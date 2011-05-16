@@ -4,43 +4,83 @@ module("moonscript", package.seeall)
 require"util"
 require"lpeg"
 
+require"moonscript.compile"
+
 local R, S, V, P = lpeg.R, lpeg.S, lpeg.V, lpeg.P
 local C, Ct = lpeg.C, lpeg.Ct
 
-local Space = S" \n\t"^0
+local Space = S" \t"^0
 local Indent = S"\t"^0
-local Break = S"\n"^1
+local Break = S"\n" + -1
+local ArgDelim = "," * Space
 
 local Name = C(R("az", "AZ", "__") * R("az", "AZ", "__")^0) * Space
-local Num = C(R("09")^1) * Space
+local Num = C(R("09")^1) / tonumber * Space
 
 local FactorOp = lpeg.C(S"+-") * Space
 local TermOp = lpeg.C(S"*/%") * Space
 
-function define(items)
-	for _, name in ipairs(items) do
-		_G[name] = lpeg.V(name)
+function wrap(fn)
+	local env = getfenv(fi)
+
+	return setfenv(fn, setmetatable({}, {
+		__index = function(self, name)
+			local value = env[name] 
+			if value ~= nil then return value end
+
+			if name:match"^[A-Z][A-Za-z0-9]*$" then
+				local v = V(name)
+				rawset(self, name, v)
+				return v
+			end
+			error("unknown variable referenced: "..name)
+		end
+	}))
+end
+
+function mark(name)
+	return function(...)
+		return name, ...
 	end
 end
 
-define { "Block", "Line", "Value", "Exp", "Factor", "Term" }
+function flatten(tbl)
+	if #tbl == 1 then
+		return tbl[1]
+	end
+	return tbl
+end
 
-local grammar = lpeg.P{
-	Block,
-	Block = Ct(Line^0),
-	Line = Ct(C"print" * Space * Exp * Space),
-	Exp = Ct(Value * (FactorOp * Value)^0),
-	Value = Num + Name
-}
-grammar = Space * grammar * Space * -1
+
+local build_grammar = wrap(function()
+	local g = lpeg.P{
+		Block,
+		Block = Ct(Line^0),
+		Line = Ct(Funcall) * Break,
+		Funcall = Name * ArgList / mark"fncall",
+		ArgList = Ct(Exp * (ArgDelim * Exp)^0),
+		Exp = Ct(Value * (FactorOp * Value)^0) / flatten,
+		Value = Funcall + Num + Name
+	}
+	return Space * g * Space * -1
+end)
+
+local grammar = build_grammar()
 
 local program = [[
-print 2323
-print hi + world + 2342
-print 23424
+hello world nuts
+eat 232, 343
 ]]
+-- print hi + world + 2342
+-- print 23424
+-- ]]
 
-print(util.dump(grammar:match(program)))
+
+local tree = grammar:match(program)
+if not tree then error("failed to compile") end
+
+print(util.dump(tree))
+print(compile.tree(tree))
 
 local program2 = [[
 if something
@@ -72,7 +112,6 @@ class Hello
   { print 200
 }}
 ]]
-
 
 function names()
 	tests = {
