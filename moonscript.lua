@@ -5,6 +5,10 @@ require"util"
 require"lpeg"
 
 require"moonscript.compile"
+require"moonscript.dump"
+require"moonscript.data"
+
+local Stack = data.Stack
 
 local function count_indent(str)
 	local sum = 0
@@ -16,10 +20,11 @@ local function count_indent(str)
 end
 
 local R, S, V, P = lpeg.R, lpeg.S, lpeg.V, lpeg.P
-local C, Ct = lpeg.C, lpeg.Ct
+local C, Ct, Cmt = lpeg.C, lpeg.Ct, lpeg.Cmt
 
 local Space = S" \t"^0
-local Break = S"\n" + -1
+local Break = S"\n"
+local Stop = Break + -1
 local Indent = C(S"\t "^0) / count_indent
 local ArgDelim = "," * Space
 
@@ -53,6 +58,14 @@ function mark(name)
 	end
 end
 
+function got(what)
+	return function(...)
+		print("got "..tostring(what))
+		return true
+	end
+end
+
+
 function flatten(tbl)
 	if #tbl == 1 then
 		return tbl[1]
@@ -61,7 +74,7 @@ function flatten(tbl)
 end
 
 local build_grammar = wrap(function()
-	local err_msg = "Failed to compile, line:\n [%d] >> %s"
+	local err_msg = "Failed to compile, line:\n [%d] >> %s (%d)"
 	local line = 1
 	local function line_count(subject, pos, str)
 		for _ in str:gmatch("\n") do
@@ -71,18 +84,48 @@ local build_grammar = wrap(function()
 		return true
 	end
 
-	local Space = lpeg.Cmt(Space, line_count)
-	local Break = lpeg.Cmt(Break, line_count)
+	local Space = Cmt(Space, line_count)
+	local Break = Cmt(Break, line_count)
+
+	local _indent = Stack(0) -- current indent
+
+	local function check_indent(str, pos, indent)
+		return _indent:top() == indent
+	end
+
+	local function advance_indent(str, pos, indent)
+		if indent > _indent:top() then
+			_indent:push(indent)
+			return true
+		end
+	end
+
+	local function pop_indent(str, pos)
+		if not _indent:pop() then error("unexpected outdent") end
+		return true
+	end
+
+	local keywords = {}
+	local function key(word)
+		keywords[word] = true
+		return word * Space
+	end
 
 	local g = lpeg.P{
 		Block,
-		Block = Ct(Line^0),
-		Line = Ct(Funcall) * Break,
+		Block = Ct((Line)^0),
+		Line = Break + Cmt(Indent, check_indent) * (Ct(If) + Exp * Stop),
+		InBlock = #Cmt(Indent, advance_indent) * Block * OutBlock,
+		OutBlock = Cmt(P(""), pop_indent),
+
 		Funcall = Name * ArgList / mark"fncall",
+		If = key"if" * Exp * Break * InBlock / mark "if",
+
 		ArgList = Ct(Exp * (ArgDelim * Exp)^0),
 		Exp = Ct(Value * (FactorOp * Value)^0) / flatten,
 		Value = Funcall + Num + Name
 	}
+
 	return {
 		_g = Space * g * Space * -1,
 		match = function(self, str, ...)
@@ -95,7 +138,7 @@ local build_grammar = wrap(function()
 
 			local tree = self._g:match(str, ...)
 			if not tree then
-				return nil, err_msg:format(line, get_line(line))
+				return nil, err_msg:format(line, get_line(line), _indent:top())
 			end
 			return tree
 		end
@@ -105,20 +148,27 @@ end)
 
 local grammar = build_grammar()
 
+
+
 local program = [[
-if gogo bozango
-	print hello_world
+if two_dads
+	do something
+	if yum
+		heckyes 23
+
+print 2
+
+print dadas
+this is what a sentence does when you use it
 ]]
--- print hi + world + 2342
--- print 23424
--- ]]
 
 
 local tree, err = grammar:match(program)
 if not tree then error(err) end
 
-print(util.dump(tree))
--- print(compile.tree(tree))
+dump.tree(tree)
+print""
+print(compile.tree(tree))
 
 local program2 = [[
 if something
