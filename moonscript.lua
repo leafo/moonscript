@@ -26,7 +26,6 @@ local Space = S" \t"^0
 local Break = S"\n"
 local Stop = Break + -1
 local Indent = C(S"\t "^0) / count_indent
-local ArgDelim = "," * Space
 
 local Name = C(R("az", "AZ", "__") * R("az", "AZ", "__")^0) * Space
 local Num = C(R("09")^1) / tonumber * Space
@@ -111,19 +110,31 @@ local build_grammar = wrap(function()
 		return word * Space
 	end
 
+	local function sym(chars)
+		return chars * Space
+	end
+
 	local g = lpeg.P{
 		Block,
 		Block = Ct((Line)^0),
 		Line = Break + Cmt(Indent, check_indent) * (Ct(If) + Exp * Stop),
+
+		Body = Break * InBlock + Ct(Line),
+
 		InBlock = #Cmt(Indent, advance_indent) * Block * OutBlock,
 		OutBlock = Cmt(P(""), pop_indent),
 
-		Funcall = Name * ArgList / mark"fncall",
-		If = key"if" * Exp * Break * InBlock / mark "if",
+		FunCall = Name * ArgList / mark"fncall",
+		If = key"if" * Exp * Break * InBlock / mark"if",
 
-		ArgList = Ct(Exp * (ArgDelim * Exp)^0),
+		ArgList = Ct(Exp * (sym"," * Exp)^0),
 		Exp = Ct(Value * (FactorOp * Value)^0) / flatten,
-		Value = Funcall + Num + Name
+		Value = FunLit + FunCall + Num + Name + TableLit,
+
+		TableLit = sym"{" * ArgList * sym"}" / mark"list",
+
+		FunLit = (sym"(" * ArgDefList * sym")")^-1 * sym"->" * Body / mark"fndef",
+		ArgDefList = Ct((Name * (sym"," * Exp)^0)^-1)
 	}
 
 	return {
@@ -149,7 +160,6 @@ end)
 local grammar = build_grammar()
 
 
-
 local program = [[
 if two_dads
 	do something
@@ -159,7 +169,14 @@ if two_dads
 print 2
 
 print dadas
-this is what a sentence does when you use it
+
+{1,2,3,4}
+
+(a,b) ->
+	throw nuts
+
+print 100
+
 ]]
 
 
@@ -168,49 +185,14 @@ if not tree then error(err) end
 
 dump.tree(tree)
 print""
-print(compile.tree(tree))
-
-local program2 = [[
-if something
-	print 1
-else
-	print 2
-]]
-
-local program2_ = [[
-if something
-{ print 1
-} else
-{ print 2
-}
-]]
+-- print(compile.tree(tree))
 
 local program3 = [[
+-- hello
 class Hello
 	@something = 2323
 
 	hello: () ->
 		print 200
 ]]
-
-local program3 = [[
-class Hello
-{ @something = 2323
-  hello: () ->
-  { print 200
-}}
-]]
-
-function names()
-	tests = {
-		"hello",
-		"23wolrld",
-		"_What343"
-	}
-
-	for _, v in ipairs(tests) do
-		print(Name:match(v))
-	end
-end
-
 
