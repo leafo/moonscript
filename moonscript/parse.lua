@@ -1,12 +1,12 @@
 
-module("moonscript", package.seeall)
+module("moonscript.parse", package.seeall)
 
 require"util"
 require"lpeg"
 
-require"moonscript.compile"
-require"moonscript.dump"
-require"moonscript.data"
+local compile = require"moonscript.compile"
+local dump = require"moonscript.dump"
+local data = require"moonscript.data"
 
 local Stack = data.Stack
 
@@ -34,7 +34,7 @@ local Num = C(R("09")^1) / tonumber * Space
 local FactorOp = lpeg.C(S"+-") * Space
 local TermOp = lpeg.C(S"*/%") * Space
 
-function wrap(fn)
+local function wrap(fn)
 	local env = getfenv(fi)
 
 	return setfenv(fn, setmetatable({}, {
@@ -52,13 +52,13 @@ function wrap(fn)
 	}))
 end
 
-function mark(name)
+local function mark(name)
 	return function(...)
 		return name, ...
 	end
 end
 
-function got(what)
+local function got(what)
 	return Cmt("", function(...)
 		print("++ got "..what)
 		return true
@@ -66,7 +66,7 @@ function got(what)
 end
 
 
-function flatten(tbl)
+local function flatten(tbl)
 	if #tbl == 1 then
 		return tbl[1]
 	end
@@ -171,6 +171,13 @@ end)
 
 local grammar = build_grammar()
 
+-- parse a string
+-- returns tree, or nil and error message
+function string(str)
+	local g = build_grammar()
+	return grammar:match(str)
+end
+
 
 local program = [[
 if two_dads
@@ -199,18 +206,6 @@ if true
 	hi 100
 
 ]]
-
-
-local tree, err = grammar:match(program)
-if not tree then error(err) end
-
-if type(tree) == "table" then
-	-- dump.tree(tree)
-	-- print""
-	print(compile.tree(tree))
-else
-	print "nothing..."
-end
 
 local program3 = [[
 -- hello
