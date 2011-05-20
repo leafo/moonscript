@@ -22,6 +22,7 @@ end
 local R, S, V, P = lpeg.R, lpeg.S, lpeg.V, lpeg.P
 local C, Ct, Cmt = lpeg.C, lpeg.Ct, lpeg.Cmt
 
+local White = S" \t\n"^0
 local Space = S" \t"^0
 local Break = S"\n"
 local Stop = Break + -1
@@ -58,10 +59,10 @@ function mark(name)
 end
 
 function got(what)
-	return function(...)
-		print("got "..tostring(what))
+	return Cmt("", function(...)
+		print("++ got "..what)
 		return true
-	end
+	end)
 end
 
 
@@ -114,31 +115,41 @@ local build_grammar = wrap(function()
 		return chars * Space
 	end
 
+	-- make sure name is not a keyword
+	local Name = Cmt(Name, function(str, pos, name)
+		if keywords[name] then return false end
+		return true, name
+	end)
+
 	local g = lpeg.P{
-		Block,
-		Block = Ct((Line)^0),
-		Line = Break + Cmt(Indent, check_indent) * (Ct(If) + Exp * Stop),
+		File,
+		File = Block^-1,
+		Block = Ct(Line * (Break^0 * Line)^0),
+		Line = Cmt(Indent, check_indent) * (Ct(If) + Exp),
 
 		Body = Break * InBlock + Ct(Line),
 
 		InBlock = #Cmt(Indent, advance_indent) * Block * OutBlock,
 		OutBlock = Cmt(P(""), pop_indent),
 
-		FunCall = Name * ArgList / mark"fncall",
-		If = key"if" * Exp * Break * InBlock / mark"if",
+		FunCall = Name * Ct(ExpList) / mark"fncall",
+		If = key"if" * Exp * Body / mark"if",
 
-		ArgList = Ct(Exp * (sym"," * Exp)^0),
+		Assign = Ct(NameList) * sym"=" * Ct(ExpList) / mark"assign",
+
 		Exp = Ct(Value * (FactorOp * Value)^0) / flatten,
-		Value = FunLit + FunCall + Num + Name + TableLit,
+		Value = Assign + FunLit + FunCall + Num + Name + TableLit,
 
-		TableLit = sym"{" * ArgList * sym"}" / mark"list",
+		TableLit = sym"{" * Ct(ExpList^-1) * sym"}" / mark"list",
 
-		FunLit = (sym"(" * ArgDefList * sym")")^-1 * sym"->" * Body / mark"fndef",
-		ArgDefList = Ct((Name * (sym"," * Exp)^0)^-1)
+		FunLit = (sym"(" * Ct(NameList^-1) * sym")")^-1 * sym"->" * Body / mark"fndef",
+
+		NameList = Name * (sym"," * Name)^0,
+		ExpList = Exp * (sym"," * Exp)^0
 	}
 
 	return {
-		_g = Space * g * Space * -1,
+		_g = White * g * White * -1,
 		match = function(self, str, ...)
 			local function get_line(num)
 				for line in str:gmatch("(.-)[\n$]") do
@@ -149,7 +160,8 @@ local build_grammar = wrap(function()
 
 			local tree = self._g:match(str, ...)
 			if not tree then
-				return nil, err_msg:format(line, get_line(line), _indent:top())
+				local line_str = get_line(line) or ""
+				return nil, err_msg:format(line, line_str, _indent:top())
 			end
 			return tree
 		end
@@ -179,13 +191,26 @@ print 100
 
 ]]
 
+local program = [[
+
+hi = (a) -> print a
+
+if true
+	hi 100
+
+]]
+
 
 local tree, err = grammar:match(program)
 if not tree then error(err) end
 
-dump.tree(tree)
-print""
--- print(compile.tree(tree))
+if type(tree) == "table" then
+	-- dump.tree(tree)
+	-- print""
+	print(compile.tree(tree))
+else
+	print "nothing..."
+end
 
 local program3 = [[
 -- hello

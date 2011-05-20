@@ -9,6 +9,9 @@ require "util"
 -- 	end, _G)
 -- })
 
+
+local map, bind = util.map, util.bind
+
 local indent_char = "  "
 
 local compilers = {
@@ -20,6 +23,15 @@ local compilers = {
 	fncall = function(self, node)
 		local _, name, args = unpack(node)
 		return name .. self:args(args)
+	end,
+	fndef = function(self, node)
+		local _, args, block = unpack(node)
+		if #block == 1 then
+			return ("function(%s) %s end"):format(
+				table.concat(args, ", "), self:value(block[1]))
+		end
+		return ("function(%s)\n%s\n%send"):format(
+			table.concat(args, ", "), self:block(block, 1), self:ichar())
 	end,
 	args = function(self, node)
 		local values = {}
@@ -42,6 +54,11 @@ local compilers = {
 		end
 		if inc then self._indent = self._indent - inc end
 		return table.concat(lines, "\n")
+	end,
+	assign = function(self, node)
+		local _, names, values = unpack(node)
+
+		return "local "..table.concat(names, ", ").." = "..table.concat(map(values, bind(self, "value")), ", ")
 	end,
 	value = function(self, node)
 		if type(node) == "table" then 

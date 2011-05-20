@@ -18,6 +18,12 @@ function map(tbl, fn)
 	return out
 end
 
+function bind(obj, name)
+	return function(...)
+		return obj[name](obj, ...)
+	end
+end
+
 function dump(what)
 	local seen = {}
 	local function _dump(what, depth)
