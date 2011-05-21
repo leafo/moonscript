@@ -16,7 +16,7 @@ local function diff(a_fname, b_fname)
 	return io.popen(diff_tool.." ".. a_fname.." "..b_fname, "r"):read("*a")
 end
 
-local function input_name(name) return opts.in_dir .. "/" .. name end
+local function input_name(name) return opts.in_dir.."/".. name end
 local function output_name(name)
 	return opts.out_dir.."/"..name:match(opts.input_pattern)..opts.output_ext 
 end
@@ -28,7 +28,11 @@ local function run_file(name)
 	local parse = require "moonscript.parse"
 	local compile = require "moonscript.compile"
 
-	return compile.tree(parse.string(file_str))
+	local tree, err = parse.string(file_str)
+	if not tree then
+		error("Compile error in "..name.."\n"..err)
+	end
+	return compile.tree(tree)
 end
 
 local function inputs(pattern)
@@ -53,6 +57,7 @@ local actions = {
 		end
 	end,
 	run = function(pattern) 
+		local failed = false
 		local tests_run, result = 0
 		for file in inputs(pattern) do
 			tests_run = tests_run + 1
@@ -86,7 +91,7 @@ local actions = {
 				print("No tests matching pattern:", pattern)
 			end
 		elseif tests_run == 1 then
-			print(result)
+			-- print(result)
 		end
 	end,
 	list = function(pattern) 

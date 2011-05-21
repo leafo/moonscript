@@ -8,6 +8,8 @@ local compile = require"moonscript.compile"
 local dump = require"moonscript.dump"
 local data = require"moonscript.data"
 
+local ntype = compile.ntype
+
 local Stack = data.Stack
 
 local function count_indent(str)
@@ -24,16 +26,16 @@ local C, Ct, Cmt = lpeg.C, lpeg.Ct, lpeg.Cmt
 
 local White = S" \t\n"^0
 local Space = S" \t"^0
+local ASpace = S" \t"^1
 local Break = S"\n"
 local Stop = Break + -1
 local Indent = C(S"\t "^0) / count_indent
 
-local _Name = C(R("az", "AZ", "__") * R("az", "AZ", "__")^0)
-local Name = _Name * Space
-local Num = C(R("09")^1) / tonumber * Space
+local Name = Space * C(R("az", "AZ", "__") * R("az", "AZ", "__")^0)
+local Num = Space * C(R("09")^1) / tonumber
 
-local FactorOp = lpeg.C(S"+-") * Space
-local TermOp = lpeg.C(S"*/%") * Space
+local FactorOp = Space * lpeg.C(S"+-")
+local TermOp = Space * lpeg.C(S"*/%")
 
 local function wrap(fn)
 	local env = getfenv(fi)
@@ -94,7 +96,7 @@ local build_grammar = wrap(function()
 
 	local _indent = Stack(0) -- current indent
 
-	local last_pos = 0 -- used to keep track of error
+	local last_pos = 0 -- used to know where to report error
 	local function check_indent(str, pos, indent)
 		last_pos = pos
 		return _indent:top() == indent
@@ -115,19 +117,34 @@ local build_grammar = wrap(function()
 	local keywords = {}
 	local function key(word)
 		keywords[word] = true
-		return word * Space
+		return Space * word
 	end
 
 	local function sym(chars)
-		return chars * Space
+		return Space * chars
+	end
+
+	local function symx(chars)
+		return chars
+	end
+
+	local function flatten_func(callee, args)
+		if #args == 0 then return callee end
+
+		args = {"call", args}
+		if ntype(callee) == "chain" then
+			table.insert(callee, args)
+			return callee
+		end
+
+		return {"chain", callee, args}
 	end
 
 	-- make sure name is not a keyword
-	local _Name = Cmt(Name, function(str, pos, name)
+	local Name = Cmt(Name, function(str, pos, name)
 		if keywords[name] then return false end
 		return true, name
 	end)
-	local Name = _Name * Space
 
 	local g = lpeg.P{
 		File,
@@ -141,15 +158,20 @@ local build_grammar = wrap(function()
 		InBlock = #Cmt(Indent, advance_indent) * Block * OutBlock,
 		OutBlock = Cmt("", pop_indent),
 
-		FunCall = _Name * (sym"(" * Ct(ExpList^-1) * sym")" + Space * Ct(ExpList)) / mark"fncall",
-
 		If = key"if" * Exp * Body / mark"if",
 
 		Assign = Ct(NameList) * sym"=" * Ct(ExpList) / mark"assign",
 
 		Exp = Ct(Term * (FactorOp * Term)^0) / flatten_or_mark"exp",
 		Term = Ct(Value * (TermOp * Value)^0) / flatten_or_mark"exp",
-		Value = Assign + FunLit + FunCall + Num + Name + TableLit,
+
+		Value = Assign + FunLit + (FunCall + Callable) * Ct(ExpList^0) / flatten_func + Num,
+
+		Callable = Name + Parens,
+		Parens = sym"(" * Exp * sym")",
+
+		-- a plain function/index
+		FunCall = Callable * (symx"(" * Ct(ExpList^-1)/mark"call" * sym")" + symx"[" * Exp/mark"index" * sym"]")^1 / mark"chain",
 
 		TableLit = sym"{" * Ct(ExpList^-1) * sym"}" / mark"list",
 
