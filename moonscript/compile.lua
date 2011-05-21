@@ -60,6 +60,13 @@ local compilers = {
 
 		return "local "..table.concat(names, ", ").." = "..table.concat(map(values, bind(self, "value")), ", ")
 	end,
+	exp = function(self, node)
+		local values = {}
+		for i = 2, #node do
+			table.insert(values, self:value(node[i]))
+		end
+		return table.concat(values, " ")
+	end,
 	value = function(self, node)
 		if type(node) == "table" then 
 			local op = unpack(node)

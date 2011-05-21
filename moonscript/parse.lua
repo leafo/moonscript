@@ -54,7 +54,7 @@ end
 
 local function mark(name)
 	return function(...)
-		return name, ...
+		return {name, ...}
 	end
 end
 
@@ -65,12 +65,19 @@ local function got(what)
 	end)
 end
 
-
 local function flatten(tbl)
 	if #tbl == 1 then
 		return tbl[1]
 	end
 	return tbl
+end
+
+local function flatten_or_mark(name)
+	return function(tbl)
+		if #tbl == 1 then return tbl[1] end
+		table.insert(tbl, 1, name)
+		return tbl
+	end
 end
 
 local build_grammar = wrap(function()
@@ -137,12 +144,13 @@ local build_grammar = wrap(function()
 
 		Assign = Ct(NameList) * sym"=" * Ct(ExpList) / mark"assign",
 
-		Exp = Ct(Value * (FactorOp * Value)^0) / flatten,
+		Exp = Ct(Term * (FactorOp * Term)^0) / flatten_or_mark"exp",
+		Term = Ct(Value * (TermOp * Value)^0) / flatten_or_mark"exp",
 		Value = Assign + FunLit + FunCall + Num + Name + TableLit,
 
 		TableLit = sym"{" * Ct(ExpList^-1) * sym"}" / mark"list",
 
-		FunLit = (sym"(" * Ct(NameList^-1) * sym")")^-1 * sym"->" * Body / mark"fndef",
+		FunLit = (sym"(" * Ct(NameList^-1) * sym")" + Ct("")) * sym"->" * Body / mark"fndef",
 
 		NameList = Name * (sym"," * Name)^0,
 		ExpList = Exp * (sym"," * Exp)^0

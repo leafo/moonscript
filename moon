@@ -14,8 +14,8 @@ local opts, ind = alt_getopt.get_opts(arg, "hto:", { help = "h" })
 local help = [[Usage: %s [options] file...
 
     -h          Print this message
-	-t          Dump parse tree
-	-o fname    Write output to file
+    -t          Dump parse tree
+    -o fname    Write output to file
 ]]
 
 function print_help(err)
