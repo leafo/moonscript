@@ -28,7 +28,8 @@ local Break = S"\n"
 local Stop = Break + -1
 local Indent = C(S"\t "^0) / count_indent
 
-local Name = C(R("az", "AZ", "__") * R("az", "AZ", "__")^0) * Space
+local _Name = C(R("az", "AZ", "__") * R("az", "AZ", "__")^0)
+local Name = _Name * Space
 local Num = C(R("09")^1) / tonumber * Space
 
 local FactorOp = lpeg.C(S"+-") * Space
@@ -52,6 +53,13 @@ local function wrap(fn)
 	}))
 end
 
+function extract_line(str, start_pos)
+	str = str:sub(start_pos)
+	m = str:match"^(.-)\n"
+	if m then return m end
+	return str:match"^.-$"
+end
+
 local function mark(name)
 	return function(...)
 		return {name, ...}
@@ -59,8 +67,9 @@ local function mark(name)
 end
 
 local function got(what)
-	return Cmt("", function(...)
-		print("++ got "..what)
+	return Cmt("", function(str, pos, ...)
+		local cap = {...}
+		print("++ got "..what, "["..extract_line(str, pos).."]")
 		return true
 	end)
 end
@@ -81,22 +90,13 @@ local function flatten_or_mark(name)
 end
 
 local build_grammar = wrap(function()
-	local err_msg = "Failed to compile, line:\n [%d] >> %s (%d)"
-	local line = 1
-	local function line_count(subject, pos, str)
-		for _ in str:gmatch("\n") do
-			line = line + 1
-		end
-		-- print(line, util.dump(str))
-		return true
-	end
-
-	local Space = Cmt(Space, line_count)
-	local Break = Cmt(Break, line_count)
+	local err_msg = "Failed to parse, line:\n [%d] >> %s (%d)"
 
 	local _indent = Stack(0) -- current indent
 
+	local last_pos = 0 -- used to keep track of error
 	local function check_indent(str, pos, indent)
+		last_pos = pos
 		return _indent:top() == indent
 	end
 
@@ -123,23 +123,26 @@ local build_grammar = wrap(function()
 	end
 
 	-- make sure name is not a keyword
-	local Name = Cmt(Name, function(str, pos, name)
+	local _Name = Cmt(Name, function(str, pos, name)
 		if keywords[name] then return false end
 		return true, name
 	end)
+	local Name = _Name * Space
 
 	local g = lpeg.P{
 		File,
 		File = Block^-1,
-		Block = Ct(Line * (Break^0 * Line)^0),
-		Line = Cmt(Indent, check_indent) * (Ct(If) + Exp),
+		Block = Ct(Line * (Break^1 * Line)^0),
+		Line = Cmt(Indent, check_indent) * Statement,
+		Statement = Ct(If) + Exp,
 
-		Body = Break * InBlock + Ct(Line),
+		Body = Break * InBlock + Ct(Statement),
 
 		InBlock = #Cmt(Indent, advance_indent) * Block * OutBlock,
-		OutBlock = Cmt(P(""), pop_indent),
+		OutBlock = Cmt("", pop_indent),
 
-		FunCall = Name * Ct(ExpList) / mark"fncall",
+		FunCall = _Name * (sym"(" * Ct(ExpList^-1) * sym")" + Space * Ct(ExpList)) / mark"fncall",
+
 		If = key"if" * Exp * Body / mark"if",
 
 		Assign = Ct(NameList) * sym"=" * Ct(ExpList) / mark"assign",
@@ -150,7 +153,7 @@ local build_grammar = wrap(function()
 
 		TableLit = sym"{" * Ct(ExpList^-1) * sym"}" / mark"list",
 
-		FunLit = (sym"(" * Ct(NameList^-1) * sym")" + Ct("")) * sym"->" * Body / mark"fndef",
+		FunLit = (sym"(" * Ct(NameList^-1) * sym")" + Ct("")) * sym"->" * (Body + Ct"") / mark"fndef",
 
 		NameList = Name * (sym"," * Name)^0,
 		ExpList = Exp * (sym"," * Exp)^0
@@ -159,6 +162,14 @@ local build_grammar = wrap(function()
 	return {
 		_g = White * g * White * -1,
 		match = function(self, str, ...)
+			local function pos_to_line(pos)
+				local line = 1
+				for _ in str:sub(1, pos):gmatch("\n") do
+					line = line + 1
+				end
+				return line
+			end
+
 			local function get_line(num)
 				for line in str:gmatch("(.-)[\n$]") do
 					if num == 1 then return line end
@@ -168,8 +179,9 @@ local build_grammar = wrap(function()
 
 			local tree = self._g:match(str, ...)
 			if not tree then
-				local line_str = get_line(line) or ""
-				return nil, err_msg:format(line, line_str, _indent:top())
+				local line_no = pos_to_line(last_pos)
+				local line_str = get_line(line_no)
+				return nil, err_msg:format(line_no, line_str, _indent:top())
 			end
 			return tree
 		end

@@ -80,7 +80,7 @@ local compilers = {
 _M.tree = function(tree)
 	local buff = {}
 	for _, line in ipairs(tree) do
-		local op = line[1]
+		local op = type(line) == "table" and line[1] or "value"
 		local fn = compilers[op]
 		if not fn then error("Unknown op: "..tostring(op)) end
 		table.insert(buff, compilers[op](compilers, line))
