@@ -66,3 +66,8 @@ function split(str, delim)
 end
 
 
+function trim(str)
+	return str:match("^%s*(.-)%s*$")
+end
+
+

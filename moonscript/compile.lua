@@ -155,6 +155,11 @@ local compilers = {
 		return table.concat(values, " ")
 	end,
 
+	string = function(self, node)
+		local _, delim, inner, delim_end = unpack(node)
+		return delim..inner..(delim_end or delim)
+	end,
+
 	value = function(self, node)
 		if type(node) == "table" then 
 			return self[node[1]](self, node)

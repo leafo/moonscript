@@ -12,7 +12,7 @@ eat(function() end, world)
 local a = 1 + 2 * 3 / 6
 a = another
 local bunch, go, here = world
-func(arg(1, arg(2, another, arg(3))))
+func(arg1, arg2, another, arg3)
 here = function() end
 local we = yeah
 local the, different = function() approach end, yeah

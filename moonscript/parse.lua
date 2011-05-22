@@ -9,6 +9,7 @@ local dump = require"moonscript.dump"
 local data = require"moonscript.data"
 
 local ntype = compile.ntype
+local trim = util.trim
 
 local Stack = data.Stack
 
@@ -22,7 +23,7 @@ local function count_indent(str)
 end
 
 local R, S, V, P = lpeg.R, lpeg.S, lpeg.V, lpeg.P
-local C, Ct, Cmt = lpeg.C, lpeg.Ct, lpeg.Cmt
+local C, Ct, Cmt, Cg, Cb = lpeg.C, lpeg.Ct, lpeg.Cmt, lpeg.Cg, lpeg.Cb
 
 local White = S" \t\n"^0
 local Space = S" \t"^0
@@ -31,11 +32,12 @@ local Break = S"\n"
 local Stop = Break + -1
 local Indent = C(S"\t "^0) / count_indent
 
-local Name = Space * C(R("az", "AZ", "__") * R("az", "AZ", "__")^0)
+
+local Name = Space * C(R("az", "AZ", "__") * R("az", "AZ", "09", "__")^0)
 local Num = Space * C(R("09")^1) / tonumber
 
-local FactorOp = Space * lpeg.C(S"+-")
-local TermOp = Space * lpeg.C(S"*/%")
+local FactorOp = Space * C(S"+-")
+local TermOp = Space * C(S"*/%")
 
 local function wrap(fn)
 	local env = getfenv(fi)
@@ -156,9 +158,17 @@ local build_grammar = wrap(function()
 		return true, name
 	end)
 
+	local function simple_string(delim)
+		return sym(delim) / trim * C((P('\\'..delim) + (1 - S('\n'..delim)))^0) * sym(delim) / mark"string"
+	end
+
+	local function check_lua_string(str, pos, right, left)
+		return #left == #right
+	end
+
 	local g = lpeg.P{
 		File,
-		File = Block^-1,
+		File = Block + Ct"",
 		Block = Ct(Line * (Break^1 * Line)^0),
 		Line = Cmt(Indent, check_indent) * Statement,
 		Statement = Ct(If) + Exp,
@@ -174,11 +184,19 @@ local build_grammar = wrap(function()
 
 		Assignable = Cmt(Chain, check_assignable) + Name,
 		AssignableList = Assignable * (sym"," * Assignable)^0,
-
 		Exp = Ct(Term * (FactorOp * Term)^0) / flatten_or_mark"exp",
 		Term = Ct(Value * (TermOp * Value)^0) / flatten_or_mark"exp",
 
-		Value = Assign + FunLit + (Chain + Callable) * Ct(ExpList^0) / flatten_func + Num,
+		Value = Assign + FunLit + String + (Chain + Callable) * Ct(ExpList^0) / flatten_func + Num,
+
+		String = simple_string("'") + simple_string('"') + LuaString,
+
+		LuaString = Cg(LuaStringOpen, "string_open") * Cb"string_open" * P"\n"^-1 *
+			C((1 - Cmt(C(LuaStringClose) * Cb"string_open", check_lua_string))^0) *
+			C(LuaStringClose) / mark"string",
+
+		LuaStringOpen = sym"[" * P"="^0 * "[" / trim,
+		LuaStringClose = "]" * P"="^0 * "]",
 
 		Callable = Name + Parens,
 		Parens = sym"(" * Exp * sym")",
