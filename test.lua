@@ -1,9 +1,14 @@
 require "lfs"
+require "alt_getopt"
 
-local argv = {...}
+local opts, ind = alt_getopt.get_opts(arg, "d:", { })
+
+local argv = {}
+for i = ind, #arg do table.insert(argv, arg[i]) end
+
 local action = table.remove(argv, 1) or "run"
 
-local diff_tool = "diff"
+local diff_tool = opts.d or "diff"
 
 local opts = {
 	in_dir = "tests/inputs",
@@ -53,7 +58,10 @@ local actions = {
 		for file in inputs(pattern) do
 			local out_fname = output_name(file)
 			print("Building: ", file, out_fname)
-			io.open(out_fname, "w"):write(run_file(file))
+			local result = run_file(file)
+			if result then
+				io.open(out_fname, "w"):write()
+			end
 		end
 	end,
 	run = function(pattern) 

@@ -26,12 +26,13 @@ local R, S, V, P = lpeg.R, lpeg.S, lpeg.V, lpeg.P
 local C, Ct, Cmt, Cg, Cb = lpeg.C, lpeg.Ct, lpeg.Cmt, lpeg.Cg, lpeg.Cb
 
 local White = S" \t\n"^0
-local Space = S" \t"^0
-local ASpace = S" \t"^1
+local _Space = S" \t"^0
 local Break = S"\n"
 local Stop = Break + -1
 local Indent = C(S"\t "^0) / count_indent
 
+local Comment = P"--" * (1 - S"\n")^0 * #Stop
+local Space = _Space * Comment^-1
 
 local Name = Space * C(R("az", "AZ", "__") * R("az", "AZ", "09", "__")^0)
 local Num = Space * C(R("09")^1) / tonumber
@@ -170,8 +171,8 @@ local build_grammar = wrap(function()
 		File,
 		File = Block + Ct"",
 		Block = Ct(Line * (Break^1 * Line)^0),
-		Line = Cmt(Indent, check_indent) * Statement,
-		Statement = Ct(If) + Exp,
+		Line = Cmt(Indent, check_indent) * Statement + _Space * Comment,
+		Statement = Ct(If) + Exp * Space,
 
 		Body = Break * InBlock + Ct(Statement),
 
@@ -198,7 +199,7 @@ local build_grammar = wrap(function()
 		LuaStringOpen = sym"[" * P"="^0 * "[" / trim,
 		LuaStringClose = "]" * P"="^0 * "]",
 
-		Callable = Name + Parens,
+		Callable = Name + Parens / mark"parens",
 		Parens = sym"(" * Exp * sym")",
 
 		-- a list of funcalls and indexs on a callable

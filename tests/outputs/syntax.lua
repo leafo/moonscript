@@ -18,12 +18,25 @@ local we = yeah
 local the, different = function() approach end, yeah
 dad()
 dad(lord)
-hello(one, two)()
+hello(one, two)();
 (5 + 5)(world)
 fun(a)(b)
 fun(a)(b)
 fun(a)(b, bad(hello))
 hello(world(what(are(you(doing(here))))))
 what(the)[3243](world, yeck(heck))
-hairy[hands][are](gross)(okay(okay[world]))
+hairy[hands][are](gross)(okay(okay[world]));
 (get[something] + 5)[years]
+local i = 200
+x = 300
+local yeah = (1 + 5) * 3
+yeah = ((1 + 5) * 3) / 2
+yeah = ((1 + 5) * 3) / 2 + i % 100
+local whoa = (1 + 2) * (3 + 4) * (4 + 5);
+(function() end)()
+return(5 + function() 4 + 2 end)
+return(5 + (function() 4 end) + 2)
+print(5 + function()
+  34
+  good(nads)
+end)

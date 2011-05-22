@@ -48,3 +48,24 @@ hairy[hands][are](gross) okay okay[world]
 
 (get[something] + 5)[years]
 
+i,x  = 200, 300
+
+yeah = (1 + 5) * 3
+yeah = ((1+5)*3)/2
+yeah = ((1+5)*3)/2 + i % 100
+
+whoa = (1+2) * (3+4) * (4+5)
+
+
+(->)()
+
+
+return 5 + () -> 4 + 2
+
+return 5 + (() -> 4) + 2
+
+print 5 + () ->
+	34
+	good nads
+
+

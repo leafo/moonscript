@@ -24,6 +24,15 @@ function bind(obj, name)
 	end
 end
 
+function itwos(seq)
+	n = 2
+	return coroutine.wrap(function()
+		for i = 1, #seq-n+1 do
+			coroutine.yield(i, seq[i], i+1, seq[i+1])
+		end
+	end)
+end
+
 function dump(what)
 	local seen = {}
 	local function _dump(what, depth)

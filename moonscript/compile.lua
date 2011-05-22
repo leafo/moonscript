@@ -11,7 +11,7 @@ local data = require "moonscript.data"
 -- 	end, _G)
 -- })
 
-local map, bind = util.map, util.bind
+local map, bind, itwos = util.map, util.bind, util.itwos
 local Stack = data.Stack
 
 local indent_char = "  "
@@ -102,6 +102,14 @@ local compiler_index = {
 		end
 		if inc then self._indent = self._indent - inc end
 		self:pop()
+
+        -- add semicolons where they might be needed
+        for i, left, k, right in itwos(lines) do
+            if left:sub(-1) == ")" and right:sub(1,1) == "(" then
+                lines[i] = lines[i]..";"
+            end
+        end
+
 		return table.concat(lines, "\n")
 	end,
 
@@ -152,6 +160,11 @@ local compiler_index = {
 		return table.concat(values, " ")
 	end,
 
+    parens = function(self, node)
+        local _, value = unpack(node)
+        return '('..self:value(value)..')'
+    end,
+
 	string = function(self, node)
 		local _, delim, inner, delim_end = unpack(node)
 		return delim..inner..(delim_end or delim)
@@ -189,12 +202,7 @@ end
 
 function tree(tree)
 	local compiler = build_compiler()
-	local buff = {}
-	for _, line in ipairs(tree) do
-		table.insert(buff, compiler:value(line))
-	end
-
-	return table.concat(buff, "\n")
+    return compiler:block(tree)
 end
 
 
