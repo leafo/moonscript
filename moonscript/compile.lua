@@ -21,10 +21,7 @@ function ntype(node)
 	return node[1]
 end
 
-local compilers = {
-	_indent = 0,
-	_scope = Stack({}),
-
+local compiler_index = {
 	push = function(self) self._scope:push{} end,
 	pop = function(self) self._scope:pop() end,
 
@@ -162,7 +159,11 @@ local compilers = {
 
 	value = function(self, node)
 		if type(node) == "table" then 
-			return self[node[1]](self, node)
+			local fn = self[node[1]]
+			if not fn then
+				error("Unknown op: "..tostring(op))
+			end
+			return fn(self, node)
 		end
 
 		return node
@@ -179,13 +180,18 @@ local compilers = {
 	end
 }
 
-_M.tree = function(tree)
+function build_compiler()
+	return setmetatable({
+		_indent = 0,
+		_scope = Stack({}),
+	}, { __index = compiler_index })
+end
+
+function tree(tree)
+	local compiler = build_compiler()
 	local buff = {}
 	for _, line in ipairs(tree) do
-		local op = type(line) == "table" and line[1] or "value"
-		local fn = compilers[op]
-		if not fn then error("Unknown op: "..tostring(op)) end
-		table.insert(buff, compilers[op](compilers, line))
+		table.insert(buff, compiler:value(line))
 	end
 
 	return table.concat(buff, "\n")
