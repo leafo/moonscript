@@ -10,9 +10,11 @@ end)
 local h = function() hi end
 eat(function() end, world)
 local a = 1 + 2 * 3 / 6
-local a, bunch, go, here = another, world
+a = another
+local bunch, go, here = world
 func(arg(1, arg(2, another, arg(3))))
-local here, we = function() end, yeah
+here = function() end
+local we = yeah
 local the, different = function() approach end, yeah
 dad()
 dad(lord)

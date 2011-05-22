@@ -140,6 +140,16 @@ local build_grammar = wrap(function()
 		return {"chain", callee, args}
 	end
 
+	-- makes sure the last item in a chain is an index
+	local function check_assignable(str, pos, value)
+		if ntype(value) == "chain" and ntype(value[#value]) == "index"
+			or type(value) == "string"
+		then
+			return true, value
+		end
+		return false
+	end
+
 	-- make sure name is not a keyword
 	local Name = Cmt(Name, function(str, pos, name)
 		if keywords[name] then return false end
@@ -160,18 +170,21 @@ local build_grammar = wrap(function()
 
 		If = key"if" * Exp * Body / mark"if",
 
-		Assign = Ct(NameList) * sym"=" * Ct(ExpList) / mark"assign",
+		Assign = Ct(AssignableList) * sym"=" * Ct(ExpList) / mark"assign",
+
+		Assignable = Cmt(Chain, check_assignable) + Name,
+		AssignableList = Assignable * (sym"," * Assignable)^0,
 
 		Exp = Ct(Term * (FactorOp * Term)^0) / flatten_or_mark"exp",
 		Term = Ct(Value * (TermOp * Value)^0) / flatten_or_mark"exp",
 
-		Value = Assign + FunLit + (FunCall + Callable) * Ct(ExpList^0) / flatten_func + Num,
+		Value = Assign + FunLit + (Chain + Callable) * Ct(ExpList^0) / flatten_func + Num,
 
 		Callable = Name + Parens,
 		Parens = sym"(" * Exp * sym")",
 
-		-- a plain function/index
-		FunCall = Callable * (symx"(" * Ct(ExpList^-1)/mark"call" * sym")" + symx"[" * Exp/mark"index" * sym"]")^1 / mark"chain",
+		-- a list of funcalls and indexs on a callable
+		Chain = Callable * (symx"(" * Ct(ExpList^-1)/mark"call" * sym")" + symx"[" * Exp/mark"index" * sym"]")^1 / mark"chain",
 
 		TableLit = sym"{" * Ct(ExpList^-1) * sym"}" / mark"list",
 
