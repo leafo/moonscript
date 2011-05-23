@@ -60,7 +60,7 @@ local actions = {
 			print("Building: ", file, out_fname)
 			local result = run_file(file)
 			if result then
-				io.open(out_fname, "w"):write()
+				io.open(out_fname, "w"):write(result)
 			end
 		end
 	end,

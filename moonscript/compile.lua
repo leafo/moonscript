@@ -25,6 +25,10 @@ local compiler_index = {
 	push = function(self) self._scope:push{} end,
 	pop = function(self) self._scope:pop() end,
 
+	indent = function(self, amount)
+		self._indent = self._indent + amount
+	end,
+
 	has_name = function(self, name)
 		for i = #self._scope,1,-1 do
 			if self._scope[i][name] then return true end
@@ -94,13 +98,14 @@ local compiler_index = {
 
 	block = function(self, node, inc)
 		self:push()
-		if inc then self._indent = self._indent + inc end
+		if inc then self:indent(inc) end
+
 		local lines = {}
 		local i = self:ichar()
 		for _, ln in ipairs(node) do
 			table.insert(lines, i..self:value(ln))
 		end
-		if inc then self._indent = self._indent - inc end
+		if inc then self:indent(-inc) end
 		self:pop()
 
         -- add semicolons where they might be needed
@@ -111,6 +116,29 @@ local compiler_index = {
         end
 
 		return table.concat(lines, "\n")
+	end,
+
+	table = function(self, node)
+		local _, items = unpack(node)
+
+		self:indent(1)
+		local item_values = {}
+		for _, item in ipairs(items) do
+			local key = self:value(item[1])
+			if type(item[1]) ~= "string" then
+				key = ("[%s]"):format(key)
+			end
+
+			table.insert(item_values, key.." = "..self:value(item[2]))
+		end
+		local i = self:ichar()
+		self:indent(-1)
+
+		if #item_values > 3 then
+			return ("{\n%s%s\n%s}"):format(i, table.concat(item_values, ",\n"..i), self:ichar())
+		end
+
+		return "{ "..table.concat(item_values, ", ").." }"
 	end,
 
 	assign = function(self, node)
@@ -174,7 +202,7 @@ local compiler_index = {
 		if type(node) == "table" then 
 			local fn = self[node[1]]
 			if not fn then
-				error("Unknown op: "..tostring(op))
+				error("Unknown op: "..tostring(node[1]))
 			end
 			return fn(self, node)
 		end

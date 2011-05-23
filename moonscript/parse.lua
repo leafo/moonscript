@@ -143,6 +143,11 @@ local build_grammar = wrap(function()
 		return {"chain", callee, args}
 	end
 
+	local function wrap_func_arg(value)
+		return {"call", {value}}
+	end
+
+
 	-- makes sure the last item in a chain is an index
 	local function check_assignable(str, pos, value)
 		if ntype(value) == "chain" and ntype(value[#value]) == "index"
@@ -159,8 +164,8 @@ local build_grammar = wrap(function()
 		return true, name
 	end)
 
-	local function simple_string(delim)
-		return sym(delim) / trim * C((P('\\'..delim) + (1 - S('\n'..delim)))^0) * sym(delim) / mark"string"
+	local function simple_string(delim, x)
+		return C(symx(delim)) * C((P('\\'..delim) + (1 - S('\n'..delim)))^0) * sym(delim) / mark"string"
 	end
 
 	local function check_lua_string(str, pos, right, left)
@@ -181,7 +186,7 @@ local build_grammar = wrap(function()
 
 		If = key"if" * Exp * Body / mark"if",
 
-		Assign = Ct(AssignableList) * sym"=" * Ct(ExpList) / mark"assign",
+		Assign = Ct(AssignableList) * sym"=" * Ct(TableBlock + ExpList) / mark"assign",
 
 		Assignable = Cmt(Chain, check_assignable) + Name,
 		AssignableList = Assignable * (sym"," * Assignable)^0,
@@ -190,7 +195,9 @@ local build_grammar = wrap(function()
 
 		Value = Assign + FunLit + String + (Chain + Callable) * Ct(ExpList^0) / flatten_func + Num,
 
-		String = simple_string("'") + simple_string('"') + LuaString,
+		String = Space * DoubleString + Space * SingleString + LuaString,
+		SingleString = simple_string("'"),
+		DoubleString = simple_string('"'),
 
 		LuaString = Cg(LuaStringOpen, "string_open") * Cb"string_open" * P"\n"^-1 *
 			C((1 - Cmt(C(LuaStringClose) * Cb"string_open", check_lua_string))^0) *
@@ -203,9 +210,20 @@ local build_grammar = wrap(function()
 		Parens = sym"(" * Exp * sym")",
 
 		-- a list of funcalls and indexs on a callable
-		Chain = Callable * (symx"(" * Ct(ExpList^-1)/mark"call" * sym")" + symx"[" * Exp/mark"index" * sym"]")^1 / mark"chain",
+		Chain = Callable * (symx"(" * Ct(ExpList^-1)/mark"call" * sym")" +
+			SingleString / wrap_func_arg  +
+			DoubleString / wrap_func_arg  +
+			symx"[" * Exp/mark"index" * sym"]"
+		)^1 / mark"chain",
 
 		TableLit = sym"{" * Ct(ExpList^-1) * sym"}" / mark"list",
+
+		TableBlockInner = Ct(KeyValueList * (Break^1 * KeyValueList)^0),
+
+		TableBlock = Break * #Cmt(Indent, advance_indent) * TableBlockInner * OutBlock / mark"table",
+
+		KeyValue = Ct((Name + sym"[" * Exp * sym"]") * symx":" * (Exp + TableBlock)),
+		KeyValueList = Cmt(Indent, check_indent) * KeyValue * (sym"," * KeyValue)^0 * sym","^-1,
 
 		FunLit = (sym"(" * Ct(NameList^-1) * sym")" + Ct("")) * sym"->" * (Body + Ct"") / mark"fndef",
 

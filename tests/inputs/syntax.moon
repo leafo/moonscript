@@ -69,3 +69,10 @@ print 5 + () ->
 	good nads
 
 
+something 'else', "ya"
+
+something'else'
+something"else"
+
+here(we)"go"[12123]
+

@@ -40,3 +40,7 @@ print(5 + function()
   34
   good(nads)
 end)
+something('else', "ya")
+something('else')
+something("else")
+here(we)("go")[12123]
