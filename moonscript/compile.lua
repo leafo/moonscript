@@ -124,12 +124,16 @@ local compiler_index = {
 		self:indent(1)
 		local item_values = {}
 		for _, item in ipairs(items) do
-			local key = self:value(item[1])
-			if type(item[1]) ~= "string" then
-				key = ("[%s]"):format(key)
-			end
+			if #item == 1 then
+				table.insert(item_values, self:value(item[1]))
+			else
+				local key = self:value(item[1])
+				if type(item[1]) ~= "string" then
+					key = ("[%s]"):format(key)
+				end
 
-			table.insert(item_values, key.." = "..self:value(item[2]))
+				table.insert(item_values, key.." = "..self:value(item[2]))
+			end
 		end
 		local i = self:ichar()
 		self:indent(-1)

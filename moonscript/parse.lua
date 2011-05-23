@@ -23,7 +23,7 @@ local function count_indent(str)
 end
 
 local R, S, V, P = lpeg.R, lpeg.S, lpeg.V, lpeg.P
-local C, Ct, Cmt, Cg, Cb = lpeg.C, lpeg.Ct, lpeg.Cmt, lpeg.Cg, lpeg.Cb
+local C, Ct, Cmt, Cg, Cb, Cc = lpeg.C, lpeg.Ct, lpeg.Cmt, lpeg.Cg, lpeg.Cb, lpeg.Cc
 
 local White = S" \t\n"^0
 local _Space = S" \t"^0
@@ -193,7 +193,9 @@ local build_grammar = wrap(function()
 		Exp = Ct(Term * (FactorOp * Term)^0) / flatten_or_mark"exp",
 		Term = Ct(Value * (TermOp * Value)^0) / flatten_or_mark"exp",
 
-		Value = Assign + FunLit + String + (Chain + Callable) * Ct(ExpList^0) / flatten_func + Num,
+		Value = TableLit + Ct(KeyValueList) / mark"table" +
+			Assign + FunLit + String +
+			(Chain + Callable) * Ct(ExpList^0) / flatten_func + Num,
 
 		String = Space * DoubleString + Space * SingleString + LuaString,
 		SingleString = simple_string("'"),
@@ -216,14 +218,19 @@ local build_grammar = wrap(function()
 			symx"[" * Exp/mark"index" * sym"]"
 		)^1 / mark"chain",
 
-		TableLit = sym"{" * Ct(ExpList^-1) * sym"}" / mark"list",
+		TableValue = KeyValue + Ct(Exp),
 
-		TableBlockInner = Ct(KeyValueList * (Break^1 * KeyValueList)^0),
+		TableLit = sym"{" * White *
+			Ct((TableValue * ((sym"," + Break) * White * TableValue)^0)^-1) * sym","^-1 *
+			White * sym"}" / mark"table",
+
+		TableBlockInner = Ct(KeyValueLine * (Break^1 * KeyValueLine)^0),
 
 		TableBlock = Break * #Cmt(Indent, advance_indent) * TableBlockInner * OutBlock / mark"table",
 
 		KeyValue = Ct((Name + sym"[" * Exp * sym"]") * symx":" * (Exp + TableBlock)),
-		KeyValueList = Cmt(Indent, check_indent) * KeyValue * (sym"," * KeyValue)^0 * sym","^-1,
+		KeyValueList = KeyValue * (sym"," * KeyValue)^0,
+		KeyValueLine = Cmt(Indent, check_indent) * KeyValueList * sym","^-1,
 
 		FunLit = (sym"(" * Ct(NameList^-1) * sym")" + Ct("")) * sym"->" * (Body + Ct"") / mark"fndef",
 
