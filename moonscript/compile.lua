@@ -91,9 +91,39 @@ local compiler_index = {
 	end,
 
 	["if"] = function(self, node)
+		local cond, block = node[2], node[3]
+		local ichr = self:ichar()
+
+		local out = {
+			("if %s then"):format(self:value(cond)),
+			self:block(block, 1)
+		}
+
+		for i = 4,#node do
+			local clause = node[i]
+			local block
+			if clause[1] == "else" then
+				table.insert(out, ichr.."else")
+				block = clause[2]
+			elseif clause[1] == "elseif" then
+				table.insert(out, ichr.."elseif "..self:value(clause[2]).." then")
+				block = clause[3]
+			else
+				error("Unknown if clause: "..clause[1])
+			end
+			table.insert(out, self:block(block, 1))
+		end
+
+		table.insert(out, ichr.."end")
+
+		return table.concat(out, "\n")
+	end,
+
+	['while'] = function(self, node)
 		local _, cond, block = unpack(node)
-		return ("if %s then\n%s\n%send"):format(
-			self:value(cond), self:block(block, 1), self:ichar())
+		local ichr = self:ichar()
+
+		return ("while %s do\n%s\n%send"):format(self:value(cond), self:block(block, 1), ichr)
 	end,
 
 	block = function(self, node, inc)

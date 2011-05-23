@@ -177,14 +177,18 @@ local build_grammar = wrap(function()
 		File = Block + Ct"",
 		Block = Ct(Line * (Break^1 * Line)^0),
 		Line = Cmt(Indent, check_indent) * Statement + _Space * Comment,
-		Statement = Ct(If) + Exp * Space,
+		Statement = If + While + Exp * Space,
 
 		Body = Break * InBlock + Ct(Statement),
 
 		InBlock = #Cmt(Indent, advance_indent) * Block * OutBlock,
 		OutBlock = Cmt("", pop_indent),
 
-		If = key"if" * Exp * Body / mark"if",
+		If = key"if" * Exp * key"then"^-1 * Body *
+			((Break * Cmt(Indent, check_indent))^-1 * key"elseif" * Exp * key"then"^-1 * Body / mark"elseif")^0 *
+			((Break * Cmt(Indent, check_indent))^-1 * key"else" * Body / mark"else")^-1 / mark"if",
+
+		While = key"while" * Exp * key"do"^-1 * Body / mark"while",
 
 		Assign = Ct(AssignableList) * sym"=" * Ct(TableBlock + ExpList) / mark"assign",
 
