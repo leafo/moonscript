@@ -177,12 +177,18 @@ local build_grammar = wrap(function()
 		File = Block + Ct"",
 		Block = Ct(Line * (Break^1 * Line)^0),
 		Line = Cmt(Indent, check_indent) * Statement + _Space * Comment,
-		Statement = If + While + Exp * Space,
+		Statement = Import + If + While + Exp * Space,
 
 		Body = Break * InBlock + Ct(Statement),
 
 		InBlock = #Cmt(Indent, advance_indent) * Block * OutBlock,
 		OutBlock = Cmt("", pop_indent),
+
+		Import = key"import"*  Ct(ImportNameList) * key"from" * Exp / mark"import", 
+		ImportName = (Ct(C(sym":") * Name) + Name),
+		ImportNameList = ImportName * (sym"," * ImportName)^0,
+
+		NameList = Name * (sym"," * Name)^0,
 
 		If = key"if" * Exp * key"then"^-1 * Body *
 			((Break * Cmt(Indent, check_indent))^-1 * key"elseif" * Exp * key"then"^-1 * Body / mark"elseif")^0 *

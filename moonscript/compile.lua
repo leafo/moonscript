@@ -21,6 +21,14 @@ function ntype(node)
 	return node[1]
 end
 
+-- functions that can be inlined, or called from build in library
+local moonlib = {
+	bind = function(tbl, name)
+		return table.concat{"moon.bind(", tbl, ".",
+			name, ", ", tbl, ")"}
+	end
+}
+
 local compiler_index = {
 	push = function(self) self._scope:push{} end,
 	pop = function(self) self._scope:pop() end,
@@ -40,8 +48,29 @@ local compiler_index = {
 		self._scope:top()[name] = true
 	end,
 
-	ichar = function(self)
-		return indent_char:rep(self._indent)
+	get_free_name = function(self, basename)
+		basename = basename or "moon"
+		local i = 0
+		local name
+		repeat
+			name = table.concat({"", basename, i}, "_")
+			i = i + 1
+		until not self:has_name(name)
+
+		return name
+	end,
+
+	ichar = function(self, ...)
+		local depths = {...}
+		if #depths == 0 then
+			return indent_char:rep(self._indent)
+		else
+			local indents = {}
+			for _, v in ipairs(depths) do
+				table.insert(indents, indent_char:rep(self._indent+v))
+			end
+			return unpack(indents)
+		end
 	end,
 
 	chain = function(self, node)
@@ -64,6 +93,52 @@ local compiler_index = {
 		end
 
 		return callee_value..table.concat(actions)
+	end,
+
+	import = function(self, node)
+		local _, names, source = unpack(node)
+
+		local to_bind = {}
+		local final_names = {}
+		for _, name in ipairs(names) do
+			if type(name) == "table" then
+				name = name[2]
+				to_bind[name] = true
+			end
+			table.insert(final_names, name)
+			self:put_name(name)
+		end
+
+		local function get_values(from)
+			local values = {}
+			for _, name in ipairs(final_names) do
+				local v = to_bind[name] and
+					moonlib.bind(from, name) or from.."."..name
+				table.insert(values, v)
+			end
+			return values
+		end
+
+		if type(source) == "string" then
+			local values = get_values(source)
+			return table.concat({"local", table.concat(final_names, ", "),
+				"=", table.concat(values, ", ")}, " ")
+		end
+
+		local outer, inner = self:ichar(0, 1)
+		local tmp_name = self:get_free_name("table")
+		out = {
+			"local "..table.concat(final_names, ", "),
+			outer.."do",
+			inner.."local "..tmp_name.." = "..self:value(source)
+		}
+
+		for i, value in ipairs(get_values(tmp_name)) do
+			table.insert(out, inner..final_names[i].." = "..value)
+		end
+
+		table.insert(out, outer.."end")
+		return table.concat(out, "\n")
 	end,
 
 	fndef = function(self, node)
