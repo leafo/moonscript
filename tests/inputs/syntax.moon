@@ -76,3 +76,33 @@ something"else"
 
 here(we)"go"[12123]
 
+-- this runs
+something =
+  test: 12323
+  what: -> print "hello world"
+
+print something.test
+
+frick = hello: "world"
+
+argon =
+  num: 100
+  world: (self) ->
+    print self.num
+    return {
+      something: -> print "hi from something"
+    }
+  somethin: (self, str) ->
+    print "string is", str
+    return world: (a,b) -> print "sum", a + b
+
+something.what()
+argon:world().something()
+
+argon:somethin"200".world(1,2)
+
+
+
+
+
+

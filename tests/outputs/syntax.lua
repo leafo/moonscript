@@ -44,3 +44,16 @@ something('else', "ya")
 something('else')
 something("else")
 here(we)("go")[12123]
+local something = { test = 12323, what = function() print("hello world") end }
+print(something.test)
+local frick = { hello = "world" }
+local argon = { num = 100, world = function(self)
+    print(self.num)
+    return({ something = function() print("hi from something") end })
+  end, somethin = function(self,str)
+    print("string is", str)
+    return({ world = function(a,b) print("sum", a + b) end })
+  end }
+something.what()
+argon:world().something()
+argon:somethin("200").world(1, 2)

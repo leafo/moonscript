@@ -73,18 +73,27 @@ local compiler_index = {
 		end
 	end,
 
+	chain_item = function(self, node)
+		local t, arg = unpack(node)
+		if t == "call" then
+			return "("..table.concat(self:values(arg), ', ')..")"
+		elseif t == "index" then
+			return "["..self:value(arg).."]"
+		elseif t == "dot" then
+			return "."..arg
+		elseif t == "colon" then
+			return ":"..arg..self:chain_item(node[3])
+		else
+			error("Unknown chain action: "..t)
+		end
+	end,
+
 	chain = function(self, node)
 		local callee = node[2]
 		local actions = {}
+
 		for i = 3,#node do
-			local t, arg = unpack(node[i])
-			if t == "call" then
-				table.insert(actions, "("..table.concat(self:values(arg), ', ')..")")
-			elseif t == "index" then
-				table.insert(actions, "["..self:value(arg).."]")
-			else
-				error("Unknown chain action: "..t)
-			end
+			table.insert(actions, self:chain_item(node[i]))
 		end
 
 		local callee_value = self:value(callee)

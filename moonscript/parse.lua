@@ -34,7 +34,8 @@ local Indent = C(S"\t "^0) / count_indent
 local Comment = P"--" * (1 - S"\n")^0 * #Stop
 local Space = _Space * Comment^-1
 
-local Name = Space * C(R("az", "AZ", "__") * R("az", "AZ", "09", "__")^0)
+local _Name = C(R("az", "AZ", "__") * R("az", "AZ", "09", "__")^0)
+local Name = Space * _Name
 local Num = Space * C(R("09")^1) / tonumber
 
 local FactorOp = Space * C(S"+-")
@@ -203,7 +204,9 @@ local build_grammar = wrap(function()
 		Exp = Ct(Term * (FactorOp * Term)^0) / flatten_or_mark"exp",
 		Term = Ct(Value * (TermOp * Value)^0) / flatten_or_mark"exp",
 
-		Value = TableLit + Ct(KeyValueList) / mark"table" +
+		Value = TableLit +
+			ColonChain +
+			Ct(KeyValueList) / mark"table" +
 			Assign + FunLit + String +
 			(Chain + Callable) * Ct(ExpList^0) / flatten_func + Num,
 
@@ -221,12 +224,25 @@ local build_grammar = wrap(function()
 		Callable = Name + Parens / mark"parens",
 		Parens = sym"(" * Exp * sym")",
 
+		FnArgs = symx"(" * Ct(ExpList^-1) * sym")",
+
+		-- chain that starts with colon expression (for precedence over table literal)
+		ColonChain = 
+			Callable * ColonCall * (ChainItem)^0 / mark"chain",
+
 		-- a list of funcalls and indexs on a callable
-		Chain = Callable * (symx"(" * Ct(ExpList^-1)/mark"call" * sym")" +
-			SingleString / wrap_func_arg  +
-			DoubleString / wrap_func_arg  +
-			symx"[" * Exp/mark"index" * sym"]"
-		)^1 / mark"chain",
+		Chain = Callable * ChainItem^1 / mark"chain",
+
+		ChainItem = 
+			Invoke + 
+			symx"[" * Exp/mark"index" * sym"]" +
+			symx"." * _Name/mark"dot" +
+			ColonCall,
+
+		ColonCall = symx":" * (_Name * Invoke) / mark"colon",
+		Invoke = FnArgs/mark"call" +
+			SingleString / wrap_func_arg +
+			DoubleString / wrap_func_arg,
 
 		TableValue = KeyValue + Ct(Exp),
 
