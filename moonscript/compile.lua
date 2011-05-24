@@ -151,13 +151,14 @@ local compiler_index = {
 	end,
 
 	fndef = function(self, node)
-		local _, args, block = unpack(node)
+		local _, args, arrow, block = unpack(node)
 		self:push()
 
 		for _, arg_name in ipairs(args) do
 			self:put_name(arg_name)
 		end
 
+		if arrow == "fat" then table.insert(args, "self") end
 		args = table.concat(args, ",")
 
 		local out

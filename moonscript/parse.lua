@@ -150,8 +150,9 @@ local build_grammar = wrap(function()
 
 
 	-- makes sure the last item in a chain is an index
+	local _assignable = { index = true, dot = true}
 	local function check_assignable(str, pos, value)
-		if ntype(value) == "chain" and ntype(value[#value]) == "index"
+		if ntype(value) == "chain" and _assignable[ntype(value[#value])]
 			or type(value) == "string"
 		then
 			return true, value
@@ -258,7 +259,9 @@ local build_grammar = wrap(function()
 		KeyValueList = KeyValue * (sym"," * KeyValue)^0,
 		KeyValueLine = Cmt(Indent, check_indent) * KeyValueList * sym","^-1,
 
-		FunLit = (sym"(" * Ct(NameList^-1) * sym")" + Ct("")) * sym"->" * (Body + Ct"") / mark"fndef",
+		FunLit = (sym"(" * Ct(NameList^-1) * sym")" + Ct("")) *
+			(sym"->" * Cc"slim" + sym"=>" * Cc"fat") *
+			(Body + Ct"") / mark"fndef",
 
 		NameList = Name * (sym"," * Name)^0,
 		ExpList = Exp * (sym"," * Exp)^0
