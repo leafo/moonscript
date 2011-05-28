@@ -37,6 +37,20 @@ local compiler_index = {
 		self._indent = self._indent + amount
 	end,
 
+	pretty = function(self, tbl)
+		local out = {}
+		for _, line in ipairs(tbl) do
+			if type(line) == "table" then
+				self:indent(1)
+				table.insert(out, indent_char..self:pretty(line))
+				self:indent(-1)
+			else
+				table.insert(out, line)
+			end
+		end
+		return table.concat(out, "\n"..self:ichar())
+	end,
+
 	has_name = function(self, name)
 		for i = #self._scope,1,-1 do
 			if self._scope[i][name] then return true end
@@ -110,10 +124,13 @@ local compiler_index = {
 		local to_bind = {}
 		local final_names = {}
 		for _, name in ipairs(names) do
-			if type(name) == "table" then
-				name = name[2]
+			if ntype(name) == ":" then
+				name = self:value(name[2])
 				to_bind[name] = true
+			else
+				name = self:value(name)
 			end
+
 			table.insert(final_names, name)
 			self:put_name(name)
 		end
@@ -211,6 +228,33 @@ local compiler_index = {
 		return ("while %s do\n%s\n%send"):format(self:value(cond), self:block(block, 1), ichr)
 	end,
 
+	name_list = function(self, node)
+		return table.concat(self:values(node), ", ")
+	end,
+
+	comprehension = function(self, node)
+		local _, exp, names, iter, when = unpack(node)
+		local insert = ("table.insert(tmp, %s)"):format(self:value(exp))
+
+		if when then
+			insert = {
+				("if %s then"):format(self:value(when)), {
+					insert
+				}, "end"
+			}
+		end
+
+		return self:pretty{
+			"(function()", {
+				"local tmp = {}",
+				("for %s in %s do"):format(self:name_list(names), self:value(iter)),
+					type(insert) == "table" and insert or {insert},
+				"end",
+				"return tmp"
+			}, "end)()"
+		}
+	end,
+
 	block = function(self, node, inc)
 		self:push()
 		if inc then self:indent(inc) end
@@ -302,6 +346,9 @@ local compiler_index = {
 	exp = function(self, node)
 		local values = {}
 		for i = 2, #node do
+			if i % 2 == 1 and node[i] == "!=" then
+				node[i] = "~="
+			end
 			table.insert(values, self:value(node[i]))
 		end
 		return table.concat(values, " ")
@@ -327,6 +374,11 @@ local compiler_index = {
 		end
 
 		return node
+	end,
+
+	self = function(self, node)
+		local _, val = unpack(node)
+		return "self."..self:value(val)
 	end,
 
 	-- a list of values

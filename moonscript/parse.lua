@@ -124,6 +124,14 @@ local build_grammar = wrap(function()
 		return Space * word
 	end
 
+	local function op(word)
+		if word:match("^%w*$") then
+			keywords[word] = true
+		end
+		return Space * C(word)
+	end
+
+
 	local function sym(chars)
 		return Space * chars
 	end
@@ -160,6 +168,8 @@ local build_grammar = wrap(function()
 		return false
 	end
 
+	local Name = sym"@" * Name / mark"self" + Name
+
 	-- make sure name is not a keyword
 	local Name = Cmt(Name, function(str, pos, name)
 		if keywords[name] then return false end
@@ -187,7 +197,7 @@ local build_grammar = wrap(function()
 		OutBlock = Cmt("", pop_indent),
 
 		Import = key"import"*  Ct(ImportNameList) * key"from" * Exp / mark"import", 
-		ImportName = (Ct(C(sym":") * Name) + Name),
+		ImportName = (Ct(sym":" / trim * Name) + Name),
 		ImportNameList = ImportName * (sym"," * ImportName)^0,
 
 		NameList = Name * (sym"," * Name)^0,
@@ -198,14 +208,24 @@ local build_grammar = wrap(function()
 
 		While = key"while" * Exp * key"do"^-1 * Body / mark"while",
 
+		Comprehension = sym"[" * Exp * key"for" * Ct(NameList) *
+			key"in" * Exp *
+			(key"when" * Exp)^-1 *
+			sym"]" / mark"comprehension",
+
 		Assign = Ct(AssignableList) * sym"=" * Ct(TableBlock + ExpList) / mark"assign",
+
+		-- we can ignore precedence for now
+		OtherOps = op"or" + op"and" + op"<=" + op">=" + op"~=" + op"!=" + op"==" + op".." + op"<" + op">",
 
 		Assignable = Cmt(Chain, check_assignable) + Name,
 		AssignableList = Assignable * (sym"," * Assignable)^0,
-		Exp = Ct(Term * (FactorOp * Term)^0) / flatten_or_mark"exp",
+		Exp = Ct(Factor * (OtherOps * Factor)^0) / flatten_or_mark"exp",
+		Factor = Ct(Term * (FactorOp * Term)^0) / flatten_or_mark"exp",
 		Term = Ct(Value * (TermOp * Value)^0) / flatten_or_mark"exp",
 
 		Value = TableLit +
+			Comprehension +
 			ColonChain +
 			Ct(KeyValueList) / mark"table" +
 			Assign + FunLit + String +
@@ -297,48 +317,17 @@ local build_grammar = wrap(function()
 	
 end)
 
-local grammar = build_grammar()
-
 -- parse a string
 -- returns tree, or nil and error message
 function string(str)
 	local g = build_grammar()
-	return grammar:match(str)
+	return g:match(str)
 end
-
-
-local program = [[
-if two_dads
-	do something
-	if yum
-		heckyes 23
-
-print 2
-
-print dadas
-
-{1,2,3,4}
-
-(a,b) ->
-	throw nuts
-
-print 100
-
-]]
-
-local program = [[
-
-hi = (a) -> print a
-
-if true
-	hi 100
-
-]]
 
 local program3 = [[
 -- hello
 class Hello
-	@something = 2323
+	@something: 2323
 
 	hello: () ->
 		print 200
