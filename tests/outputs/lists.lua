@@ -62,13 +62,17 @@ end)();
   return tmp
 end)()
 require("util")
-local dump = function(x) print(util.dump(x)) end
+local dump = function(x)
+  print(util.dump(x))
+end
 local range = function(count)
   local i = 0
-  return(coroutine.wrap(function() while i < count do
-    coroutine.yield(i)
-    i = i + 1
-  end end))
+  return(coroutine.wrap(function()
+    while i < count do
+      coroutine.yield(i)
+      i = i + 1
+    end
+  end))
 end
 dump((function()
   local tmp = {}

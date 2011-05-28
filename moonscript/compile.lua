@@ -29,6 +29,8 @@ local moonlib = {
 	end
 }
 
+local must_return = data.Set{ 'parens', 'exp', 'value', 'string', 'table', 'fndef' }
+
 local compiler_index = {
 	push = function(self) self._scope:push{} end,
 	pop = function(self) self._scope:pop() end,
@@ -37,7 +39,7 @@ local compiler_index = {
 		self._indent = self._indent + amount
 	end,
 
-	pretty = function(self, tbl)
+	pretty = function(self, tbl, indent_front)
 		local out = {}
 		for _, line in ipairs(tbl) do
 			if type(line) == "table" then
@@ -48,7 +50,12 @@ local compiler_index = {
 				table.insert(out, line)
 			end
 		end
-		return table.concat(out, "\n"..self:ichar())
+
+		local block = table.concat(out, "\n"..self:ichar())
+		if indent_front then
+			block = self:ichar()..block
+		end
+		return block
 	end,
 
 	has_name = function(self, name)
@@ -181,24 +188,25 @@ local compiler_index = {
 		local out
 		if #block == 0 then
 			out = ("function(%s) end"):format(args)
-		elseif #block == 1 then
-			out = ("function(%s) %s end"):format(args, self:value(block[1]))
+		elseif #block == 1 and must_return[ntype(block[1])] then
+			out = ("function(%s) %s end"):format(args, self:block(block, true, 0))
 		else
 			out = ("function(%s)\n%s\n%send"):format(
-				args, self:block(block, 1), self:ichar())
+				args, self:block(block, true), self:ichar())
 		end
 
 		self:pop()
 		return out
 	end,
 
-	["if"] = function(self, node)
+	-- compile if
+	["if"] = function(self, node, return_value)
 		local cond, block = node[2], node[3]
 		local ichr = self:ichar()
 
 		local out = {
 			("if %s then"):format(self:value(cond)),
-			self:block(block, 1)
+			self:block(block, return_value)
 		}
 
 		for i = 4,#node do
@@ -213,7 +221,7 @@ local compiler_index = {
 			else
 				error("Unknown if clause: "..clause[1])
 			end
-			table.insert(out, self:block(block, 1))
+			table.insert(out, self:block(block, return_value))
 		end
 
 		table.insert(out, ichr.."end")
@@ -225,7 +233,8 @@ local compiler_index = {
 		local _, cond, block = unpack(node)
 		local ichr = self:ichar()
 
-		return ("while %s do\n%s\n%send"):format(self:value(cond), self:block(block, 1), ichr)
+		return ("while %s do\n%s\n%send"):format(self:value(cond),
+			self:block(block, nil, 1), ichr)
 	end,
 
 	name_list = function(self, node)
@@ -267,17 +276,25 @@ local compiler_index = {
 		}
 	end,
 
-	block = function(self, node, inc)
+	block = function(self, node, return_value, inc)
+		inc = inc or 1
+
 		self:push()
-		if inc then self:indent(inc) end
+		self:indent(inc)
 
 		local lines = {}
-		local i = self:ichar()
-		for _, ln in ipairs(node) do
-			table.insert(lines, i..self:value(ln))
+		local len = #node
+		for i=1,len do
+			local ln = node[i]
+			local value = self:stm(ln, return_value and i == len)
+			if type(value) == "table" then
+				for _, v in value do
+					table.insert(lines, value)
+				end
+			else
+				table.insert(lines, value)
+			end
 		end
-		if inc then self:indent(-inc) end
-		self:pop()
 
         -- add semicolons where they might be needed
         for i, left, k, right in itwos(lines) do
@@ -286,7 +303,12 @@ local compiler_index = {
             end
         end
 
-		return table.concat(lines, "\n")
+		local out = self:pretty(lines, true)
+
+		self:indent(-inc)
+		self:pop()
+
+		return out
 	end,
 
 	table = function(self, node)
@@ -376,17 +398,34 @@ local compiler_index = {
 		return delim..inner..(delim_end or delim)
 	end,
 
-	value = function(self, node)
+	value = function(self, node, ...)
+		if return_value == nil then return_value = true end
+
 		if type(node) == "table" then 
 			local fn = self[node[1]]
 			if not fn then
 				error("Unknown op: "..tostring(node[1]))
 			end
-			return fn(self, node)
+			return fn(self, node, ...)
 		end
 
 		return node
 	end,
+
+    -- has no return value, meant to be on line of it's own
+    stm = function(self, node, return_value)
+        local value = self:value(node, return_value)
+
+        if must_return[ntype(node)] then
+			if return_value then
+				return "return "..value
+			else
+				return self:value({"assign", {"_"}, {value}}, false)
+			end
+        end
+
+        return value
+    end,
 
 	minus = function(self, node)
 		local _, value = unpack(node)
@@ -428,7 +467,7 @@ end
 
 function tree(tree)
 	local compiler = build_compiler()
-    return compiler:block(tree)
+    return compiler:block(tree, false, 0)
 end
 
 

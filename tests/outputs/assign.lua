@@ -1,6 +1,6 @@
-function()
+local _ = function()
   local joop = 2302
-  function(hi)
+  return function(hi)
     local d = 100
     hi = 1021
     local a, b, c = 1, 2, 3

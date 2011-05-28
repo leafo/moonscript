@@ -1,25 +1,25 @@
 local you_cool = false
 if cool then
   if you_cool then
-    one
+    local _ = one
   else
     if eatdic then
-      yeah
+      local _ = yeah
     else
-      two
-      three
+      local _ = two
+      _ = three
     end
   end
 else
-  no
+  local _ = no
 end
 if cool then
-  no
+  local _ = no
 end
 if cool then
-  no
+  local _ = no
 else
-  yes
+  local _ = yes
 end
 if cool then
   wow(cool)
@@ -29,12 +29,12 @@ end
 if working then
   if cool then
     if cool then
-      okay
+      local _ = okay
     else
-      what
+      local _ = what
     end
   else
-    nah
+    local _ = nah
   end
 end
 while true do
@@ -46,7 +46,7 @@ while 5 + 5 do
 end
 while also do
   i(work(too))
-  "okay"
+  local _ = "okay"
 end
 if yeah then
   no(day)

@@ -29,3 +29,11 @@ function Stack(...)
 	return self
 end
 
+function Set(items)
+	local self = {}
+	for _,item in ipairs(items) do
+		self[item] = true
+	end
+	return self
+end
+
