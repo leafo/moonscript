@@ -168,7 +168,7 @@ local build_grammar = wrap(function()
 		return false
 	end
 
-	local Name = sym"@" * Name / mark"self" + Name
+	local Name = sym"@" * Name / mark"self" + Name + "..."
 
 	-- make sure name is not a keyword
 	local Name = Cmt(Name, function(str, pos, name)
@@ -180,6 +180,16 @@ local build_grammar = wrap(function()
 		return C(symx(delim)) * C((P('\\'..delim) + (1 - S('\n'..delim)))^0) * sym(delim) / mark"string"
 	end
 
+	-- wrap if statement if there is a conditional decorator
+	local function wrap_if(stm, cond)
+		if cond then
+			local pass, fail = unpack(cond)
+			if fail then fail = {"else", {fail}} end
+			return {"if", cond[2], {stm}, fail}
+		end
+		return stm
+	end
+
 	local function check_lua_string(str, pos, right, left)
 		return #left == #right
 	end
@@ -189,7 +199,9 @@ local build_grammar = wrap(function()
 		File = Block + Ct"",
 		Block = Ct(Line * (Break^1 * Line)^0),
 		Line = Cmt(Indent, check_indent) * Statement + _Space * Comment,
-		Statement = Import + If + While + Exp * Space,
+
+		Statement = (Import + If + While + Exp * Space) *
+			(key"if" * Exp * (key"else" * Exp)^-1 * Space / mark"if")^-1 / wrap_if,
 
 		Body = Break * InBlock + Ct(Statement),
 
@@ -225,7 +237,11 @@ local build_grammar = wrap(function()
 		Factor = Ct(Term * (FactorOp * Term)^0) / flatten_or_mark"exp",
 		Term = Ct(Value * (TermOp * Value)^0) / flatten_or_mark"exp",
 
-		Value = TableLit +
+		Value =
+			sym"-" * Exp / mark"minus" +
+			sym"#" * Exp / mark"length" +
+			sym"not" * Exp / mark"not" +
+			TableLit +
 			Comprehension +
 			ColonChain +
 			Ct(KeyValueList) / mark"table" +

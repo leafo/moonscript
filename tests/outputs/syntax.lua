@@ -57,3 +57,33 @@ local argon = { num = 100, world = function(self)
 something.what()
 argon:world().something()
 argon:somethin("200").world(1, 2)
+x = -434
+x = -hello(world(one(two)))
+local hi = -"herfef"
+x = -(function()
+  local tmp = {}
+  for x in x do
+    table.insert(tmp, x)
+  end
+  return tmp
+end)()
+if cool then
+  print("hello")
+else
+  cool
+end
+print("nutjob")
+if hello then
+  343
+end
+if cool then
+  print("what")
+else
+  cool
+end
+local arg = { ... }
+x = function(...) dump({ ... }) end
+x = not true
+local y = not (5 + 5)
+y = #"hello"
+x = #{ #{  }, #{ 1 }, #{ 1, 2 } }

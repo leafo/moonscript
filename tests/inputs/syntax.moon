@@ -101,8 +101,33 @@ argon:world().something()
 
 argon:somethin"200".world(1,2)
 
+x = -434
+
+x = -hello world one two
+
+hi = -"herfef"
+
+x = -[x for x in x]
+
+print "hello" if cool
+
+print "nutjob"
+
+if hello then 343
+
+print "what" if cool else whack
+
+arg = {...}
+
+x = (...) ->
+  dump {...}
 
 
+x = not true
+
+y = not(5+5)
 
 
+y = #"hello"
 
+x = #{#{},#{1},#{1,2}}

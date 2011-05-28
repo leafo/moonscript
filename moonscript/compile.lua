@@ -388,6 +388,21 @@ local compiler_index = {
 		return node
 	end,
 
+	minus = function(self, node)
+		local _, value = unpack(node)
+		return "-"..self:value(value)
+	end,
+
+	length = function(self, node)
+		local _, value = unpack(node)
+		return "#"..self:value(value)
+	end,
+
+	["not"] = function(self, node)
+		local _, value = unpack(node)
+		return "not "..self:value(value)
+	end,
+
 	self = function(self, node)
 		local _, val = unpack(node)
 		return "self."..self:value(val)
