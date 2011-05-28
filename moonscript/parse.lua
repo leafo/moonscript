@@ -208,10 +208,11 @@ local build_grammar = wrap(function()
 
 		While = key"while" * Exp * key"do"^-1 * Body / mark"while",
 
-		Comprehension = sym"[" * Exp * key"for" * Ct(NameList) *
-			key"in" * Exp *
-			(key"when" * Exp)^-1 *
+		Comprehension = sym"[" * Exp *
+			Ct((key"for" * Ct(NameList) * key"in" * Exp / mark"for") * CompClause^0) *
 			sym"]" / mark"comprehension",
+
+		CompClause = key"for" * Ct(NameList) * key"in" * Exp / mark"for" + key"when" * Exp / mark"when",
 
 		Assign = Ct(AssignableList) * sym"=" * Ct(TableBlock + ExpList) / mark"assign",
 

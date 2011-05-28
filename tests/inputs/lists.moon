@@ -11,3 +11,22 @@ rad = [{a} for a in ipairs {
    1,2,3,4,5,6,
 } when good_number a]
 
+
+[z for z in items for j in list when z > 4]
+
+require "util"
+
+dump = (x) -> print util.dump x
+
+range = (count) ->
+  i = 0
+  return coroutine.wrap ->
+    while i < count
+      coroutine.yield i
+      i = i + 1
+
+dump [x for x in range 10]
+dump [{x, y} for x in range 5 when x > 2 for y in range 5]
+
+things = [x + y for x in range 10 when x > 5 for y in range 10 when y > 7]
+

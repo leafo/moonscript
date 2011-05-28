@@ -233,25 +233,37 @@ local compiler_index = {
 	end,
 
 	comprehension = function(self, node)
-		local _, exp, names, iter, when = unpack(node)
-		local insert = ("table.insert(tmp, %s)"):format(self:value(exp))
+		local _, exp, clauses = unpack(node)
+		local insert = { ("table.insert(tmp, %s)"):format(self:value(exp)) }
 
-		if when then
-			insert = {
-				("if %s then"):format(self:value(when)), {
-					insert
-				}, "end"
-			}
+		for i = #clauses,1,-1 do
+			local c = clauses[i]
+
+			if "for" == c[1] then
+				local _, names, iter = unpack(c)
+				insert = {
+					("for %s in %s do"):format(self:name_list(names), self:value(iter)),
+					insert,
+					"end"
+				}
+			elseif "when" == c[1] then
+				local _, when = unpack(c)
+				insert = {
+					("if %s then"):format(self:value(when)),
+					insert,
+					"end"
+				}
+			else
+				error("Unknown clause type :"..tostring(c[1]))
+			end
 		end
 
 		return self:pretty{
-			"(function()", {
-				"local tmp = {}",
-				("for %s in %s do"):format(self:name_list(names), self:value(iter)),
-					type(insert) == "table" and insert or {insert},
-				"end",
-				"return tmp"
-			}, "end)()"
+			"(function()",
+				{ "local tmp = {}", },
+				insert,
+				{ "return tmp" },
+			"end)()"
 		}
 	end,
 
