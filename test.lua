@@ -1,6 +1,13 @@
 require "lfs"
 require "alt_getopt"
 
+local gettime = nil
+
+pcall(function()
+	require "socket"
+	gettime = socket.gettime
+end)
+
 local opts, ind = alt_getopt.get_opts(arg, "d:", { })
 
 local argv = {}
@@ -26,18 +33,37 @@ local function output_name(name)
 	return opts.out_dir.."/"..name:match(opts.input_pattern)..opts.output_ext 
 end
 
-local function run_file(name) 
+local function run_file(name, benchmark)
 	name = input_name(name)
 	file_str = io.open(name):read("*a")
 
 	local parse = require "moonscript.parse"
 	local compile = require "moonscript.compile"
 
+
+	local start_parse
+	if benchmark then start_parse = gettime() end
+
 	local tree, err = parse.string(file_str)
+
+	local parse_time = 0
+	if benchmark then parse_time = gettime() - start_parse end
+
 	if not tree then
 		error("Compile error in "..name.."\n"..err)
 	end
-	return compile.tree(tree)
+
+	local start_compile
+	if benchmark then start_compile = gettime() end
+
+	local code = compile.tree(tree)
+
+	if benchmark then
+		local compile_time = gettime() - start_compile
+		return code, parse_time, compile_time
+	end
+
+	return code
 end
 
 local function inputs(pattern)
@@ -70,7 +96,7 @@ local actions = {
 		for file in inputs(pattern) do
 			tests_run = tests_run + 1
 			local correct_fname = output_name(file)
-			result = run_file(file)
+			result, parse_time, compile_time = run_file(file, gettime)
 			local handle = io.open(correct_fname)
 
 			if not handle then 
@@ -87,7 +113,14 @@ local actions = {
 					os.remove(tmp_name)
 					-- break
 				else
-					print("Test", file, "passed")
+					if parse_time then
+						parse_time = ("%.3fms"):format(parse_time*1000)
+						compile_time = ("%.3fms"):format(compile_time*1000)
+						print("Test", file, "passed", "",
+							("p: %s, c: %s"):format(parse_time, compile_time))
+					else
+						print("Test", file, "passed")
+					end
 				end
 			end
 		end
