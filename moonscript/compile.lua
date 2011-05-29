@@ -21,6 +21,20 @@ function ntype(node)
 	return node[1]
 end
 
+-- number of newlines in string
+local function num_lines(str)
+	local sum = 0
+	for v in str:gmatch("[\n]") do
+		sum = sum + 1
+	end
+	return sum
+end
+
+-- small enough to fit on one line
+local function is_small(str)
+	return num_lines(str) == 0 and #str < 40
+end
+
 -- functions that can be inlined, or called from build in library
 local moonlib = {
 	bind = function(tbl, name)
@@ -152,26 +166,28 @@ local compiler_index = {
 			return values
 		end
 
+		-- importing from constant expression
 		if type(source) == "string" then
 			local values = get_values(source)
 			return table.concat({"local", table.concat(final_names, ", "),
 				"=", table.concat(values, ", ")}, " ")
 		end
 
-		local outer, inner = self:ichar(0, 1)
 		local tmp_name = self:get_free_name("table")
-		out = {
-			"local "..table.concat(final_names, ", "),
-			outer.."do",
-			inner.."local "..tmp_name.." = "..self:value(source)
-		}
+
+		self:push()
+		self:put_name(tmp_name)
+		inner = { "local "..tmp_name.." = "..self:value(source) }
 
 		for i, value in ipairs(get_values(tmp_name)) do
-			table.insert(out, inner..final_names[i].." = "..value)
+			table.insert(inner, final_names[i].." = "..value)
 		end
+		self:pop()
 
-		table.insert(out, outer.."end")
-		return table.concat(out, "\n")
+		return self:pretty{
+			"local "..table.concat(final_names, ", "),
+			"do", inner, "end"
+		}
 	end,
 
 	fndef = function(self, node)
@@ -182,17 +198,23 @@ local compiler_index = {
 			self:put_name(arg_name)
 		end
 
-		if arrow == "fat" then table.insert(args, "self") end
+		if arrow == "fat" then table.insert(args, 1, "self") end
 		args = table.concat(args, ",")
 
 		local out
 		if #block == 0 then
 			out = ("function(%s) end"):format(args)
-		elseif #block == 1 and must_return[ntype(block[1])] then
-			out = ("function(%s) %s end"):format(args, self:block(block, true, 0))
 		else
-			out = ("function(%s)\n%s\n%send"):format(
-				args, self:block(block, true), self:ichar())
+			local inner = self:block(block, true)
+			if #inner == 1 and is_small(inner[1]) then
+				out = ("function(%s) %s end"):format(args, inner[1])
+			else
+				out = self:pretty{
+					("function(%s)"):format(args),
+					inner,
+					"end"
+				}
+			end
 		end
 
 		self:pop()
@@ -202,7 +224,6 @@ local compiler_index = {
 	-- compile if
 	["if"] = function(self, node, return_value)
 		local cond, block = node[2], node[3]
-		local ichr = self:ichar()
 
 		local out = {
 			("if %s then"):format(self:value(cond)),
@@ -213,10 +234,10 @@ local compiler_index = {
 			local clause = node[i]
 			local block
 			if clause[1] == "else" then
-				table.insert(out, ichr.."else")
+				table.insert(out, "else")
 				block = clause[2]
 			elseif clause[1] == "elseif" then
-				table.insert(out, ichr.."elseif "..self:value(clause[2]).." then")
+				table.insert(out, "elseif "..self:value(clause[2]).." then")
 				block = clause[3]
 			else
 				error("Unknown if clause: "..clause[1])
@@ -224,17 +245,19 @@ local compiler_index = {
 			table.insert(out, self:block(block, return_value))
 		end
 
-		table.insert(out, ichr.."end")
-
-		return table.concat(out, "\n")
+		table.insert(out, "end")
+		
+		return self:pretty(out)
 	end,
 
 	['while'] = function(self, node)
 		local _, cond, block = unpack(node)
-		local ichr = self:ichar()
 
-		return ("while %s do\n%s\n%send"):format(self:value(cond),
-			self:block(block, nil, 1), ichr)
+		return self:pretty{
+			("while %s do"):format(self:value(cond)),
+			self:block(block),
+			"end"
+		}
 	end,
 
 	name_list = function(self, node)
@@ -276,6 +299,7 @@ local compiler_index = {
 		}
 	end,
 
+	-- returns list of compiled statements
 	block = function(self, node, return_value, inc)
 		inc = inc or 1
 
@@ -303,39 +327,45 @@ local compiler_index = {
             end
         end
 
-		local out = self:pretty(lines, true)
-
 		self:indent(-inc)
 		self:pop()
 
-		return out
+		return lines
 	end,
 
 	table = function(self, node)
 		local _, items = unpack(node)
 
 		self:indent(1)
+		local len = #items
 		local item_values = {}
-		for _, item in ipairs(items) do
+		for i = 1,len do
+			local item = items[i]
+			local item_value
 			if #item == 1 then
-				table.insert(item_values, self:value(item[1]))
+				item_value = self:value(item[1])
 			else
 				local key = self:value(item[1])
 				if type(item[1]) ~= "string" then
 					key = ("[%s]"):format(key)
 				end
 
-				table.insert(item_values, key.." = "..self:value(item[2]))
+				item_value = key.." = "..self:value(item[2])
 			end
+
+			if i ~= len then
+				item_value = item_value..","
+			end
+
+			table.insert(item_values, item_value)
 		end
-		local i = self:ichar()
 		self:indent(-1)
 
 		if #item_values > 3 then
-			return ("{\n%s%s\n%s}"):format(i, table.concat(item_values, ",\n"..i), self:ichar())
+			return self:pretty{ "{", item_values, "}" }
 		end
 
-		return "{ "..table.concat(item_values, ", ").." }"
+		return "{ "..table.concat(item_values, " ").." }"
 	end,
 
 	assign = function(self, node)
@@ -374,7 +404,9 @@ local compiler_index = {
 			local line = table.concat(names, ", ").." = "..table.concat(values, ", ")
 			table.insert(lines, t == "local" and "local "..line or line)
 		end
-		return table.concat(lines, "\n"..self:ichar())
+
+
+		return self:pretty(lines)
 	end,
 
 	exp = function(self, node)
@@ -467,7 +499,7 @@ end
 
 function tree(tree)
 	local compiler = build_compiler()
-    return compiler:block(tree, false, 0)
+    return compiler:pretty(compiler:block(tree, false, 0))
 end
 
 
