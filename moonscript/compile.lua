@@ -43,7 +43,13 @@ local moonlib = {
 	end
 }
 
+-- these are always expressions, never statements, must be sent into temp variable
 local must_return = data.Set{ 'parens', 'exp', 'value', 'string', 'table', 'fndef' }
+
+-- make sure there are no block levels statements in expression
+local function validate_expression(block)
+	-- need to annotate blocks? how do I know where expressions are
+end
 
 local compiler_index = {
 	push = function(self) self._scope:push{} end,
@@ -264,25 +270,29 @@ local compiler_index = {
 		return table.concat(self:values(node), ", ")
 	end,
 
-	comprehension = function(self, node)
+	-- need to get tmp name instead of using tmp
+	comprehension = function(self, node, return_value)
 		local _, exp, clauses = unpack(node)
-		local insert = { ("table.insert(tmp, %s)"):format(self:value(exp)) }
+
+		local action = return_value
+			and { ("table.insert(tmp, %s)"):format(self:value(exp)) }
+			or { self:stm(exp) }
 
 		for i = #clauses,1,-1 do
 			local c = clauses[i]
 
 			if "for" == c[1] then
 				local _, names, iter = unpack(c)
-				insert = {
+				action = {
 					("for %s in %s do"):format(self:name_list(names), self:value(iter)),
-					insert,
+					action,
 					"end"
 				}
 			elseif "when" == c[1] then
 				local _, when = unpack(c)
-				insert = {
+				action = {
 					("if %s then"):format(self:value(when)),
-					insert,
+					action,
 					"end"
 				}
 			else
@@ -290,13 +300,17 @@ local compiler_index = {
 			end
 		end
 
-		return self:pretty{
-			"(function()",
-				{ "local tmp = {}", },
-				insert,
-				{ "return tmp" },
-			"end)()"
-		}
+		if return_value then
+			return self:pretty{
+				"(function()",
+					{ "local tmp = {}", },
+					action,
+					{ "return tmp" },
+				"end)()"
+			}
+		else
+			return self:pretty(action)
+		end
 	end,
 
 	-- returns list of compiled statements
@@ -430,7 +444,7 @@ local compiler_index = {
 		return delim..inner..(delim_end or delim)
 	end,
 
-	value = function(self, node, ...)
+	value = function(self, node, return_value, ...)
 		if return_value == nil then return_value = true end
 
 		if type(node) == "table" then 
@@ -438,7 +452,7 @@ local compiler_index = {
 			if not fn then
 				error("Unknown op: "..tostring(node[1]))
 			end
-			return fn(self, node, ...)
+			return fn(self, node, return_value, ...)
 		end
 
 		return node

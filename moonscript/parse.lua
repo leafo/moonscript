@@ -191,6 +191,23 @@ local build_grammar = wrap(function()
 		return stm
 	end
 
+	local function wrap_decorator(stm, dec)
+		if not dec then return stm end
+
+		local arg = {stm, dec}
+
+		if dec[1] == "if" then
+			local _, cond, fail = unpack(dec)
+			if fail then fail = {"else", {fail}} end
+			stm = {"if", cond, {stm}, fail}
+		elseif dec[1] == "comprehension" then
+			local _, clauses = unpack(dec)
+			stm = {"comprehension", stm, clauses}
+		end
+
+		return stm
+	end
+
 	local function check_lua_string(str, pos, right, left)
 		return #left == #right
 	end
@@ -201,8 +218,11 @@ local build_grammar = wrap(function()
 		Block = Ct(Line * (Break^1 * Line)^0),
 		Line = Cmt(Indent, check_indent) * Statement + _Space * Comment,
 
-		Statement = (Import + If + While + Exp * Space) *
-			(key"if" * Exp * (key"else" * Exp)^-1 * Space / mark"if")^-1 / wrap_if,
+		Statement = (Import + If + While + Exp * Space) * (
+				-- statement decorators
+				key"if" * Exp * (key"else" * Exp)^-1 * Space / mark"if" +
+				CompInner / mark"comprehension"
+			)^-1 / wrap_decorator,
 
 		Body = Break * InBlock + Ct(Statement),
 
@@ -225,7 +245,9 @@ local build_grammar = wrap(function()
 			Ct((key"for" * Ct(NameList) * key"in" * Exp / mark"for") * CompClause^0) *
 			sym"]" / mark"comprehension",
 
-		CompClause = key"for" * Ct(NameList) * key"in" * Exp / mark"for" + key"when" * Exp / mark"when",
+		CompInner = Ct(CompFor * CompClause^0),
+		CompFor = key"for" * Ct(NameList) * key"in" * Exp / mark"for",
+		CompClause = CompFor + key"when" * Exp / mark"when",
 
 		Assign = Ct(AssignableList) * sym"=" * Ct(TableBlock + ExpList) / mark"assign",
 

@@ -24,16 +24,12 @@ local mm = (function()
     table.insert(tmp, self.x)
   end
   return tmp
-end)();
-(function()
-  local tmp = {}
-  for z in ipairs(items) do
-    if z > 4 then
-      table.insert(tmp, z)
-    end
-  end
-  return tmp
 end)()
+for z in ipairs(items) do
+  if z > 4 then
+    local _ = z
+  end
+end
 local rad = (function()
   local tmp = {}
   for a in ipairs({
@@ -49,18 +45,14 @@ local rad = (function()
     end
   end
   return tmp
-end)();
-(function()
-  local tmp = {}
-  for z in items do
-    for j in list do
-      if z > 4 then
-        table.insert(tmp, z)
-      end
+end)()
+for z in items do
+  for j in list do
+    if z > 4 then
+      _ = z
     end
   end
-  return tmp
-end)()
+end
 require("util")
 local dump = function(x) print(util.dump(x)) end
 local range = function(count)
@@ -103,3 +95,30 @@ local things = (function()
   end
   return tmp
 end)()
+for x in ipairs({ 1, 2, 4 }) do
+  for y in ipairs({ 1, 2, 3 }) do
+    if x ~= 2 then
+      print(x, y)
+    end
+  end
+end
+for x in items do
+  print("hello", x)
+end
+for x in x do
+  _ = x
+end
+local x = (function()
+  local tmp = {}
+  for x in x do
+    table.insert(tmp, x)
+  end
+  return tmp
+end)()
+for x in ipairs({ 1, 2, 4 }) do
+  for y in ipairs({ 1, 2, 3 }) do
+    if x ~= 2 then
+      print(x, y)
+    end
+  end
+end

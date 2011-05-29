@@ -71,8 +71,6 @@ x = -(function()
 end)()
 if cool then
   print("hello")
-else
-  _ = cool
 end
 print("nutjob")
 if hello then
@@ -81,7 +79,7 @@ end
 if cool then
   print("what")
 else
-  _ = cool
+  _ = whack
 end
 local arg = { ... }
 x = function(...) dump({ ... }) end
