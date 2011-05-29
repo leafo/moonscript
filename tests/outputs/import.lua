@@ -12,8 +12,8 @@ do
   master = _table_0.master
   ghost = moon.bind(_table_0.ghost, _table_0)
 end
-a = 3434
-local yumm = "hello"
+local yumm
+a, yumm = 3434, "hello"
 local _table_0 = 232
 local something
 do

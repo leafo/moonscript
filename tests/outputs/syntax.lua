@@ -12,11 +12,11 @@ end)
 local h = function() return hi end
 eat(function() end, world)
 local a = 1 + 2 * 3 / 6
-a = another
-local bunch, go, here = world
+local bunch, go, here
+a, bunch, go, here = another, world
 func(arg1, arg2, another, arg3)
-here = function() end
-local we = yeah
+local we
+here, we = function() end, yeah
 local the, different = function() return approach end, yeah
 dad()
 dad(lord)
@@ -29,8 +29,8 @@ hello(world(what(are(you(doing(here))))))
 what(the)[3243](world, yeck(heck))
 hairy[hands][are](gross)(okay(okay[world]));
 (get[something] + 5)[years]
-local i = 200
-x = 300
+local i
+i, x = 200, 300
 local yeah = (1 + 5) * 3
 yeah = ((1 + 5) * 3) / 2
 yeah = ((1 + 5) * 3) / 2 + i % 100

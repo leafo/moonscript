@@ -326,8 +326,8 @@ local compiler_index = {
 			local ln = node[i]
 			local value = self:stm(ln, return_value and i == len)
 			if type(value) == "table" then
-				for _, v in value do
-					table.insert(lines, value)
+				for _, v in ipairs(value) do
+					table.insert(lines, v)
 				end
 			else
 				table.insert(lines, value)
@@ -386,40 +386,28 @@ local compiler_index = {
 		local _, names, values = unpack(node)
 		local assigns, current = {}, nil
 
-		local function append(t, name, value)
-			if not current or t ~= current[1] then
-				current = {t, {name}, {value}}
-				table.insert(assigns, current)
-			else
-				table.insert(current[2], name)
-				table.insert(current[3], value)
-			end
-		end
-
-		for i, assignee in ipairs(names) do
-			local name_value = self:value(assignee)
-			local value = self:value(values[i])
-
-			if ntype(assignee) == "chain" or self:has_name(assignee) then
-				append("non-local", name_value, value)
-			else
-				append("local", name_value, value)
-			end
-
-			if type(assignee) == "string" then
-				self:put_name(assignee)
+		-- declare undeclared names
+		local undeclared_names = {}
+		for _, name in ipairs(names) do
+			if type(name) == "string" and not self:has_name(name) then
+				table.insert(undeclared_names, name)
+				self:put_name(name)
 			end
 		end
 
 		local lines = {}
-		for _, group in ipairs(assigns) do
-			local t, names, values = unpack(group)
-			if #values == 0 then values = {"nil"} end
-			local line = table.concat(names, ", ").." = "..table.concat(values, ", ")
-			table.insert(lines, t == "local" and "local "..line or line)
+		local num_undeclared = #undeclared_names
+		if num_undeclared > 0 and num_undeclared ~= #names then
+			table.insert(lines, "local "..table.concat(undeclared_names, ", "))
 		end
 
+		local ln = self:name_list(names)..  " = "..table.concat(self:values(values), ", ")
 
+		if num_undeclared == #names then
+			ln = "local "..ln
+		end
+
+		table.insert(lines, ln)
 		return self:pretty(lines)
 	end,
 
