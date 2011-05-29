@@ -1,5 +1,5 @@
 
-module("util", package.seeall)
+module("moonscript.util", package.seeall)
 
 -- shallow copy
 function clone(tbl)

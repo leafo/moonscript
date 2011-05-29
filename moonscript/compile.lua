@@ -1,7 +1,7 @@
 
 module("moonscript.compile", package.seeall)
-require "util"
 
+local util = require "moonscript.util"
 local data = require "moonscript.data"
 
 -- this doesn't work

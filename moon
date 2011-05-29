@@ -4,8 +4,7 @@ module("moonscript", package.seeall)
 
 require "moonscript.parse"
 require "moonscript.compile"
-
-require "util"
+require "moonscript.util"
 
 require "alt_getopt"
 

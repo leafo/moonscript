@@ -1,7 +1,8 @@
 
 module("moonscript.parse", package.seeall)
 
-require"util"
+local util = require"moonscript.util"
+
 require"lpeg"
 
 local compile = require"moonscript.compile"
