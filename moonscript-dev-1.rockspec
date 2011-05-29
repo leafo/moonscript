@@ -15,7 +15,8 @@ description = {
 dependencies = {
 	"lua >= 5.1",
 	"lpeg >= 0.10",
-	"alt-getopt >= 0.7"
+	"alt-getopt >= 0.7",
+	"luafilesystem >= 1.5"
 }
 
 build = {
@@ -28,7 +29,7 @@ build = {
 		["moonscript.util"] = "moonscript/util.lua",
 	},
 	install = {
-		bin = { "moon", }
+		bin = { "moon", "moonc" }
 	}
 }
 

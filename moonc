@@ -1,0 +1,223 @@
+#!/usr/bin/lua
+
+module("moonscript", package.seeall)
+
+require "moonscript.parse"
+require "moonscript.compile"
+require "moonscript.util"
+
+require "alt_getopt"
+require "lfs"
+
+local opts, ind = alt_getopt.get_opts(arg, "hwt:", { help = "h" })
+
+local help = [[Usage: %s [options] file...
+
+    -h          Print this message
+    -w          Watch file/directory
+    -t path     Specify where to place compiled files
+]]
+
+function print_help(err)
+	if err then print("Error: "..err) end
+	print(help:format(arg[0]))
+	os.exit()
+end
+
+function mkdir(path)
+	local chunks = util.split(path, "/")
+	local accum
+
+	for _, dir in ipairs(chunks) do
+		accum = accum and accum.."/"..dir or dir
+		lfs.mkdir(accum)
+	end
+
+	return lfs.attributes(path, "mode")
+end
+
+function normalize(path)
+	return path:match("(.-)/*$").."/"
+end
+
+function get_dir(fname)
+	return fname:match("^(.-)[^/]*$")
+end
+
+-- convert .moon to .lua
+function convert_path(path)
+	return (path:gsub("%.moon$", ".lua"))
+end
+
+function compile_file(from, to)
+	local f = io.open(from)
+	if not f then
+		return nil, "Can't find file"
+	end
+	local text = f:read("*a")
+
+	local tree, err = parse.string(text)
+	if not tree then
+		return nil, err
+	end
+
+	local code = compile.tree(tree)
+
+	mkdir(get_dir(to))
+	local out_f = io.open(to, "w")
+	if not out_f then
+		return nil, "Failed to write output: "..to
+	end
+	
+	out_f:write(code.."\n")
+
+	return true
+end
+
+function scan_directory(root, collected)
+	root = normalize(root)
+	collected = collected or {}
+
+	for fname in lfs.dir(root) do
+		if not fname:match("^%.") then 
+			local full_path = root..fname
+
+			if lfs.attributes(full_path, "mode") == "directory" then
+				scan_directory(full_path, collected)
+			end
+
+			if fname:match(".moon") then
+				table.insert(collected, full_path)
+			end
+		end
+	end
+
+	return collected
+end
+
+function append(a, b)
+	for _, v in ipairs(b) do
+		table.insert(a, v)
+	end
+end
+
+function remove_dups(tbl)
+	local hash = {}
+	local final = {}
+
+	for _, v in ipairs(tbl) do
+		if not hash[v] then
+			table.insert(final, v)
+			hash[v] = true
+		end
+	end
+
+	return final
+end
+
+function get_files(fname, files)
+	files = files or {}
+
+	if lfs.attributes(fname, "mode") == "directory" then
+		append(files, scan_directory(fname))
+	else
+		table.insert(files, "./"..fname)
+	end
+
+	return files
+end
+
+if opts.h then print_help() end
+
+local inputs = {}
+for i = ind, #arg do
+	table.insert(inputs, arg[i])
+end
+
+if #inputs == 0 then
+	print_help("No files specified")
+end
+
+local target_dir = "."
+if opts.t then
+	if mkdir(opts.t) ~= "directory" then
+		print_help("Invalid target dir")
+	end
+	target_dir = opts.t
+end
+
+target_dir = target_dir.."/"
+
+local files = {}
+for _, input in ipairs(inputs) do
+	get_files(input, files)
+end
+
+files = remove_dups(files)
+
+
+function dump(tbl)
+	local items = {}
+	for k,v in pairs(tbl) do
+		table.insert(items, ('%s="%s"'):format(k,v))
+	end
+	return "{ "..table.concat(items, ", ").." }"
+end
+
+if opts.w then
+	local inotify
+	if not pcall(function()
+		inotify = require "inotify"
+	end) then
+		print_help("inotify not installed")
+	end
+
+	local dirs = {}
+	for _, fname in ipairs(files) do
+		table.insert(dirs, get_dir(fname))
+	end
+	dirs = remove_dups(dirs)
+
+	print(("Starting watch loop, Ctrl-C to exit [%d dirs]"):format(#dirs))
+
+	local wd_table = {}
+	local handle = inotify:init()
+	for _, dir in ipairs(dirs) do
+		local wd = handle:addwatch(dir, inotify.IN_MODIFY)
+		wd_table[wd] = dir
+	end
+
+	while true do
+		local success, events = pcall(handle.read, handle)
+		if not success then
+			print"\nQuitting..."
+			break
+		end
+
+		if events then
+			for _, ev in ipairs(events) do
+				local fname = wd_table[ev.wd]..ev.name
+				local success, err = compile_file(fname, target_dir..convert_path(fname))
+
+				if not success then
+					print()
+					print("Error: "..fname)
+					print(err)
+					print()
+				else
+					print("Built", fname)
+				end
+			end
+		else break end
+	end
+else
+	for _, fname in ipairs(files) do
+		local success, err = compile_file(fname, target_dir..convert_path(fname))
+		if not success then
+			print(fname, err)
+			break
+		end
+	end
+end
+
+
