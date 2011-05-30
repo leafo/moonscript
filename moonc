@@ -70,6 +70,7 @@ function compile_file(from, to)
 	end
 	
 	out_f:write(code.."\n")
+	out_f:close()
 
 	return true
 end
@@ -197,15 +198,18 @@ if opts.w then
 		if events then
 			for _, ev in ipairs(events) do
 				local fname = wd_table[ev.wd]..ev.name
-				local success, err = compile_file(fname, target_dir..convert_path(fname))
+				if fname:match("%.moon$") then
+					local target = target_dir..convert_path(fname)
+					local success, err = compile_file(fname, target)
 
-				if not success then
-					print()
-					print("Error: "..fname)
-					print(err)
-					print()
-				else
-					print("Built", fname)
+					if not success then
+						print()
+						print("Error: "..fname)
+						print(err)
+						print()
+					else
+						print("Built", fname)
+					end
 				end
 			end
 		else break end
@@ -216,6 +220,8 @@ else
 		if not success then
 			print(fname, err)
 			break
+		else
+			print("Built", fname)
 		end
 	end
 end
