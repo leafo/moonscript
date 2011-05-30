@@ -14,3 +14,17 @@
 
 joop = 2345
 
+a, b = if hello
+  "hello"
+else
+  "nothing", "yeah"
+
+
+a, b = if hello
+  if yeah then "one", "two" else "mmhh"
+else
+  print "the other"
+  "nothing", "yeah"
+
+
+

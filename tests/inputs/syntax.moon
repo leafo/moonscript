@@ -26,7 +26,7 @@ a, bunch, go, here = another, world
 func arg1, arg2, another, arg3
 
 here, we = () ->, yeah
-the, different = () -> approach, yeah
+the, different = () -> approach; yeah
 
 dad()
 dad(lord)
@@ -131,5 +131,8 @@ y = not(5+5)
 y = #"hello"
 
 x = #{#{},#{1},#{1,2}}
+
+hello, world
+
 
 

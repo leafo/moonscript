@@ -11,3 +11,19 @@ local _ = function()
   end
 end
 local joop = 2345
+local a, b
+if hello then
+  a, b = "hello"
+else
+  a, b = "nothing", "yeah"
+end
+if hello then
+  if yeah then
+    a, b = "one", "two"
+  else
+    a, b = "mmhh"
+  end
+else
+  print("the other")
+  a, b = "nothing", "yeah"
+end

@@ -218,7 +218,7 @@ local build_grammar = wrap(function()
 		Block = Ct(Line * (Break^1 * Line)^0),
 		Line = Cmt(Indent, check_indent) * Statement + _Space * Comment,
 
-		Statement = (Import + If + While + Exp * Space) * (
+		Statement = (Import + If + While + Ct(ExpList) / flatten_or_mark"explist" * Space) * (
 				-- statement decorators
 				key"if" * Exp * (key"else" * Exp)^-1 * Space / mark"if" +
 				CompInner / mark"comprehension"
@@ -249,7 +249,7 @@ local build_grammar = wrap(function()
 		CompFor = key"for" * Ct(NameList) * key"in" * Exp / mark"for",
 		CompClause = CompFor + key"when" * Exp / mark"when",
 
-		Assign = Ct(AssignableList) * sym"=" * Ct(TableBlock + ExpList) / mark"assign",
+		Assign = Ct(AssignableList) * sym"=" * (Ct(TableBlock + ExpListLow) + If) / mark"assign",
 
 		-- we can ignore precedence for now
 		OtherOps = op"or" + op"and" + op"<=" + op">=" + op"~=" + op"!=" + op"==" + op".." + op"<" + op">",
@@ -324,7 +324,8 @@ local build_grammar = wrap(function()
 			(Body + Ct"") / mark"fndef",
 
 		NameList = Name * (sym"," * Name)^0,
-		ExpList = Exp * (sym"," * Exp)^0
+		ExpList = Exp * (sym"," * Exp)^0,
+		ExpListLow = Exp * ((sym"," + sym";") * Exp)^0,
 	}
 
 	return {

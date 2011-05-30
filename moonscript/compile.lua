@@ -44,7 +44,10 @@ local moonlib = {
 }
 
 -- these are always expressions, never statements, must be sent into temp variable
-local must_return = data.Set{ 'parens', 'exp', 'value', 'string', 'table', 'fndef' }
+local must_return = data.Set{ 'parens', 'exp', 'value', 'string', 'table', 'fndef', 'explist' }
+
+-- these can't return a value, and must be munged
+local block_statements = data.Set{ 'if' }
 
 -- make sure there are no block levels statements in expression
 local function validate_expression(block)
@@ -324,7 +327,7 @@ local compiler_index = {
 		local len = #node
 		for i=1,len do
 			local ln = node[i]
-			local value = self:stm(ln, return_value and i == len)
+			local value = self:stm(ln, i == len and return_value)
 			if type(value) == "table" then
 				for _, v in ipairs(value) do
 					table.insert(lines, v)
@@ -384,7 +387,6 @@ local compiler_index = {
 
 	assign = function(self, node)
 		local _, names, values = unpack(node)
-		local assigns, current = {}, nil
 
 		-- declare undeclared names
 		local undeclared_names = {}
@@ -395,19 +397,26 @@ local compiler_index = {
 			end
 		end
 
+		local compact = not block_statements[ntype(values)] and #undeclared_names == #names
+
 		local lines = {}
 		local num_undeclared = #undeclared_names
-		if num_undeclared > 0 and num_undeclared ~= #names then
+		if num_undeclared > 0 and not compact then
 			table.insert(lines, "local "..table.concat(undeclared_names, ", "))
 		end
 
-		local ln = self:name_list(names)..  " = "..table.concat(self:values(values), ", ")
+		if block_statements[ntype(values)] then
+			table.insert(lines, self:stm(values, self:name_list(names)))
+		else
+			local ln = self:name_list(names).." = "..table.concat(self:values(values), ", ")
 
-		if num_undeclared == #names then
-			ln = "local "..ln
+			if compact then
+				ln = "local "..ln
+			end
+
+			table.insert(lines, ln)
 		end
 
-		table.insert(lines, ln)
 		return self:pretty(lines)
 	end,
 
@@ -432,6 +441,14 @@ local compiler_index = {
 		return delim..inner..(delim_end or delim)
 	end,
 
+	explist = function(self, node)
+		local values = {}
+		for i=2,#node do
+			table.insert(values, self:value(node[i]))
+		end
+		return table.concat(values, ", ")
+	end,
+
 	value = function(self, node, return_value, ...)
 		if return_value == nil then return_value = true end
 
@@ -452,7 +469,12 @@ local compiler_index = {
 
         if must_return[ntype(node)] then
 			if return_value then
-				return "return "..value
+				local return_to = "return"
+				if type(return_value) == "string" then
+					return_to = return_value.." ="
+				end
+
+				return return_to.." "..value
 			else
 				return self:value({"assign", {"_"}, {value}}, false)
 			end

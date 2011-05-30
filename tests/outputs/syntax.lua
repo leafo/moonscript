@@ -87,3 +87,4 @@ x = not true
 local y = not (5 + 5)
 y = #"hello"
 x = #{ #{  }, #{ 1 }, #{ 1, 2 } }
+_ = hello, world

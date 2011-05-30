@@ -50,13 +50,16 @@ local function run_file(name, benchmark)
 	if benchmark then parse_time = gettime() - start_parse end
 
 	if not tree then
-		error("Compile error in "..name.."\n"..err)
+		error("Parse error in "..name.."\n"..err)
 	end
 
 	local start_compile
 	if benchmark then start_compile = gettime() end
 
-	local code = compile.tree(tree)
+	local success, code = pcall(compile.tree, tree)
+	if not success then
+		error("Compile error in"..name..":\n"..code)
+	end
 
 	if benchmark then
 		local compile_time = gettime() - start_compile
