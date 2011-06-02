@@ -12,14 +12,9 @@ local data = require "moonscript.data"
 -- })
 
 local map, bind, itwos = util.map, util.bind, util.itwos
-local Stack = data.Stack
+local Stack, ntype = data.Stack, data.ntype
 
 local indent_char = "  "
-
-function ntype(node)
-	if type(node) ~= "table" then return "value" end
-	return node[1]
-end
 
 -- number of newlines in string
 local function num_lines(str)

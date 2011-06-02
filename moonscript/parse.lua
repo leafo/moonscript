@@ -5,11 +5,10 @@ local util = require"moonscript.util"
 
 require"lpeg"
 
-local compile = require"moonscript.compile"
 local dump = require"moonscript.dump"
 local data = require"moonscript.data"
 
-local ntype = compile.ntype
+local ntype = data.ntype
 local trim = util.trim
 
 local Stack = data.Stack

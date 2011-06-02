@@ -37,3 +37,9 @@ function Set(items)
 	return self
 end
 
+-- find out the type of a node
+function ntype(node)
+	if type(node) ~= "table" then return "value" end
+	return node[1]
+end
+
