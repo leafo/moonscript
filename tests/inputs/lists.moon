@@ -39,3 +39,13 @@ x = [x for x in x]
 
 print x,y for x in ipairs{1,2,4} for y in ipairs{1,2,3} when x != 2
 
+double = [x*2 for x in *items]
+
+print x for x in *double
+
+cut = [x for x in *items when x > 3]
+
+hello = [x + y for x in *items for y in *items]
+
+print z for z in *hello
+

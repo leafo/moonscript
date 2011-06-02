@@ -122,3 +122,46 @@ for x in ipairs({ 1, 2, 4 }) do
     end
   end
 end
+local double = (function()
+  local tmp = {}
+  local _items_0 = items
+  for _index_0=1,#_items_0 do
+    local x = _items_0[_index_0]
+    table.insert(tmp, x * 2)
+  end
+  return tmp
+end)()
+local _items_0 = double
+for _index_0=1,#_items_0 do
+  local x = _items_0[_index_0]
+  print(x)
+end
+local cut = (function()
+  local tmp = {}
+  local _items_0 = items
+  for _index_0=1,#_items_0 do
+    local x = _items_0[_index_0]
+    if x > 3 then
+      table.insert(tmp, x)
+    end
+  end
+  return tmp
+end)()
+local hello = (function()
+  local tmp = {}
+  local _items_1 = items
+  for _index_1=1,#_items_1 do
+    local x = _items_1[_index_1]
+    local _items_0 = items
+    for _index_0=1,#_items_0 do
+      local y = _items_0[_index_0]
+      table.insert(tmp, x + y)
+    end
+  end
+  return tmp
+end)()
+local _items_0 = hello
+for _index_0=1,#_items_0 do
+  local z = _items_0[_index_0]
+  print(z)
+end

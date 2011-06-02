@@ -281,16 +281,33 @@ local compiler_index = {
 			and { ("table.insert(tmp, %s)"):format(self:value(exp)) }
 			or { self:stm(exp) }
 
+		self:push()
 		for i = #clauses,1,-1 do
 			local c = clauses[i]
 
 			if "for" == c[1] then
 				local _, names, iter = unpack(c)
-				action = {
-					("for %s in %s do"):format(self:name_list(names), self:value(iter)),
-					action,
-					"end"
-				}
+				if ntype(iter) == "unpack" then
+					iter = iter[2]
+					local items_tmp, index_tmp = self:get_free_name("items"), self:get_free_name("index")
+
+					self:put_name(items_tmp)
+					self:put_name(index_tmp)
+
+					action = {
+						("local %s = %s"):format(items_tmp, self:value(iter)),
+						("for %s=1,#%s do"):format(index_tmp, items_tmp),
+						{("local %s = %s[%s]"):format(self:name_list(names), items_tmp, index_tmp)},
+						action,
+						"end"
+					}
+				else
+					action = {
+						("for %s in %s do"):format(self:name_list(names), self:value(iter)),
+						action,
+						"end"
+					}
+				end
 			elseif "when" == c[1] then
 				local _, when = unpack(c)
 				action = {
@@ -302,6 +319,7 @@ local compiler_index = {
 				error("Unknown clause type :"..tostring(c[1]))
 			end
 		end
+		self:pop()
 
 		if return_value then
 			return self:pretty{
