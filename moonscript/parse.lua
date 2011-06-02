@@ -26,6 +26,8 @@ end
 local R, S, V, P = lpeg.R, lpeg.S, lpeg.V, lpeg.P
 local C, Ct, Cmt, Cg, Cb, Cc = lpeg.C, lpeg.Ct, lpeg.Cmt, lpeg.Cg, lpeg.Cb, lpeg.Cc
 
+lpeg.setmaxstack(3000)
+
 local White = S" \t\n"^0
 local _Space = S" \t"^0
 local Break = S"\n"
@@ -159,7 +161,7 @@ local build_grammar = wrap(function()
 
 
 	-- makes sure the last item in a chain is an index
-	local _assignable = { index = true, dot = true}
+	local _assignable = { index = true, dot = true, slice = true }
 	local function check_assignable(str, pos, value)
 		if ntype(value) == "chain" and _assignable[ntype(value[#value])]
 			or type(value) == "string"
@@ -256,9 +258,12 @@ local build_grammar = wrap(function()
 
 		Assignable = Cmt(Chain, check_assignable) + Name,
 		AssignableList = Assignable * (sym"," * Assignable)^0,
-		Exp = Ct(Factor * (OtherOps * Factor)^0) / flatten_or_mark"exp",
-		Factor = Ct(Term * (FactorOp * Term)^0) / flatten_or_mark"exp",
-		Term = Ct(Value * (TermOp * Value)^0) / flatten_or_mark"exp",
+
+		Exp = Ct(Value * ((OtherOps + FactorOp + TermOp) * Value)^0) / flatten_or_mark"exp",
+
+		-- Exp = Ct(Factor * (OtherOps * Factor)^0) / flatten_or_mark"exp",
+		-- Factor = Ct(Term * (FactorOp * Term)^0) / flatten_or_mark"exp",
+		-- Term = Ct(Value * (TermOp * Value)^0) / flatten_or_mark"exp",
 
 		Value =
 			sym"-" * Exp / mark"minus" +
@@ -270,6 +275,7 @@ local build_grammar = wrap(function()
 			Ct(KeyValueList) / mark"table" +
 			Assign + FunLit + String +
 			(Chain + Callable) * Ct(ExpList^0) / flatten_func + Num,
+
 
 		String = Space * DoubleString + Space * SingleString + LuaString,
 		SingleString = simple_string("'"),
@@ -296,9 +302,12 @@ local build_grammar = wrap(function()
 
 		ChainItem = 
 			Invoke + 
+			Slice +
 			symx"[" * Exp/mark"index" * sym"]" +
 			symx"." * _Name/mark"dot" +
 			ColonCall,
+
+		Slice = symx"[" * Num * sym":" * Num * (sym":" * Num)^-1 *sym"]" / mark"slice",
 
 		ColonCall = symx":" * (_Name * Invoke) / mark"colon",
 		Invoke = FnArgs/mark"call" +

@@ -18,6 +18,20 @@ function map(tbl, fn)
 	return out
 end
 
+function every(tbl, fn)
+	for i=1,#tbl do
+		local pass
+		if fn then
+			pass = fn(tbl[i])
+		else
+			pass = tbl[i]
+		end
+
+		if not pass then return false end
+	end
+	return true
+end
+
 function bind(obj, name)
 	return function(...)
 		return obj[name](obj, ...)
