@@ -88,3 +88,7 @@ local y = not (5 + 5)
 y = #"hello"
 x = #{ #{  }, #{ 1 }, #{ 1, 2 } }
 _ = hello, world
+something:hello(what)(a, b)
+something:hello(what)
+something.hello:world(a, b)
+something.hello:world(1, 2, 3)(a, b)

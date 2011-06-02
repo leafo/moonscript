@@ -148,7 +148,15 @@ local build_grammar = wrap(function()
 
 		args = {"call", args}
 		if ntype(callee) == "chain" then
-			table.insert(callee, args)
+			-- check for colon stub that needs arguments
+			if ntype(callee[#callee]) == "colon_stub" then
+				local stub = callee[#callee]
+				stub[1] = "colon"
+				table.insert(stub, args)
+			else
+				table.insert(callee, args)
+			end
+
 			return callee
 		end
 
@@ -269,10 +277,11 @@ local build_grammar = wrap(function()
 			sym"not" * Exp / mark"not" +
 			TableLit +
 			Comprehension +
-			ColonChain +
+			ColonChain * Ct(ExpList^0) / flatten_func + -- have precedence over open table
 			Ct(KeyValueList) / mark"table" +
 			Assign + FunLit + String +
-			(Chain + Callable) * Ct(ExpList^0) / flatten_func + Num,
+			((Chain + Callable) * Ct(ExpList^0)) / flatten_func +
+			Num,
 
 
 		String = Space * DoubleString + Space * SingleString + LuaString,
@@ -293,10 +302,10 @@ local build_grammar = wrap(function()
 
 		-- chain that starts with colon expression (for precedence over table literal)
 		ColonChain = 
-			Callable * ColonCall * (ChainItem)^0 / mark"chain",
+			Callable * (ColonCall * (ChainItem)^0 + ColonSuffix) / mark"chain",
 
 		-- a list of funcalls and indexs on a callable
-		Chain = Callable * ChainItem^1 / mark"chain",
+		Chain = Callable * (ChainItem^1 * ColonSuffix^-1 + ColonSuffix) / mark"chain",
 
 		ChainItem = 
 			Invoke + 
@@ -308,6 +317,9 @@ local build_grammar = wrap(function()
 		Slice = symx"[" * Num * sym":" * Num * (sym":" * Num)^-1 *sym"]" / mark"slice",
 
 		ColonCall = symx":" * (_Name * Invoke) / mark"colon",
+
+		ColonSuffix = symx":" * _Name / mark"colon_stub",
+
 		Invoke = FnArgs/mark"call" +
 			SingleString / wrap_func_arg +
 			DoubleString / wrap_func_arg,

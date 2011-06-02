@@ -134,5 +134,8 @@ x = #{#{},#{1},#{1,2}}
 
 hello, world
 
-
+something:hello(what) a,b
+something:hello what
+something.hello:world a,b
+something.hello:world(1,2,3) a,b
 
