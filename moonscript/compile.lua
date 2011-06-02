@@ -140,6 +140,11 @@ local compiler_index = {
 			table.insert(actions, self:chain_item(node[i]))
 		end
 
+		-- self function calls operate on self
+		if ntype(callee) == "self" and node[3] and ntype(node[3]) == "call" then
+			callee[1] = "self_colon"
+		end
+
 		local callee_value = self:value(callee)
 		if ntype(callee) == "exp" then
 			callee_value = "("..callee_value..")"
@@ -520,6 +525,11 @@ local compiler_index = {
 	self = function(self, node)
 		local _, val = unpack(node)
 		return "self."..self:value(val)
+	end,
+
+	self_colon = function(self, node)
+		local _, val = unpack(node)
+		return "self:"..self:value(val)
 	end,
 
 	-- a list of values
