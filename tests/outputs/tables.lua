@@ -3,7 +3,7 @@ local backpack = {
     yeah = 200,
     they = function()
       print("hello")
-      yor_feet("small")
+      return yor_feet("small")
     end,
     pretty = hair,
     gold = hmm

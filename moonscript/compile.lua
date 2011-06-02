@@ -485,17 +485,18 @@ local compiler_index = {
     stm = function(self, node, return_value)
         local value = self:value(node, return_value)
 
-        if must_return[ntype(node)] then
-			if return_value then
-				local return_to = "return"
-				if type(return_value) == "string" then
-					return_to = return_value.." ="
-				end
+		local is_value = must_return[ntype(node)] 
+		local ret_chain = ntype(node) == "chain" and node[2] ~= "return"
 
-				return return_to.." "..value
-			else
-				return self:value({"assign", {"_"}, {value}}, false)
+		if return_value and (is_value or ret_chain) then
+			local return_to = "return"
+			if type(return_value) == "string" then
+				return_to = return_value.." ="
 			end
+
+			return return_to.." "..value
+		elseif is_value then
+			return self:value({"assign", {"_"}, {value}}, false)
         end
 
         return value

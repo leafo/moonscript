@@ -1,13 +1,13 @@
-local x = function() print(what) end
+local x = function() return print(what) end
 local _ = function() end
 _ = function()
   return function() return function() end end
 end
 go(to(the(barn)))
-open(function() the(function() return door end) end)
+open(function() return the(function() return door end) end)
 open(function()
   the(door)
-  local hello = function() my(func) end
+  local hello = function() return my(func) end
 end)
 local h = function() return hi end
 eat(function() end, world)
@@ -40,21 +40,21 @@ return(5 + function() return 4 + 2 end)
 return(5 + (function() return 4 end) + 2)
 print(5 + function()
   _ = 34
-  good(nads)
+  return good(nads)
 end)
 something('else', "ya")
 something('else')
 something("else")
 here(we)("go")[12123]
-local something = { test = 12323, what = function() print("hello world") end }
+local something = { test = 12323, what = function() return print("hello world") end }
 print(something.test)
 local frick = { hello = "world" }
 local argon = { num = 100, world = function(self)
     print(self.num)
-    return({ something = function() print("hi from something") end })
+    return({ something = function() return print("hi from something") end })
   end, somethin = function(self,str)
     print("string is", str)
-    return({ world = function(a,b) print("sum", a + b) end })
+    return({ world = function(a,b) return print("sum", a + b) end })
   end }
 something.what()
 argon:world().something()
@@ -82,7 +82,7 @@ else
   _ = whack
 end
 local arg = { ... }
-x = function(...) dump({ ... }) end
+x = function(...) return dump({ ... }) end
 x = not true
 local y = not (5 + 5)
 y = #"hello"
