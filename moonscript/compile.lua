@@ -416,6 +416,13 @@ local compiler_index = {
 		end
 
 		local compact = not block_statements[ntype(values)] and #undeclared_names == #names
+		-- if there is an fndef in there, don't do compact
+		for _, v in ipairs(values) do
+			if ntype(v) == "fndef" then
+				compact = false
+				break
+			end
+		end
 
 		local lines = {}
 		local num_undeclared = #undeclared_names

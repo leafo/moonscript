@@ -1,4 +1,5 @@
-local x = function() return print(what) end
+local x
+x = function() return print(what) end
 local _ = function() end
 _ = function()
   return function() return function() end end
@@ -7,9 +8,11 @@ go(to(the(barn)))
 open(function() return the(function() return door end) end)
 open(function()
   the(door)
-  local hello = function() return my(func) end
+  local hello
+  hello = function() return my(func) end
 end)
-local h = function() return hi end
+local h
+h = function() return hi end
 eat(function() end, world)
 local a = 1 + 2 * 3 / 6
 local bunch, go, here
@@ -17,7 +20,8 @@ a, bunch, go, here = another, world
 func(arg1, arg2, another, arg3)
 local we
 here, we = function() end, yeah
-local the, different = function() return approach end, yeah
+local the, different
+the, different = function() return approach end, yeah
 dad()
 dad(lord)
 hello(one, two)();
