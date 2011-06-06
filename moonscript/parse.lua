@@ -178,7 +178,7 @@ local build_grammar = wrap(function()
 		return false
 	end
 
-	local Name = sym"@" * Name / mark"self" + Name + "..."
+	local Name = sym"@" * Name / mark"self" + Name + Space * "..." / trim
 
 	-- make sure name is not a keyword
 	local Name = Cmt(Name, function(str, pos, name)

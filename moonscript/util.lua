@@ -47,6 +47,14 @@ function itwos(seq)
 	end)
 end
 
+function reversed(seq)
+	return coroutine.wrap(function()
+		for i=#seq,1,-1 do
+			coroutine.yield(i, seq[i])
+		end
+	end)
+end
+
 function dump(what)
 	local seen = {}
 	local function _dump(what, depth)
