@@ -3,9 +3,10 @@ module "moonscript.compile", package.seeall
 
 util = require "moonscript.util"
 data = require "moonscript.data"
+dump = require "moonscript.dump"
 
 import map, bind, itwos, every, reversed from util
-import Stack, ntype from data
+import Stack, Set, ntype from data
 import concat, insert from table
 
 indent_char = "  "
@@ -23,6 +24,8 @@ moonlib =
   bind: (tbl, name) ->
     concat {"moon.bind(", tbl, ".", name, ", ", tbl, ")"}
 
+cascading = Set{ "if" }
+
 line_compile =
   assign: (node) =>
     _, names, values = unpack node
@@ -32,13 +35,26 @@ line_compile =
     @put_name name for name in *undeclared
 
     declare = "local "..(concat undeclared, ", ")
-    values = concat [@value v for v in *values], ", "
 
-    if #undeclared == #names
-      @add_line declare..' = '..values
-    else
+    if @is_stm values
       @add_line declare if #undeclared > 0
-      @add_line concat([@value n for n in *names], ", ").." = "..values
+      if cascading[ntype(values)]
+        decorate = (value) ->
+          {"assign", names, {value}}
+
+        @stm values, decorate
+      else
+        @add_line concat([@value n for n in *names], ", ").." = "..@value values
+    else
+      values = concat [@value v for v in *values], ", "
+      if #undeclared == #names
+        @add_line declare..' = '..values
+      else
+        @add_line declare if #undeclared > 0
+        @add_line concat([@value n for n in *names], ", ").." = "..values
+
+  ["return"]: (node) =>
+    @add_line "return", @value node[2]
 
   ["import"]: (node) =>
     _, names, source = unpack node
@@ -81,7 +97,7 @@ line_compile =
 
     @add_line "end"
 
-  ["if"]: (node) =>
+  ["if"]: (node, ret) =>
     cond, block = node[2], node[3]
 
     add_clause = (clause) ->
@@ -94,13 +110,13 @@ line_compile =
         clause[3]
 
       b = @block()
-      b:stms block
+      b:stms block, ret
       @add_line b:render()
 
     @add_line "if", (@value cond), "then"
 
     b = @block()
-    b:stms block
+    b:stms block, ret
     @add_line b:render()
 
     add_clause cond for i, cond in ipairs node when i > 3
@@ -167,7 +183,6 @@ line_compile =
 
     render_clause action, clause for i, clause in reversed clauses
 
-    -- do this in a do end? probably a good idea
     @add_lines action._lines -- do this better?
 
 value_compile =
@@ -189,6 +204,11 @@ value_compile =
   string: (node) =>
     _, delim, inner, delim_end = unpack node
     delim..inner..(delim_end or delim)
+
+  ["if"]: (node) =>
+    func = @block()
+    func:stm node, (exp) -> {"return", exp}
+    @format "(function()", func:render(), "end)()"
 
   comprehension: (node) =>
     exp = node[2]
@@ -239,7 +259,7 @@ value_compile =
 
     b = @block()
     b:put_name name for name in *args
-    b:stms block
+    b:ret_stms block
 
     decl = "function("..(concat args, ", ")..")"
     if #b._lines == 0
@@ -354,12 +374,19 @@ B =
   block: (node) =>
     Block(self)
 
+  is_stm: (node) =>
+    line_compile[ntype node] != nil
+
+  is_value: (node) =>
+    t = ntype node
+    value_compile[t] != nil or t == "value"
+
   -- line wise compile functions
   name: (node) => @value node
   value: (node, ...) =>
     return tostring node if type(node) != "table"
     fn = value_compile[node[1]]
-    error "Failed to compile value: "..node[1] if not fn
+    error "Failed to compile value: "..dump.value node if not fn
     fn self, node, ...
 
   values: (values, delim) =>
@@ -374,8 +401,33 @@ B =
     out = fn self, node, ...
     @add_line out if out
 
-  stms: (stms) =>
-    @stm stm for stm in *stms
+  ret_stms: (stms, ret) =>
+    if not ret
+      ret = (exp) -> {"return", exp}
+
+    -- wow I really need a for loop
+    i = 1
+    while i < #stms
+      @stm stms[i]
+      i = i + 1
+
+    if stms[i]
+      if cascading[ntype(stms[i])]
+        @stm stms[i], ret
+      else
+        line = ret stms[i]
+        if @is_stm line
+          @stm line
+        else
+          @stm strms[i]
+
+    nil
+
+  stms: (stms, ret) =>
+    if ret
+      @ret_stms stms, ret
+    else
+      @stm stm for stm in *stms
     nil
 
 block_t.__index = B

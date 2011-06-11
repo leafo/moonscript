@@ -14,6 +14,10 @@ local function flat_value(op, depth)
 	return "{"..table.concat(items, ", ").."}"
 end
 
+function value(op)
+	return flat_value(op)
+end
+
 function tree(block, depth)
 	depth = depth or 0
 	for _, op in ipairs(block) do
