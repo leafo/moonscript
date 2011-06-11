@@ -26,6 +26,13 @@ moonlib =
 
 cascading = Set{ "if" }
 
+-- does this always return a value
+has_value = (node) ->
+  if ntype(node) == "chain"
+    ntype(node[#node]) != "call"
+  else
+    true
+
 line_compile =
   assign: (node) =>
     _, names, values = unpack node
@@ -394,12 +401,16 @@ B =
     concat [@value v for v in *values], delim
 
   stm: (node, ...) =>
-    fn = line_compile[node[1]]
+    fn = line_compile[ntype(node)]
     if not fn
-        return @stm {"assign", {"_"}, {node}}
-
-    out = fn self, node, ...
-    @add_line out if out
+      -- coerce value into statement
+      if has_value node
+        @stm {"assign", {"_"}, {node}}
+      else
+        @add_line @value node
+    else
+      out = fn self, node, ...
+      @add_line out if out
 
   ret_stms: (stms, ret) =>
     if not ret
@@ -411,15 +422,20 @@ B =
       @stm stms[i]
       i = i + 1
 
-    if stms[i]
-      if cascading[ntype(stms[i])]
-        @stm stms[i], ret
-      else
+    last_exp = stms[i]
+
+    if last_exp
+      if cascading[ntype(last_exp)]
+        @stm last_exp, ret
+      elseif @is_value last_exp
         line = ret stms[i]
         if @is_stm line
           @stm line
         else
-          @stm strms[i]
+          error "got a value from implicit return"
+      else
+        -- nothing we can do with a statement except show it
+        @stm last_exp
 
     nil
 
