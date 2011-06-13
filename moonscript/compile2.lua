@@ -61,6 +61,7 @@ local moonlib = { bind = function(tbl, name) return concat({
       ")"
     }) end }
 local cascading = Set({ "if" })
+local non_atomic = Set({ "update" })
 local has_value
 has_value = function(node)
   if ntype(node) == "chain" then
@@ -70,6 +71,8 @@ has_value = function(node)
     return true
   end
 end
+local is_non_atomic
+is_non_atomic = function(node) return non_atomic[ntype(node)] end
 local line_compile = {
   assign = function(self, node)
     local _, names, values = unpack(node)
@@ -145,7 +148,21 @@ local line_compile = {
       end
     end
   end,
+  update = function(self, node)
+    local _, name, op, exp = unpack(node)
+    local op_final = op:match("(.)=")
+    if not op_final then
+      _ = error("unknown op: ") .. op
+    end
+    return self:stm({ "assign", { name }, { {
+          "exp",
+          name,
+          op_final,
+          exp
+        } } })
+  end,
   ["return"] = function(self, node) return self:add_line("return", self:value(node[2])) end,
+  ["break"] = function(self, node) return self:add_line("break") end,
   ["import"] = function(self, node)
     local _, names, source = unpack(node)
     local to_bind = {  }
@@ -237,8 +254,13 @@ local line_compile = {
   end,
   ["while"] = function(self, node)
     local _, cond, block = unpack(node)
-    self:add_line("while", self:value(cond), "do")
     local inner = self:block()
+    if is_non_atomic(cond) then
+      self:add_line("while", "true", "do")
+      inner:stm({ "if", { "not", cond }, { { "break" } } })
+    else
+      self:add_line("while", self:value(cond), "do")
+    end
     inner:stms(block)
     self:add_line(inner:render())
     return self:add_line("end")
@@ -314,6 +336,11 @@ local value_compile = {
       end
       return _moon_0
     end)(), " ")
+  end,
+  update = function(self, node)
+    local _, name = unpack(node)
+    self:stm(node)
+    return self:name(name)
   end,
   explist = function(self, node) return concat((function()
       local _moon_0 = {}

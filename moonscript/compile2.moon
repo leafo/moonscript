@@ -43,6 +43,9 @@ moonlib =
 
 cascading = Set{ "if" }
 
+-- an action that can't be completed in a single line
+non_atomic = Set{ "update" }
+
 -- does this always return a value
 has_value = (node) ->
   if ntype(node) == "chain"
@@ -50,6 +53,9 @@ has_value = (node) ->
     ctype != "call" and ctype != "colon"
   else
     true
+
+is_non_atomic = (node) ->
+  non_atomic[ntype(node)]
 
 line_compile =
   assign: (node) =>
@@ -89,8 +95,17 @@ line_compile =
         @add_line declare if #undeclared > 0
         @add_line concat([@value n for n in *names], ", ").." = "..values
 
+  update: (node) =>
+    _, name, op, exp = unpack node
+    op_final = op:match"(.)="
+    error"unknown op: "..op if not op_final
+    @stm {"assign", {name}, {{"exp", name, op_final, exp}}}
+
   ["return"]: (node) =>
     @add_line "return", @value node[2]
+
+  ["break"]: (node) =>
+    @add_line "break"
 
   ["import"]: (node) =>
     _, names, source = unpack node
@@ -162,8 +177,13 @@ line_compile =
   ["while"]: (node) =>
     _, cond, block = unpack node
 
-    @add_line "while", @value(cond), "do"
     inner = @block()
+    if is_non_atomic cond
+      @add_line "while", "true", "do"
+      inner:stm {"if", {"not", cond}, {{"break"}}}
+    else
+      @add_line "while", @value(cond), "do"
+
     inner:stms block
 
     @add_line inner:render()
@@ -230,6 +250,11 @@ value_compile =
 
     -- ugly
     concat [_comp i,v for i,v in ipairs node when i > 1], " "
+
+  update: (node) =>
+    _, name = unpack node
+    @stm node
+    @name name
 
   explist: (node) =>
     concat [@value v for i,v in ipairs node when i > 1], ", "

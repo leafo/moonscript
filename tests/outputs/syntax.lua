@@ -95,3 +95,9 @@ something:hello(what)(a, b)
 something:hello(what)
 something.hello:world(a, b)
 something.hello:world(1, 2, 3)(a, b)
+x = 1232
+x = x + 10 + 3
+local j = j - "hello"
+y = y * 2
+y = y / 100
+local m = m % 2

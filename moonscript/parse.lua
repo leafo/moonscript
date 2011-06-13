@@ -227,7 +227,7 @@ local build_grammar = wrap(function()
 		Block = Ct(Line * (Break^1 * Line)^0),
 		Line = Cmt(Indent, check_indent) * Statement + _Space * Comment,
 
-		Statement = (Import + If + While + Ct(ExpList) / flatten_or_mark"explist" * Space) * (
+		Statement = (Import + While + BreakLoop + Ct(ExpList) / flatten_or_mark"explist" * Space) * (
 				-- statement decorators
 				key"if" * Exp * (key"else" * Exp)^-1 * Space / mark"if" +
 				CompInner / mark"comprehension"
@@ -244,6 +244,8 @@ local build_grammar = wrap(function()
 
 		NameList = Name * (sym"," * Name)^0,
 
+		BreakLoop = Ct(key"break"/trim),
+
 		If = key"if" * Exp * key"then"^-1 * Body *
 			((Break * Cmt(Indent, check_indent))^-1 * key"elseif" * Exp * key"then"^-1 * Body / mark"elseif")^0 *
 			((Break * Cmt(Indent, check_indent))^-1 * key"else" * Body / mark"else")^-1 / mark"if",
@@ -256,7 +258,8 @@ local build_grammar = wrap(function()
 		CompFor = key"for" * Ct(NameList) * key"in" * (sym"*" * Exp / mark"unpack" + Exp) / mark"for",
 		CompClause = CompFor + key"when" * Exp / mark"when",
 
-		Assign = Ct(AssignableList) * sym"=" * (Ct(TableBlock + ExpListLow) + If) / mark"assign",
+		Assign = Ct(AssignableList) * sym"=" * (If + Ct(TableBlock + ExpListLow)) / mark"assign",
+		Update = Assignable * ((sym"+=" + sym"-=" + sym"*=" + sym"/=" + sym"%=")/trim) * Exp / mark"update",
 
 		-- we can ignore precedence for now
 		OtherOps = op"or" + op"and" + op"<=" + op">=" + op"~=" + op"!=" + op"==" + op".." + op"<" + op">",
@@ -271,6 +274,7 @@ local build_grammar = wrap(function()
 		-- Term = Ct(Value * (TermOp * Value)^0) / flatten_or_mark"exp",
 
 		Value =
+			If +
 			sym"-" * Exp / mark"minus" +
 			sym"#" * Exp / mark"length" +
 			sym"not" * Exp / mark"not" +
@@ -278,7 +282,7 @@ local build_grammar = wrap(function()
 			Comprehension +
 			ColonChain * Ct(ExpList^0) / flatten_func + -- have precedence over open table
 			Ct(KeyValueList) / mark"table" +
-			Assign + FunLit + String +
+			Assign + Update + FunLit + String +
 			((Chain + Callable) * Ct(ExpList^0)) / flatten_func +
 			Num,
 

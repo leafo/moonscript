@@ -139,3 +139,11 @@ something:hello what
 something.hello:world a,b
 something.hello:world(1,2,3) a,b
 
+x = 1232
+x += 10 + 3
+j -= "hello"
+y *= 2
+y /= 100
+m %= 2
+
+
