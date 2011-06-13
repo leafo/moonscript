@@ -265,6 +265,15 @@ local line_compile = {
     self:add_line(inner:render())
     return self:add_line("end")
   end,
+  ["for"] = function(self, node)
+    local _, name, bounds, block = unpack(node)
+    bounds = self:value({ "explist", unpack(bounds) })
+    self:add_line("for", self:name(name), "=", bounds, "do")
+    local inner = self:block()
+    inner:stms(block)
+    self:add_line(inner:render())
+    return self:add_line("end")
+  end,
   comprehension = function(self, node, action)
     local _, exp, clauses = unpack(node)
     if not action then

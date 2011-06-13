@@ -147,3 +147,6 @@ y /= 100
 m %= 2
 
 
+x = 0
+(if ntype(v) == "fndef" then x += 1) for v in *values
+

@@ -189,6 +189,15 @@ line_compile =
     @add_line inner:render()
     @add_line "end"
 
+  ["for"]: (node) =>
+    _, name, bounds, block = unpack node
+    bounds = @value {"explist", unpack bounds}
+    @add_line "for", @name(name), "=", bounds, "do"
+    inner = @block()
+    inner:stms block
+    @add_line inner:render()
+    @add_line "end"
+
   comprehension: (node, action) =>
     _, exp, clauses = unpack node
 
