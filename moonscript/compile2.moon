@@ -18,7 +18,24 @@ pretty = (lines, indent) ->
     else
       line
 
-  concat [render line for line in *lines], "\n"..indent
+  lines = [render line for line in *lines]
+
+  -- add semicolons for ambiguities
+  fix = (i, left, k, right) ->
+    if left:sub(-1) == ")" and right:sub(1,1) == "("
+      lines[i] = lines[i]..";"
+  fix(i,l, k,r) for i,l,k,r in itwos lines
+
+  concat lines, "\n"..indent
+
+returner = (exp) ->
+  if ntype(exp) == "chain" and exp[2] == "return"
+    -- extract the return
+    items = {"explist"}
+    insert items, v for v in *exp[3][2]
+    {"return", items}
+  else
+    {"return", exp}
 
 moonlib =
   bind: (tbl, name) ->
@@ -29,7 +46,8 @@ cascading = Set{ "if" }
 -- does this always return a value
 has_value = (node) ->
   if ntype(node) == "chain"
-    ntype(node[#node]) != "call"
+    ctype = ntype(node[#node])
+    ctype != "call" and ctype != "colon"
   else
     true
 
@@ -53,8 +71,19 @@ line_compile =
       else
         @add_line concat([@value n for n in *names], ", ").." = "..@value values
     else
+      has_fndef = false
+      i = 1
+      while i <= #values
+        if ntype(values[i]) == "fndef"
+          has_fndef = true
+        i = i +1
+
+      -- need new compiler
+      -- (if ntype(v) == "fndef" then has_fndef = true) for v in *values
+
       values = concat [@value v for v in *values], ", "
-      if #undeclared == #names
+
+      if #undeclared == #names and not has_fndef
         @add_line declare..' = '..values
       else
         @add_line declare if #undeclared > 0
@@ -80,7 +109,7 @@ line_compile =
 
     get_value = (name) ->
       if to_bind[name]
-        moonlib.bind name, source
+        moonlib.bind source, name
       else
         source.."."..name
 
@@ -133,7 +162,7 @@ line_compile =
   ["while"]: (node) =>
     _, cond, block = unpack node
 
-    @add_line "while "..@value cond
+    @add_line "while", @value(cond), "do"
     inner = @block()
     inner:stms block
 
@@ -195,7 +224,7 @@ line_compile =
 value_compile =
   exp: (node) =>
     _comp = (i, value) ->
-      if i % 1 == 1 and value == "!="
+      if i % 2 == 1 and value == "!="
         value = "~="
       @value value
 
@@ -214,7 +243,7 @@ value_compile =
 
   ["if"]: (node) =>
     func = @block()
-    func:stm node, (exp) -> {"return", exp}
+    func:stm node, returner
     @format "(function()", func:render(), "end)()"
 
   comprehension: (node) =>
@@ -279,6 +308,7 @@ value_compile =
   table: (node) =>
     _, items = unpack node
 
+    inner = @block() -- handle indent
     _comp = (i, tuple) ->
       out = if #tuple == 2
         key, value = unpack tuple
@@ -286,9 +316,9 @@ value_compile =
           ("[%s]"):format @value key
         else
           @value key
-        ("%s = %s"):format key, @value value
+        ("%s = %s"):format key, inner:value value
       else
-        @value tuple[1]
+        inner:value tuple[1]
 
       out.."," if i != #items else out
 
@@ -297,7 +327,7 @@ value_compile =
     if #values > 3
       @format "{", values, "}"
     else
-      "{ "..(concat values, " ").."}"
+      "{ "..(concat values, " ").." }"
 
   minus: (node) =>
     "-"..@value node[2]
@@ -414,7 +444,7 @@ B =
 
   ret_stms: (stms, ret) =>
     if not ret
-      ret = (exp) -> {"return", exp}
+      ret = returner
 
     -- wow I really need a for loop
     i = 1

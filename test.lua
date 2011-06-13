@@ -8,7 +8,11 @@ pcall(function()
 	gettime = socket.gettime
 end)
 
-local opts, ind = alt_getopt.get_opts(arg, "d:", { })
+require "moonscript.parse"
+require "moonscript.compile2"
+local parse, compile = moonscript.parse, moonscript.compile
+
+local opts, ind = alt_getopt.get_opts(arg, "qd:", { })
 
 local argv = {}
 for i = ind, #arg do table.insert(argv, arg[i]) end
@@ -16,6 +20,7 @@ for i = ind, #arg do table.insert(argv, arg[i]) end
 local action = table.remove(argv, 1) or "run"
 
 local diff_tool = opts.d or "diff"
+local quiet = opts.q
 
 local opts = {
 	in_dir = "tests/inputs",
@@ -37,8 +42,6 @@ local function run_file(name, benchmark)
 	name = input_name(name)
 	file_str = io.open(name):read("*a")
 
-	local parse = require "moonscript.parse"
-	local compile = require "moonscript.compile"
 
 
 	local start_parse
@@ -112,7 +115,10 @@ local actions = {
 					local tmp = io.open(tmp_name, "w")
 					tmp:write(result)
 					tmp:close()
-					print(diff(correct_fname, tmp_name))
+
+					if not quiet then
+						print(diff(correct_fname, tmp_name))
+					end
 					os.remove(tmp_name)
 					-- break
 				else

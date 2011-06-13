@@ -1,9 +1,8 @@
 local x
 x = function() return print(what) end
-local _ = function() end
-_ = function()
-  return function() return function() end end
-end
+local _
+_ = function() end
+_ = function() return function() return function() end end end
 go(to(the(barn)))
 open(function() return the(function() return door end) end)
 open(function()
@@ -31,8 +30,8 @@ fun(a)(b)
 fun(a)(b, bad(hello))
 hello(world(what(are(you(doing(here))))))
 what(the)[3243](world, yeck(heck))
-hairy[hands][are](gross)(okay(okay[world]));
-(get[something] + 5)[years]
+hairy[hands][are](gross)(okay(okay[world]))
+_ = (get[something] + 5)[years]
 local i
 i, x = 200, 300
 local yeah = (1 + 5) * 3
@@ -49,16 +48,16 @@ end)
 something('else', "ya")
 something('else')
 something("else")
-here(we)("go")[12123]
+_ = here(we)("go")[12123]
 local something = { test = 12323, what = function() return print("hello world") end }
 print(something.test)
 local frick = { hello = "world" }
 local argon = { num = 100, world = function(self)
     print(self.num)
-    return({ something = function() return print("hi from something") end })
-  end, somethin = function(self,str)
+    return { something = function() return print("hi from something") end }
+  end, somethin = function(self, str)
     print("string is", str)
-    return({ world = function(a,b) return print("sum", a + b) end })
+    return { world = function(a, b) return print("sum", a + b) end }
   end }
 something.what()
 argon:world().something()
@@ -67,11 +66,11 @@ x = -434
 x = -hello(world(one(two)))
 local hi = -"herfef"
 x = -(function()
-  local tmp = {}
+  local _moon_0 = {}
   for x in x do
-    table.insert(tmp, x)
+    table.insert(_moon_0, x)
   end
-  return tmp
+  return _moon_0
 end)()
 if cool then
   print("hello")
