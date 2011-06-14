@@ -227,7 +227,7 @@ local build_grammar = wrap(function()
 		Block = Ct(Line * (Break^1 * Line)^0),
 		Line = Cmt(Indent, check_indent) * Statement + _Space * Comment,
 
-		Statement = (Import + While + For + BreakLoop + Ct(ExpList) / flatten_or_mark"explist" * Space) * (
+		Statement = (Import + While + For + Export + BreakLoop + Ct(ExpList) / flatten_or_mark"explist" * Space) * (
 				-- statement decorators
 				key"if" * Exp * (key"else" * Exp)^-1 * Space / mark"if" +
 				CompInner / mark"comprehension"
@@ -340,6 +340,10 @@ local build_grammar = wrap(function()
 
 		TableBlock = Break * #Cmt(Indent, advance_indent) * TableBlockInner * OutBlock / mark"table",
 
+		ClassDecl = key"class" * Name * TableBlock / mark"class",
+
+		Export = key"export" * Ct(NameList) / mark"export",
+
 		KeyValue = Ct((Name + sym"[" * Exp * sym"]") * symx":" * (Exp + TableBlock)),
 		KeyValueList = KeyValue * (sym"," * KeyValue)^0,
 		KeyValueLine = Cmt(Indent, check_indent) * KeyValueList * sym","^-1,
@@ -371,7 +375,20 @@ local build_grammar = wrap(function()
 				end
 			end
 
-			local tree = self._g:match(str, ...)
+
+			local tree
+			local args = {...}
+			local pass, err = pcall(function()
+				tree = self._g:match(str, unpack(args))
+			end)
+
+			if not pass then
+				local line_no = pos_to_line(last_pos)
+				print("stopped at", line_no)
+				error(err)
+			end
+			
+
 			if not tree then
 				local line_no = pos_to_line(last_pos)
 				local line_str = get_line(line_no)
