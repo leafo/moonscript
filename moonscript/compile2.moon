@@ -61,10 +61,7 @@ line_compile =
   assign: (node) =>
     _, names, values = unpack node
 
-    undeclared = [name for name in *names when type(name) == "string" and not @has_name name]
-
-    @put_name name for name in *undeclared
-
+    undeclared = @declare names
     declare = "local "..(concat undeclared, ", ")
 
     if @is_stm values
@@ -197,6 +194,54 @@ line_compile =
     inner:stms block
     @add_line inner:render()
     @add_line "end"
+
+  ["class"]: (node) =>
+    _, name, table = unpack node
+    mt_name = "_"..name.."_mt"
+    @add_line "local", concat @declare({ name, mt_name }), ", "
+
+    constructor = nil
+    meta_methods = {}
+    final_properties = {}
+
+    overloaded_index = value
+
+    find_special = (name, value) ->
+      if name == "constructor"
+        constructor = value
+      elseif name:match("^__%a")
+        insert meta_methods, {name, value}
+        overloaded_index = value if name == "__index"
+      else
+        insert final_properties, {name, value}
+
+    find_special unpack entry for entry in *table[2]
+
+    if not overloaded_index
+      insert meta_methods, {"__index", {"table", final_properties}}
+
+    print util.dump constructor
+    print util.dump meta_methods
+    print util.dump final_properties
+
+    @stm {"assign", {mt_name}, {{"table", meta_methods}}}
+
+    -- synthesize constructor
+    if not constructor
+      constructor = {"fndef", {}, "slim", {}}
+
+    -- extract self arguments
+    self_args = {}
+    get_initializers = (arg) ->
+      if ntype(arg) == "self"
+        arg = arg[2]
+        insert self_args, arg
+      arg
+
+    constructor[2] = [get_initializers arg for arg in *constructor[2]]
+
+    print util.dump constructor
+    @stm {"assign", {name}, {constructor}}
 
   comprehension: (node, action) =>
     _, exp, clauses = unpack node
@@ -393,6 +438,11 @@ B =
   set_indent: (depth) =>
     @indent = depth
     @lead = indent_char:rep @indent
+
+  declare: (names) =>
+    undeclared = [name for name in *names when type(name) == "string" and not @has_name name]
+    @put_name name for name in *undeclared
+    undeclared
 
   put_name: (name) =>
     @_names[name] = true

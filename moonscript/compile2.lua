@@ -76,22 +76,7 @@ is_non_atomic = function(node) return non_atomic[ntype(node)] end
 local line_compile = {
   assign = function(self, node)
     local _, names, values = unpack(node)
-    local undeclared = (function()
-      local _moon_0 = {}
-      local _item_0 = names
-      for _index_0=1,#_item_0 do
-        local name = _item_0[_index_0]
-        if type(name) == "string" and not self:has_name(name) then
-          table.insert(_moon_0, name)
-        end
-      end
-      return _moon_0
-    end)()
-    local _item_0 = undeclared
-    for _index_0=1,#_item_0 do
-      local name = _item_0[_index_0]
-      self:put_name(name)
-    end
+    local undeclared = self:declare(names)
     local declare = "local " .. (concat(undeclared, ", "))
     if self:is_stm(values) then
       if #undeclared > 0 then
@@ -273,6 +258,68 @@ local line_compile = {
     inner:stms(block)
     self:add_line(inner:render())
     return self:add_line("end")
+  end,
+  ["class"] = function(self, node)
+    local _, name, table = unpack(node)
+    local mt_name = "_" .. name .. "_mt"
+    self:add_line("local", concat(self:declare({ name, mt_name }), ", "))
+    local constructor = nil
+    local meta_methods = {  }
+    local final_properties = {  }
+    local overloaded_index = value
+    local find_special
+    find_special = function(name, value)
+      if name == "constructor" then
+        constructor = value
+      elseif name:match("^__%a") then
+        insert(meta_methods, { name, value })
+        if name == "__index" then
+          overloaded_index = value
+        end
+      else
+        return insert(final_properties, { name, value })
+      end
+    end
+    local _item_0 = table[2]
+    for _index_0=1,#_item_0 do
+      local entry = _item_0[_index_0]
+      find_special(unpack(entry))
+    end
+    if not overloaded_index then
+      insert(meta_methods, { "__index", { "table", final_properties } })
+    end
+    print(util.dump(constructor))
+    print(util.dump(meta_methods))
+    print(util.dump(final_properties))
+    self:stm({ "assign", { mt_name }, { { "table", meta_methods } } })
+    if not constructor then
+      constructor = {
+        "fndef",
+        {  },
+        "slim",
+        {  }
+      }
+    end
+    local self_args = {  }
+    local get_initializers
+    get_initializers = function(arg)
+      if ntype(arg) == "self" then
+        arg = arg[2]
+        insert(self_args, arg)
+      end
+      return arg
+    end
+    constructor[2] = (function()
+      local _moon_0 = {}
+      local _item_0 = constructor[2]
+      for _index_0=1,#_item_0 do
+        local arg = _item_0[_index_0]
+        table.insert(_moon_0, get_initializers(arg))
+      end
+      return _moon_0
+    end)()
+    print(util.dump(constructor))
+    return self:stm({ "assign", { name }, { constructor } })
   end,
   comprehension = function(self, node, action)
     local _, exp, clauses = unpack(node)
@@ -491,6 +538,25 @@ local B = {
   set_indent = function(self, depth)
     self.indent = depth
     self.lead = indent_char:rep(self.indent)
+  end,
+  declare = function(self, names)
+    local undeclared = (function()
+      local _moon_0 = {}
+      local _item_0 = names
+      for _index_0=1,#_item_0 do
+        local name = _item_0[_index_0]
+        if type(name) == "string" and not self:has_name(name) then
+          table.insert(_moon_0, name)
+        end
+      end
+      return _moon_0
+    end)()
+    local _item_0 = undeclared
+    for _index_0=1,#_item_0 do
+      local name = _item_0[_index_0]
+      self:put_name(name)
+    end
+    return undeclared
   end,
   put_name = function(self, name) self._names[name] = true end,
   has_name = function(self, name)
