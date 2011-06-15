@@ -210,21 +210,12 @@ line_compile = {
   end,
   ["class"] = function(self, node)
     local _, name, tbl = unpack(node)
-    local mt_name = "_" .. name .. "_mt"
-    self:add_line("local", concat(self:declare({ name, mt_name }), ", "))
     local constructor = nil
-    local meta_methods = {  }
     local final_properties = {  }
-    local overloaded_index = value
     local find_special
     find_special = function(name, value)
       if name == constructor_name then
         constructor = value
-      elseif name:match("^__%a") then
-        insert(meta_methods, { name, value })
-        if name == "__index" then
-          overloaded_index = value
-        end
       else
         return insert(final_properties, { name, value })
       end
@@ -234,15 +225,12 @@ line_compile = {
       local entry = _item_0[_index_0]
       find_special(unpack(entry))
     end
-    if not overloaded_index then
-      insert(meta_methods, { "__index", { "table", final_properties } })
-    end
-    self:stm({ "assign", { mt_name }, { { "table", meta_methods } } })
+    tbl[2] = final_properties
     if not constructor then
       constructor = {
         "fndef",
         {  },
-        "slim",
+        "fat",
         {  }
       }
     end
@@ -264,7 +252,7 @@ line_compile = {
       end
       return _moon_0
     end)()
-    constructor[3] = "slim"
+    constructor[3] = "fat"
     local body = constructor[4]
     local dests = (function()
       local _moon_0 = {}
@@ -278,9 +266,20 @@ line_compile = {
     if #self_args > 0 then
       insert(body, 1, { "assign", dests, self_args })
     end
-    insert(body, 1, { "raw", ("local self = setmetatable({}, %s)"):format(mt_name) })
-    insert(body, { "return", "self" })
-    return self:stm({ "assign", { name }, { constructor } })
+    local def_scope = self:block()
+    local base_name = def_scope:free_name("base")
+    def_scope:add_line(("local %s ="):format(base_name), def_scope:value(tbl))
+    def_scope:add_line(("%s.__index = %s"):format(base_name, base_name))
+    local cls = def_scope:value({ "table", { { "__init", constructor } } })
+    local cls_mt = def_scope:value({ "table", { { "__index", base_name }, { "__call", {
+            "fndef",
+            { "mt", "..." },
+            "slim",
+            { { "raw", ("local self = setmetatable({}, %s)"):format(base_name) }, { "chain", "mt.__init", { "call", { "self", "..." } } }, "self" }
+          } } } })
+    def_scope:add_line(("return setmetatable(%s, %s)"):format(cls, cls_mt))
+    local def = concat({ "(function()\n", (def_scope:render()), "\nend)()" })
+    return self:stm({ "assign", { name }, { def } })
   end,
   comprehension = function(self, node, action)
     local _, exp, clauses = unpack(node)
