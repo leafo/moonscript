@@ -6,7 +6,12 @@ require("moonscript.compile.format")
 local reversed = util.reversed
 local ntype = data.ntype
 local concat, insert = table.concat, table.insert
+local constructor_name = "new"
 line_compile = {
+  raw = function(self, node)
+    local _, text = unpack(node)
+    return self:add_line(text)
+  end,
   assign = function(self, node)
     local _, names, values = unpack(node)
     local undeclared = self:declare(names)
@@ -204,7 +209,7 @@ line_compile = {
     return nil
   end,
   ["class"] = function(self, node)
-    local _, name, table = unpack(node)
+    local _, name, tbl = unpack(node)
     local mt_name = "_" .. name .. "_mt"
     self:add_line("local", concat(self:declare({ name, mt_name }), ", "))
     local constructor = nil
@@ -213,7 +218,7 @@ line_compile = {
     local overloaded_index = value
     local find_special
     find_special = function(name, value)
-      if name == "constructor" then
+      if name == constructor_name then
         constructor = value
       elseif name:match("^__%a") then
         insert(meta_methods, { name, value })
@@ -224,7 +229,7 @@ line_compile = {
         return insert(final_properties, { name, value })
       end
     end
-    local _item_0 = table[2]
+    local _item_0 = tbl[2]
     for _index_0=1,#_item_0 do
       local entry = _item_0[_index_0]
       find_special(unpack(entry))
@@ -232,9 +237,6 @@ line_compile = {
     if not overloaded_index then
       insert(meta_methods, { "__index", { "table", final_properties } })
     end
-    print(util.dump(constructor))
-    print(util.dump(meta_methods))
-    print(util.dump(final_properties))
     self:stm({ "assign", { mt_name }, { { "table", meta_methods } } })
     if not constructor then
       constructor = {
@@ -262,7 +264,22 @@ line_compile = {
       end
       return _moon_0
     end)()
-    print(util.dump(constructor))
+    constructor[3] = "slim"
+    local body = constructor[4]
+    local dests = (function()
+      local _moon_0 = {}
+      local _item_0 = self_args
+      for _index_0=1,#_item_0 do
+        local name = _item_0[_index_0]
+        table.insert(_moon_0, { "self", name })
+      end
+      return _moon_0
+    end)()
+    if #self_args > 0 then
+      insert(body, 1, { "assign", dests, self_args })
+    end
+    insert(body, 1, { "raw", ("local self = setmetatable({}, %s)"):format(mt_name) })
+    insert(body, { "return", "self" })
     return self:stm({ "assign", { name }, { constructor } })
   end,
   comprehension = function(self, node, action)

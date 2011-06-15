@@ -227,7 +227,7 @@ local build_grammar = wrap(function()
 		Block = Ct(Line * (Break^1 * Line)^0),
 		Line = Cmt(Indent, check_indent) * Statement + _Space * Comment,
 
-		Statement = (Import + While + For + Export + BreakLoop + Ct(ExpList) / flatten_or_mark"explist" * Space) * (
+		Statement = (Import + While + For + ClassDecl + Export + BreakLoop + Ct(ExpList) / flatten_or_mark"explist" * Space) * (
 				-- statement decorators
 				key"if" * Exp * (key"else" * Exp)^-1 * Space / mark"if" +
 				CompInner / mark"comprehension"

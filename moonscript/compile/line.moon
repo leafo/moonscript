@@ -12,7 +12,12 @@ import concat, insert from table
 
 export line_compile
 
+constructor_name = "new"
+
 line_compile =
+  raw: (node) =>
+    _, text = unpack node
+    @add_line text
   assign: (node) =>
     _, names, values = unpack node
 
@@ -156,7 +161,7 @@ line_compile =
     nil
 
   ["class"]: (node) =>
-    _, name, table = unpack node
+    _, name, tbl = unpack node
     mt_name = "_"..name.."_mt"
     @add_line "local", concat @declare({ name, mt_name }), ", "
 
@@ -167,7 +172,7 @@ line_compile =
     overloaded_index = value
 
     find_special = (name, value) ->
-      if name == "constructor"
+      if name == constructor_name
         constructor = value
       elseif name:match("^__%a")
         insert meta_methods, {name, value}
@@ -175,14 +180,10 @@ line_compile =
       else
         insert final_properties, {name, value}
 
-    find_special unpack entry for entry in *table[2]
+    find_special unpack entry for entry in *tbl[2]
 
     if not overloaded_index
       insert meta_methods, {"__index", {"table", final_properties}}
-
-    print util.dump constructor
-    print util.dump meta_methods
-    print util.dump final_properties
 
     @stm {"assign", {mt_name}, {{"table", meta_methods}}}
 
@@ -199,8 +200,14 @@ line_compile =
       arg
 
     constructor[2] = [get_initializers arg for arg in *constructor[2]]
+    constructor[3] = "slim"
+    body = constructor[4]
 
-    print util.dump constructor
+    dests = [{"self", name} for name in *self_args]
+    insert body, 1, {"assign", dests, self_args} if #self_args > 0
+    insert body, 1, {"raw", ("local self = setmetatable({}, %s)"):format(mt_name)}
+    insert body, {"return", "self"}
+
     @stm {"assign", {name}, {constructor}}
 
   comprehension: (node, action) =>
