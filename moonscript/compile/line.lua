@@ -209,7 +209,7 @@ line_compile = {
     return nil
   end,
   ["class"] = function(self, node)
-    local _, name, tbl = unpack(node)
+    local _, name, parent, tbl = unpack(node)
     local constructor = nil
     local final_properties = {  }
     local find_special
@@ -277,8 +277,20 @@ line_compile = {
             "slim",
             { { "raw", ("local self = setmetatable({}, %s)"):format(base_name) }, { "chain", "mt.__init", { "call", { "self", "..." } } }, "self" }
           } } } })
+    local parent_var = def_scope:free_name("parent")
+    if parent ~= "" then
+      def_scope:stm({ "if", parent_var, { { "chain", "setmetatable", { "call", { base_name, {
+                  "chain",
+                  "getmetatable",
+                  { "call", { parent_var } },
+                  { "dot", "__index" }
+                } } } } } })
+    end
     def_scope:add_line(("return setmetatable(%s, %s)"):format(cls, cls_mt))
-    local def = concat({ "(function()\n", (def_scope:render()), "\nend)()" })
+    if parent ~= "" then
+      parent = self:value(parent)
+    end
+    local def = concat({ ("(function(%s)\n"):format(parent_var), (def_scope:render()), ("\nend)(%s)"):format(parent) })
     return self:stm({ "assign", { name }, { def } })
   end,
   comprehension = function(self, node, action)

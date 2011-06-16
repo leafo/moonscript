@@ -11,4 +11,12 @@ x:hello()
 
 print x
 
+class Simple
+  cool: => print "cool"
+
+class Yikes extends Simple
+  new: => print "created hello"
+
+x = Yikes()
+x:cool()
 

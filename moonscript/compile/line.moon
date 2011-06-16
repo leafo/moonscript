@@ -161,7 +161,7 @@ line_compile =
     nil
 
   ["class"]: (node) =>
-    _, name, tbl = unpack node
+    _, name, parent, tbl = unpack node
 
     constructor = nil
     final_properties = {}
@@ -195,9 +195,6 @@ line_compile =
     dests = [{"self", name} for name in *self_args]
     insert body, 1, {"assign", dests, self_args} if #self_args > 0
 
-    -- insert body, 1, {"raw", ("local self = setmetatable({}, %s)"):format(mt_name)}
-    -- insert body, {"return", "self"}
-
     def_scope = @block()
     base_name = def_scope:free_name "base"
     def_scope:add_line ("local %s ="):format(base_name), def_scope:value tbl
@@ -216,9 +213,23 @@ line_compile =
         }}}
     }}
 
+    parent_var = def_scope:free_name "parent"
+    if parent != ""
+      def_scope:stm {"if", parent_var,
+        {{"chain", "setmetatable", {"call",
+        {base_name, {"chain", "getmetatable",
+          {"call", {parent_var}}, {"dot", "__index"}}}}}}}
+
     def_scope:add_line ("return setmetatable(%s, %s)"):format(cls, cls_mt)
 
-    def = concat { "(function()\n", (def_scope:render()), "\nend)()" }
+    parent = @value parent if parent != ""
+
+    def = concat {
+      ("(function(%s)\n"):format(parent_var)
+      (def_scope:render())
+      ("\nend)(%s)"):format(parent)
+    }
+
     @stm {"assign", {name}, {def}}
 
   comprehension: (node, action) =>

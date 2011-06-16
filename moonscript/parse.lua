@@ -340,8 +340,7 @@ local build_grammar = wrap(function()
 
 		TableBlock = Break * #Cmt(Indent, advance_indent) * TableBlockInner * OutBlock / mark"table",
 
-		ClassDecl = key"class" * Name * (key"extends" * Name)^-1 * TableBlock / mark"class",
-
+		ClassDecl = key"class" * Name * (key"extends" * Exp + C"")^-1 * TableBlock / mark"class",
 		Export = key"export" * Ct(NameList) / mark"export",
 
 		KeyValue = Ct((Name + sym"[" * Exp * sym"]") * symx":" * (Exp + TableBlock)),
