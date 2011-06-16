@@ -178,13 +178,13 @@ local build_grammar = wrap(function()
 		return false
 	end
 
-	local Name = sym"@" * Name / mark"self" + Name + Space * "..." / trim
-
 	-- make sure name is not a keyword
 	local Name = Cmt(Name, function(str, pos, name)
 		if keywords[name] then return false end
-		return true, name
-	end)
+		return true
+	end) / trim
+
+	local Name = sym"@" * Name / mark"self" + Name + Space * "..." / trim
 
 	local function simple_string(delim, x)
 		return C(symx(delim)) * C((P('\\'..delim) + (1 - S('\n'..delim)))^0) * sym(delim) / mark"string"
