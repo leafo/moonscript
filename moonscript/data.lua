@@ -43,3 +43,10 @@ function ntype(node)
 	return node[1]
 end
 
+lua_keywords = Set{
+	'and', 'break', 'do', 'else', 'elseif',
+	'end', 'false', 'for', 'function', 'if',
+	'in', 'local', 'nil', 'not', 'or',
+	'repeat', 'return', 'then', 'true',
+	'until', 'while'
+}

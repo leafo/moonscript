@@ -86,7 +86,7 @@ line_compile = {
   end,
   ["return"] = function(self, node) return self:add_line("return", self:value(node[2])) end,
   ["break"] = function(self, node) return self:add_line("break") end,
-  ["import"] = function(self, node)
+  import = function(self, node)
     local _, names, source = unpack(node)
     local to_bind = {  }
     local get_name
@@ -197,7 +197,7 @@ line_compile = {
     self:add_line(inner:render())
     return self:add_line("end")
   end,
-  ["export"] = function(self, node)
+  export = function(self, node)
     local _, names = unpack(node)
     local _item_0 = names
     for _index_0=1,#_item_0 do
@@ -208,7 +208,7 @@ line_compile = {
     end
     return nil
   end,
-  ["class"] = function(self, node)
+  class = function(self, node)
     local _, name, parent_val, tbl = unpack(node)
     local constructor = nil
     local final_properties = {  }

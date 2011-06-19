@@ -129,6 +129,9 @@ local value_compile = {
       local out
       if #tuple == 2 then
         local key, value = unpack(tuple)
+        if type(key) == "string" and data.lua_keywords[key] then
+          key = { "string", '"', key }
+        end
         local key_val = self:value(key)
         if type(key) ~= "string" then
           key = ("[%s]"):format(key_val)

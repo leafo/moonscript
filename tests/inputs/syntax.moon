@@ -150,3 +150,12 @@ m %= 2
 x = 0
 (if ntype(v) == "fndef" then x += 1) for v in *values
 
+
+hello =
+  something: world
+  if: "hello"
+  else: 3434
+  function: "okay"
+  good: 230203
+
+

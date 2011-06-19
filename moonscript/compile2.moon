@@ -38,7 +38,7 @@ value_compile =
     _, delim, inner, delim_end = unpack node
     delim..inner..(delim_end or delim)
 
-  ["if"]: (node) =>
+  if: (node) =>
     func = @block()
     func:stm node, returner
     @format "(function()", func:render(), "end)()"
@@ -113,8 +113,11 @@ value_compile =
     _comp = (i, tuple) ->
       out = if #tuple == 2
         key, value = unpack tuple
-        key_val = @value key
 
+        if type(key) == "string" and data.lua_keywords[key]
+          key = {"string", '"', key}
+
+        key_val = @value key
         key = if type(key) != "string"
           ("[%s]"):format key_val
         else
@@ -143,7 +146,7 @@ value_compile =
   length: (node) =>
     "#"..@value node[2]
 
-  ["not"]: (node) =>
+  not: (node) =>
     "not "..@value node[2]
 
   self: (node) =>

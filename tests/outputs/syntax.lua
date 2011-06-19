@@ -112,3 +112,10 @@ for _index_0=1,#_item_0 do
     end
   end)())
 end
+local hello = {
+  something = world,
+  ["if"] = "hello",
+  ["else"] = 3434,
+  ["function"] = "okay",
+  good = 230203
+}

@@ -177,6 +177,8 @@ local build_grammar = wrap(function()
 		return false
 	end
 
+	local SimpleName = Name -- for table key
+
 	-- make sure name is not a keyword
 	local Name = Cmt(Name, function(str, pos, name)
 		if keywords[name] then return false end
@@ -342,7 +344,7 @@ local build_grammar = wrap(function()
 		ClassDecl = key"class" * Name * (key"extends" * Exp + C"")^-1 * TableBlock / mark"class",
 		Export = key"export" * Ct(NameList) / mark"export",
 
-		KeyValue = Ct((Name + sym"[" * Exp * sym"]") * symx":" * (Exp + TableBlock)),
+		KeyValue = Ct((SimpleName + sym"[" * Exp * sym"]") * symx":" * (Exp + TableBlock)),
 		KeyValueList = KeyValue * (sym"," * KeyValue)^0,
 		KeyValueLine = Cmt(Indent, check_indent) * KeyValueList * sym","^-1,
 

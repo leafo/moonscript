@@ -58,13 +58,13 @@ line_compile =
     error"unknown op: "..op if not op_final
     @stm {"assign", {name}, {{"exp", name, op_final, exp}}}
 
-  ["return"]: (node) =>
+  return: (node) =>
     @add_line "return", @value node[2]
 
-  ["break"]: (node) =>
+  break: (node) =>
     @add_line "break"
 
-  ["import"]: (node) =>
+  import: (node) =>
     _, names, source = unpack node
 
     to_bind = {}
@@ -105,7 +105,7 @@ line_compile =
 
     @add_line "end"
 
-  ["if"]: (node, ret) =>
+  if: (node, ret) =>
     cond, block = node[2], node[3]
 
     add_clause = (clause) ->
@@ -131,7 +131,7 @@ line_compile =
 
     @add_line "end"
 
-  ["while"]: (node) =>
+  while: (node) =>
     _, cond, block = unpack node
 
     inner = @block()
@@ -146,7 +146,7 @@ line_compile =
     @add_line inner:render()
     @add_line "end"
 
-  ["for"]: (node) =>
+  for: (node) =>
     _, name, bounds, block = unpack node
     bounds = @value {"explist", unpack bounds}
     @add_line "for", @name(name), "=", bounds, "do"
@@ -155,12 +155,12 @@ line_compile =
     @add_line inner:render()
     @add_line "end"
 
-  ["export"]: (node) =>
+  export: (node) =>
     _, names = unpack node
     @put_name name for name in *names when type(name) == "string"
     nil
 
-  ["class"]: (node) =>
+  class: (node) =>
     _, name, parent_val, tbl = unpack node
 
     constructor = nil
