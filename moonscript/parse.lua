@@ -133,7 +133,6 @@ local build_grammar = wrap(function()
 		return Space * C(word)
 	end
 
-
 	local function sym(chars)
 		return Space * chars
 	end

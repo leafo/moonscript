@@ -209,7 +209,7 @@ line_compile = {
     return nil
   end,
   ["class"] = function(self, node)
-    local _, name, parent, tbl = unpack(node)
+    local _, name, parent_val, tbl = unpack(node)
     local constructor = nil
     local final_properties = {  }
     local find_special
@@ -226,12 +226,33 @@ line_compile = {
       find_special(unpack(entry))
     end
     tbl[2] = final_properties
+    local def_scope = self:block()
+    local parent_loc = def_scope:free_name("parent")
+    def_scope:set("super", function(block, chain)
+      local calling_name = block:get("current_block")
+      local slice = (function()
+        local _moon_0 = {}
+        for i, item in ipairs(chain) do
+          if i > 2 then
+            table.insert(_moon_0, item)
+          end
+        end
+        return _moon_0
+      end)()
+      slice[1] = { "call", { "self", unpack(slice[1][2]) } }
+      return {
+        "chain",
+        parent_loc,
+        { "dot", calling_name },
+        unpack(slice)
+      }
+    end)
     if not constructor then
       constructor = {
         "fndef",
-        {  },
+        { "..." },
         "fat",
-        {  }
+        { { "if", parent_loc, { { "chain", "super", { "call", { "..." } } } } } }
       }
     end
     local self_args = {  }
@@ -266,7 +287,6 @@ line_compile = {
     if #self_args > 0 then
       insert(body, 1, { "assign", dests, self_args })
     end
-    local def_scope = self:block()
     local base_name = def_scope:free_name("base")
     def_scope:add_line(("local %s ="):format(base_name), def_scope:value(tbl))
     def_scope:add_line(("%s.__index = %s"):format(base_name, base_name))
@@ -277,20 +297,21 @@ line_compile = {
             "slim",
             { { "raw", ("local self = setmetatable({}, %s)"):format(base_name) }, { "chain", "mt.__init", { "call", { "self", "..." } } }, "self" }
           } } } })
-    local parent_var = def_scope:free_name("parent")
-    if parent ~= "" then
-      def_scope:stm({ "if", parent_var, { { "chain", "setmetatable", { "call", { base_name, {
+    if parent_val ~= "" then
+      def_scope:stm({ "if", parent_loc, { { "chain", "setmetatable", { "call", { base_name, {
                   "chain",
                   "getmetatable",
-                  { "call", { parent_var } },
+                  { "call", { parent_loc } },
                   { "dot", "__index" }
                 } } } } } })
     end
     def_scope:add_line(("return setmetatable(%s, %s)"):format(cls, cls_mt))
-    if parent ~= "" then
-      parent = self:value(parent)
+    if parent_val ~= "" then
+      parent_val = self:value(parent_val)
     end
-    local def = concat({ ("(function(%s)\n"):format(parent_var), (def_scope:render()), ("\nend)(%s)"):format(parent) })
+    local def = concat({ ("(function(%s)\n"):format(parent_loc), (def_scope:render()), ("\nend)(%s)"):format(parent_val) })
+    self:add_line("local", name)
+    self:put_name(name)
     return self:stm({ "assign", { name }, { def } })
   end,
   comprehension = function(self, node, action)

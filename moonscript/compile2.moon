@@ -61,6 +61,10 @@ value_compile =
   chain: (node) =>
     callee = node[2]
 
+    sup = @get "super"
+    if callee == "super" and sup
+      return @value sup self, node
+
     chain_item = (node) ->
       t, arg = unpack node
       if t == "call"
@@ -109,11 +113,18 @@ value_compile =
     _comp = (i, tuple) ->
       out = if #tuple == 2
         key, value = unpack tuple
+        key_val = @value key
+
         key = if type(key) != "string"
-          ("[%s]"):format @value key
+          ("[%s]"):format key_val
         else
-          @value key
-        ("%s = %s"):format key, inner:value value
+          key_val
+
+        inner:set "current_block", key_val
+        value = inner:value value
+        inner:set "current_block", nil
+
+        ("%s = %s"):format key, value
       else
         inner:value tuple[1]
 
@@ -141,18 +152,23 @@ value_compile =
   self_colon: (node) =>
     "self:"..@value node[2]
 
+class Block
+  new: (@parent) =>
+    @set_indent @parent and @parent.indent + 1 or 0
+    @_lines = {}
+    @_names = {}
+    @_state = {}
 
-block_t = {}
-Block = (parent) ->
-  indent = parent and parent.indent + 1 or 0
-  b = setmetatable {
-      _lines: {}, _names: {}, parent: parent
-    }, block_t
+    if @parent
+      setmetatable @_state, { __index: @parent._state }
+      setmetatable @_names, { __index: @parent._names }
 
-  b:set_indent indent
-  b
+  set: (name, value) =>
+    @_state[name] = value
 
-B =
+  get: (name) =>
+    @_state[name]
+
   set_indent: (depth) =>
     @indent = depth
     @lead = indent_char:rep @indent
@@ -166,12 +182,7 @@ B =
     @_names[name] = true
 
   has_name: (name) =>
-    if @_names[name]
-      true
-    elseif @parent
-      @parent:has_name name
-    else
-      false
+    @_names[name]
 
   free_name: (prefix) =>
     prefix = prefix or "moon"
@@ -277,8 +288,6 @@ B =
     else
       @stm stm for stm in *stms
     nil
-
-block_t.__index = B
 
 build_compiler = ->
   Block(nil)

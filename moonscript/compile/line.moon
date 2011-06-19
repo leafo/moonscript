@@ -161,7 +161,7 @@ line_compile =
     nil
 
   ["class"]: (node) =>
-    _, name, parent, tbl = unpack node
+    _, name, parent_val, tbl = unpack node
 
     constructor = nil
     final_properties = {}
@@ -175,9 +175,24 @@ line_compile =
     find_special unpack entry for entry in *tbl[2]
     tbl[2] = final_properties
 
-    -- synthesize constructor
+    def_scope = @block()
+    parent_loc = def_scope:free_name "parent"
+
+    def_scope:set "super" (block, chain) ->
+      calling_name = block:get"current_block"
+      slice = [item for i, item in ipairs chain when i > 2]
+      -- inject self
+      slice[1] = {"call", {"self", unpack slice[1][2]}}
+
+      {"chain", parent_loc, {"dot", calling_name}, unpack slice}
+
+    -- synthesize constructor if needed
     if not constructor
-      constructor = {"fndef", {}, "fat", {}}
+      constructor = {"fndef", {"..."}, "fat", {
+        {"if", parent_loc, {
+          {"chain", "super", {"call", {"..."}}}
+        }}
+      }}
 
     -- organize constructor
     -- extract self arguments
@@ -192,10 +207,10 @@ line_compile =
     constructor[3] = "fat"
     body = constructor[4]
 
+    -- insert self assigning arguments
     dests = [{"self", name} for name in *self_args]
     insert body, 1, {"assign", dests, self_args} if #self_args > 0
 
-    def_scope = @block()
     base_name = def_scope:free_name "base"
     def_scope:add_line ("local %s ="):format(base_name), def_scope:value tbl
     def_scope:add_line ("%s.__index = %s"):format(base_name, base_name)
@@ -213,23 +228,24 @@ line_compile =
         }}}
     }}
 
-    parent_var = def_scope:free_name "parent"
-    if parent != ""
-      def_scope:stm {"if", parent_var,
+    if parent_val != ""
+      def_scope:stm {"if", parent_loc,
         {{"chain", "setmetatable", {"call",
         {base_name, {"chain", "getmetatable",
-          {"call", {parent_var}}, {"dot", "__index"}}}}}}}
+          {"call", {parent_loc}}, {"dot", "__index"}}}}}}}
 
     def_scope:add_line ("return setmetatable(%s, %s)"):format(cls, cls_mt)
 
-    parent = @value parent if parent != ""
+    parent_val = @value parent_val if parent_val != ""
 
     def = concat {
-      ("(function(%s)\n"):format(parent_var)
+      ("(function(%s)\n"):format(parent_loc)
       (def_scope:render())
-      ("\nend)(%s)"):format(parent)
+      ("\nend)(%s)"):format(parent_val)
     }
 
+    @add_line "local", name
+    @put_name name
     @stm {"assign", {name}, {def}}
 
   comprehension: (node, action) =>

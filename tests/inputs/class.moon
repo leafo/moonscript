@@ -20,3 +20,20 @@ class Yikes extends Simple
 x = Yikes()
 x:cool()
 
+
+class Hi
+  new: (arg) =>
+    print "init arg", arg
+
+  cool: (num) =>
+    print "num", num
+
+
+class Simple extends Hi
+  new: => super "man"
+  cool: => super 120302
+
+x = Simple()
+x:cool()
+
+
