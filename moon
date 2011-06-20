@@ -84,12 +84,11 @@ table.insert(package.loaders, 2, moon_loader)
 local file, err = io.open(script)
 if not file then error(err) end
 
-local new_arg = { [-1] = arg[0] }
-local j = 0
-for i=ind,#arg do
-	new_arg[j] = arg[i]
-	j = j + 1
-end
+local new_arg = {
+	[-1] = arg[0],
+	[0] = arg[ind],
+	select(ind + 1, unpack(arg))
+}
 
 local chunk = moon_chunk(file, script)
 getfenv(chunk).arg = new_arg
