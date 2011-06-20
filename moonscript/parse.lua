@@ -35,6 +35,7 @@ local Indent = C(S"\t "^0) / count_indent
 
 local Comment = P"--" * (1 - S"\n")^0 * #Stop
 local Space = _Space * Comment^-1
+local SomeSpace = S" \t"^1 * Comment^-1
 
 local _Name = C(R("az", "AZ", "__") * R("az", "AZ", "09", "__")^0)
 local Name = Space * _Name
@@ -279,7 +280,7 @@ local build_grammar = wrap(function()
 
 		Value =
 			If +
-			sym"-" * Exp / mark"minus" +
+			sym"-" * -SomeSpace * Exp / mark"minus" +
 			sym"#" * Exp / mark"length" +
 			sym"not" * Exp / mark"not" +
 			TableLit +
@@ -406,13 +407,4 @@ function string(str)
 	local g = build_grammar()
 	return g:match(str)
 end
-
-local program3 = [[
--- hello
-class Hello
-	@something: 2323
-
-	hello: () ->
-		print 200
-]]
 

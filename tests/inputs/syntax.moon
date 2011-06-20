@@ -159,3 +159,12 @@ hello =
   good: 230203
 
 
+5 + what wack
+what whack + 5
+
+5 - what wack
+what whack - 5
+
+x = hello - world - something
+
+

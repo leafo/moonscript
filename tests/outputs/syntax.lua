@@ -119,3 +119,8 @@ local hello = {
   ["function"] = "okay",
   good = 230203
 }
+_ = 5 + what(wack)
+what(whack + 5)
+_ = 5 - what(wack)
+what(whack - 5)
+x = hello - world - something
