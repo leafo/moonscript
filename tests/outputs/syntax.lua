@@ -124,3 +124,8 @@ what(whack + 5)
 _ = 5 - what(wack)
 what(whack - 5)
 x = hello - world - something
+hello()
+hello.world()
+_ = hello().something
+_ = what()["ofefe"]
+what()(the()(heck()))

@@ -167,4 +167,14 @@ what whack - 5
 
 x = hello - world - something
 
+hello!
+hello.world!
+
+hello!.something
+what!["ofefe"]
+
+what! the! heck!
+
+
+
 

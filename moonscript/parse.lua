@@ -306,7 +306,7 @@ local build_grammar = wrap(function()
 		Callable = Name + Parens / mark"parens",
 		Parens = sym"(" * Exp * sym")",
 
-		FnArgs = symx"(" * Ct(ExpList^-1) * sym")",
+		FnArgs = symx"(" * Ct(ExpList^-1) * sym")" + sym"!" * -P"=" * Ct"",
 
 		-- chain that starts with colon expression (for precedence over table literal)
 		ColonChain = 
