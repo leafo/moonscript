@@ -57,7 +57,7 @@ moonlib = { bind = function(tbl, name) return concat({
       tbl,
       ")"
     }) end }
-cascading = Set({ "if" })
+cascading = Set({ "if", "with" })
 non_atomic = Set({ "update" })
 has_value = function(node)
   if ntype(node) == "chain" then

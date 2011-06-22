@@ -61,6 +61,10 @@ value_compile =
   chain: (node) =>
     callee = node[2]
 
+    if callee == -1
+      callee = @get"scope_var"
+      if not callee then error"Short-dot syntax must be called within a with block"
+
     sup = @get "super"
     if callee == "super" and sup
       return @value sup self, node
@@ -187,7 +191,7 @@ class Block
   has_name: (name) =>
     @_names[name]
 
-  free_name: (prefix) =>
+  free_name: (prefix, dont_put) =>
     prefix = prefix or "moon"
     searching = true
     name, i = nil, 0
@@ -196,7 +200,7 @@ class Block
       i = i + 1
       searching = @has_name name
 
-    @put_name name
+    @put_name name if not dont_put
     name
 
   add_lines: (lines) =>

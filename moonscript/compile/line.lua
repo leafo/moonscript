@@ -365,5 +365,19 @@ line_compile = {
       render_clause(action, clause)
     end
     return self:add_lines(action._lines)
+  end,
+  with = function(self, node, ret)
+    local _, exp, block = unpack(node)
+    local inner = self:block()
+    local tmp_name = inner:free_name("with", true)
+    self:set("scope_var", tmp_name)
+    inner:stm({ "assign", { tmp_name }, { exp } })
+    inner:stms(block)
+    if ret then
+      inner:stm(ret(tmp_name))
+    end
+    self:add_line("do")
+    self:add_line(inner:render())
+    return self:add_line("end")
   end
 }

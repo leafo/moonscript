@@ -41,7 +41,7 @@ moonlib =
   bind: (tbl, name) ->
     concat {"moon.bind(", tbl, ".", name, ", ", tbl, ")"}
 
-cascading = Set{ "if" }
+cascading = Set{ "if", "with" }
 
 -- an action that can't be completed in a single line
 non_atomic = Set{ "update" }

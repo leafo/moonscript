@@ -63,6 +63,12 @@ local value_compile = {
   end,
   chain = function(self, node)
     local callee = node[2]
+    if callee == -1 then
+      callee = self:get("scope_var")
+      if not callee then
+        error("Short-dot syntax must be called within a with block")
+      end
+    end
     local sup = self:get("super")
     if callee == "super" and sup then
       return(self:value(sup(self, node)))
@@ -200,7 +206,7 @@ Block = (function(_parent_0)
     end,
     put_name = function(self, name) self._names[name] = true end,
     has_name = function(self, name) return self._names[name] end,
-    free_name = function(self, prefix)
+    free_name = function(self, prefix, dont_put)
       prefix = prefix or "moon"
       local searching = true
       local name, i = nil, 0
@@ -209,7 +215,9 @@ Block = (function(_parent_0)
         i = i + 1
         searching = self:has_name(name)
       end
-      self:put_name(name)
+      if not dont_put then
+        self:put_name(name)
+      end
       return name
     end,
     add_lines = function(self, lines)

@@ -300,4 +300,17 @@ line_compile =
 
     @add_lines action._lines -- do this better?
 
+  with: (node, ret) =>
+    _, exp, block = unpack node
+    inner = @block!
+    tmp_name = inner:free_name "with", true
+
+    @set "scope_var", tmp_name
+    inner:stm {"assign", {tmp_name}, {exp}}
+    inner:stms block
+    inner:stm ret tmp_name if ret
+
+    @add_line "do"
+    @add_line inner:render!
+    @add_line "end"
 

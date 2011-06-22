@@ -229,7 +229,7 @@ local build_grammar = wrap(function()
 		Block = Ct(Line * (Break^1 * Line)^0),
 		Line = Cmt(Indent, check_indent) * Statement + _Space * Comment,
 
-		Statement = (Import + While + For + ClassDecl + Export + BreakLoop + Ct(ExpList) / flatten_or_mark"explist" * Space) * (
+		Statement = (Import + While + With + For + ClassDecl + Export + BreakLoop + Ct(ExpList) / flatten_or_mark"explist" * Space) * (
 				-- statement decorators
 				key"if" * Exp * (key"else" * Exp)^-1 * Space / mark"if" +
 				CompInner / mark"comprehension"
@@ -248,6 +248,8 @@ local build_grammar = wrap(function()
 
 		BreakLoop = Ct(key"break"/trim),
 
+		With = key"with" * Exp * key"do"^-1 * Body / mark"with",
+
 		If = key"if" * Exp * key"then"^-1 * Body *
 			((Break * Cmt(Indent, check_indent))^-1 * key"elseif" * Exp * key"then"^-1 * Body / mark"elseif")^0 *
 			((Break * Cmt(Indent, check_indent))^-1 * key"else" * Body / mark"else")^-1 / mark"if",
@@ -263,13 +265,13 @@ local build_grammar = wrap(function()
 		CompFor = key"for" * Ct(NameList) * key"in" * (sym"*" * Exp / mark"unpack" + Exp) / mark"for",
 		CompClause = CompFor + key"when" * Exp / mark"when",
 
-		Assign = Ct(AssignableList) * sym"=" * (If + Ct(TableBlock + ExpListLow)) / mark"assign",
+		Assign = Ct(AssignableList) * sym"=" * (With + If + Ct(TableBlock + ExpListLow)) / mark"assign",
 		Update = Assignable * ((sym"+=" + sym"-=" + sym"*=" + sym"/=" + sym"%=")/trim) * Exp / mark"update",
 
 		-- we can ignore precedence for now
 		OtherOps = op"or" + op"and" + op"<=" + op">=" + op"~=" + op"!=" + op"==" + op".." + op"<" + op">",
 
-		Assignable = Cmt(Chain, check_assignable) + Name,
+		Assignable = Cmt(DotChain + Chain, check_assignable) + Name,
 		AssignableList = Assignable * (sym"," * Assignable)^0,
 
 		Exp = Ct(Value * ((OtherOps + FactorOp + TermOp) * Value)^0) / flatten_or_mark"exp",
@@ -288,7 +290,7 @@ local build_grammar = wrap(function()
 			ColonChain * Ct(ExpList^0) / flatten_func + -- have precedence over open table
 			Ct(KeyValueList) / mark"table" +
 			Assign + Update + FunLit + String +
-			((Chain + Callable) * Ct(ExpList^0)) / flatten_func +
+			((Chain + DotChain + Callable) * Ct(ExpList^0)) / flatten_func +
 			Num,
 
 
@@ -314,6 +316,14 @@ local build_grammar = wrap(function()
 
 		-- a list of funcalls and indexs on a callable
 		Chain = Callable * (ChainItem^1 * ColonSuffix^-1 + ColonSuffix) / mark"chain",
+
+		-- shorthand dot call for use in with statement
+		DotChain =
+			(sym"." * Cc(-1) * (_Name / mark"dot") * ChainItem^0) / mark"chain" + 
+			(sym":" * Cc(-1) * (
+				(_Name * Invoke / mark"colon") * ChainItem^0 + 
+				(_Name / mark"colon_stub")
+			)) / mark"chain",
 
 		ChainItem = 
 			Invoke + 
