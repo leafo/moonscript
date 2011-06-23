@@ -33,10 +33,10 @@ local value_compile = {
   end,
   explist = function(self, node) return concat((function()
       local _moon_0 = {}
-      for i, v in ipairs(node) do
-        if i > 1 then
-          table.insert(_moon_0, self:value(v))
-        end
+      local _item_0 = node
+      for _index_0=2,#_item_0 do
+        local v = _item_0[_index_0]
+        table.insert(_moon_0, self:value(v))
       end
       return _moon_0
     end)(), ", ") end,
@@ -90,10 +90,10 @@ local value_compile = {
     end
     local actions = (function()
       local _moon_0 = {}
-      for i, act in ipairs(node) do
-        if i > 2 then
-          table.insert(_moon_0, chain_item(act))
-        end
+      local _item_0 = node
+      for _index_0=3,#_item_0 do
+        local act = _item_0[_index_0]
+        table.insert(_moon_0, chain_item(act))
       end
       return _moon_0
     end)()

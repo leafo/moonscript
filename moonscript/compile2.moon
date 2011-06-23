@@ -29,7 +29,7 @@ value_compile =
     @name name
 
   explist: (node) =>
-    concat [@value v for i,v in ipairs node when i > 1], ", "
+    concat [@value v for v in *node[2:]], ", "
 
   parens: (node) =>
     "("..(@value node[2])..")"
@@ -82,7 +82,7 @@ value_compile =
       else
         error "Unknown chain action: "..t
 
-    actions = [chain_item act for i, act in ipairs node when i > 2]
+    actions = [chain_item act for act in *node[3:]]
 
     if ntype(callee) == "self" and node[3] and ntype(node[3]) == "call"
       callee[1] = "self_colon"

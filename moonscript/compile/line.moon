@@ -130,7 +130,7 @@ line_compile =
     b\stms block, ret
     @add_line b\render!
 
-    add_clause cond for i, cond in ipairs node when i > 3
+    add_clause cond for cond in *node[4:]
 
     @add_line "end"
 
@@ -183,7 +183,7 @@ line_compile =
 
     def_scope\set "super" (block, chain) ->
       calling_name = block\get"current_block"
-      slice = [item for i, item in ipairs chain when i > 2]
+      slice = [item for item in *chain[3:]]
       -- inject self
       slice[1] = {"call", {"self", unpack slice[1][2]}}
 

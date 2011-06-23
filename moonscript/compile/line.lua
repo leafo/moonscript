@@ -170,10 +170,10 @@ line_compile = {
     local b = self:block()
     b:stms(block, ret)
     self:add_line(b:render())
-    for i, cond in ipairs(node) do
-      if i > 3 then
-        add_clause(cond)
-      end
+    local _item_0 = node
+    for _index_0=4,#_item_0 do
+      local cond = _item_0[_index_0]
+      add_clause(cond)
     end
     return self:add_line("end")
   end,
@@ -234,10 +234,10 @@ line_compile = {
       local calling_name = block:get("current_block")
       local slice = (function()
         local _moon_0 = {}
-        for i, item in ipairs(chain) do
-          if i > 2 then
-            table.insert(_moon_0, item)
-          end
+        local _item_0 = chain
+        for _index_0=3,#_item_0 do
+          local item = _item_0[_index_0]
+          table.insert(_moon_0, item)
         end
         return _moon_0
       end)()
