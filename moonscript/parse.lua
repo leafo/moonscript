@@ -280,7 +280,7 @@ local build_grammar = wrap(function()
 		-- Factor = Ct(Term * (FactorOp * Term)^0) / flatten_or_mark"exp",
 		-- Term = Ct(Value * (TermOp * Value)^0) / flatten_or_mark"exp",
 
-		Value =
+		SimpleValue =
 			If +
 			sym"-" * -SomeSpace * Exp / mark"minus" +
 			sym"#" * Exp / mark"length" +
@@ -288,10 +288,18 @@ local build_grammar = wrap(function()
 			TableLit +
 			Comprehension +
 			ColonChain * Ct(ExpList^0) / flatten_func + -- have precedence over open table
-			Ct(KeyValueList) / mark"table" +
 			Assign + Update + FunLit + String +
-			((Chain + DotChain + Callable) * Ct(ExpList^0)) / flatten_func +
 			Num,
+
+		ChainValue =
+			((Chain + DotChain + Callable) * Ct(ExpList^0)) / flatten_func,
+
+		Value =
+			SimpleValue +
+			Ct(KeyValueList) / mark"table" +
+			ChainValue,
+
+		SliceValue = SimpleValue + ChainValue,
 
 		String = Space * DoubleString + Space * SingleString + LuaString,
 		SingleString = simple_string("'"),
@@ -331,7 +339,8 @@ local build_grammar = wrap(function()
 			symx"." * _Name/mark"dot" +
 			ColonCall,
 
-		Slice = symx"[" * Num * sym":" * Num * (sym":" * Num)^-1 *sym"]" / mark"slice",
+		Slice = symx"[" * (SliceValue + Cc(1)) * sym":" * (SliceValue + Cc"")  *
+			(sym":" * SliceValue)^-1 *sym"]" / mark"slice",
 
 		ColonCall = symx"\\" * (_Name * Invoke) / mark"colon",
 		ColonSuffix = symx"\\" * _Name / mark"colon_stub",

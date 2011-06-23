@@ -14,6 +14,9 @@ export line_compile
 
 constructor_name = "new"
 
+is_slice = (node) ->
+  ntype(node) == "chain" and ntype(node[#node]) == "slice"
+
 line_compile =
   raw: (node) =>
     _, text = unpack node
@@ -260,7 +263,7 @@ line_compile =
 
     render_clause = (clause) =>
       t = clause[1]
-      action = @block()
+      action = @block!
       action\set_indent @indent - 1
 
       if "for" == t
@@ -269,20 +272,37 @@ line_compile =
 
         if ntype(iter) == "unpack"
           iter = iter[2]
-          items_tmp = @free_name "item"
-          index_tmp = @free_name "index"
+          items_tmp = action\free_name "item"
+          index_tmp = action\free_name "index"
+          max_tmp = nil
 
           insert self._lines, 1, ("local %s = %s[%s]")\format name_list, items_tmp, index_tmp
 
+          -- slice shortcut
+          min, max, skip = 1, ("#%s")\format items_tmp, nil
+          if is_slice iter
+            slice = iter[#iter]
+            table.remove iter
+            min = action\value slice[2]
+            if slice[3] and slice[3] != ""
+              max_tmp = action\free_name "max", true
+              action\stm {"assign", {max_tmp}, {slice[3]}}
+              max = action\value {"exp", max_tmp, "<", 0
+                "and", {"exp", {"length", items_tmp}, "+", max_tmp}
+                "or", max_tmp
+              }
+            if slice[4]
+              skip = action\value slice[4]
+
           action\add_lines {
-            ("local %s = %s")\format items_tmp, @value iter
-            ("for %s=1,#%s do")\format index_tmp, items_tmp
+            ("local %s = %s")\format items_tmp, action\value iter
+            ("for %s=%s do")\format index_tmp, concat {min, max, skip}, ","
             @render true
             "end"
           }
         else
           action\add_lines {
-            ("for %s in %s do")\format(name_list, @value iter)
+            ("for %s in %s do")\format name_list, action\value iter
             @render true
             "end"
           }

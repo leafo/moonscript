@@ -7,6 +7,8 @@ local reversed = util.reversed
 local ntype = data.ntype
 local concat, insert = table.concat, table.insert
 local constructor_name = "new"
+local is_slice
+is_slice = function(node) return ntype(node) == "chain" and ntype(node[#node]) == "slice" end
 line_compile = {
   raw = function(self, node)
     local _, text = unpack(node)
@@ -341,17 +343,46 @@ line_compile = {
         end)(), ", ")
         if ntype(iter) == "unpack" then
           iter = iter[2]
-          local items_tmp = self:free_name("item")
-          local index_tmp = self:free_name("index")
+          local items_tmp = action:free_name("item")
+          local index_tmp = action:free_name("index")
+          local max_tmp = nil
           insert(self._lines, 1, ("local %s = %s[%s]"):format(name_list, items_tmp, index_tmp))
+          local min, max, skip = 1, ("#%s"):format(items_tmp, nil)
+          if is_slice(iter) then
+            local slice = iter[#iter]
+            table.remove(iter)
+            min = action:value(slice[2])
+            if slice[3] and slice[3] ~= "" then
+              max_tmp = action:free_name("max", true)
+              action:stm({ "assign", { max_tmp }, { slice[3] } })
+              max = action:value({
+                "exp",
+                max_tmp,
+                "<",
+                0,
+                "and",
+                {
+                  "exp",
+                  { "length", items_tmp },
+                  "+",
+                  max_tmp
+                },
+                "or",
+                max_tmp
+              })
+            end
+            if slice[4] then
+              skip = action:value(slice[4])
+            end
+          end
           return action:add_lines({
-            ("local %s = %s"):format(items_tmp, self:value(iter)),
-            ("for %s=1,#%s do"):format(index_tmp, items_tmp),
+            ("local %s = %s"):format(items_tmp, action:value(iter)),
+            ("for %s=%s do"):format(index_tmp, concat({ min, max, skip }, ",")),
             self:render(true),
             "end"
           })
         else
-          return action:add_lines({ ("for %s in %s do"):format(name_list, self:value(iter)), self:render(true), "end" })
+          return action:add_lines({ ("for %s in %s do"):format(name_list, action:value(iter)), self:render(true), "end" })
         end
       elseif "when" == t then
         local cond

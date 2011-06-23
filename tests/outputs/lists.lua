@@ -1,11 +1,11 @@
 local hi = (function()
   local _moon_0 = {}
   for _, x in ipairs({
-      1,
-      2,
-      3,
-      4
-    }) do
+    1,
+    2,
+    3,
+    4
+  }) do
     table.insert(_moon_0, x * 2)
   end
   return _moon_0
@@ -33,13 +33,13 @@ end
 local rad = (function()
   local _moon_0 = {}
   for a in ipairs({
-      1,
-      2,
-      3,
-      4,
-      5,
-      6
-    }) do
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+  }) do
     if good_number(a) then
       table.insert(_moon_0, { a })
     end
@@ -166,4 +166,40 @@ local _item_0 = hello
 for _index_0=1,#_item_0 do
   local z = _item_0[_index_0]
   print(z)
+end
+x = {
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7
+}
+local _max_0 = -5
+local _item_0 = x
+for _index_0=2,_max_0 < 0 and #_item_0 + _max_0 or _max_0,2 do
+  local y = _item_0[_index_0]
+  print(y)
+end
+local _max_0 = 3
+local _item_0 = x
+for _index_0=1,_max_0 < 0 and #_item_0 + _max_0 or _max_0 do
+  local y = _item_0[_index_0]
+  print(y)
+end
+local _item_0 = x
+for _index_0=2,#_item_0 do
+  local y = _item_0[_index_0]
+  print(y)
+end
+local _item_0 = x
+for _index_0=1,#_item_0,2 do
+  local y = _item_0[_index_0]
+  print(y)
+end
+local _item_0 = x
+for _index_0=2,#_item_0,2 do
+  local y = _item_0[_index_0]
+  print(y)
 end
