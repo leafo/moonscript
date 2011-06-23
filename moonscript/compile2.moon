@@ -39,24 +39,24 @@ value_compile =
     delim..inner..(delim_end or delim)
 
   if: (node) =>
-    func = @block()
-    func:stm node, returner
-    @format "(function()", func:render(), "end)()"
+    func = @block!
+    func\stm node, returner
+    @format "(function()", func\render!, "end)()"
 
   comprehension: (node) =>
     exp = node[2]
-    func = @block()
-    tmp_name = func:free_name()
+    func = @block!
+    tmp_name = func\free_name!
 
-    func:add_line "local", tmp_name, "= {}"
+    func\add_line "local", tmp_name, "= {}"
 
-    action = func:block()
-    action:add_line ("table.insert(%s, %s)"):format(tmp_name, func:value exp)
-    func:stm node, action
+    action = func\block!
+    action\add_line ("table.insert(%s, %s)")\format(tmp_name, func\value exp)
+    func\stm node, action
 
-    func:add_line "return", tmp_name
+    func\add_line "return", tmp_name
 
-    @format "(function()", func:render(), "end)()"
+    @format "(function()", func\render!, "end)()"
 
   chain: (node) =>
     callee = node[2]
@@ -98,9 +98,9 @@ value_compile =
     if arrow == "fat"
       insert args, 1, "self"
 
-    b = @block()
-    b:put_name name for name in *args
-    b:ret_stms block
+    b = @block!
+    b\put_name name for name in *args
+    b\ret_stms block
 
     decl = "function("..(concat args, ", ")..")"
     if #b._lines == 0
@@ -113,7 +113,7 @@ value_compile =
   table: (node) =>
     _, items = unpack node
 
-    inner = @block() -- handle indent
+    inner = @block! -- handle indent
     _comp = (i, tuple) ->
       out = if #tuple == 2
         key, value = unpack tuple
@@ -123,17 +123,17 @@ value_compile =
 
         key_val = @value key
         key = if type(key) != "string"
-          ("[%s]"):format key_val
+          ("[%s]")\format key_val
         else
           key_val
 
-        inner:set "current_block", key_val
-        value = inner:value value
-        inner:set "current_block", nil
+        inner\set "current_block", key_val
+        value = inner\value value
+        inner\set "current_block", nil
 
-        ("%s = %s"):format key, value
+        ("%s = %s")\format key, value
       else
-        inner:value tuple[1]
+        inner\value tuple[1]
 
       out.."," if i != #items else out
 
@@ -178,7 +178,7 @@ class Block
 
   set_indent: (depth) =>
     @indent = depth
-    @lead = indent_char:rep @indent
+    @lead = indent_char\rep @indent
 
   declare: (names) =>
     undeclared = [name for name in *names when type(name) == "string" and not @has_name name]
@@ -301,7 +301,7 @@ build_compiler = ->
   setmetatable {}, { __index: compiler_index }
 
 tree = (tree) ->
-  scope = Block()
-  scope:stm line for line in *tree
-  scope:render()
+  scope = Block!
+  scope\stm line for line in *tree
+  scope\render!
 

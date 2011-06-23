@@ -309,7 +309,7 @@ line_compile = {
     if parent_val ~= "" then
       parent_val = self:value(parent_val)
     end
-    local def = concat({ ("(function(%s)\n"):format(parent_loc), (def_scope:render()), ("\nend)(%s)"):format(parent_val) })
+    local def = concat({ ("(function(%s)\n"):format(parent_loc), def_scope:render(), ("\nend)(%s)"):format(parent_val) })
     self:add_line("local", name)
     self:put_name(name)
     return self:stm({ "assign", { name }, { def } })
@@ -326,7 +326,7 @@ line_compile = {
     render_clause = function(self, clause)
       local t = clause[1]
       action = self:block()
-      action:set_indent(-1 + self.indent)
+      action:set_indent(self.indent - 1)
       if "for" == t then
         local names, iter
         _, names, iter = unpack(clause)

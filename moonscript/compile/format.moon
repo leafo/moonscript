@@ -22,7 +22,7 @@ pretty = (lines, indent) ->
 
   -- add semicolons for ambiguities
   fix = (i, left, k, right) ->
-    if left:sub(-1) == ")" and right:sub(1,1) == "("
+    if left\sub(-1) == ")" and right\sub(1,1) == "("
       lines[i] = lines[i]..";"
   fix(i,l, k,r) for i,l,k,r in itwos lines
 
