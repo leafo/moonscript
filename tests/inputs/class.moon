@@ -7,7 +7,7 @@ class Hello
   __tostring: => "hello world"
 
 x = Hello 1,2
-x:hello()
+x\hello()
 
 print x
 
@@ -18,7 +18,7 @@ class Yikes extends Simple
   new: => print "created hello"
 
 x = Yikes()
-x:cool()
+x\cool()
 
 
 class Hi
@@ -34,6 +34,6 @@ class Simple extends Hi
   cool: => super 120302
 
 x = Simple()
-x:cool()
+x\cool()
 
 

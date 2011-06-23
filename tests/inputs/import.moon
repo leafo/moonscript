@@ -3,10 +3,10 @@
 import hello from yeah
 import hello, world from table["cool"]
 
-import a, :b, c from items
+import a, \b, c from items
 
 
-import master, :ghost from find "mytable"
+import master, \ghost from find "mytable"
 
 
 a, yumm = 3434, "hello"
@@ -18,5 +18,5 @@ import something from a table
 
 
 if indent
-  import okay, :well from tables[100]
+  import okay, \well from tables[100]
 

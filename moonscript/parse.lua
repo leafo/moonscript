@@ -240,8 +240,8 @@ local build_grammar = wrap(function()
 		InBlock = #Cmt(Indent, advance_indent) * Block * OutBlock,
 		OutBlock = Cmt("", pop_indent),
 
-		Import = key"import"*  Ct(ImportNameList) * key"from" * Exp / mark"import", 
-		ImportName = (Ct(sym":" / trim * Name) + Name),
+		Import = key"import" *  Ct(ImportNameList) * key"from" * Exp / mark"import", 
+		ImportName = (sym"\\" * Ct(Cc":" * Name) + Name),
 		ImportNameList = ImportName * (sym"," * ImportName)^0,
 
 		NameList = Name * (sym"," * Name)^0,
@@ -293,7 +293,6 @@ local build_grammar = wrap(function()
 			((Chain + DotChain + Callable) * Ct(ExpList^0)) / flatten_func +
 			Num,
 
-
 		String = Space * DoubleString + Space * SingleString + LuaString,
 		SingleString = simple_string("'"),
 		DoubleString = simple_string('"'),
@@ -320,7 +319,7 @@ local build_grammar = wrap(function()
 		-- shorthand dot call for use in with statement
 		DotChain =
 			(sym"." * Cc(-1) * (_Name / mark"dot") * ChainItem^0) / mark"chain" + 
-			(sym":" * Cc(-1) * (
+			(sym"\\" * Cc(-1) * (
 				(_Name * Invoke / mark"colon") * ChainItem^0 + 
 				(_Name / mark"colon_stub")
 			)) / mark"chain",
@@ -334,9 +333,8 @@ local build_grammar = wrap(function()
 
 		Slice = symx"[" * Num * sym":" * Num * (sym":" * Num)^-1 *sym"]" / mark"slice",
 
-		ColonCall = symx":" * (_Name * Invoke) / mark"colon",
-
-		ColonSuffix = symx":" * _Name / mark"colon_stub",
+		ColonCall = symx"\\" * (_Name * Invoke) / mark"colon",
+		ColonSuffix = symx"\\" * _Name / mark"colon_stub",
 
 		Invoke = FnArgs/mark"call" +
 			SingleString / wrap_func_arg +

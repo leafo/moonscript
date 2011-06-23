@@ -97,9 +97,9 @@ argon =
     return world: (a,b) -> print "sum", a + b
 
 something.what()
-argon:world().something()
+argon\world().something()
 
-argon:somethin"200".world(1,2)
+argon\somethin"200".world(1,2)
 
 x = -434
 
@@ -134,10 +134,11 @@ x = #{#{},#{1},#{1,2}}
 
 hello, world
 
-something:hello(what) a,b
-something:hello what
-something.hello:world a,b
-something.hello:world(1,2,3) a,b
+something\hello(what) a,b
+something\hello what
+something.hello\world a,b
+something.hello\world(1,2,3) a,b
+
 
 x = 1232
 x += 10 + 3

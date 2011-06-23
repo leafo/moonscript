@@ -13,9 +13,9 @@ with leaf
 
   .hi 1,2,3
 
-  :hi(1,2).world 2323
+  \hi(1,2).world 2323
 
-  :hi "yeah", "man"
+  \hi "yeah", "man"
   .world = 200
 
 zyzyzy = with something
