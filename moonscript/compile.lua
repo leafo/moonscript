@@ -166,7 +166,7 @@ Block = (function(_parent_0)
     end
   }
   _base_0.__index = _base_0
-  return setmetatable({ __init = function(self, parent)
+  local _class_0 = setmetatable({ __init = function(self, parent)
       self.parent = parent
       self:set_indent(self.parent and self.parent.indent + 1 or 0)
       self._lines = {  }
@@ -182,6 +182,8 @@ Block = (function(_parent_0)
       mt.__init(self, ...)
       return self
     end })
+  _base_0.__class = _class_0
+  return _class_0
 end)()
 tree = function(tree)
   local scope = Block()

@@ -36,4 +36,5 @@ class Simple extends Hi
 x = Simple()
 x\cool()
 
+print x.__class == Simple
 

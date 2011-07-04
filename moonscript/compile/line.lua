@@ -307,7 +307,10 @@ line_compile = {
                   { "dot", "__index" }
                 } } } } } })
     end
-    def_scope:add_line(("return setmetatable(%s, %s)"):format(cls, cls_mt))
+    local cls_name = def_scope:free_name("class")
+    def_scope:add_line(("local %s = setmetatable(%s, %s)"):format(cls_name, cls, cls_mt))
+    def_scope:add_line(("%s.__class = %s"):format(base_name, cls_name))
+    def_scope:add_line("return", cls_name)
     if parent_val ~= "" then
       parent_val = self:value(parent_val)
     end

@@ -237,7 +237,10 @@ line_compile =
         {base_name, {"chain", "getmetatable",
           {"call", {parent_loc}}, {"dot", "__index"}}}}}}}
 
-    def_scope\add_line ("return setmetatable(%s, %s)")\format(cls, cls_mt)
+    cls_name = def_scope\free_name "class"
+    def_scope\add_line ("local %s = setmetatable(%s, %s)")\format(cls_name, cls, cls_mt)
+    def_scope\add_line ("%s.__class = %s")\format base_name, cls_name
+    def_scope\add_line "return", cls_name
 
     parent_val = @value parent_val if parent_val != ""
 
