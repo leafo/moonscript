@@ -68,3 +68,10 @@ has_value = function(node)
   end
 end
 is_non_atomic = function(node) return non_atomic[ntype(node)] end
+count_lines = function(str)
+  local count = 1
+  for _ in str:gmatch("\n") do
+    count = count + 1
+  end
+  return count
+end

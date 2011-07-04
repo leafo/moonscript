@@ -8,6 +8,7 @@ import Set, ntype from data
 import concat, insert from table
 
 export indent_char, pretty, returner, moonlib, cascading, non_atomic, has_value, is_non_atomic
+export count_lines
 
 indent_char = "  "
 pretty = (lines, indent) ->
@@ -56,3 +57,9 @@ has_value = (node) ->
 
 is_non_atomic = (node) ->
   non_atomic[ntype(node)]
+
+count_lines = (str) ->
+  count = 1
+  count += 1 for _ in str\gmatch "\n"
+  count
+

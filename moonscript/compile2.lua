@@ -179,6 +179,7 @@ local value_compile = {
 local Block
 Block = (function(_parent_0)
   local _base_0 = {
+    line_table = function(self) return self._posmap end,
     set = function(self, name, value) self._state[name] = value end,
     get = function(self, name) return self._state[name] end,
     set_indent = function(self, depth)
@@ -220,6 +221,7 @@ Block = (function(_parent_0)
       end
       return name
     end,
+    mark_pos = function(self, node) self._posmap[#self._lines + 1] = node[-1] end,
     add_lines = function(self, lines)
       local _item_0 = lines
       for _index_0=1,#_item_0 do
@@ -263,6 +265,7 @@ Block = (function(_parent_0)
       if not fn then
         error("Failed to compile value: " .. dump.value(node))
       end
+      self:mark_pos(node)
       return fn(self, node, ...)
     end,
     values = function(self, values, delim)
@@ -336,6 +339,7 @@ Block = (function(_parent_0)
       self.parent = parent
       self:set_indent(self.parent and self.parent.indent + 1 or 0)
       self._lines = {  }
+      self._posmap = {  }
       self._names = {  }
       self._state = {  }
       if self.parent then
@@ -360,5 +364,5 @@ tree = function(tree)
     local line = _item_0[_index_0]
     scope:stm(line)
   end
-  return scope:render()
+  return scope:render(), scope:line_table()
 end

@@ -8,6 +8,8 @@ require "moonscript.util"
 
 require "alt_getopt"
 
+require "lpeg"
+
 -- moonloader and repl
 local opts, ind = alt_getopt.get_opts(arg, "ch", { help = "h" })
 
@@ -43,11 +45,13 @@ local function create_moonpath(package_path)
 	return table.concat(paths, ";")
 end
 
+local line_tables = {}
 local function moon_chunk(file, file_path)
-	-- print("loading", file_path)
 	local tree, err = parse.string(file:read"*a")
 	if not tree then error("Parse error: "..err) end
-	local code = compile.tree(tree)
+	local code, ltable = compile.tree(tree)
+
+	line_tables[file_path] = ltable
 
 	return load(function()
 		local out = code
@@ -74,12 +78,63 @@ local function moon_loader(name)
 	return moon_chunk(file, file_path)
 end
 
-
 if not package.moonpath then
 	package.moonpath = create_moonpath(package.path)
 end
 
 table.insert(package.loaders, 2, moon_loader)
+
+local lookup_text = {}
+local function lookup_line(fname, pos)
+	if not lookup_text[fname] then
+		local f = io.open(fname)
+		lookup_text[fname] = f:read"*a"
+		f:close()
+	end
+
+	local sub = lookup_text[fname]:sub(1, pos)
+	local count = 1
+	for _ in sub:gmatch("\n") do
+		count = count + 1
+	end
+	return count
+end
+
+local function reverse_line(fname, line_table, line)
+	for i = line,0,-1 do
+		if line_table[i] then
+			return lookup_line(fname, line_table[i])
+		end
+	end
+	return "unknown"
+end
+
+local function rewrite_traceback(text, err)
+	local header_text = "stack traceback:"
+
+	local Header, Line = lpeg.V"Header", lpeg.V"Line"
+	local Break = lpeg.S"\n"
+	local g = lpeg.P {
+		Header,
+		Header = header_text * Break * lpeg.Ct(Line^1),
+		Line = "\t" * lpeg.C((1 -Break)^0) * (Break + -1)
+	}
+
+	local match = g:match(text)
+	table.insert(match, 1, err)
+	for i, trace in pairs(match) do
+		local fname, line, msg = trace:match('^%[string "(.-)"]:(%d+): (.*)$')
+		if fname then
+			if line_tables[fname] then
+				local table = line_tables[fname]
+				match[i] = fname .. ":" ..
+					reverse_line(fname, table, line) .. ": " .. msg
+			end
+		end
+	end
+
+	return header_text .. "\n\t" .. table.concat(match, "\n\t")
+end
 
 local file, err = io.open(script)
 if not file then error(err) end
@@ -92,4 +147,9 @@ local new_arg = {
 
 local chunk = moon_chunk(file, script)
 getfenv(chunk).arg = new_arg
-chunk(unpack(new_arg))
+
+local runner = coroutine.create(chunk)
+local success, err = coroutine.resume(runner, unpack(new_arg))
+if not success then
+	print(rewrite_traceback(debug.traceback(runner), err))
+end

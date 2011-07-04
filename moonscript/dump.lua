@@ -11,7 +11,9 @@ local function flat_value(op, depth)
 		table.insert(items, flat_value(item, depth+1))
 	end
 
-	return "{"..table.concat(items, ", ").."}"
+	local pos = op[-1]
+
+	return "{"..(pos and "["..pos.."] " or "")..table.concat(items, ", ").."}"
 end
 
 function value(op)

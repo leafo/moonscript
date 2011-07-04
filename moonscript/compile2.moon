@@ -163,12 +163,16 @@ class Block
   new: (@parent) =>
     @set_indent @parent and @parent.indent + 1 or 0
     @_lines = {}
+    @_posmap = {}
     @_names = {}
     @_state = {}
 
     if @parent
       setmetatable @_state, { __index: @parent._state }
       setmetatable @_names, { __index: @parent._names }
+
+  line_table: =>
+    @_posmap
 
   set: (name, value) =>
     @_state[name] = value
@@ -202,6 +206,9 @@ class Block
 
     @put_name name if not dont_put
     name
+
+  mark_pos: (node) =>
+    @_posmap[#@_lines + 1] = node[-1]
 
   add_lines: (lines) =>
     insert @_lines, line for line in *lines
@@ -244,6 +251,7 @@ class Block
     return tostring node if type(node) != "table"
     fn = value_compile[node[1]]
     error "Failed to compile value: "..dump.value node if not fn
+    @mark_pos node
     fn self, node, ...
 
   values: (values, delim) =>
@@ -303,5 +311,8 @@ build_compiler = ->
 tree = (tree) ->
   scope = Block!
   scope\stm line for line in *tree
-  scope\render!
+
+  -- print util.dump scope._posmap
+
+  scope\render!, scope\line_table!
 

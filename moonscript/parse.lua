@@ -75,6 +75,17 @@ local function mark(name)
 	end
 end
 
+local function insert_pos(pos, value)
+    if type(value) == "table" then
+        value[-1] = pos
+    end
+    return value
+end
+
+local function pos(patt)
+	return (lpeg.Cp() * patt) / insert_pos
+end
+
 local function got(what)
 	return Cmt("", function(str, pos, ...)
 		local cap = {...}
@@ -294,10 +305,10 @@ local build_grammar = wrap(function()
 		ChainValue =
 			((Chain + DotChain + Callable) * Ct(ExpList^0)) / flatten_func,
 
-		Value =
+		Value = pos(
 			SimpleValue +
 			Ct(KeyValueList) / mark"table" +
-			ChainValue,
+			ChainValue),
 
 		SliceValue = SimpleValue + ChainValue,
 
@@ -405,7 +416,6 @@ local build_grammar = wrap(function()
 				print("stopped at", line_no)
 				error(err)
 			end
-			
 
 			if not tree then
 				local line_no = pos_to_line(last_pos)
