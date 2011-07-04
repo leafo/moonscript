@@ -9,7 +9,7 @@ pcall(function()
 end)
 
 require "moonscript.parse"
-require "moonscript.compile2"
+require "moonscript.compile"
 local parse, compile = moonscript.parse, moonscript.compile
 
 local opts, ind = alt_getopt.get_opts(arg, "qd:", { })
