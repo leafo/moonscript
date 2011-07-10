@@ -1,5 +1,17 @@
 # TODO
 
+
+posmap = {
+	[out_line] = file char
+}
+
+differentiate root block and normal block
+
+- use `with` as an arugment to function (normal expression)
+- varargs that get put in a nested generated function aren't valid anymor:
+- variable declartion for classes is messed up (always local)
+
+
 - add all lines through Block
 - add_line should only add one line at a time
 - add_block?
@@ -47,3 +59,5 @@ x =
 * allow return anywhere in block
 * upercase constants and capital letter variables should automatically be exported (in the global scope?)
 
+
+* any/every keywords for comprehensions

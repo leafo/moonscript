@@ -33,7 +33,7 @@ pretty = function(lines, indent)
   for i, l, k, r in itwos(lines) do
     fix(i, l, k, r)
   end
-  return concat(lines, "\n" .. indent)
+  return indent .. concat(lines, "\n" .. indent)
 end
 returner = function(exp)
   if ntype(exp) == "chain" and exp[2] == "return" then

@@ -1,6 +1,7 @@
 module("moonscript.compile", package.seeall)
 local util = require("moonscript.util")
 local data = require("moonscript.data")
+local dump = require("moonscript.dump")
 require("moonscript.compile.format")
 local ntype = data.ntype
 local concat, insert = table.concat, table.insert
@@ -28,16 +29,22 @@ value_compile = {
     self:stm(node)
     return self:name(name)
   end,
-  explist = function(self, node) return concat((function()
-      local _moon_0 = {}
-      local _item_0 = node
-      for _index_0=2,#_item_0 do
-        local v = _item_0[_index_0]
-        table.insert(_moon_0, self:value(v))
-      end
-      return _moon_0
-    end)(), ", ") end,
-  parens = function(self, node) return "(" .. (self:value(node[2])) .. ")" end,
+  explist = function(self, node)
+    do
+      local _with_0 = self:line()
+      _with_0:append_list((function()
+        local _moon_0 = {}
+        local _item_0 = node
+        for _index_0=2,#_item_0 do
+          local v = _item_0[_index_0]
+          table.insert(_moon_0, self:value(v))
+        end
+        return _moon_0
+      end)(), ", ")
+      return _with_0
+    end
+  end,
+  parens = function(self, node) return self:line("(", self:value(node[2]), ")") end,
   string = function(self, node)
     local _, delim, inner, delim_end = unpack(node)
     return delim .. inner .. (delim_end or delim)
@@ -108,20 +115,15 @@ value_compile = {
     if arrow == "fat" then
       insert(args, 1, "self")
     end
-    local b = self:block()
-    local _item_0 = args
-    for _index_0=1,#_item_0 do
-      local name = _item_0[_index_0]
-      b:put_name(name)
-    end
-    b:ret_stms(block)
-    local decl = "function(" .. (concat(args, ", ")) .. ")"
-    if #b._lines == 0 then
-      return decl .. " end"
-    elseif #b._lines == 1 then
-      return concat({ decl, b._lines[1], "end" }, " ")
-    else
-      return self:format(decl, b._lines, "end")
+    do
+      local _with_0 = self:block("function(" .. concat(args, ", ") .. ")")
+      local _item_0 = args
+      for _index_0=1,#_item_0 do
+        local name = _item_0[_index_0]
+        _with_0:put_name(name)
+      end
+      _with_0:ret_stms(block)
+      return _with_0
     end
   end,
   table = function(self, node)

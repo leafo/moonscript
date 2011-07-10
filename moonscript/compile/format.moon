@@ -27,7 +27,7 @@ pretty = (lines, indent) ->
       lines[i] = lines[i]..";"
   fix(i,l, k,r) for i,l,k,r in itwos lines
 
-  concat lines, "\n"..indent
+  indent .. concat lines, "\n"..indent
 
 returner = (exp) ->
   if ntype(exp) == "chain" and exp[2] == "return"

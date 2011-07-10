@@ -12,7 +12,7 @@ is_slice = function(node) return ntype(node) == "chain" and ntype(node[#node]) =
 line_compile = {
   raw = function(self, node)
     local _, text = unpack(node)
-    return self:add_line(text)
+    return self:add(text)
   end,
   assign = function(self, node)
     local _, names, values = unpack(node)
@@ -20,22 +20,14 @@ line_compile = {
     local declare = "local " .. (concat(undeclared, ", "))
     if self:is_stm(values) then
       if #undeclared > 0 then
-        self:add_line(declare)
+        self:add(declare)
       end
       if cascading[ntype(values)] then
         local decorate
         decorate = function(value) return { "assign", names, { value } } end
         return self:stm(values, decorate)
       else
-        return self:add_line(concat((function()
-          local _moon_0 = {}
-          local _item_0 = names
-          for _index_0=1,#_item_0 do
-            local n = _item_0[_index_0]
-            table.insert(_moon_0, self:value(n))
-          end
-          return _moon_0
-        end)(), ", ") .. " = " .. self:value(values))
+        return error("Assigning unsupported statement")
       end
     else
       local has_fndef = false
@@ -46,30 +38,35 @@ line_compile = {
         end
         i = i + 1
       end
-      values = concat((function()
-        local _moon_0 = {}
-        local _item_0 = values
-        for _index_0=1,#_item_0 do
-          local v = _item_0[_index_0]
-          table.insert(_moon_0, self:value(v))
+      do
+        local _with_0 = self:line()
+        if #undeclared == #names and not has_fndef then
+          _with_0:append(declare)
+        else
+          if #undeclared > 0 then
+            self:add(declare)
+          end
+          _with_0:append_list((function()
+            local _moon_0 = {}
+            local _item_0 = names
+            for _index_0=1,#_item_0 do
+              local name = _item_0[_index_0]
+              table.insert(_moon_0, self:value(name))
+            end
+            return _moon_0
+          end)(), ", ")
         end
-        return _moon_0
-      end)(), ", ")
-      if #undeclared == #names and not has_fndef then
-        return self:add_line(declare .. ' = ' .. values)
-      else
-        if #undeclared > 0 then
-          self:add_line(declare)
-        end
-        return self:add_line(concat((function()
+        _with_0:append(" = ")
+        _with_0:append_list((function()
           local _moon_0 = {}
-          local _item_0 = names
+          local _item_0 = values
           for _index_0=1,#_item_0 do
-            local n = _item_0[_index_0]
-            table.insert(_moon_0, self:value(n))
+            local v = _item_0[_index_0]
+            table.insert(_moon_0, self:value(v))
           end
           return _moon_0
-        end)(), ", ") .. " = " .. values)
+        end)(), ", ")
+        return _with_0
       end
     end
   end,
@@ -86,8 +83,8 @@ line_compile = {
           exp
         } } })
   end,
-  ["return"] = function(self, node) return self:add_line("return", self:value(node[2])) end,
-  ["break"] = function(self, node) return self:add_line("break") end,
+  ["return"] = function(self, node) return self:line("return ", self:value(node[2])) end,
+  ["break"] = function(self, node) return "break" end,
   import = function(self, node)
     local _, names, source = unpack(node)
     local to_bind = {  }
@@ -133,71 +130,80 @@ line_compile = {
         end
         return _moon_0
       end)()
-      self:add_line("local", (concat(final_names, ", ")), "=", (concat(values, ", ")))
-      return(nil)
+      local line
+      do
+        local _with_0 = self:line("local ", concat(final_names, ", "), " = ")
+        _with_0:append_list(values, ", ")
+        line = _with_0
+      end
+      return(line)
     end
-    self:add_line("local", concat(final_names, ", "))
-    self:add_line("do")
-    local inner = self:block()
-    local tmp_name = inner:free_name("table")
-    inner:add_line("local", tmp_name, "=", self:value(source))
-    source = tmp_name
-    local _item_0 = final_names
-    for _index_0=1,#_item_0 do
-      local name = _item_0[_index_0]
-      inner:add_line(name .. " = " .. get_value(name))
+    self:add(self:line("local ", concat(final_names, ", ")))
+    do
+      local _with_0 = self:block("do")
+      source = _with_0:init_free_var("table", source)
+      local _item_0 = final_names
+      for _index_0=1,#_item_0 do
+        local name = _item_0[_index_0]
+        _with_0:stm({ "assign", { name }, { get_value(name) } })
+      end
+      return _with_0
     end
-    self:add_line(inner:render())
-    return self:add_line("end")
   end,
   ["if"] = function(self, node, ret)
     local cond, block = node[2], node[3]
+    local root
+    do
+      local _with_0 = self:block(self:line("if ", self:value(cond), " then"))
+      _with_0:stms(block, ret)
+      root = _with_0
+    end
+    local current = root
     local add_clause
     add_clause = function(clause)
       local type = clause[1]
+      local i = 2
+      local next
       if type == "else" then
-        self:add_line("else")
-        block = clause[2]
+        next = self:block("else")
       else
-        self:add_line("elseif", (self:value(clause[2])), "then")
-        block = clause[3]
+        i = i + 1
+        next = self:block(self:line("elseif ", self:value(clause[2]), " then"))
       end
-      local b = self:block()
-      b:stms(block, ret)
-      return self:add_line(b:render())
+      next:stms(clause[i], ret)
+      current.next = next
+      current = next
     end
-    self:add_line("if", (self:value(cond)), "then")
-    local b = self:block()
-    b:stms(block, ret)
-    self:add_line(b:render())
     local _item_0 = node
     for _index_0=4,#_item_0 do
       local cond = _item_0[_index_0]
       add_clause(cond)
     end
-    return self:add_line("end")
+    return root
   end,
   ["while"] = function(self, node)
     local _, cond, block = unpack(node)
-    local inner = self:block()
+    local out
     if is_non_atomic(cond) then
-      self:add_line("while", "true", "do")
-      inner:stm({ "if", { "not", cond }, { { "break" } } })
+      do
+        local _with_0 = self:block("while true do")
+        _with_0:stm({ "if", { "not", cond }, { { "break" } } })
+        out = _with_0
+      end
     else
-      self:add_line("while", self:value(cond), "do")
+      out = self:block(self:line("while ", self:value(cond), " do"))
     end
-    inner:stms(block)
-    self:add_line(inner:render())
-    return self:add_line("end")
+    out:stms(block)
+    return out
   end,
   ["for"] = function(self, node)
     local _, name, bounds, block = unpack(node)
-    bounds = self:value({ "explist", unpack(bounds) })
-    self:add_line("for", self:name(name), "=", bounds, "do")
-    local inner = self:block()
-    inner:stms(block)
-    self:add_line(inner:render())
-    return self:add_line("end")
+    local loop = self:line("for ", self:name(name), " = ", self:value({ "explist", unpack(bounds) }))
+    do
+      local _with_0 = self:block(loop)
+      _with_0:stms(block)
+      return _with_0
+    end
   end,
   export = function(self, node)
     local _, names = unpack(node)
@@ -402,16 +408,15 @@ line_compile = {
   end,
   with = function(self, node, ret)
     local _, exp, block = unpack(node)
-    local inner = self:block()
-    local tmp_name = inner:free_name("with", true)
-    self:set("scope_var", tmp_name)
-    inner:stm({ "assign", { tmp_name }, { exp } })
-    inner:stms(block)
-    if ret then
-      inner:stm(ret(tmp_name))
+    do
+      local _with_0 = self:block()
+      local var = _with_0:init_free_var("with", exp)
+      self:set("scope_var", var)
+      _with_0:stms(block)
+      if ret then
+        _with_0:stm(ret(var))
+      end
+      return _with_0
     end
-    self:add_line("do")
-    self:add_line(inner:render())
-    return self:add_line("end")
   end
 }

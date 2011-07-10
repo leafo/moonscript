@@ -1,6 +1,20 @@
 
 module("moonscript.util", package.seeall)
 
+moon = {
+	is_object = function(value)
+		return type(value) == "table" and value.__class
+	end,
+	type = function(value)
+		base_type = type(value)
+		if base_type == "table" then
+			cls = value.__class
+			if cls then return cls end
+		end
+		return base_type
+	end
+}
+
 -- shallow copy
 function clone(tbl)
 	local out = {}

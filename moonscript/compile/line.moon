@@ -20,7 +20,8 @@ is_slice = (node) ->
 line_compile =
   raw: (node) =>
     _, text = unpack node
-    @add_line text
+    @add text
+
   assign: (node) =>
     _, names, values = unpack node
 
@@ -28,14 +29,14 @@ line_compile =
     declare = "local "..(concat undeclared, ", ")
 
     if @is_stm values
-      @add_line declare if #undeclared > 0
+      @add declare if #undeclared > 0
       if cascading[ntype(values)]
         decorate = (value) ->
           {"assign", names, {value}}
 
         @stm values, decorate
       else
-        @add_line concat([@value n for n in *names], ", ").." = "..@value values
+        error "Assigning unsupported statement"
     else
       has_fndef = false
       i = 1
@@ -44,16 +45,15 @@ line_compile =
           has_fndef = true
         i = i +1
 
-      -- need new compiler
-      -- (if ntype(v) == "fndef" then has_fndef = true) for v in *values
+      with @line!
+        if #undeclared == #names and not has_fndef
+          \append declare
+        else
+          @add declare if #undeclared > 0
+          \append_list [@value name for name in *names], ", "
 
-      values = concat [@value v for v in *values], ", "
-
-      if #undeclared == #names and not has_fndef
-        @add_line declare..' = '..values
-      else
-        @add_line declare if #undeclared > 0
-        @add_line concat([@value n for n in *names], ", ").." = "..values
+        \append " = "
+        \append_list [@value v for v in *values], ", "
 
   update: (node) =>
     _, name, op, exp = unpack node
@@ -62,10 +62,10 @@ line_compile =
     @stm {"assign", {name}, {{"exp", name, op_final, exp}}}
 
   return: (node) =>
-    @add_line "return", @value node[2]
+    @line "return ", @value node[2]
 
   break: (node) =>
-    @add_line "break"
+    "break"
 
   import: (node) =>
     _, names, source = unpack node
@@ -91,84 +91,69 @@ line_compile =
     -- from constant expression, put it on one line
     if type(source) == "string"
       values = [get_value name for name in *final_names]
-      @add_line "local", (concat final_names, ", "), "=", (concat values, ", ")
-      return nil
+      line = with @line "local ", concat(final_names, ", "), " = "
+        \append_list values, ", "
+      return line
 
-    @add_line "local", concat(final_names, ", ")
-    @add_line "do"
-
-    inner = @block()
-    tmp_name = inner\free_name "table"
-    inner\add_line "local", tmp_name , "=", @value source
-
-    source = tmp_name
-    inner\add_line name.." = "..get_value name for name in *final_names
-
-    @add_line inner\render!
-
-    @add_line "end"
+    @add @line "local ", concat(final_names, ", ")
+    with @block "do"
+      source = \init_free_var "table", source
+      \stm {"assign", {name}, {get_value name}} for name in *final_names
 
   if: (node, ret) =>
     cond, block = node[2], node[3]
+    root = with @block @line "if ", @value(cond), " then"
+      \stms block, ret
 
-    add_clause = (clause) ->
+    current = root
+    add_clause = (clause)->
       type = clause[1]
-      block = if type == "else"
-        @add_line "else"
-        clause[2]
+      i = 2
+      next = if type == "else"
+        @block "else"
       else
-        @add_line "elseif", (@value clause[2]), "then"
-        clause[3]
+        i += 1
+        @block @line "elseif ", @value(clause[2]), " then"
 
-      b = @block!
-      b\stms block, ret
-      @add_line b\render!
+      next\stms clause[i], ret
 
-    @add_line "if", (@value cond), "then"
-
-    b = @block!
-    b\stms block, ret
-    @add_line b\render!
+      current.next = next
+      current = next
 
     add_clause cond for cond in *node[4:]
-
-    @add_line "end"
+    root
 
   while: (node) =>
     _, cond, block = unpack node
 
-    inner = @block!
-    if is_non_atomic cond
-      @add_line "while", "true", "do"
-      inner\stm {"if", {"not", cond}, {{"break"}}}
+    out = if is_non_atomic cond
+      with @block "while true do"
+        \stm {"if", {"not", cond}, {{"break"}}}
     else
-      @add_line "while", @value(cond), "do"
+      @block @line "while ", @value(cond), " do"
 
-    inner\stms block
-
-    @add_line inner\render!
-    @add_line "end"
+    out\stms block
+    out
 
   for: (node) =>
     _, name, bounds, block = unpack node
-    bounds = @value {"explist", unpack bounds}
-    @add_line "for", @name(name), "=", bounds, "do"
-    inner = @block!
-    inner\stms block
-    @add_line inner\render!
-    @add_line "end"
+    loop = @line "for ", @name(name), " = ", @value {"explist", unpack bounds}
+    with @block loop
+      \stms block
 
   export: (node) =>
     _, names = unpack node
     @put_name name for name in *names when type(name) == "string"
     nil
 
+  -- TODO convert this
   class: (node) =>
     _, name, parent_val, tbl = unpack node
 
     constructor = nil
     final_properties = {}
 
+    -- organize constructor and everything else
     find_special = (name, value) ->
       if name == constructor_name
         constructor = value
@@ -325,15 +310,10 @@ line_compile =
 
   with: (node, ret) =>
     _, exp, block = unpack node
-    inner = @block!
-    tmp_name = inner\free_name "with", true
 
-    @set "scope_var", tmp_name
-    inner\stm {"assign", {tmp_name}, {exp}}
-    inner\stms block
-    inner\stm ret tmp_name if ret
-
-    @add_line "do"
-    @add_line inner\render!
-    @add_line "end"
+    with @block!
+      var = \init_free_var "with", exp
+      @set "scope_var", var
+      \stms block
+      \stm ret var if ret
 

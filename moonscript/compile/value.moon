@@ -3,6 +3,7 @@ module "moonscript.compile", package.seeall
 
 util = require "moonscript.util"
 data = require "moonscript.data"
+dump = require "moonscript.dump"
 
 require "moonscript.compile.format"
 
@@ -27,10 +28,11 @@ value_compile =
     @name name
 
   explist: (node) =>
-    concat [@value v for v in *node[2:]], ", "
+    with @line!
+      \append_list [@value v for v in *node[2:]], ", "
 
   parens: (node) =>
-    "("..(@value node[2])..")"
+    @line "(", @value(node[2]), ")"
 
   string: (node) =>
     _, delim, inner, delim_end = unpack node
@@ -96,17 +98,9 @@ value_compile =
     if arrow == "fat"
       insert args, 1, "self"
 
-    b = @block!
-    b\put_name name for name in *args
-    b\ret_stms block
-
-    decl = "function("..(concat args, ", ")..")"
-    if #b._lines == 0
-      decl.." end"
-    elseif #b._lines == 1
-      concat {decl, b._lines[1], "end"}, " "
-    else
-      @format decl, b._lines, "end"
+    with @block "function("..concat(args, ", ")..")"
+      \put_name name for name in *args
+      \ret_stms block
 
   table: (node) =>
     _, items = unpack node
