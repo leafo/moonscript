@@ -5,36 +5,6 @@ local itwos = util.itwos
 local Set, ntype = data.Set, data.ntype
 local concat, insert = table.concat, table.insert
 indent_char = "  "
-pretty = function(lines, indent)
-  indent = indent or ""
-  local render
-  render = function(line)
-    if type(line) == "table" then
-      return indent_char .. pretty(line, indent .. indent_char)
-    else
-      return line
-    end
-  end
-  lines = (function()
-    local _moon_0 = {}
-    local _item_0 = lines
-    for _index_0=1,#_item_0 do
-      local line = _item_0[_index_0]
-      table.insert(_moon_0, render(line))
-    end
-    return _moon_0
-  end)()
-  local fix
-  fix = function(i, left, k, right)
-    if left:sub(-1) == ")" and right:sub(1, 1) == "(" then
-      lines[i] = lines[i] .. ";"
-    end
-  end
-  for i, l, k, r in itwos(lines) do
-    fix(i, l, k, r)
-  end
-  return indent .. concat(lines, "\n" .. indent)
-end
 returner = function(exp)
   if ntype(exp) == "chain" and exp[2] == "return" then
     local items = { "explist" }

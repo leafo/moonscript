@@ -50,20 +50,27 @@ value_compile = {
     return delim .. inner .. (delim_end or delim)
   end,
   ["if"] = function(self, node)
-    local func = self:block()
-    func:stm(node, returner)
-    return self:format("(function()", func:render(), "end)()")
+    do
+      local _with_0 = self:block("(function()", "end)()")
+      _with_0:stm(node, returner)
+      return _with_0
+    end
   end,
   comprehension = function(self, node)
     local exp = node[2]
-    local func = self:block()
-    local tmp_name = func:free_name()
-    func:add_line("local", tmp_name, "= {}")
-    local action = func:block()
-    action:add_line(("table.insert(%s, %s)"):format(tmp_name, func:value(exp)))
-    func:stm(node, action)
-    func:add_line("return", tmp_name)
-    return self:format("(function()", func:render(), "end)()")
+    do
+      local _with_0 = self:block("(function()", "end()")
+      local tmp_name = _with_0:init_free_var("accum", { "table" })
+      local action
+      do
+        local _with_1 = _with_1:block()
+        _with_1:stm({ "chain", "table.insert", { "call", { tmp_name, _with_1:value(exp) } } })
+        action = _with_1
+      end
+      _with_1:stm(node, action)
+      _with_1:stm({ "return", tmp_name })
+      return _with_0
+    end
   end,
   chain = function(self, node)
     local callee = node[2]
@@ -81,34 +88,37 @@ value_compile = {
     chain_item = function(node)
       local t, arg = unpack(node)
       if t == "call" then
-        return "(" .. (self:values(arg)) .. ")"
+        return "(", self:values(arg), ")"
       elseif t == "index" then
-        return "[" .. (self:value(arg)) .. "]"
+        return "[", self:value(arg), "]"
       elseif t == "dot" then
-        return "." .. arg
+        return ".", arg
       elseif t == "colon" then
-        return ":" .. arg .. (chain_item(node[3]))
+        return ":", arg, chain_item(node[3])
+      elseif t == "colon_stub" then
+        return error("Uncalled colon stub")
       else
         return error("Unknown chain action: " .. t)
       end
     end
-    local actions = (function()
-      local _moon_0 = {}
+    local actions
+    do
+      local _with_0 = self:line()
       local _item_0 = node
       for _index_0=3,#_item_0 do
-        local act = _item_0[_index_0]
-        table.insert(_moon_0, chain_item(act))
+        local action = _item_0[_index_0]
+        _with_0:append(chain_item(action))
       end
-      return _moon_0
-    end)()
+      actions = _with_0
+    end
     if ntype(callee) == "self" and node[3] and ntype(node[3]) == "call" then
       callee[1] = "self_colon"
     end
     local callee_value = self:name(callee)
     if ntype(callee) == "exp" then
-      callee_value = "(" .. callee_value .. ")"
+      callee_value = self:line("(", callee_value, ")")
     end
-    return self:name(callee) .. concat(actions)
+    return self:line(callee, actions)
   end,
   fndef = function(self, node)
     local _, args, arrow, block = unpack(node)
@@ -128,50 +138,43 @@ value_compile = {
   end,
   table = function(self, node)
     local _, items = unpack(node)
-    local inner = self:block()
-    local _comp
-    _comp = function(i, tuple)
-      local out
-      if #tuple == 2 then
-        local key, value = unpack(tuple)
-        if type(key) == "string" and data.lua_keywords[key] then
-          key = { "string", '"', key }
-        end
-        local key_val = self:value(key)
-        if type(key) ~= "string" then
-          key = ("[%s]"):format(key_val)
+    do
+      local _with_0 = self:block("{", "}")
+      _with_0.delim = ","
+      local format_line
+      format_line = function(tuple)
+        if #tuple == 2 then
+          local key, value = unpack(tuple)
+          if type(key) == "string" and data.lua_keywords[key] then
+            key = { "string", '"', key }
+          end
+          local assign
+          if type(key) ~= "string" then
+            assign = self:line("[", _with_0:value(key), "]")
+          else
+            assign = key
+          end
+          _with_0:set("current_block", key)
+          local out = self:line(assign, " = ", _with_0:value(value))
+          _with_0:set("current_block", nil)
+          return out
         else
-          key = key_val
+          return self:line(_with_0:value(tuple[1]))
         end
-        inner:set("current_block", key_val)
-        value = inner:value(value)
-        inner:set("current_block", nil)
-        out = ("%s = %s"):format(key, value)
-      else
-        out = inner:value(tuple[1])
       end
-      if i ~= #items then
-        return out .. ","
-      else
-        return out
+      if items then
+        local _item_0 = items
+        for _index_0=1,#_item_0 do
+          local line = _item_0[_index_0]
+          _with_0:add(format_line(line))
+        end
       end
-    end
-    local values = (function()
-      local _moon_0 = {}
-      for i, v in ipairs(items) do
-        table.insert(_moon_0, _comp(i, v))
-      end
-      return _moon_0
-    end)()
-    if #values > 3 then
-      return self:format("{", values, "}")
-    else
-      return "{ " .. (concat(values, " ")) .. " }"
+      return _with_0
     end
   end,
-  minus = function(self, node) return "-" .. self:value(node[2]) end,
-  length = function(self, node) return "#" .. self:value(node[2]) end,
-  ["not"] = function(self, node) return "not " .. self:value(node[2]) end,
+  minus = function(self, node) return self:line("-", self:value(node[2])) end,
+  length = function(self, node) return self:line("#", self:value(node[2])) end,
+  ["not"] = function(self, node) return self:line("not ", self:value(node[2])) end,
   self = function(self, node) return "self." .. self:value(node[2]) end,
   self_colon = function(self, node) return "self:" .. self:value(node[2]) end
 }

@@ -7,27 +7,10 @@ import itwos from util
 import Set, ntype from data
 import concat, insert from table
 
-export indent_char, pretty, returner, moonlib, cascading, non_atomic, has_value, is_non_atomic
+export indent_char, returner, moonlib, cascading, non_atomic, has_value, is_non_atomic
 export count_lines
 
 indent_char = "  "
-pretty = (lines, indent) ->
-  indent = indent or ""
-  render = (line) ->
-    if type(line) == "table"
-      indent_char..pretty(line, indent..indent_char)
-    else
-      line
-
-  lines = [render line for line in *lines]
-
-  -- add semicolons for ambiguities
-  fix = (i, left, k, right) ->
-    if left\sub(-1) == ")" and right\sub(1,1) == "("
-      lines[i] = lines[i]..";"
-  fix(i,l, k,r) for i,l,k,r in itwos lines
-
-  indent .. concat lines, "\n"..indent
 
 returner = (exp) ->
   if ntype(exp) == "chain" and exp[2] == "return"

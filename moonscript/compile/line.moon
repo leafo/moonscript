@@ -22,6 +22,13 @@ line_compile =
     _, text = unpack node
     @add text
 
+  declare: (node) =>
+    _, names = unpack node
+    undeclared = @declare names
+    if #undeclared > 0
+      with @line "local "
+        \append_list names, ", "
+
   assign: (node) =>
     _, names, values = unpack node
 
@@ -146,7 +153,7 @@ line_compile =
     @put_name name for name in *names when type(name) == "string"
     nil
 
-  -- TODO convert this
+  -- fix newlines
   class: (node) =>
     _, name, parent_val, tbl = unpack node
 
@@ -163,17 +170,6 @@ line_compile =
     find_special unpack entry for entry in *tbl[2]
     tbl[2] = final_properties
 
-    def_scope = @block!
-    parent_loc = def_scope\free_name "parent"
-
-    def_scope\set "super" (block, chain) ->
-      calling_name = block\get"current_block"
-      slice = [item for item in *chain[3:]]
-      -- inject self
-      slice[1] = {"call", {"self", unpack slice[1][2]}}
-
-      {"chain", parent_loc, {"dot", calling_name}, unpack slice}
-
     -- synthesize constructor if needed
     if not constructor
       constructor = {"fndef", {"..."}, "fat", {
@@ -182,7 +178,7 @@ line_compile =
         }}
       }}
 
-    -- organize constructor
+    -- organize constructor arguments
     -- extract self arguments
     self_args = {}
     get_initializers = (arg) ->
@@ -199,45 +195,61 @@ line_compile =
     dests = [{"self", name} for name in *self_args]
     insert body, 1, {"assign", dests, self_args} if #self_args > 0
 
-    base_name = def_scope\free_name "base"
-    def_scope\add_line ("local %s =")\format(base_name), def_scope\value tbl
-    def_scope\add_line ("%s.__index = %s")\format(base_name, base_name)
+    -- now create the class's initialization block
+    parent_loc = @free_name "parent", false
 
-    cls = def_scope\value {"table", {
-      {"__init", constructor}
-    }}
+    def_scope = with @block!
+      parent = @value parent_val if parent_val != ""
+      \put_name parent_loc
 
-    cls_mt = def_scope\value {"table", {
-      {"__index", base_name}
-      {"__call", {"fndef", {"mt", "..."}, "slim", {
-          {"raw", ("local self = setmetatable({}, %s)")\format(base_name)}
-          {"chain", "mt.__init", {"call", {"self", "..."}}}
-          "self"
-        }}}
-    }}
+      .header = @line "(function(", parent_loc, ")"
+      .footer = @line "end)(", parent, ")"
 
-    if parent_val != ""
-      def_scope\stm {"if", parent_loc,
+      \set "super", (block, chain) ->
+        calling_name = block\get"current_block"
+        slice = [item for item in *chain[3:]]
+        -- inject self
+        slice[1] = {"call", {"self", unpack slice[1][2]}}
+        {"chain", parent_loc, {"dot", calling_name}, unpack slice}
+
+      -- the metatable holding all the class methods
+      base_name = \init_free_var "base", tbl
+      \stm {"assign", { {"chain", base_name, {"dot", "__index"}} }, { base_name }}
+
+      -- handle super class if there is one
+      \stm {"if", parent_loc,
         {{"chain", "setmetatable", {"call",
         {base_name, {"chain", "getmetatable",
           {"call", {parent_loc}}, {"dot", "__index"}}}}}}}
 
-    cls_name = def_scope\free_name "class"
-    def_scope\add_line ("local %s = setmetatable(%s, %s)")\format(cls_name, cls, cls_mt)
-    def_scope\add_line ("%s.__class = %s")\format base_name, cls_name
-    def_scope\add_line "return", cls_name
+      -- the class object that is returned
+      cls = {"table", {
+        {"__init", constructor}
+      }}
 
-    parent_val = @value parent_val if parent_val != ""
+      -- the class's meta table, gives us call and access to base methods
+      cls_mt = {"table", {
+        {"__index", base_name}
+        {"__call", {"fndef", {"mt", "..."}, "slim", {
+            {"raw", ("local self = setmetatable({}, %s)")\format(base_name)}
+            {"chain", "mt.__init", {"call", {"self", "..."}}}
+            "self"
+          }}}
+      }}
 
-    def = concat {
-      ("(function(%s)\n")\format(parent_loc)
-      def_scope\render()
-      ("\nend)(%s)")\format(parent_val)
-    }
+      cls_name = \init_free_var "class", {
+        "chain", "setmetatable", {"call", {cls, cls_mt}}
+      }
 
-    @add_line "local", name
-    @put_name name
-    @stm {"assign", {name}, {def}}
+      \stm {"assign"
+        {{"chain", base_name, {"dot", "__class"}}}
+        {cls_name}
+      }
+
+      \stm {"return", cls_name}
+
+    @stm {"declare", {name}}
+    @line name, " = ", def_scope
 
   comprehension: (node, action) =>
     _, exp, clauses = unpack node

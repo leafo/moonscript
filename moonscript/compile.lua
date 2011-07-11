@@ -69,6 +69,9 @@ end)()
 local Block_
 Block_ = (function(_parent_0)
   local _base_0 = {
+    header = "do",
+    footer = "end",
+    delim = "\n",
     line_table = function(self) return self._posmap end,
     set = function(self, name, value) self._state[name] = value end,
     get = function(self, name) return self._state[name] end,
@@ -145,7 +148,16 @@ Block_ = (function(_parent_0)
         local footer = flatten(self.footer)
         return(concat({ header, footer }, " "))
       end
-      local body = pretty(self._lines, indent_char:rep(self.indent))
+      local indent = indent_char:rep(self.indent)
+      if not self.delim then
+        for i = 1, #self._lines - 1 do
+          local left, right = self._lines[i], self._lines[i + 1]
+          if left:sub(-1) == ")" and right:sub(1, 1) == "(" then
+            self._lines[i] = self._lines[i] .. ";"
+          end
+        end
+      end
+      local body = indent .. concat(self._lines, (self.delim or "") .. "\n" .. indent)
       return concat({ header, body, indent_char:rep(self.indent - 1) .. (function()
           if self.next then
             return self.next:render()
@@ -181,15 +193,19 @@ Block_ = (function(_parent_0)
     end,
     values = function(self, values, delim)
       delim = delim or ', '
-      return concat((function()
-        local _moon_0 = {}
-        local _item_0 = values
-        for _index_0=1,#_item_0 do
-          local v = _item_0[_index_0]
-          table.insert(_moon_0, self:value(v))
-        end
-        return _moon_0
-      end)(), delim)
+      do
+        local _with_0 = Line()
+        _with_0:append_list((function()
+          local _moon_0 = {}
+          local _item_0 = values
+          for _index_0=1,#_item_0 do
+            local v = _item_0[_index_0]
+            table.insert(_moon_0, self:value(v))
+          end
+          return _moon_0
+        end)(), delim)
+        return _with_0
+      end
     end,
     stm = function(self, node, ...)
       local fn = line_compile[ntype(node)]
@@ -248,12 +264,6 @@ Block_ = (function(_parent_0)
   _base_0.__index = _base_0
   local _class_0 = setmetatable({ __init = function(self, parent, header, footer)
       self.parent, self.header, self.footer = parent, header, footer
-      if not self.header then
-        self.header = "do"
-      end
-      if not self.footer then
-        self.footer = "end"
-      end
       self.line_offset = 1
       self._lines = {  }
       self._posmap = {  }

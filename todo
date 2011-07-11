@@ -10,6 +10,7 @@ differentiate root block and normal block
 - use `with` as an arugment to function (normal expression)
 - varargs that get put in a nested generated function aren't valid anymor:
 - variable declartion for classes is messed up (always local)
+- class expressions, x = class extends Hello do new: => print "hello"
 
 
 - add all lines through Block

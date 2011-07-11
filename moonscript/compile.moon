@@ -43,10 +43,11 @@ class Line
     concat buff
 
 class Block_
-  new: (@parent, @header, @footer) =>
-    @header = "do" if not @header
-    @footer = "end" if not @footer
+  header: "do"
+  footer: "end"
+  delim: "\n"
 
+  new: (@parent, @header, @footer) =>
     @line_offset = 1
 
     @_lines = {}
@@ -138,7 +139,16 @@ class Block_
       footer = flatten @footer
       return concat {header, footer}, " "
 
-    body = pretty @_lines, indent_char\rep @indent
+    indent = indent_char\rep @indent
+
+    -- inject semicolons for ambiguous lines
+    if not @delim
+      for i = 1, #@_lines - 1
+        left, right = @_lines[i], @_lines[i+1]
+        if left\sub(-1) == ")" and right\sub(1,1) == "("
+          @_lines[i] = @_lines[i]..";"
+
+    body = indent .. concat @_lines, (@delim or "") .. "\n" .. indent
 
     concat {
       header,
@@ -171,7 +181,8 @@ class Block_
 
   values: (values, delim) =>
     delim = delim or ', '
-    concat [@value v for v in *values], delim
+    with Line!
+      \append_list [@value v for v in *values], delim
 
   stm: (node, ...) =>
     fn = line_compile[ntype(node)]
