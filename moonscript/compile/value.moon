@@ -45,12 +45,11 @@ value_compile =
   comprehension: (node) =>
     exp = node[2]
 
-    with @block "(function()", "end()"
+    with @block "(function()", "end)()"
       tmp_name = \init_free_var "accum", {"table"}
 
-      -- TODO change this to function
-      action = with \block!
-        \stm {"chain", "table.insert", {"call", {tmp_name, \value exp}}}
+      action = (value) ->
+        {"chain", "table.insert", {"call", {tmp_name, value}}}
 
       \stm node, action
       \stm {"return", tmp_name}

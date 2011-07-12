@@ -209,7 +209,49 @@ line_compile = {
   end,
   ["for"] = function(self, node)
     local _, name, bounds, block = unpack(node)
-    local loop = self:line("for ", self:name(name), " = ", self:value({ "explist", unpack(bounds) }))
+    local loop = self:line("for ", self:name(name), " = ", self:value({ "explist", unpack(bounds) }), " do")
+    do
+      local _with_0 = self:block(loop)
+      _with_0:stms(block)
+      return _with_0
+    end
+  end,
+  foreach = function(self, node)
+    local _, names, exp, block = unpack(node)
+    if ntype(exp) == "unpack" then
+      local loop
+      do
+        local _with_0 = self:block()
+        local tmp_var = _with_0:init_free_var("item", exp[2])
+        local index_tmp = _with_0:free_name("index")
+        block = (function()
+          local _moon_0 = {}
+          local _item_0 = block
+          for _index_0=1,#_item_0 do
+            local s = _item_0[_index_0]
+            table.insert(_moon_0, s)
+          end
+          return _moon_0
+        end)()
+        insert(block, 1, { "assign", names, { { "chain", tmp_var, { "index", index_tmp } } } })
+        _with_0:stm({
+          "for",
+          index_tmp,
+          { 1, { "length", tmp_var } },
+          block
+        })
+        loop = _with_0
+      end
+      return(loop)
+    end
+    local loop
+    do
+      local _with_0 = self:line()
+      _with_0:append("for ")
+      _with_0:append_list(names, ", ")
+      _with_0:append(" in ", self:value(exp), " do")
+      loop = _with_0
+    end
     do
       local _with_0 = self:block(loop)
       _with_0:stms(block)
@@ -290,11 +332,11 @@ line_compile = {
     do
       local _with_0 = self:block()
       if parent_val ~= "" then
-        local parent = self:value(parent_val)
+        parent_val = self:value(parent_val)
       end
       _with_0:put_name(parent_loc)
       _with_0.header = self:line("(function(", parent_loc, ")")
-      _with_0.footer = self:line("end)(", parent, ")")
+      _with_0.footer = self:line("end)(", parent_val, ")")
       _with_0:set("super", function(block, chain)
         local calling_name = block:get("current_block")
         local slice = (function()
@@ -307,10 +349,16 @@ line_compile = {
           return _moon_0
         end)()
         slice[1] = { "call", { "self", unpack(slice[1][2]) } }
+        local act
+        if ntype(calling_name) ~= "value" then
+          act = "index"
+        else
+          act = "dot"
+        end
         return {
           "chain",
           parent_loc,
-          { "dot", calling_name },
+          { act, calling_name },
           unpack(slice)
         }
       end)
@@ -340,7 +388,37 @@ line_compile = {
   comprehension = function(self, node, action)
     local _, exp, clauses = unpack(node)
     if not action then
-      action = self:block()
+      action = function(exp) return exp end
+    end
+    local statement = action(exp)
+    local build_clause
+    build_clause = function(clause)
+      local t = clause[1]
+      if t == "for" then
+        local names, iter
+        _, names, iter = unpack(clause)
+        statement = {
+          "foreach",
+          names,
+          iter,
+          { statement }
+        }
+      elseif t == "when" then
+        local cond
+        _, cond = unpack(clause)
+        statement = { "if", cond, { statement } }
+      else
+        statement = error("Unknown comprehension clause: " .. t)
+      end
+    end
+    for i, clause in reversed(clauses) do
+      build_clause(clause)
+    end
+    return self:stm(statement)
+  end,
+  xxxx = function(self)
+    if not action then
+      local action = self:block()
       action:stm(exp)
     end
     local depth = #clauses
@@ -348,11 +426,10 @@ line_compile = {
     local render_clause
     render_clause = function(self, clause)
       local t = clause[1]
-      action = self:block()
+      local action = self:block()
       action:set_indent(self.indent - 1)
       if "for" == t then
-        local names, iter
-        _, names, iter = unpack(clause)
+        local _, names, iter = unpack(clause)
         local name_list = concat((function()
           local _moon_0 = {}
           local _item_0 = names
@@ -406,8 +483,7 @@ line_compile = {
           return action:add_lines({ ("for %s in %s do"):format(name_list, action:value(iter)), self:render(true), "end" })
         end
       elseif "when" == t then
-        local cond
-        _, cond = unpack(clause)
+        local _, cond = unpack(clause)
         return action:add_lines({ ("if %s then"):format(self:value(cond)), self:render(true), "end" })
       else
         return error("Unknown comprehension clause: " .. t)

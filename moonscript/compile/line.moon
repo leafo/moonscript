@@ -144,7 +144,34 @@ line_compile =
 
   for: (node) =>
     _, name, bounds, block = unpack node
-    loop = @line "for ", @name(name), " = ", @value {"explist", unpack bounds}
+    loop = @line "for ", @name(name), " = ", @value({"explist", unpack bounds}), " do"
+    with @block loop
+      \stms block
+
+  -- for x in y ...
+  -- {"foreach", {names...}, exp, body}
+  foreach: (node) =>
+    _, names, exp, block = unpack node
+
+    if ntype(exp) == "unpack"
+      loop = with @block!
+        tmp_var = \init_free_var "item", exp[2]
+        index_tmp = \free_name "index"
+
+        block = [s for s in *block]
+        insert block, 1, {"assign", names, {
+          {"chain", tmp_var, {"index", index_tmp}}
+        }}
+
+        \stm {"for", index_tmp, {1, {"length", tmp_var}}, block }
+
+      return loop
+
+    loop = with @line!
+      \append "for "
+      \append_list names, ", "
+      \append " in ", @value(exp), " do"
+
     with @block loop
       \stms block
 
@@ -153,7 +180,6 @@ line_compile =
     @put_name name for name in *names when type(name) == "string"
     nil
 
-  -- fix newlines
   class: (node) =>
     _, name, parent_val, tbl = unpack node
 
@@ -199,18 +225,20 @@ line_compile =
     parent_loc = @free_name "parent", false
 
     def_scope = with @block!
-      parent = @value parent_val if parent_val != ""
+      parent_val = @value parent_val if parent_val != ""
       \put_name parent_loc
 
       .header = @line "(function(", parent_loc, ")"
-      .footer = @line "end)(", parent, ")"
+      .footer = @line "end)(", parent_val, ")"
 
       \set "super", (block, chain) ->
         calling_name = block\get"current_block"
         slice = [item for item in *chain[3:]]
         -- inject self
         slice[1] = {"call", {"self", unpack slice[1][2]}}
-        {"chain", parent_loc, {"dot", calling_name}, unpack slice}
+
+        act = if ntype(calling_name) != "value" then "index" else "dot"
+        {"chain", parent_loc, {act, calling_name}, unpack slice}
 
       -- the metatable holding all the class methods
       base_name = \init_free_var "base", tbl
@@ -254,6 +282,26 @@ line_compile =
   comprehension: (node, action) =>
     _, exp, clauses = unpack node
 
+    if not action
+      action = (exp) -> exp
+
+    statement = action exp
+    build_clause = (clause) ->
+      t = clause[1]
+      statement = if t == "for"
+        _, names, iter = unpack clause
+        {"foreach", names, iter, {statement}}
+      elseif t == "when"
+        _, cond = unpack clause
+        {"if", cond, {statement}}
+      else
+        error "Unknown comprehension clause: "..t
+
+    build_clause clause for i, clause in reversed clauses
+    @stm statement
+
+  xxxx: =>
+    -- kill me
     if not action
       action = @block!
       action\stm exp

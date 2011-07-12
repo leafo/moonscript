@@ -59,16 +59,12 @@ value_compile = {
   comprehension = function(self, node)
     local exp = node[2]
     do
-      local _with_0 = self:block("(function()", "end()")
+      local _with_0 = self:block("(function()", "end)()")
       local tmp_name = _with_0:init_free_var("accum", { "table" })
       local action
-      do
-        local _with_1 = _with_1:block()
-        _with_1:stm({ "chain", "table.insert", { "call", { tmp_name, _with_1:value(exp) } } })
-        action = _with_1
-      end
-      _with_1:stm(node, action)
-      _with_1:stm({ "return", tmp_name })
+      action = function(value) return { "chain", "table.insert", { "call", { tmp_name, value } } } end
+      _with_0:stm(node, action)
+      _with_0:stm({ "return", tmp_name })
       return _with_0
     end
   end,

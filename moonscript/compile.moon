@@ -45,7 +45,6 @@ class Line
 class Block_
   header: "do"
   footer: "end"
-  delim: "\n"
 
   new: (@parent, @header, @footer) =>
     @line_offset = 1

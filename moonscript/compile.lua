@@ -71,7 +71,6 @@ Block_ = (function(_parent_0)
   local _base_0 = {
     header = "do",
     footer = "end",
-    delim = "\n",
     line_table = function(self) return self._posmap end,
     set = function(self, name, value) self._state[name] = value end,
     get = function(self, name) return self._state[name] end,
