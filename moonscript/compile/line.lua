@@ -7,8 +7,6 @@ local reversed = util.reversed
 local ntype = data.ntype
 local concat, insert = table.concat, table.insert
 local constructor_name = "new"
-local is_slice
-is_slice = function(node) return ntype(node) == "chain" and ntype(node[#node]) == "slice" end
 line_compile = {
   raw = function(self, node)
     local _, text = unpack(node)
@@ -28,7 +26,7 @@ line_compile = {
   assign = function(self, node)
     local _, names, values = unpack(node)
     local undeclared = self:declare(names)
-    local declare = "local " .. (concat(undeclared, ", "))
+    local declare = "local " .. concat(undeclared, ", ")
     if self:is_stm(values) then
       if #undeclared > 0 then
         self:add(declare)
@@ -219,11 +217,40 @@ line_compile = {
   foreach = function(self, node)
     local _, names, exp, block = unpack(node)
     if ntype(exp) == "unpack" then
+      local iter = exp[2]
       local loop
       do
         local _with_0 = self:block()
-        local tmp_var = _with_0:init_free_var("item", exp[2])
+        local items_tmp = _with_0:free_name("item", true)
+        local bounds
+        if is_slice(iter) then
+          local slice = iter[#iter]
+          table.remove(iter)
+          table.remove(slice, 1)
+          if slice[2] and slice[2] ~= "" then
+            local max_tmp = _with_0:init_free_var("max", slice[2])
+            slice[2] = {
+              "exp",
+              max_tmp,
+              "<",
+              0,
+              "and",
+              { "length", items_tmp },
+              "+",
+              max_tmp,
+              "or",
+              max_tmp
+            }
+          else
+            slice[2] = { "length", items_tmp }
+          end
+          bounds = slice
+        else
+          print("tmp", items_tmp)
+          bounds = { 1, { "length", items_tmp } }
+        end
         local index_tmp = _with_0:free_name("index")
+        _with_0:stm({ "assign", { items_tmp }, { iter } })
         block = (function()
           local _moon_0 = {}
           local _item_0 = block
@@ -233,11 +260,11 @@ line_compile = {
           end
           return _moon_0
         end)()
-        insert(block, 1, { "assign", names, { { "chain", tmp_var, { "index", index_tmp } } } })
+        insert(block, 1, { "assign", names, { { "chain", items_tmp, { "index", index_tmp } } } })
         _with_0:stm({
           "for",
           index_tmp,
-          { 1, { "length", tmp_var } },
+          bounds,
           block
         })
         loop = _with_0
@@ -415,84 +442,6 @@ line_compile = {
       build_clause(clause)
     end
     return self:stm(statement)
-  end,
-  xxxx = function(self)
-    if not action then
-      local action = self:block()
-      action:stm(exp)
-    end
-    local depth = #clauses
-    action:set_indent(self.indent + depth)
-    local render_clause
-    render_clause = function(self, clause)
-      local t = clause[1]
-      local action = self:block()
-      action:set_indent(self.indent - 1)
-      if "for" == t then
-        local _, names, iter = unpack(clause)
-        local name_list = concat((function()
-          local _moon_0 = {}
-          local _item_0 = names
-          for _index_0=1,#_item_0 do
-            local name = _item_0[_index_0]
-            table.insert(_moon_0, self:name(name))
-          end
-          return _moon_0
-        end)(), ", ")
-        if ntype(iter) == "unpack" then
-          iter = iter[2]
-          local items_tmp = action:free_name("item")
-          local index_tmp = action:free_name("index")
-          local max_tmp = nil
-          insert(self._lines, 1, ("local %s = %s[%s]"):format(name_list, items_tmp, index_tmp))
-          local min, max, skip = 1, ("#%s"):format(items_tmp, nil)
-          if is_slice(iter) then
-            local slice = iter[#iter]
-            table.remove(iter)
-            min = action:value(slice[2])
-            if slice[3] and slice[3] ~= "" then
-              max_tmp = action:free_name("max", true)
-              action:stm({ "assign", { max_tmp }, { slice[3] } })
-              max = action:value({
-                "exp",
-                max_tmp,
-                "<",
-                0,
-                "and",
-                {
-                  "exp",
-                  { "length", items_tmp },
-                  "+",
-                  max_tmp
-                },
-                "or",
-                max_tmp
-              })
-            end
-            if slice[4] then
-              skip = action:value(slice[4])
-            end
-          end
-          return action:add_lines({
-            ("local %s = %s"):format(items_tmp, action:value(iter)),
-            ("for %s=%s do"):format(index_tmp, concat({ min, max, skip }, ",")),
-            self:render(true),
-            "end"
-          })
-        else
-          return action:add_lines({ ("for %s in %s do"):format(name_list, action:value(iter)), self:render(true), "end" })
-        end
-      elseif "when" == t then
-        local _, cond = unpack(clause)
-        return action:add_lines({ ("if %s then"):format(self:value(cond)), self:render(true), "end" })
-      else
-        return error("Unknown comprehension clause: " .. t)
-      end
-    end
-    for i, clause in reversed(clauses) do
-      render_clause(action, clause)
-    end
-    return self:add_lines(action._lines)
   end,
   with = function(self, node, ret)
     local _, exp, block = unpack(node)

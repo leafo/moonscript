@@ -8,7 +8,7 @@ import Set, ntype from data
 import concat, insert from table
 
 export indent_char, returner, moonlib, cascading, non_atomic, has_value, is_non_atomic
-export count_lines
+export count_lines, is_slice
 
 indent_char = "  "
 
@@ -40,6 +40,9 @@ has_value = (node) ->
 
 is_non_atomic = (node) ->
   non_atomic[ntype(node)]
+
+is_slice = (node) ->
+  ntype(node) == "chain" and ntype(node[#node]) == "slice"
 
 count_lines = (str) ->
   count = 1

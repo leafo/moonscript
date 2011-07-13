@@ -14,9 +14,6 @@ export line_compile
 
 constructor_name = "new"
 
-is_slice = (node) ->
-  ntype(node) == "chain" and ntype(node[#node]) == "slice"
-
 line_compile =
   raw: (node) =>
     _, text = unpack node
@@ -33,7 +30,7 @@ line_compile =
     _, names, values = unpack node
 
     undeclared = @declare names
-    declare = "local "..(concat undeclared, ", ")
+    declare = "local "..concat(undeclared, ", ")
 
     if @is_stm values
       @add declare if #undeclared > 0
@@ -154,16 +151,38 @@ line_compile =
     _, names, exp, block = unpack node
 
     if ntype(exp) == "unpack"
+      iter = exp[2]
       loop = with @block!
-        tmp_var = \init_free_var "item", exp[2]
+        items_tmp = \free_name "item", true
+        -- handle unpacked slices directly
+        bounds = if is_slice iter
+          slice = iter[#iter]
+          table.remove iter
+          table.remove slice, 1
+
+          slice[2] = if slice[2] and slice[2] != ""
+            max_tmp = \init_free_var "max", slice[2]
+            {"exp", max_tmp, "<", 0
+              "and", {"length", items_tmp}, "+", max_tmp
+              "or", max_tmp }
+          else
+            {"length", items_tmp}
+
+          slice
+        else
+          print "tmp", items_tmp
+          {1, {"length", items_tmp}}
+
         index_tmp = \free_name "index"
+
+        \stm {"assign", {items_tmp}, {iter}}
 
         block = [s for s in *block]
         insert block, 1, {"assign", names, {
-          {"chain", tmp_var, {"index", index_tmp}}
+          {"chain", items_tmp, {"index", index_tmp}}
         }}
 
-        \stm {"for", index_tmp, {1, {"length", tmp_var}}, block }
+        \stm {"for", index_tmp, bounds, block }
 
       return loop
 
@@ -300,73 +319,6 @@ line_compile =
     build_clause clause for i, clause in reversed clauses
     @stm statement
 
-  xxxx: =>
-    -- kill me
-    if not action
-      action = @block!
-      action\stm exp
-
-    depth = #clauses
-    action\set_indent @indent + depth
-
-    render_clause = (clause) =>
-      t = clause[1]
-      action = @block!
-      action\set_indent @indent - 1
-
-      if "for" == t
-        _, names, iter = unpack clause
-        name_list = concat [@name name for name in *names], ", "
-
-        if ntype(iter) == "unpack"
-          iter = iter[2]
-          items_tmp = action\free_name "item"
-          index_tmp = action\free_name "index"
-          max_tmp = nil
-
-          insert self._lines, 1, ("local %s = %s[%s]")\format name_list, items_tmp, index_tmp
-
-          -- slice shortcut
-          min, max, skip = 1, ("#%s")\format items_tmp, nil
-          if is_slice iter
-            slice = iter[#iter]
-            table.remove iter
-            min = action\value slice[2]
-            if slice[3] and slice[3] != ""
-              max_tmp = action\free_name "max", true
-              action\stm {"assign", {max_tmp}, {slice[3]}}
-              max = action\value {"exp", max_tmp, "<", 0
-                "and", {"exp", {"length", items_tmp}, "+", max_tmp}
-                "or", max_tmp
-              }
-            if slice[4]
-              skip = action\value slice[4]
-
-          action\add_lines {
-            ("local %s = %s")\format items_tmp, action\value iter
-            ("for %s=%s do")\format index_tmp, concat {min, max, skip}, ","
-            @render true
-            "end"
-          }
-        else
-          action\add_lines {
-            ("for %s in %s do")\format name_list, action\value iter
-            @render true
-            "end"
-          }
-      elseif "when" == t
-        _, cond = unpack clause
-        action\add_lines {
-          ("if %s then")\format @value cond
-          @render true
-          "end"
-        }
-      else
-        error "Unknown comprehension clause: "..t
-
-    render_clause action, clause for i, clause in reversed clauses
-
-    @add_lines action._lines -- do this better?
 
   with: (node, ret) =>
     _, exp, block = unpack node

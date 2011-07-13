@@ -19,8 +19,8 @@ value_compile =
         value = "~="
       @value value
 
-    -- ugly
-    concat [_comp i,v for i,v in ipairs node when i > 1], " "
+    with @line!
+      \append_list [_comp i,v for i,v in ipairs node when i > 1], " "
 
   update: (node) =>
     _, name = unpack node

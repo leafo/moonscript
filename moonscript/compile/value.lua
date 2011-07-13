@@ -14,15 +14,19 @@ value_compile = {
       end
       return self:value(value)
     end
-    return concat((function()
-      local _moon_0 = {}
-      for i, v in ipairs(node) do
-        if i > 1 then
-          table.insert(_moon_0, _comp(i, v))
+    do
+      local _with_0 = self:line()
+      _with_0:append_list((function()
+        local _moon_0 = {}
+        for i, v in ipairs(node) do
+          if i > 1 then
+            table.insert(_moon_0, _comp(i, v))
+          end
         end
-      end
-      return _moon_0
-    end)(), " ")
+        return _moon_0
+      end)(), " ")
+      return _with_0
+    end
   end,
   update = function(self, node)
     local _, name = unpack(node)
