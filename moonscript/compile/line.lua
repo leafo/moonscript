@@ -18,7 +18,15 @@ line_compile = {
     if #undeclared > 0 then
       do
         local _with_0 = self:line("local ")
-        _with_0:append_list(names, ", ")
+        _with_0:append_list((function()
+          local _moon_0 = {}
+          local _item_0 = names
+          for _index_0=1,#_item_0 do
+            local name = _item_0[_index_0]
+            table.insert(_moon_0, self:name(name))
+          end
+          return _moon_0
+        end)(), ", ")
         return _with_0
       end
     end
@@ -246,7 +254,6 @@ line_compile = {
           end
           bounds = slice
         else
-          print("tmp", items_tmp)
           bounds = { 1, { "length", items_tmp } }
         end
         local index_tmp = _with_0:free_name("index")
@@ -275,7 +282,15 @@ line_compile = {
     do
       local _with_0 = self:line()
       _with_0:append("for ")
-      _with_0:append_list(names, ", ")
+      _with_0:append_list((function()
+        local _moon_0 = {}
+        local _item_0 = names
+        for _index_0=1,#_item_0 do
+          local name = _item_0[_index_0]
+          table.insert(_moon_0, self:name(name))
+        end
+        return _moon_0
+      end)(), ", ")
       _with_0:append(" in ", self:value(exp), " do")
       loop = _with_0
     end
@@ -287,13 +302,7 @@ line_compile = {
   end,
   export = function(self, node)
     local _, names = unpack(node)
-    local _item_0 = names
-    for _index_0=1,#_item_0 do
-      local name = _item_0[_index_0]
-      if type(name) == "string" then
-        self:put_name(name)
-      end
-    end
+    self:declare(names)
     return nil
   end,
   class = function(self, node)

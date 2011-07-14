@@ -24,7 +24,7 @@ line_compile =
     undeclared = @declare names
     if #undeclared > 0
       with @line "local "
-        \append_list names, ", "
+        \append_list [@name name for name in *names], ", "
 
   assign: (node) =>
     _, names, values = unpack node
@@ -170,7 +170,6 @@ line_compile =
 
           slice
         else
-          print "tmp", items_tmp
           {1, {"length", items_tmp}}
 
         index_tmp = \free_name "index"
@@ -188,7 +187,7 @@ line_compile =
 
     loop = with @line!
       \append "for "
-      \append_list names, ", "
+      \append_list [@name name for name in *names], ", "
       \append " in ", @value(exp), " do"
 
     with @block loop
@@ -196,7 +195,7 @@ line_compile =
 
   export: (node) =>
     _, names = unpack node
-    @put_name name for name in *names when type(name) == "string"
+    @declare names
     nil
 
   class: (node) =>

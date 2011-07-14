@@ -15,6 +15,21 @@ moon = {
 	end
 }
 
+function pos_to_line(str, pos)
+	local line = 1
+	for _ in str:sub(1, pos):gmatch("\n") do
+		line = line + 1
+	end
+	return line
+end
+
+function get_line(str, num)
+	for line in str:gmatch("(.-)[\n$]") do
+		if num == 1 then return line end
+		num = num - 1
+	end
+end
+
 -- shallow copy
 function clone(tbl)
 	local out = {}

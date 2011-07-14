@@ -7,6 +7,7 @@ require("moonscript.compile.line")
 require("moonscript.compile.value")
 local ntype = data.ntype
 local concat, insert = table.concat, table.insert
+local pos_to_line, get_line, trim = util.pos_to_line, util.get_line, util.trim
 local Line
 Line = (function(_parent_0)
   local _base_0 = {
@@ -114,7 +115,12 @@ Block_ = (function(_parent_0)
       self:stm({ "assign", { name }, { value } })
       return name
     end,
-    mark_pos = function(self, node) self._posmap[#self._lines + 1] = node[-1] end,
+    mark_pos = function(self, node)
+      if node[-1] then
+        self.last_pos = node[-1]
+        self._posmap[#self._lines + 1] = self.last_pos
+      end
+    end,
     add_line_text = function(self, text)
       self.line_offset = self.line_offset + 1
       return insert(self._lines, text)
@@ -303,12 +309,25 @@ RootBlock = (function(_parent_0)
   return _class_0
 end)(Block_)
 Block = Block_
+format_error = function(msg, pos, file_str)
+  local line = pos_to_line(file_str, pos)
+  local line_str = get_line(file_str, line) or ""
+  return concat({ msg, ("On line [%d]:\n\t%s"):format(line, trim(line_str, line)) }, "\n")
+end
 tree = function(tree)
   local scope = RootBlock()
-  local _item_0 = tree
-  for _index_0=1,#_item_0 do
-    local line = _item_0[_index_0]
-    scope:stm(line)
+  local runner = coroutine.create(function()
+    local _item_0 = tree
+    for _index_0=1,#_item_0 do
+      local line = _item_0[_index_0]
+      scope:stm(line)
+    end
+    return scope:render()
+  end)
+  local success, result = coroutine.resume(runner)
+  if not success then
+    return nil, result .. "\n" .. debug.traceback(runner), scope.last_pos
+  else
+    return result, scope:line_table()
   end
-  return scope:render(), scope:line_table()
 end

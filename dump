@@ -10,6 +10,8 @@ require "alt_getopt"
 
 local opts, ind = alt_getopt.get_opts(arg, "hbto:", { help = "h" })
 
+local pos_to_line, get_line = util.pos_to_line, util.get_line
+
 local help = [[Usage: %s [options] file...
 
     -h          Print this message
@@ -73,7 +75,13 @@ if opts.t then
 end
 
 local start_compile = gettime()
-local code = compile.tree(tree)
+
+local code, err, pos  = compile.tree(tree)
+if not code then
+	print(compile.format_error(err, pos, file_str))
+	os.exit()
+end
+
 local compile_time = gettime() - start_compile
 
 if opts.b then

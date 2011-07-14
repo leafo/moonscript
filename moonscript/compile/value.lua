@@ -118,7 +118,7 @@ value_compile = {
     if ntype(callee) == "exp" then
       callee_value = self:line("(", callee_value, ")")
     end
-    return self:line(callee, actions)
+    return self:line(callee_value, actions)
   end,
   fndef = function(self, node)
     local _, args, arrow, block = unpack(node)

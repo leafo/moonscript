@@ -389,21 +389,14 @@ local build_grammar = wrap(function()
 	return {
 		_g = White * g * White * -1,
 		match = function(self, str, ...)
-			local function pos_to_line(pos)
-				local line = 1
-				for _ in str:sub(1, pos):gmatch("\n") do
-					line = line + 1
-				end
-				return line
+
+			local pos_to_line = function(pos)
+				return util.pos_to_line(str, pos)
 			end
 
-			local function get_line(num)
-				for line in str:gmatch("(.-)[\n$]") do
-					if num == 1 then return line end
-					num = num - 1
-				end
+			local get_line = function(num)
+				return util.get_line(str, num)
 			end
-
 
 			local tree
 			local args = {...}

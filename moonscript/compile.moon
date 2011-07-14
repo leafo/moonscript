@@ -10,8 +10,9 @@ require "moonscript.compile.value"
 
 import ntype from data
 import concat, insert from table
+import pos_to_line, get_line, trim from util
 
-export tree
+export tree, format_error
 export Block
 
 -- buffer for building up a line
@@ -99,7 +100,9 @@ class Block_
     name
 
   mark_pos: (node) =>
-    @_posmap[#@_lines + 1] = node[-1]
+    if node[-1]
+      @last_pos = node[-1]
+      @_posmap[#@_lines + 1] = @last_pos
 
   -- add raw text as new line
   add_line_text: (text) =>
@@ -234,9 +237,24 @@ class RootBlock extends Block_
 
 Block = Block_
 
+format_error = (msg, pos, file_str) ->
+  line = pos_to_line file_str, pos
+  line_str = get_line(file_str, line) or ""
+  concat {
+    msg
+    ("On line [%d]:\n\t%s")\format line, trim line_str, line
+  }, "\n"
+
 tree = (tree) ->
   scope = RootBlock!
-  scope\stm line for line in *tree
 
-  scope\render!, scope\line_table!
+  runner = coroutine.create ->
+    scope\stm line for line in *tree
+    scope\render!
+
+  success, result = coroutine.resume runner
+  if not success
+    nil, result .. "\n" .. debug.traceback(runner), scope.last_pos
+  else
+    result, scope\line_table!
 

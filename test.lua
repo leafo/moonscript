@@ -42,8 +42,6 @@ local function run_file(name, benchmark)
 	name = input_name(name)
 	file_str = io.open(name):read("*a")
 
-
-
 	local start_parse
 	if benchmark then start_parse = gettime() end
 
@@ -59,10 +57,18 @@ local function run_file(name, benchmark)
 	local start_compile
 	if benchmark then start_compile = gettime() end
 
-	local success, code = pcall(compile.tree, tree)
-	if not success then
-		error("Compile error in"..name..":\n"..code)
+	local code, err, pos = compile.tree(tree)
+	if not code then
+		print()
+		print(("Failed to compile: %s"):format(name))
+		print(compile.format_error(err, pos, file_str))
+		os.exit()
 	end
+
+	-- local success, code = pcall(compile.tree, tree)
+	-- if not success then
+	-- 	error("Compile error in"..name..":\n"..code)
+	-- end
 
 	if benchmark then
 		local compile_time = gettime() - start_compile

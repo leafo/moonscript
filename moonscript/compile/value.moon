@@ -89,7 +89,7 @@ value_compile =
     callee_value = @name callee
     callee_value = @line "(", callee_value, ")" if ntype(callee) == "exp"
 
-    @line callee, actions
+    @line callee_value, actions
 
   fndef: (node) =>
     _, args, arrow, block = unpack node
