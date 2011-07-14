@@ -128,6 +128,12 @@ class Block_
   pop: =>
     @_names = getmetatable(@_names).__index
 
+  _insert_breaks: =>
+    for i = 1, #@_lines - 1
+      left, right = @_lines[i], @_lines[i+1]
+      if left\sub(-1) == ")" and right\sub(1,1) == "("
+        @_lines[i] = @_lines[i]..";"
+
   render: =>
     flatten = (line) ->
       if type(line) == "string"
@@ -144,11 +150,7 @@ class Block_
     indent = indent_char\rep @indent
 
     -- inject semicolons for ambiguous lines
-    if not @delim
-      for i = 1, #@_lines - 1
-        left, right = @_lines[i], @_lines[i+1]
-        if left\sub(-1) == ")" and right\sub(1,1) == "("
-          @_lines[i] = @_lines[i]..";"
+    if not @delim then @_insert_breaks!
 
     body = indent .. concat @_lines, (@delim or "") .. "\n" .. indent
 
@@ -233,7 +235,9 @@ class Block_
     nil
 
 class RootBlock extends Block_
-  render: => concat @_lines, "\n"
+  render: =>
+    @_insert_breaks!
+    concat @_lines, "\n"
 
 Block = Block_
 

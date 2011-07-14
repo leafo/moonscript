@@ -12,9 +12,16 @@ local backpack = {
   eat = goo,
   yeah = dudd
 }
-local start = { something = "cold" }
-local bathe = { on = "fire" }
-local another = { [4] = 232, ["good food"] = "is the best" }
+local start = {
+  something = "cold"
+}
+local bathe = {
+  on = "fire"
+}
+local another = {
+  [4] = 232,
+  ["good food"] = "is the best"
+}
 local fwip = {
   something = hello("what"),
   number = 2323,
@@ -22,8 +29,13 @@ local fwip = {
   fruit = basket,
   nuts = day
 }
-local frick = { hello = "world" }
-local frack, best = { hello = "world", rice = 3434 }, "what"
+local frick = {
+  hello = "world"
+}
+local frack, best = {
+  hello = "world",
+  rice = 3434
+}, "what"
 local ya = {
   1,
   2,
@@ -60,7 +72,11 @@ local annother = {
   7,
   8
 }
-local yeah = { [232] = 3434, "helo", ice = "cake" }
+local yeah = {
+  [232] = 3434,
+  "helo",
+  ice = "cake"
+}
 local whatabout = {
   hello(world, another),
   what,

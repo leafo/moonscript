@@ -1,14 +1,14 @@
 local hi = (function()
-  local _moon_0 = {}
+  local _accum_0 = { }
   for _, x in ipairs({
     1,
     2,
     3,
     4
   }) do
-    table.insert(_moon_0, x * 2)
+    table.insert(_accum_0, x * 2)
   end
-  return _moon_0
+  return _accum_0
 end)()
 local items = {
   1,
@@ -19,11 +19,11 @@ local items = {
   6
 }
 local mm = (function()
-  local _moon_0 = {}
+  local _accum_0 = { }
   for self.x in ipairs(items) do
-    table.insert(_moon_0, self.x)
+    table.insert(_accum_0, self.x)
   end
-  return _moon_0
+  return _accum_0
 end)()
 for z in ipairs(items) do
   if z > 4 then
@@ -31,7 +31,7 @@ for z in ipairs(items) do
   end
 end
 local rad = (function()
-  local _moon_0 = {}
+  local _accum_0 = { }
   for a in ipairs({
     1,
     2,
@@ -41,10 +41,12 @@ local rad = (function()
     6
   }) do
     if good_number(a) then
-      table.insert(_moon_0, { a })
+      table.insert(_accum_0, {
+        a
+      })
     end
   end
-  return _moon_0
+  return _accum_0
 end)()
 for z in items do
   for j in list do
@@ -55,7 +57,9 @@ for z in items do
 end
 require("util")
 local dump
-dump = function(x) return print(util.dump(x)) end
+dump = function(x)
+  return print(util.dump(x))
+end
 local range
 range = function(count)
   local i = 0
@@ -67,38 +71,49 @@ range = function(count)
   end)
 end
 dump((function()
-  local _moon_0 = {}
+  local _accum_0 = { }
   for x in range(10) do
-    table.insert(_moon_0, x)
+    table.insert(_accum_0, x)
   end
-  return _moon_0
+  return _accum_0
 end)())
 dump((function()
-  local _moon_0 = {}
+  local _accum_0 = { }
   for x in range(5) do
     if x > 2 then
       for y in range(5) do
-        table.insert(_moon_0, { x, y })
+        table.insert(_accum_0, {
+          x,
+          y
+        })
       end
     end
   end
-  return _moon_0
+  return _accum_0
 end)())
 local things = (function()
-  local _moon_0 = {}
+  local _accum_0 = { }
   for x in range(10) do
     if x > 5 then
       for y in range(10) do
         if y > 7 then
-          table.insert(_moon_0, x + y)
+          table.insert(_accum_0, x + y)
         end
       end
     end
   end
-  return _moon_0
+  return _accum_0
 end)()
-for x in ipairs({ 1, 2, 4 }) do
-  for y in ipairs({ 1, 2, 3 }) do
+for x in ipairs({
+  1,
+  2,
+  4
+}) do
+  for y in ipairs({
+    1,
+    2,
+    3
+  }) do
     if x ~= 2 then
       print(x, y)
     end
@@ -111,61 +126,81 @@ for x in x do
   local _ = x
 end
 local x = (function()
-  local _moon_0 = {}
+  local _accum_0 = { }
   for x in x do
-    table.insert(_moon_0, x)
+    table.insert(_accum_0, x)
   end
-  return _moon_0
+  return _accum_0
 end)()
-for x in ipairs({ 1, 2, 4 }) do
-  for y in ipairs({ 1, 2, 3 }) do
+for x in ipairs({
+  1,
+  2,
+  4
+}) do
+  for y in ipairs({
+    1,
+    2,
+    3
+  }) do
     if x ~= 2 then
       print(x, y)
     end
   end
 end
 local double = (function()
-  local _moon_0 = {}
-  local _item_0 = items
-  for _index_0=1,#_item_0 do
-    local x = _item_0[_index_0]
-    table.insert(_moon_0, x * 2)
+  local _accum_0 = { }
+  do
+    local _item_0 = items
+    for _index_0 = 1, #_item_0 do
+      x = _item_0[_index_0]
+      table.insert(_accum_0, x * 2)
+    end
   end
-  return _moon_0
+  return _accum_0
 end)()
-local _item_0 = double
-for _index_0=1,#_item_0 do
-  local x = _item_0[_index_0]
-  print(x)
+do
+  local _item_0 = double
+  for _index_0 = 1, #_item_0 do
+    x = _item_0[_index_0]
+    print(x)
+  end
 end
 local cut = (function()
-  local _moon_0 = {}
-  local _item_0 = items
-  for _index_0=1,#_item_0 do
-    local x = _item_0[_index_0]
-    if x > 3 then
-      table.insert(_moon_0, x)
+  local _accum_0 = { }
+  do
+    local _item_0 = items
+    for _index_0 = 1, #_item_0 do
+      x = _item_0[_index_0]
+      if x > 3 then
+        table.insert(_accum_0, x)
+      end
     end
   end
-  return _moon_0
+  return _accum_0
 end)()
 local hello = (function()
-  local _moon_0 = {}
-  local _item_1 = items
-  for _index_1=1,#_item_1 do
-    local x = _item_1[_index_1]
+  local _accum_0 = { }
+  do
     local _item_0 = items
-    for _index_0=1,#_item_0 do
-      local y = _item_0[_index_0]
-      table.insert(_moon_0, x + y)
+    for _index_0 = 1, #_item_0 do
+      x = _item_0[_index_0]
+      do
+        local _item_1 = items
+        for _index_1 = 1, #_item_1 do
+          local y = _item_1[_index_1]
+          table.insert(_accum_0, x + y)
+        end
+      end
     end
   end
-  return _moon_0
+  return _accum_0
 end)()
-local _item_0 = hello
-for _index_0=1,#_item_0 do
-  local z = _item_0[_index_0]
-  print(z)
+do
+  local _item_0 = hello
+  for _index_0 = 1, #_item_0 do
+    local z = _item_0[_index_0]
+    print(z)
+  end
 end
 x = {
   1,
@@ -176,30 +211,40 @@ x = {
   6,
   7
 }
-local _max_0 = -5
-local _item_0 = x
-for _index_0=2,_max_0 < 0 and #_item_0 + _max_0 or _max_0,2 do
-  local y = _item_0[_index_0]
-  print(y)
+do
+  local _max_0 = -5
+  local _item_0 = x
+  for _index_0 = 2, _max_0 < 0 and #_item_0 + _max_0 or _max_0, 2 do
+    local y = _item_0[_index_0]
+    print(y)
+  end
 end
-local _max_0 = 3
-local _item_0 = x
-for _index_0=1,_max_0 < 0 and #_item_0 + _max_0 or _max_0 do
-  local y = _item_0[_index_0]
-  print(y)
+do
+  local _max_0 = 3
+  local _item_0 = x
+  for _index_0 = 1, _max_0 < 0 and #_item_0 + _max_0 or _max_0 do
+    local y = _item_0[_index_0]
+    print(y)
+  end
 end
-local _item_0 = x
-for _index_0=2,#_item_0 do
-  local y = _item_0[_index_0]
-  print(y)
+do
+  local _item_0 = x
+  for _index_0 = 2, #_item_0 do
+    local y = _item_0[_index_0]
+    print(y)
+  end
 end
-local _item_0 = x
-for _index_0=1,#_item_0,2 do
-  local y = _item_0[_index_0]
-  print(y)
+do
+  local _item_0 = x
+  for _index_0 = 1, #_item_0, 2 do
+    local y = _item_0[_index_0]
+    print(y)
+  end
 end
-local _item_0 = x
-for _index_0=2,#_item_0,2 do
-  local y = _item_0[_index_0]
-  print(y)
+do
+  local _item_0 = x
+  for _index_0 = 2, #_item_0, 2 do
+    local y = _item_0[_index_0]
+    print(y)
+  end
 end

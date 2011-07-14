@@ -214,6 +214,9 @@ line_compile =
     find_special unpack entry for entry in *tbl[2]
     tbl[2] = final_properties
 
+    -- now create the class's initialization block
+    parent_loc = @free_name "parent", true
+
     -- synthesize constructor if needed
     if not constructor
       constructor = {"fndef", {"..."}, "fat", {
@@ -238,9 +241,6 @@ line_compile =
     -- insert self assigning arguments
     dests = [{"self", name} for name in *self_args]
     insert body, 1, {"assign", dests, self_args} if #self_args > 0
-
-    -- now create the class's initialization block
-    parent_loc = @free_name "parent", false
 
     def_scope = with @block!
       parent_val = @value parent_val if parent_val != ""

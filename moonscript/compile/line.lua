@@ -323,6 +323,7 @@ line_compile = {
       find_special(unpack(entry))
     end
     tbl[2] = final_properties
+    local parent_loc = self:free_name("parent", true)
     if not constructor then
       constructor = {
         "fndef",
@@ -363,7 +364,6 @@ line_compile = {
     if #self_args > 0 then
       insert(body, 1, { "assign", dests, self_args })
     end
-    local parent_loc = self:free_name("parent", false)
     local def_scope
     do
       local _with_0 = self:block()

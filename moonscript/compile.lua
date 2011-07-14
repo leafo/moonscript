@@ -139,6 +139,14 @@ Block_ = (function(_parent_0)
     end,
     push = function(self) self._names = setmetatable({  }, { __index = self._names }) end,
     pop = function(self) self._names = getmetatable(self._names).__index end,
+    _insert_breaks = function(self)
+      for i = 1, #self._lines - 1 do
+        local left, right = self._lines[i], self._lines[i + 1]
+        if left:sub(-1) == ")" and right:sub(1, 1) == "(" then
+          self._lines[i] = self._lines[i] .. ";"
+        end
+      end
+    end,
     render = function(self)
       local flatten
       flatten = function(line)
@@ -155,12 +163,7 @@ Block_ = (function(_parent_0)
       end
       local indent = indent_char:rep(self.indent)
       if not self.delim then
-        for i = 1, #self._lines - 1 do
-          local left, right = self._lines[i], self._lines[i + 1]
-          if left:sub(-1) == ")" and right:sub(1, 1) == "(" then
-            self._lines[i] = self._lines[i] .. ";"
-          end
-        end
+        self:_insert_breaks()
       end
       local body = indent .. concat(self._lines, (self.delim or "") .. "\n" .. indent)
       return concat({ header, body, indent_char:rep(self.indent - 1) .. (function()
@@ -291,7 +294,10 @@ Block_ = (function(_parent_0)
 end)()
 local RootBlock
 RootBlock = (function(_parent_0)
-  local _base_0 = { render = function(self) return concat(self._lines, "\n") end }
+  local _base_0 = { render = function(self)
+      self:_insert_breaks()
+      return concat(self._lines, "\n")
+    end }
   _base_0.__index = _base_0
   if _parent_0 then
     setmetatable(_base_0, getmetatable(_parent_0).__index)
