@@ -177,6 +177,7 @@ line_compile =
         \stm {"assign", {items_tmp}, {iter}}
 
         block = [s for s in *block]
+        \shadow_name name for name in *names
         insert block, 1, {"assign", names, {
           {"chain", items_tmp, {"index", index_tmp}}
         }}

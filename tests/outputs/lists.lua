@@ -152,7 +152,7 @@ local double = (function()
   do
     local _item_0 = items
     for _index_0 = 1, #_item_0 do
-      x = _item_0[_index_0]
+      local x = _item_0[_index_0]
       table.insert(_accum_0, x * 2)
     end
   end
@@ -161,7 +161,7 @@ end)()
 do
   local _item_0 = double
   for _index_0 = 1, #_item_0 do
-    x = _item_0[_index_0]
+    local x = _item_0[_index_0]
     print(x)
   end
 end
@@ -170,7 +170,7 @@ local cut = (function()
   do
     local _item_0 = items
     for _index_0 = 1, #_item_0 do
-      x = _item_0[_index_0]
+      local x = _item_0[_index_0]
       if x > 3 then
         table.insert(_accum_0, x)
       end
@@ -183,7 +183,7 @@ local hello = (function()
   do
     local _item_0 = items
     for _index_0 = 1, #_item_0 do
-      x = _item_0[_index_0]
+      local x = _item_0[_index_0]
       do
         local _item_1 = items
         for _index_1 = 1, #_item_1 do

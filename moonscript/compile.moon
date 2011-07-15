@@ -82,6 +82,9 @@ class Block_
   has_name: (name) =>
     @_names[name]
 
+  shadow_name: (name) =>
+    @_names[name] = false
+
   free_name: (prefix, dont_put) =>
     prefix = prefix or "moon"
     searching = true
