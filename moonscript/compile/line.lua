@@ -130,33 +130,21 @@ line_compile = {
   end,
   import = function(self, node)
     local _, names, source = unpack(node)
-    local to_bind = { }
-    local get_name
-    get_name = function(name)
-      if ntype(name) == ":" then
-        local tmp = self:name(name[2])
-        to_bind[tmp] = true
-        return tmp
-      else
-        return self:name(name)
-      end
-    end
-    local final_names = (function()
-      local _accum_0 = { }
-      do
-        local _item_0 = names
-        for _index_0 = 1, #_item_0 do
-          local n = _item_0[_index_0]
-          table.insert(_accum_0, get_name(n))
-        end
-      end
-      return _accum_0
-    end)()
+    local final_names, to_bind = { }, { }
     do
-      local _item_0 = final_names
+      local _item_0 = names
       for _index_0 = 1, #_item_0 do
         local name = _item_0[_index_0]
-        self:put_name(name)
+        local final
+        if ntype(name) == ":" then
+          local tmp = self:name(name[2])
+          to_bind[tmp] = true
+          final = tmp
+        else
+          final = self:name(name)
+        end
+        self:put_name(final)
+        insert(final_names, final)
       end
     end
     local get_value
@@ -411,22 +399,15 @@ line_compile = {
     local _, name, parent_val, tbl = unpack(node)
     local constructor = nil
     local final_properties = { }
-    local find_special
-    find_special = function(name, value)
-      if name == constructor_name then
-        constructor = value
-      else
-        return insert(final_properties, {
-          name,
-          value
-        })
-      end
-    end
     do
       local _item_0 = tbl[2]
       for _index_0 = 1, #_item_0 do
         local entry = _item_0[_index_0]
-        find_special(unpack(entry))
+        if entry[1] == constructor_name then
+          constructor = entry[2]
+        else
+          insert(final_properties, entry)
+        end
       end
     end
     tbl[2] = final_properties
@@ -689,8 +670,7 @@ line_compile = {
       end
     end
     local statement = action(exp)
-    local build_clause
-    build_clause = function(clause)
+    for _, clause in reversed(clauses) do
       local t = clause[1]
       if t == "for" then
         local names, iter
@@ -716,9 +696,6 @@ line_compile = {
       else
         statement = error("Unknown comprehension clause: " .. t)
       end
-    end
-    for i, clause in reversed(clauses) do
-      build_clause(clause)
     end
     return self:stm(statement)
   end,

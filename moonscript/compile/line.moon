@@ -74,17 +74,17 @@ line_compile =
   import: (node) =>
     _, names, source = unpack node
 
-    to_bind = {}
-    get_name = (name) ->
-      if ntype(name) == ":"
+    final_names, to_bind = {}, {}
+    for name in *names
+      final = if ntype(name) == ":"
         tmp = @name name[2]
         to_bind[tmp] = true
         tmp
       else
         @name name
 
-    final_names = [get_name n for n in *names]
-    @put_name name for name in *final_names
+      @put_name final
+      insert final_names, final
 
     get_value = (name) ->
       if to_bind[name]
@@ -206,13 +206,12 @@ line_compile =
     final_properties = {}
 
     -- organize constructor and everything else
-    find_special = (name, value) ->
-      if name == constructor_name
-        constructor = value
+    for entry in *tbl[2]
+      if entry[1] == constructor_name
+        constructor = entry[2]
       else
-        insert final_properties, {name, value}
+        insert final_properties, entry
 
-    find_special unpack entry for entry in *tbl[2]
     tbl[2] = final_properties
 
     -- now create the class's initialization block
@@ -305,7 +304,7 @@ line_compile =
       action = (exp) -> exp
 
     statement = action exp
-    build_clause = (clause) ->
+    for _, clause in reversed clauses
       t = clause[1]
       statement = if t == "for"
         _, names, iter = unpack clause
@@ -316,7 +315,6 @@ line_compile =
       else
         error "Unknown comprehension clause: "..t
 
-    build_clause clause for i, clause in reversed clauses
     @stm statement
 
 
