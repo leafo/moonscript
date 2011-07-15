@@ -7,18 +7,30 @@ local concat, insert = table.concat, table.insert
 indent_char = "  "
 returner = function(exp)
   if ntype(exp) == "chain" and exp[2] == "return" then
-    local items = { "explist" }
-    local _item_0 = exp[3][2]
-    for _index_0=1,#_item_0 do
-      local v = _item_0[_index_0]
-      insert(items, v)
+    local items = {
+      "explist"
+    }
+    do
+      local _item_0 = exp[3][2]
+      for _index_0 = 1, #_item_0 do
+        local v = _item_0[_index_0]
+        insert(items, v)
+      end
     end
-    return { "return", items }
+    return {
+      "return",
+      items
+    }
   else
-    return { "return", exp }
+    return {
+      "return",
+      exp
+    }
   end
 end
-moonlib = { bind = function(tbl, name) return concat({
+moonlib = {
+  bind = function(tbl, name)
+    return concat({
       "moon.bind(",
       tbl,
       ".",
@@ -26,9 +38,16 @@ moonlib = { bind = function(tbl, name) return concat({
       ", ",
       tbl,
       ")"
-    }) end }
-cascading = Set({ "if", "with" })
-non_atomic = Set({ "update" })
+    })
+  end
+}
+cascading = Set({
+  "if",
+  "with"
+})
+non_atomic = Set({
+  "update"
+})
 has_value = function(node)
   if ntype(node) == "chain" then
     local ctype = ntype(node[#node])
@@ -37,8 +56,12 @@ has_value = function(node)
     return true
   end
 end
-is_non_atomic = function(node) return non_atomic[ntype(node)] end
-is_slice = function(node) return ntype(node) == "chain" and ntype(node[#node]) == "slice" end
+is_non_atomic = function(node)
+  return non_atomic[ntype(node)]
+end
+is_slice = function(node)
+  return ntype(node) == "chain" and ntype(node[#node]) == "slice"
+end
 count_lines = function(str)
   local count = 1
   for _ in str:gmatch("\n") do

@@ -13,10 +13,12 @@ Line = (function(_parent_0)
   local _base_0 = {
     _append_single = function(self, item)
       if util.moon.type(item) == Line then
-        local _item_0 = item
-        for _index_0=1,#_item_0 do
-          local value = _item_0[_index_0]
-          self:_append_single(value)
+        do
+          local _item_0 = item
+          for _index_0 = 1, #_item_0 do
+            local value = _item_0[_index_0]
+            self:_append_single(value)
+          end
         end
       else
         insert(self, item)
@@ -32,15 +34,19 @@ Line = (function(_parent_0)
       end
     end,
     append = function(self, ...)
-      local _item_0 = { ... }
-      for _index_0=1,#_item_0 do
-        local item = _item_0[_index_0]
-        self:_append_single(item)
+      do
+        local _item_0 = {
+          ...
+        }
+        for _index_0 = 1, #_item_0 do
+          local item = _item_0[_index_0]
+          self:_append_single(item)
+        end
       end
       return nil
     end,
     render = function(self)
-      local buff = {  }
+      local buff = { }
       for i = 1, #self do
         local c = self[i]
         insert(buff, (function()
@@ -55,15 +61,23 @@ Line = (function(_parent_0)
     end
   }
   _base_0.__index = _base_0
-  local _class_0 = setmetatable({ __init = function(self, ...)
+  if _parent_0 then
+    setmetatable(_base_0, getmetatable(_parent_0).__index)
+  end
+  local _class_0 = setmetatable({
+    __init = function(self, ...)
       if _parent_0 then
         return _parent_0.__init(self, ...)
       end
-    end }, { __index = _base_0, __call = function(mt, ...)
+    end
+  }, {
+    __index = _base_0,
+    __call = function(mt, ...)
       local self = setmetatable({}, _base_0)
       mt.__init(self, ...)
       return self
-    end })
+    end
+  })
   _base_0.__class = _class_0
   return _class_0
 end)()
@@ -72,36 +86,57 @@ Block_ = (function(_parent_0)
   local _base_0 = {
     header = "do",
     footer = "end",
-    line_table = function(self) return self._posmap end,
-    set = function(self, name, value) self._state[name] = value end,
-    get = function(self, name) return self._state[name] end,
+    line_table = function(self)
+      return self._posmap
+    end,
+    set = function(self, name, value)
+      self._state[name] = value
+    end,
+    get = function(self, name)
+      return self._state[name]
+    end,
     declare = function(self, names)
       local undeclared = (function()
-        local _moon_0 = {}
-        local _item_0 = names
-        for _index_0=1,#_item_0 do
-          local name = _item_0[_index_0]
-          if type(name) == "string" and not self:has_name(name) then
-            table.insert(_moon_0, name)
+        local _accum_0 = { }
+        do
+          local _item_0 = names
+          for _index_0 = 1, #_item_0 do
+            local name = _item_0[_index_0]
+            if type(name) == "string" and not self:has_name(name) then
+              table.insert(_accum_0, name)
+            end
           end
         end
-        return _moon_0
+        return _accum_0
       end)()
-      local _item_0 = undeclared
-      for _index_0=1,#_item_0 do
-        local name = _item_0[_index_0]
-        self:put_name(name)
+      do
+        local _item_0 = undeclared
+        for _index_0 = 1, #_item_0 do
+          local name = _item_0[_index_0]
+          self:put_name(name)
+        end
       end
       return undeclared
     end,
-    put_name = function(self, name) self._names[name] = true end,
-    has_name = function(self, name) return self._names[name] end,
+    put_name = function(self, name)
+      self._names[name] = true
+    end,
+    has_name = function(self, name)
+      return self._names[name]
+    end,
+    shadow_name = function(self, name)
+      self._names[name] = false
+    end,
     free_name = function(self, prefix, dont_put)
       prefix = prefix or "moon"
       local searching = true
       local name, i = nil, 0
       while searching do
-        name = concat({ "", prefix, i }, "_")
+        name = concat({
+          "",
+          prefix,
+          i
+        }, "_")
         i = i + 1
         searching = self:has_name(name)
       end
@@ -112,7 +147,15 @@ Block_ = (function(_parent_0)
     end,
     init_free_var = function(self, prefix, value)
       local name = self:free_name(prefix, true)
-      self:stm({ "assign", { name }, { value } })
+      self:stm({
+        "assign",
+        {
+          name
+        },
+        {
+          value
+        }
+      })
       return name
     end,
     mark_pos = function(self, node)
@@ -137,8 +180,14 @@ Block_ = (function(_parent_0)
         return error("Adding unknown item")
       end
     end,
-    push = function(self) self._names = setmetatable({  }, { __index = self._names }) end,
-    pop = function(self) self._names = getmetatable(self._names).__index end,
+    push = function(self)
+      self._names = setmetatable({ }, {
+        __index = self._names
+      })
+    end,
+    pop = function(self)
+      self._names = getmetatable(self._names).__index
+    end,
     _insert_breaks = function(self)
       for i = 1, #self._lines - 1 do
         local left, right = self._lines[i], self._lines[i + 1]
@@ -159,22 +208,31 @@ Block_ = (function(_parent_0)
       local header = flatten(self.header)
       if #self._lines == 0 then
         local footer = flatten(self.footer)
-        return(concat({ header, footer }, " "))
+        return(concat({
+          header,
+          footer
+        }, " "))
       end
       local indent = indent_char:rep(self.indent)
       if not self.delim then
         self:_insert_breaks()
       end
       local body = indent .. concat(self._lines, (self.delim or "") .. "\n" .. indent)
-      return concat({ header, body, indent_char:rep(self.indent - 1) .. (function()
+      return concat({
+        header,
+        body,
+        indent_char:rep(self.indent - 1) .. (function()
           if self.next then
             return self.next:render()
           else
             return flatten(self.footer)
           end
-        end)() }, "\n")
+        end)()
+      }, "\n")
     end,
-    block = function(self, header, footer) return Block(self, header, footer) end,
+    block = function(self, header, footer)
+      return Block(self, header, footer)
+    end,
     line = function(self, ...)
       do
         local _with_0 = Line()
@@ -182,12 +240,16 @@ Block_ = (function(_parent_0)
         return _with_0
       end
     end,
-    is_stm = function(self, node) return line_compile[ntype(node)] ~= nil end,
+    is_stm = function(self, node)
+      return line_compile[ntype(node)] ~= nil
+    end,
     is_value = function(self, node)
       local t = ntype(node)
       return value_compile[t] ~= nil or t == "value"
     end,
-    name = function(self, node) return self:value(node) end,
+    name = function(self, node)
+      return self:value(node)
+    end,
     value = function(self, node, ...)
       if type(node) ~= "table" then
         return(tostring(node))
@@ -204,13 +266,15 @@ Block_ = (function(_parent_0)
       do
         local _with_0 = Line()
         _with_0:append_list((function()
-          local _moon_0 = {}
-          local _item_0 = values
-          for _index_0=1,#_item_0 do
-            local v = _item_0[_index_0]
-            table.insert(_moon_0, self:value(v))
+          local _accum_0 = { }
+          do
+            local _item_0 = values
+            for _index_0 = 1, #_item_0 do
+              local v = _item_0[_index_0]
+              table.insert(_accum_0, self:value(v))
+            end
           end
-          return _moon_0
+          return _accum_0
         end)(), delim)
         return _with_0
       end
@@ -219,7 +283,15 @@ Block_ = (function(_parent_0)
       local fn = line_compile[ntype(node)]
       if not fn then
         if has_value(node) then
-          return self:stm({ "assign", { "_" }, { node } })
+          return self:stm({
+            "assign",
+            {
+              "_"
+            },
+            {
+              node
+            }
+          })
         else
           return self:add(self:value(node))
         end
@@ -260,57 +332,78 @@ Block_ = (function(_parent_0)
       if ret then
         self:ret_stms(stms, ret)
       else
-        local _item_0 = stms
-        for _index_0=1,#_item_0 do
-          local stm = _item_0[_index_0]
-          self:stm(stm)
+        do
+          local _item_0 = stms
+          for _index_0 = 1, #_item_0 do
+            local stm = _item_0[_index_0]
+            self:stm(stm)
+          end
         end
       end
       return nil
     end
   }
   _base_0.__index = _base_0
-  local _class_0 = setmetatable({ __init = function(self, parent, header, footer)
+  if _parent_0 then
+    setmetatable(_base_0, getmetatable(_parent_0).__index)
+  end
+  local _class_0 = setmetatable({
+    __init = function(self, parent, header, footer)
       self.parent, self.header, self.footer = parent, header, footer
       self.line_offset = 1
-      self._lines = {  }
-      self._posmap = {  }
-      self._names = {  }
-      self._state = {  }
+      self._lines = { }
+      self._posmap = { }
+      self._names = { }
+      self._state = { }
       if self.parent then
         self.indent = self.parent.indent + 1
-        setmetatable(self._state, { __index = self.parent._state })
-        return setmetatable(self._names, { __index = self.parent._names })
+        setmetatable(self._state, {
+          __index = self.parent._state
+        })
+        return setmetatable(self._names, {
+          __index = self.parent._names
+        })
       else
         self.indent = 0
       end
-    end }, { __index = _base_0, __call = function(mt, ...)
+    end
+  }, {
+    __index = _base_0,
+    __call = function(mt, ...)
       local self = setmetatable({}, _base_0)
       mt.__init(self, ...)
       return self
-    end })
+    end
+  })
   _base_0.__class = _class_0
   return _class_0
 end)()
 local RootBlock
 RootBlock = (function(_parent_0)
-  local _base_0 = { render = function(self)
+  local _base_0 = {
+    render = function(self)
       self:_insert_breaks()
       return concat(self._lines, "\n")
-    end }
+    end
+  }
   _base_0.__index = _base_0
   if _parent_0 then
     setmetatable(_base_0, getmetatable(_parent_0).__index)
   end
-  local _class_0 = setmetatable({ __init = function(self, ...)
+  local _class_0 = setmetatable({
+    __init = function(self, ...)
       if _parent_0 then
         return _parent_0.__init(self, ...)
       end
-    end }, { __index = _base_0, __call = function(mt, ...)
+    end
+  }, {
+    __index = _base_0,
+    __call = function(mt, ...)
       local self = setmetatable({}, _base_0)
       mt.__init(self, ...)
       return self
-    end })
+    end
+  })
   _base_0.__class = _class_0
   return _class_0
 end)(Block_)
@@ -318,15 +411,20 @@ Block = Block_
 format_error = function(msg, pos, file_str)
   local line = pos_to_line(file_str, pos)
   local line_str = get_line(file_str, line) or ""
-  return concat({ msg, ("On line [%d]:\n\t%s"):format(line, trim(line_str, line)) }, "\n")
+  return concat({
+    msg,
+    ("On line [%d]:\n\t%s"):format(line, trim(line_str, line))
+  }, "\n")
 end
 tree = function(tree)
   local scope = RootBlock()
   local runner = coroutine.create(function()
-    local _item_0 = tree
-    for _index_0=1,#_item_0 do
-      local line = _item_0[_index_0]
-      scope:stm(line)
+    do
+      local _item_0 = tree
+      for _index_0 = 1, #_item_0 do
+        local line = _item_0[_index_0]
+        scope:stm(line)
+      end
     end
     return scope:render()
   end)

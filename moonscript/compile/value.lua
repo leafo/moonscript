@@ -17,13 +17,13 @@ value_compile = {
     do
       local _with_0 = self:line()
       _with_0:append_list((function()
-        local _moon_0 = {}
+        local _accum_0 = { }
         for i, v in ipairs(node) do
           if i > 1 then
-            table.insert(_moon_0, _comp(i, v))
+            table.insert(_accum_0, _comp(i, v))
           end
         end
-        return _moon_0
+        return _accum_0
       end)(), " ")
       return _with_0
     end
@@ -37,18 +37,22 @@ value_compile = {
     do
       local _with_0 = self:line()
       _with_0:append_list((function()
-        local _moon_0 = {}
-        local _item_0 = node
-        for _index_0=2,#_item_0 do
-          local v = _item_0[_index_0]
-          table.insert(_moon_0, self:value(v))
+        local _accum_0 = { }
+        do
+          local _item_0 = node
+          for _index_0 = 2, #_item_0 do
+            local v = _item_0[_index_0]
+            table.insert(_accum_0, self:value(v))
+          end
         end
-        return _moon_0
+        return _accum_0
       end)(), ", ")
       return _with_0
     end
   end,
-  parens = function(self, node) return self:line("(", self:value(node[2]), ")") end,
+  parens = function(self, node)
+    return self:line("(", self:value(node[2]), ")")
+  end,
   string = function(self, node)
     local _, delim, inner, delim_end = unpack(node)
     return delim .. inner .. (delim_end or delim)
@@ -64,11 +68,28 @@ value_compile = {
     local exp = node[2]
     do
       local _with_0 = self:block("(function()", "end)()")
-      local tmp_name = _with_0:init_free_var("accum", { "table" })
+      local tmp_name = _with_0:init_free_var("accum", {
+        "table"
+      })
       local action
-      action = function(value) return { "chain", "table.insert", { "call", { tmp_name, value } } } end
+      action = function(value)
+        return {
+          "chain",
+          "table.insert",
+          {
+            "call",
+            {
+              tmp_name,
+              value
+            }
+          }
+        }
+      end
       _with_0:stm(node, action)
-      _with_0:stm({ "return", tmp_name })
+      _with_0:stm({
+        "return",
+        tmp_name
+      })
       return _with_0
     end
   end,
@@ -104,10 +125,12 @@ value_compile = {
     local actions
     do
       local _with_0 = self:line()
-      local _item_0 = node
-      for _index_0=3,#_item_0 do
-        local action = _item_0[_index_0]
-        _with_0:append(chain_item(action))
+      do
+        local _item_0 = node
+        for _index_0 = 3, #_item_0 do
+          local action = _item_0[_index_0]
+          _with_0:append(chain_item(action))
+        end
       end
       actions = _with_0
     end
@@ -127,10 +150,12 @@ value_compile = {
     end
     do
       local _with_0 = self:block("function(" .. concat(args, ", ") .. ")")
-      local _item_0 = args
-      for _index_0=1,#_item_0 do
-        local name = _item_0[_index_0]
-        _with_0:put_name(name)
+      do
+        local _item_0 = args
+        for _index_0 = 1, #_item_0 do
+          local name = _item_0[_index_0]
+          _with_0:put_name(name)
+        end
       end
       _with_0:ret_stms(block)
       return _with_0
@@ -146,7 +171,11 @@ value_compile = {
         if #tuple == 2 then
           local key, value = unpack(tuple)
           if type(key) == "string" and data.lua_keywords[key] then
-            key = { "string", '"', key }
+            key = {
+              "string",
+              '"',
+              key
+            }
           end
           local assign
           if type(key) ~= "string" then
@@ -163,18 +192,30 @@ value_compile = {
         end
       end
       if items then
-        local _item_0 = items
-        for _index_0=1,#_item_0 do
-          local line = _item_0[_index_0]
-          _with_0:add(format_line(line))
+        do
+          local _item_0 = items
+          for _index_0 = 1, #_item_0 do
+            local line = _item_0[_index_0]
+            _with_0:add(format_line(line))
+          end
         end
       end
       return _with_0
     end
   end,
-  minus = function(self, node) return self:line("-", self:value(node[2])) end,
-  length = function(self, node) return self:line("#", self:value(node[2])) end,
-  ["not"] = function(self, node) return self:line("not ", self:value(node[2])) end,
-  self = function(self, node) return "self." .. self:value(node[2]) end,
-  self_colon = function(self, node) return "self:" .. self:value(node[2]) end
+  minus = function(self, node)
+    return self:line("-", self:value(node[2]))
+  end,
+  length = function(self, node)
+    return self:line("#", self:value(node[2]))
+  end,
+  ["not"] = function(self, node)
+    return self:line("not ", self:value(node[2]))
+  end,
+  self = function(self, node)
+    return "self." .. self:value(node[2])
+  end,
+  self_colon = function(self, node)
+    return "self:" .. self:value(node[2])
+  end
 }

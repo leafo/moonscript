@@ -19,13 +19,15 @@ line_compile = {
       do
         local _with_0 = self:line("local ")
         _with_0:append_list((function()
-          local _moon_0 = {}
-          local _item_0 = names
-          for _index_0=1,#_item_0 do
-            local name = _item_0[_index_0]
-            table.insert(_moon_0, self:name(name))
+          local _accum_0 = { }
+          do
+            local _item_0 = names
+            for _index_0 = 1, #_item_0 do
+              local name = _item_0[_index_0]
+              table.insert(_accum_0, self:name(name))
+            end
           end
-          return _moon_0
+          return _accum_0
         end)(), ", ")
         return _with_0
       end
@@ -41,7 +43,15 @@ line_compile = {
       end
       if cascading[ntype(values)] then
         local decorate
-        decorate = function(value) return { "assign", names, { value } } end
+        decorate = function(value)
+          return {
+            "assign",
+            names,
+            {
+              value
+            }
+          }
+        end
         return self:stm(values, decorate)
       else
         return error("Assigning unsupported statement")
@@ -64,24 +74,28 @@ line_compile = {
             self:add(declare)
           end
           _with_0:append_list((function()
-            local _moon_0 = {}
-            local _item_0 = names
-            for _index_0=1,#_item_0 do
-              local name = _item_0[_index_0]
-              table.insert(_moon_0, self:value(name))
+            local _accum_0 = { }
+            do
+              local _item_0 = names
+              for _index_0 = 1, #_item_0 do
+                local name = _item_0[_index_0]
+                table.insert(_accum_0, self:value(name))
+              end
             end
-            return _moon_0
+            return _accum_0
           end)(), ", ")
         end
         _with_0:append(" = ")
         _with_0:append_list((function()
-          local _moon_0 = {}
-          local _item_0 = values
-          for _index_0=1,#_item_0 do
-            local v = _item_0[_index_0]
-            table.insert(_moon_0, self:value(v))
+          local _accum_0 = { }
+          do
+            local _item_0 = values
+            for _index_0 = 1, #_item_0 do
+              local v = _item_0[_index_0]
+              table.insert(_accum_0, self:value(v))
+            end
           end
-          return _moon_0
+          return _accum_0
         end)(), ", ")
         return _with_0
       end
@@ -93,18 +107,30 @@ line_compile = {
     if not op_final then
       _ = error("unknown op: ") .. op
     end
-    return self:stm({ "assign", { name }, { {
+    return self:stm({
+      "assign",
+      {
+        name
+      },
+      {
+        {
           "exp",
           name,
           op_final,
           exp
-        } } })
+        }
+      }
+    })
   end,
-  ["return"] = function(self, node) return self:line("return ", self:value(node[2])) end,
-  ["break"] = function(self, node) return "break" end,
+  ["return"] = function(self, node)
+    return self:line("return ", self:value(node[2]))
+  end,
+  ["break"] = function(self, node)
+    return "break"
+  end,
   import = function(self, node)
     local _, names, source = unpack(node)
-    local to_bind = {  }
+    local to_bind = { }
     local get_name
     get_name = function(name)
       if ntype(name) == ":" then
@@ -116,18 +142,22 @@ line_compile = {
       end
     end
     local final_names = (function()
-      local _moon_0 = {}
-      local _item_0 = names
-      for _index_0=1,#_item_0 do
-        local n = _item_0[_index_0]
-        table.insert(_moon_0, get_name(n))
+      local _accum_0 = { }
+      do
+        local _item_0 = names
+        for _index_0 = 1, #_item_0 do
+          local n = _item_0[_index_0]
+          table.insert(_accum_0, get_name(n))
+        end
       end
-      return _moon_0
+      return _accum_0
     end)()
-    local _item_0 = final_names
-    for _index_0=1,#_item_0 do
-      local name = _item_0[_index_0]
-      self:put_name(name)
+    do
+      local _item_0 = final_names
+      for _index_0 = 1, #_item_0 do
+        local name = _item_0[_index_0]
+        self:put_name(name)
+      end
     end
     local get_value
     get_value = function(name)
@@ -139,13 +169,15 @@ line_compile = {
     end
     if type(source) == "string" then
       local values = (function()
-        local _moon_0 = {}
-        local _item_0 = final_names
-        for _index_0=1,#_item_0 do
-          local name = _item_0[_index_0]
-          table.insert(_moon_0, get_value(name))
+        local _accum_0 = { }
+        do
+          local _item_0 = final_names
+          for _index_0 = 1, #_item_0 do
+            local name = _item_0[_index_0]
+            table.insert(_accum_0, get_value(name))
+          end
         end
-        return _moon_0
+        return _accum_0
       end)()
       local line
       do
@@ -159,10 +191,20 @@ line_compile = {
     do
       local _with_0 = self:block("do")
       source = _with_0:init_free_var("table", source)
-      local _item_0 = final_names
-      for _index_0=1,#_item_0 do
-        local name = _item_0[_index_0]
-        _with_0:stm({ "assign", { name }, { get_value(name) } })
+      do
+        local _item_0 = final_names
+        for _index_0 = 1, #_item_0 do
+          local name = _item_0[_index_0]
+          _with_0:stm({
+            "assign",
+            {
+              name
+            },
+            {
+              get_value(name)
+            }
+          })
+        end
       end
       return _with_0
     end
@@ -191,10 +233,12 @@ line_compile = {
       current.next = next
       current = next
     end
-    local _item_0 = node
-    for _index_0=4,#_item_0 do
-      local cond = _item_0[_index_0]
-      add_clause(cond)
+    do
+      local _item_0 = node
+      for _index_0 = 4, #_item_0 do
+        local cond = _item_0[_index_0]
+        add_clause(cond)
+      end
     end
     return root
   end,
@@ -204,7 +248,18 @@ line_compile = {
     if is_non_atomic(cond) then
       do
         local _with_0 = self:block("while true do")
-        _with_0:stm({ "if", { "not", cond }, { { "break" } } })
+        _with_0:stm({
+          "if",
+          {
+            "not",
+            cond
+          },
+          {
+            {
+              "break"
+            }
+          }
+        })
         out = _with_0
       end
     else
@@ -215,7 +270,10 @@ line_compile = {
   end,
   ["for"] = function(self, node)
     local _, name, bounds, block = unpack(node)
-    local loop = self:line("for ", self:name(name), " = ", self:value({ "explist", unpack(bounds) }), " do")
+    local loop = self:line("for ", self:name(name), " = ", self:value({
+      "explist",
+      unpack(bounds)
+    }), " do")
     do
       local _with_0 = self:block(loop)
       _with_0:stms(block)
@@ -243,31 +301,73 @@ line_compile = {
               "<",
               0,
               "and",
-              { "length", items_tmp },
+              {
+                "length",
+                items_tmp
+              },
               "+",
               max_tmp,
               "or",
               max_tmp
             }
           else
-            slice[2] = { "length", items_tmp }
+            slice[2] = {
+              "length",
+              items_tmp
+            }
           end
           bounds = slice
         else
-          bounds = { 1, { "length", items_tmp } }
+          bounds = {
+            1,
+            {
+              "length",
+              items_tmp
+            }
+          }
         end
         local index_tmp = _with_0:free_name("index")
-        _with_0:stm({ "assign", { items_tmp }, { iter } })
+        _with_0:stm({
+          "assign",
+          {
+            items_tmp
+          },
+          {
+            iter
+          }
+        })
         block = (function()
-          local _moon_0 = {}
-          local _item_0 = block
-          for _index_0=1,#_item_0 do
-            local s = _item_0[_index_0]
-            table.insert(_moon_0, s)
+          local _accum_0 = { }
+          do
+            local _item_0 = block
+            for _index_0 = 1, #_item_0 do
+              local s = _item_0[_index_0]
+              table.insert(_accum_0, s)
+            end
           end
-          return _moon_0
+          return _accum_0
         end)()
-        insert(block, 1, { "assign", names, { { "chain", items_tmp, { "index", index_tmp } } } })
+        do
+          local _item_0 = names
+          for _index_0 = 1, #_item_0 do
+            local name = _item_0[_index_0]
+            _with_0:shadow_name(name)
+          end
+        end
+        insert(block, 1, {
+          "assign",
+          names,
+          {
+            {
+              "chain",
+              items_tmp,
+              {
+                "index",
+                index_tmp
+              }
+            }
+          }
+        })
         _with_0:stm({
           "for",
           index_tmp,
@@ -283,13 +383,15 @@ line_compile = {
       local _with_0 = self:line()
       _with_0:append("for ")
       _with_0:append_list((function()
-        local _moon_0 = {}
-        local _item_0 = names
-        for _index_0=1,#_item_0 do
-          local name = _item_0[_index_0]
-          table.insert(_moon_0, self:name(name))
+        local _accum_0 = { }
+        do
+          local _item_0 = names
+          for _index_0 = 1, #_item_0 do
+            local name = _item_0[_index_0]
+            table.insert(_accum_0, self:name(name))
+          end
         end
-        return _moon_0
+        return _accum_0
       end)(), ", ")
       _with_0:append(" in ", self:value(exp), " do")
       loop = _with_0
@@ -308,31 +410,55 @@ line_compile = {
   class = function(self, node)
     local _, name, parent_val, tbl = unpack(node)
     local constructor = nil
-    local final_properties = {  }
+    local final_properties = { }
     local find_special
     find_special = function(name, value)
       if name == constructor_name then
         constructor = value
       else
-        return insert(final_properties, { name, value })
+        return insert(final_properties, {
+          name,
+          value
+        })
       end
     end
-    local _item_0 = tbl[2]
-    for _index_0=1,#_item_0 do
-      local entry = _item_0[_index_0]
-      find_special(unpack(entry))
+    do
+      local _item_0 = tbl[2]
+      for _index_0 = 1, #_item_0 do
+        local entry = _item_0[_index_0]
+        find_special(unpack(entry))
+      end
     end
     tbl[2] = final_properties
     local parent_loc = self:free_name("parent", true)
     if not constructor then
       constructor = {
         "fndef",
-        { "..." },
+        {
+          "..."
+        },
         "fat",
-        { { "if", parent_loc, { { "chain", "super", { "call", { "..." } } } } } }
+        {
+          {
+            "if",
+            parent_loc,
+            {
+              {
+                "chain",
+                "super",
+                {
+                  "call",
+                  {
+                    "..."
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     end
-    local self_args = {  }
+    local self_args = { }
     local get_initializers
     get_initializers = function(arg)
       if ntype(arg) == "self" then
@@ -342,27 +468,38 @@ line_compile = {
       return arg
     end
     constructor[2] = (function()
-      local _moon_0 = {}
-      local _item_0 = constructor[2]
-      for _index_0=1,#_item_0 do
-        local arg = _item_0[_index_0]
-        table.insert(_moon_0, get_initializers(arg))
+      local _accum_0 = { }
+      do
+        local _item_0 = constructor[2]
+        for _index_0 = 1, #_item_0 do
+          local arg = _item_0[_index_0]
+          table.insert(_accum_0, get_initializers(arg))
+        end
       end
-      return _moon_0
+      return _accum_0
     end)()
     constructor[3] = "fat"
     local body = constructor[4]
     local dests = (function()
-      local _moon_0 = {}
-      local _item_0 = self_args
-      for _index_0=1,#_item_0 do
-        local name = _item_0[_index_0]
-        table.insert(_moon_0, { "self", name })
+      local _accum_0 = { }
+      do
+        local _item_0 = self_args
+        for _index_0 = 1, #_item_0 do
+          local name = _item_0[_index_0]
+          table.insert(_accum_0, {
+            "self",
+            name
+          })
+        end
       end
-      return _moon_0
+      return _accum_0
     end)()
     if #self_args > 0 then
-      insert(body, 1, { "assign", dests, self_args })
+      insert(body, 1, {
+        "assign",
+        dests,
+        self_args
+      })
     end
     local def_scope
     do
@@ -376,15 +513,23 @@ line_compile = {
       _with_0:set("super", function(block, chain)
         local calling_name = block:get("current_block")
         local slice = (function()
-          local _moon_0 = {}
-          local _item_0 = chain
-          for _index_0=3,#_item_0 do
-            local item = _item_0[_index_0]
-            table.insert(_moon_0, item)
+          local _accum_0 = { }
+          do
+            local _item_0 = chain
+            for _index_0 = 3, #_item_0 do
+              local item = _item_0[_index_0]
+              table.insert(_accum_0, item)
+            end
           end
-          return _moon_0
+          return _accum_0
         end)()
-        slice[1] = { "call", { "self", unpack(slice[1][2]) } }
+        slice[1] = {
+          "call",
+          {
+            "self",
+            unpack(slice[1][2])
+          }
+        }
         local act
         if ntype(calling_name) ~= "value" then
           act = "index"
@@ -394,37 +539,154 @@ line_compile = {
         return {
           "chain",
           parent_loc,
-          { act, calling_name },
+          {
+            act,
+            calling_name
+          },
           unpack(slice)
         }
       end)
       local base_name = _with_0:init_free_var("base", tbl)
-      _with_0:stm({ "assign", { { "chain", base_name, { "dot", "__index" } } }, { base_name } })
-      _with_0:stm({ "if", parent_loc, { { "chain", "setmetatable", { "call", { base_name, {
+      _with_0:stm({
+        "assign",
+        {
+          {
+            "chain",
+            base_name,
+            {
+              "dot",
+              "__index"
+            }
+          }
+        },
+        {
+          base_name
+        }
+      })
+      _with_0:stm({
+        "if",
+        parent_loc,
+        {
+          {
+            "chain",
+            "setmetatable",
+            {
+              "call",
+              {
+                base_name,
+                {
                   "chain",
                   "getmetatable",
-                  { "call", { parent_loc } },
-                  { "dot", "__index" }
-                } } } } } })
-      local cls = { "table", { { "__init", constructor } } }
-      local cls_mt = { "table", { { "__index", base_name }, { "__call", {
+                  {
+                    "call",
+                    {
+                      parent_loc
+                    }
+                  },
+                  {
+                    "dot",
+                    "__index"
+                  }
+                }
+              }
+            }
+          }
+        }
+      })
+      local cls = {
+        "table",
+        {
+          {
+            "__init",
+            constructor
+          }
+        }
+      }
+      local cls_mt = {
+        "table",
+        {
+          {
+            "__index",
+            base_name
+          },
+          {
+            "__call",
+            {
               "fndef",
-              { "mt", "..." },
+              {
+                "mt",
+                "..."
+              },
               "slim",
-              { { "raw", ("local self = setmetatable({}, %s)"):format(base_name) }, { "chain", "mt.__init", { "call", { "self", "..." } } }, "self" }
-            } } } }
-      local cls_name = _with_0:init_free_var("class", { "chain", "setmetatable", { "call", { cls, cls_mt } } })
-      _with_0:stm({ "assign", { { "chain", base_name, { "dot", "__class" } } }, { cls_name } })
-      _with_0:stm({ "return", cls_name })
+              {
+                {
+                  "raw",
+                  ("local self = setmetatable({}, %s)"):format(base_name)
+                },
+                {
+                  "chain",
+                  "mt.__init",
+                  {
+                    "call",
+                    {
+                      "self",
+                      "..."
+                    }
+                  }
+                },
+                "self"
+              }
+            }
+          }
+        }
+      }
+      local cls_name = _with_0:init_free_var("class", {
+        "chain",
+        "setmetatable",
+        {
+          "call",
+          {
+            cls,
+            cls_mt
+          }
+        }
+      })
+      _with_0:stm({
+        "assign",
+        {
+          {
+            "chain",
+            base_name,
+            {
+              "dot",
+              "__class"
+            }
+          }
+        },
+        {
+          cls_name
+        }
+      })
+      _with_0:stm({
+        "return",
+        cls_name
+      })
       def_scope = _with_0
     end
-    self:stm({ "declare", { name } })
+    self:stm({
+      "declare",
+      {
+        name
+      }
+    })
     return self:line(name, " = ", def_scope)
   end,
   comprehension = function(self, node, action)
     local _, exp, clauses = unpack(node)
     if not action then
-      action = function(exp) return exp end
+      action = function(exp)
+        return exp
+      end
     end
     local statement = action(exp)
     local build_clause
@@ -437,12 +699,20 @@ line_compile = {
           "foreach",
           names,
           iter,
-          { statement }
+          {
+            statement
+          }
         }
       elseif t == "when" then
         local cond
         _, cond = unpack(clause)
-        statement = { "if", cond, { statement } }
+        statement = {
+          "if",
+          cond,
+          {
+            statement
+          }
+        }
       else
         statement = error("Unknown comprehension clause: " .. t)
       end
