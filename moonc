@@ -61,11 +61,10 @@ function compile_file(from, to)
 		return nil, err
 	end
 
-	local good, code = pcall(compile.tree, tree)
-	if not good then
-		return nil, "Compile critical failure: "..code
+	local code, err, pos = compile.tree(tree)
+	if not code then
+		return nil, compile.format_error(err, pos, text)
 	end
-	-- local code = compile.tree(tree)
 
 	mkdir(get_dir(to))
 	local out_f = io.open(to, "w")

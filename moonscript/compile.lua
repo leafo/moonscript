@@ -7,7 +7,7 @@ require("moonscript.compile.line")
 require("moonscript.compile.value")
 local ntype = data.ntype
 local concat, insert = table.concat, table.insert
-local pos_to_line, get_line, trim = util.pos_to_line, util.get_line, util.trim
+local pos_to_line, get_closest_line, trim = util.pos_to_line, util.get_closest_line, util.trim
 local Line
 Line = (function(_parent_0)
   local _base_0 = {
@@ -410,10 +410,12 @@ end)(Block_)
 Block = Block_
 format_error = function(msg, pos, file_str)
   local line = pos_to_line(file_str, pos)
-  local line_str = get_line(file_str, line) or ""
+  local line_str
+  line_str, line = get_closest_line(file_str, line)
+  line_str = line_str or ""
   return concat({
-    msg,
-    ("On line [%d]:\n\t%s"):format(line, trim(line_str, line))
+    "Compile error: " .. msg,
+    (" [%d] >>    %s"):format(line, trim(line_str))
   }, "\n")
 end
 tree = function(tree)
@@ -430,7 +432,21 @@ tree = function(tree)
   end)
   local success, result = coroutine.resume(runner)
   if not success then
-    return nil, result .. "\n" .. debug.traceback(runner), scope.last_pos
+    local error_msg
+    if type(result) == "table" then
+      local error_type = result[1]
+      if error_type == "user-error" then
+        error_msg = result[2]
+      else
+        error_msg = error("Unknown error thrown", util.dump(error_msg))
+      end
+    else
+      error_msg = concat({
+        result,
+        debug.traceback(runner)
+      }, "\n")
+    end
+    return nil, error_msg, scope.last_pos
   else
     return result, scope:line_table()
   end

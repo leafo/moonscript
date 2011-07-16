@@ -59,7 +59,7 @@ value_compile =
 
     if callee == -1
       callee = @get "scope_var"
-      if not callee then error "Short-dot syntax must be called within a with block"
+      if not callee then user_error "Short-dot syntax must be called within a with block"
 
     sup = @get "super"
     if callee == "super" and sup
@@ -76,7 +76,7 @@ value_compile =
       elseif t == "colon"
         ":", arg, chain_item(node[3])
       elseif t == "colon_stub"
-        error "Uncalled colon stub"
+        user_error "Uncalled colon stub"
       else
         error "Unknown chain action: "..t
 

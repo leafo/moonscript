@@ -98,7 +98,7 @@ value_compile = {
     if callee == -1 then
       callee = self:get("scope_var")
       if not callee then
-        error("Short-dot syntax must be called within a with block")
+        user_error("Short-dot syntax must be called within a with block")
       end
     end
     local sup = self:get("super")
@@ -117,7 +117,7 @@ value_compile = {
       elseif t == "colon" then
         return ":", arg, chain_item(node[3])
       elseif t == "colon_stub" then
-        return error("Uncalled colon stub")
+        return user_error("Uncalled colon stub")
       else
         return error("Unknown chain action: " .. t)
       end

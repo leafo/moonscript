@@ -112,7 +112,7 @@ line_compile = {
     local _, name, op, exp = unpack(node)
     local op_final = op:match("(.)=")
     if not op_final then
-      _ = error("unknown op: ") .. op
+      error("Unknown op: " .. op)
     end
     return self:stm({
       "assign",

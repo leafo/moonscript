@@ -10,7 +10,7 @@ require "moonscript.compile.value"
 
 import ntype from data
 import concat, insert from table
-import pos_to_line, get_line, trim from util
+import pos_to_line, get_closest_line, trim from util
 
 export tree, format_error
 export Block
@@ -246,10 +246,11 @@ Block = Block_
 
 format_error = (msg, pos, file_str) ->
   line = pos_to_line file_str, pos
-  line_str = get_line(file_str, line) or ""
+  line_str, line = get_closest_line file_str, line
+  line_str = line_str or ""
   concat {
-    msg
-    ("On line [%d]:\n\t%s")\format line, trim line_str, line
+    "Compile error: "..msg
+    (" [%d] >>    %s")\format line, trim line_str
   }, "\n"
 
 tree = (tree) ->
@@ -261,7 +262,16 @@ tree = (tree) ->
 
   success, result = coroutine.resume runner
   if not success
-    nil, result .. "\n" .. debug.traceback(runner), scope.last_pos
+    error_msg = if type(result) == "table"
+      error_type = result[1]
+      if error_type == "user-error"
+        result[2]
+      else
+        error "Unknown error thrown", util.dump error_msg
+    else
+      concat {result, debug.traceback runner}, "\n"
+
+    nil, error_msg, scope.last_pos
   else
     result, scope\line_table!
 

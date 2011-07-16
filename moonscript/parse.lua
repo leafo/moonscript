@@ -110,7 +110,7 @@ local function flatten_or_mark(name)
 end
 
 local build_grammar = wrap(function()
-	local err_msg = "Failed to parse, line:\n [%d] >> %s (%d)"
+	local err_msg = "Failed to parse:\n [%d] >>    %s (%d)"
 
 	local _indent = Stack(0) -- current indent
 
@@ -423,8 +423,9 @@ local build_grammar = wrap(function()
 
 			if not tree then
 				local line_no = pos_to_line(last_pos)
-				local line_str = get_line(line_no)
-				return nil, err_msg:format(line_no, line_str or "", _indent:top())
+				local line_str = get_line(line_no) or ""
+				
+				return nil, err_msg:format(line_no, trim(line_str), _indent:top())
 			end
 			return tree
 		end

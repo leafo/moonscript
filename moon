@@ -47,9 +47,13 @@ end
 
 local line_tables = {}
 local function moon_chunk(file, file_path)
-	local tree, err = parse.string(file:read"*a")
+	local text = file:read"*a"
+	local tree, err = parse.string(text)
 	if not tree then error("Parse error: "..err) end
-	local code, ltable = compile.tree(tree)
+	local code, ltable, pos = compile.tree(tree)
+	if not code then
+		error(compile.format_error(ltable, pos, text))
+	end
 
 	line_tables[file_path] = ltable
 

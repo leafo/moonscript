@@ -5,6 +5,12 @@ local itwos = util.itwos
 local Set, ntype = data.Set, data.ntype
 local concat, insert = table.concat, table.insert
 indent_char = "  "
+user_error = function(...)
+  return error({
+    "user-error",
+    ...
+  })
+end
 returner = function(exp)
   if ntype(exp) == "chain" and exp[2] == "return" then
     local items = {

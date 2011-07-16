@@ -66,7 +66,7 @@ line_compile =
   update: (node) =>
     _, name, op, exp = unpack node
     op_final = op\match "(.)="
-    error"unknown op: "..op if not op_final
+    error "Unknown op: "..op if not op_final
     @stm {"assign", {name}, {{"exp", name, op_final, exp}}}
 
   return: (node) =>

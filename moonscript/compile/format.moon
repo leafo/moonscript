@@ -8,9 +8,12 @@ import Set, ntype from data
 import concat, insert from table
 
 export indent_char, returner, moonlib, cascading, non_atomic, has_value, is_non_atomic
-export count_lines, is_slice
+export count_lines, is_slice, user_error
 
 indent_char = "  "
+
+user_error = (...) ->
+  error {"user-error", ...}
 
 returner = (exp) ->
   if ntype(exp) == "chain" and exp[2] == "return"

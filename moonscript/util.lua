@@ -23,10 +23,21 @@ function pos_to_line(str, pos)
 	return line
 end
 
-function get_line(str, num)
+function get_closest_line(str, line_num)
+	local line = get_line(str, line_num)
+	if (not line or trim(line) == "") and line_num > 1 then
+		return get_closest_line(str, line_num - 1)
+	end
+
+	return line, line_num
+end
+
+function get_line(str, line_num)
 	for line in str:gmatch("(.-)[\n$]") do
-		if num == 1 then return line end
-		num = num - 1
+		if line_num == 1 then
+			return line
+		end
+		line_num = line_num - 1
 	end
 end
 
