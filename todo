@@ -3,13 +3,14 @@
 - use `with` as an arugment to function (normal expression)
 - varargs that get put in a nested generated function aren't valid anymore:
 
+- cascading expressions in function
+- assigning a for loop
+
 - class expressions, x = class extends Hello do new: => print "hello"
 
 * issues with whitespace on the end of lines
-* default arguments
 * multiline comments
-* table slices
-* add a proper return statement
+* table slices (almost)
 * add continue keyword (ouch)
 * vim syntax file
 

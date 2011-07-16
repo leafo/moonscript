@@ -24,12 +24,28 @@ local yeah = (1 + 5) * 3
 yeah = ((1 + 5) * 3) / 2
 yeah = ((1 + 5) * 3) / 2 + i % 100
 local whoa = (1 + 2) * (3 + 4) * (4 + 5)
-return(5 + function()
+_ = function()
+  if something then
+    return 1, 2, 4
+  end
+  return print("hello")
+end
+_ = function()
+  if hello then
+    return "heloo", "world"
+  else
+    return no, way
+  end
+end
+_ = function()
+  return 1, 2, 34
+end
+return 5 + function()
   return 4 + 2
-end)
-return(5 + (function()
+end
+return 5 + (function()
   return 4
-end) + 2)
+end) + 2
 print(5 + function()
   _ = 34
   return good(nads)

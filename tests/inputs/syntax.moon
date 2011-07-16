@@ -37,6 +37,21 @@ yeah = ((1+5)*3)/2 + i % 100
 
 whoa = (1+2) * (3+4) * (4+5)
 
+->
+  if something
+    return 1,2,4
+
+  print "hello"
+
+->
+  if hello
+    "heloo", "world"
+  else
+    no, way
+
+
+-> 1,2,34
+
 return 5 + () -> 4 + 2
 
 return 5 + (() -> 4) + 2

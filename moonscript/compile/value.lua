@@ -57,6 +57,13 @@ value_compile = {
     local _, delim, inner, delim_end = unpack(node)
     return delim .. inner .. (delim_end or delim)
   end,
+  with = function(self, node)
+    do
+      local _with_0 = self:block("(function()", "end)()")
+      _with_0:stm(node, returner)
+      return _with_0
+    end
+  end,
   ["if"] = function(self, node)
     do
       local _with_0 = self:block("(function()", "end)()")

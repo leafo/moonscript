@@ -38,6 +38,10 @@ value_compile =
     _, delim, inner, delim_end = unpack node
     delim..inner..(delim_end or delim)
 
+  with: (node) =>
+    with @block "(function()", "end)()"
+      \stm node, returner
+
   if: (node) =>
     with @block "(function()", "end)()"
       \stm node, returner
