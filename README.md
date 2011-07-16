@@ -49,13 +49,13 @@ After it is installed, run the following in a terminal:
     ~> wget https://raw.github.com/leafo/moonscript/master/moonscript-dev-1.rockspec
     ~> luarocks install moonscript-dev-1.rockspec
 
-This will provide the `moon` and `moonc` binaries along with the `moonscript`
+This will provide the `moon` and `moonc` tools along with the `moonscript`
 Lua module.
 
 ### Optional
 
-If you are on Linux and want to run *watch* mode, which compiles `moon` files to
-`lua` files as they are changed, you can install
+If you are on Linux and want to run *watch* mode, which compiles `.moon` files to
+`.lua` files as they are changed, you can install
 [linotify](https://github.com/hoelzro/linotify).
 
 

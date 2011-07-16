@@ -1,27 +1,14 @@
 # TODO
 
-
-posmap = {
-	[out_line] = file char
-}
-
-differentiate root block and normal block
-
 - use `with` as an arugment to function (normal expression)
-- varargs that get put in a nested generated function aren't valid anymor:
-- variable declartion for classes is messed up (always local)
+- varargs that get put in a nested generated function aren't valid anymore:
+
 - class expressions, x = class extends Hello do new: => print "hello"
-
-
-- add all lines through Block
-- add_line should only add one line at a time
-- add_block?
 
 * issues with whitespace on the end of lines
 * default arguments
 * multiline comments
 * table slices
-* chains that don't end in funcall need tmp assignment
 * add a proper return statement
 * add continue keyword (ouch)
 * vim syntax file
@@ -49,16 +36,7 @@ or
 	x = 3434
 
 
-* these should work:
-
-x = 5 + if something then 40 else 343
-
-x =
-  hello: if something 343 else 343
-
-
 * allow return anywhere in block
 * upercase constants and capital letter variables should automatically be exported (in the global scope?)
 
-
-* any/every keywords for comprehensions
+* any/every keywords for comprehensions?
