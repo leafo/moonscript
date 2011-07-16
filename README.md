@@ -37,7 +37,7 @@ command line, like any first-class scripting language.
 
 ## Installation
 
-## Installing with LuaRocks
+### Installing with LuaRocks
 
 The easiest way to install is to use Lua rocks and the provide rockspec.
 
@@ -59,15 +59,19 @@ If you are on Linux and want to run *watch* mode, which compiles `moon` files to
 [linotify](https://github.com/hoelzro/linotify).
 
 
-# Learning
+## Learning
 
 Read the [reference manual](docs/index.md).
 
-# Command Line Use
+## Command Line Use
 
 Two tools are installed with MoonScript, `moon` and `moonc`.
+`moonc` is used for transforming MoonsScript code into a Lua file.
+It takes a list of files, compiles them all, and creates the associated `.lua`
+files in the same directories.
 
-## moon
+
+### moon
 
 `moon` can be used to run MoonsScript files directly from the command line,
 without needing a separate compile step. All MoonsScript files are compiled in
@@ -79,7 +83,7 @@ automatically.
 In addition to this, when an error occurs during runtime, the stack trace is
 rewritten to give line numbers from the original `.moon` file.
 
-## moonc
+### moonc
 
 `moonc` is used for transforming a MoonsScript file into a Lua file.
 It takes a list of files, compiles them all, and creates the associated `.lua`
