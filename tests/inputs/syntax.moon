@@ -1,24 +1,5 @@
 
 
-x = -> print what
-
-
-->
-
--> -> ->
-go to the barn
-
-open -> the -> door
-
-open ->
-  the door
-  hello = ->
-    my func
-
-h = -> hi
-
-eat ->, world
-
 a = 1 + 2* 3 / 6
 
 a, bunch, go, here = another, world
@@ -55,10 +36,6 @@ yeah = ((1+5)*3)/2
 yeah = ((1+5)*3)/2 + i % 100
 
 whoa = (1+2) * (3+4) * (4+5)
-
-
-(->)()
-
 
 return 5 + () -> 4 + 2
 
@@ -167,14 +144,6 @@ what whack + 5
 what whack - 5
 
 x = hello - world - something
-
-hello!
-hello.world!
-
-hello!.something
-what!["ofefe"]
-
-what! the! heck!
 
 
 

@@ -145,6 +145,27 @@ value_compile = {
   end,
   fndef = function(self, node)
     local _, args, arrow, block = unpack(node)
+    local default_args = { }
+    local format_names
+    format_names = function(arg)
+      if type(arg) == "string" then
+        return arg
+      else
+        insert(default_args, arg)
+        return arg[1]
+      end
+    end
+    args = (function()
+      local _accum_0 = { }
+      do
+        local _item_0 = args
+        for _index_0 = 1, #_item_0 do
+          local arg = _item_0[_index_0]
+          table.insert(_accum_0, format_names(arg))
+        end
+      end
+      return _accum_0
+    end)()
     if arrow == "fat" then
       insert(args, 1, "self")
     end
@@ -155,6 +176,33 @@ value_compile = {
         for _index_0 = 1, #_item_0 do
           local name = _item_0[_index_0]
           _with_0:put_name(name)
+        end
+      end
+      do
+        local _item_0 = default_args
+        for _index_0 = 1, #_item_0 do
+          local default = _item_0[_index_0]
+          local name, value = unpack(default)
+          _with_0:stm({
+            'if',
+            {
+              'exp',
+              name,
+              '==',
+              'nil'
+            },
+            {
+              {
+                'assign',
+                {
+                  name
+                },
+                {
+                  value
+                }
+              }
+            }
+          })
         end
       end
       _with_0:ret_stms(block)

@@ -37,6 +37,13 @@ line_compile = {
     local _, names, values = unpack(node)
     local undeclared = self:declare(names)
     local declare = "local " .. concat(undeclared, ", ")
+    if #values == 1 and cascading[ntype(values[1])] then
+      return(self:stm({
+        "assign",
+        names,
+        values[1]
+      }))
+    end
     if self:is_stm(values) then
       if #undeclared > 0 then
         self:add(declare)

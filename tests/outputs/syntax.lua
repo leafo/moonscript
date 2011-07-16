@@ -1,32 +1,3 @@
-local x
-x = function()
-  return print(what)
-end
-local _
-_ = function() end
-_ = function()
-  return function()
-    return function() end
-  end
-end
-go(to(the(barn)))
-open(function()
-  return the(function()
-    return door
-  end)
-end)
-open(function()
-  the(door)
-  local hello
-  hello = function()
-    return my(func)
-  end
-end)
-local h
-h = function()
-  return hi
-end
-eat(function() end, world)
 local a = 1 + 2 * 3 / 6
 local bunch, go, here
 a, bunch, go, here = another, world
@@ -47,14 +18,12 @@ fun(a)(b, bad(hello))
 hello(world(what(are(you(doing(here))))))
 what(the)[3243](world, yeck(heck))
 hairy[hands][are](gross)(okay(okay[world]))
-_ = (get[something] + 5)[years]
-local i
-i, x = 200, 300
+local _ = (get[something] + 5)[years]
+local i, x = 200, 300
 local yeah = (1 + 5) * 3
 yeah = ((1 + 5) * 3) / 2
 yeah = ((1 + 5) * 3) / 2 + i % 100
-local whoa = (1 + 2) * (3 + 4) * (4 + 5);
-(function() end)()
+local whoa = (1 + 2) * (3 + 4) * (4 + 5)
 return(5 + function()
   return 4 + 2
 end)
@@ -180,8 +149,3 @@ what(whack + 5)
 _ = 5 - what(wack)
 what(whack - 5)
 x = hello - world - something
-hello()
-hello.world()
-_ = hello().something
-_ = what()["ofefe"]
-what()(the()(heck()))

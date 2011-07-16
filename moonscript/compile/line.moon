@@ -32,6 +32,10 @@ line_compile =
     undeclared = @declare names
     declare = "local "..concat(undeclared, ", ")
 
+    -- can we extract single cascading value
+    if #values == 1 and cascading[ntype values[1]]
+      return @stm {"assign", names, values[1]}
+
     if @is_stm values
       @add declare if #undeclared > 0
       if cascading[ntype(values)]

@@ -177,7 +177,6 @@ local build_grammar = wrap(function()
 		return {"call", {value}}
 	end
 
-
 	-- makes sure the last item in a chain is an index
 	local _assignable = { index = true, dot = true, slice = true }
 	local function check_assignable(str, pos, value)
@@ -228,6 +227,11 @@ local build_grammar = wrap(function()
 		end
 
 		return stm
+	end
+
+	local function wrap_default_arg(name, default)
+		if not default then return name end
+		return {name, default}
 	end
 
 	local function check_lua_string(str, pos, right, left)
@@ -380,7 +384,11 @@ local build_grammar = wrap(function()
 		KeyValueList = KeyValue * (sym"," * KeyValue)^0,
 		KeyValueLine = Cmt(Indent, check_indent) * KeyValueList * sym","^-1,
 
-		FunLit = (sym"(" * Ct(NameList^-1) * sym")" + Ct("")) *
+		FnArgsDef = sym"(" * Ct(FnArgDefList^-1) * sym")",
+		FnArgDefList =  FnArgDef * (sym"," * FnArgDef)^0,
+		FnArgDef = Name * (sym"=" * Exp)^-1 / wrap_default_arg,
+
+		FunLit = (FnArgsDef + Ct("")) *
 			(sym"->" * Cc"slim" + sym"=>" * Cc"fat") *
 			(Body + Ct"") / mark"fndef",
 
@@ -416,7 +424,7 @@ local build_grammar = wrap(function()
 			if not tree then
 				local line_no = pos_to_line(last_pos)
 				local line_str = get_line(line_no)
-				return nil, err_msg:format(line_no, line_str, _indent:top())
+				return nil, err_msg:format(line_no, line_str or "", _indent:top())
 			end
 			return tree
 		end

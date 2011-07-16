@@ -94,11 +94,30 @@ value_compile =
   fndef: (node) =>
     _, args, arrow, block = unpack node
 
+    default_args = {}
+    format_names = (arg) ->
+      if type(arg) == "string"
+        arg
+      else
+        insert default_args, arg
+        arg[1]
+
+    args = [format_names arg for arg in *args]
+
     if arrow == "fat"
       insert args, 1, "self"
 
     with @block "function("..concat(args, ", ")..")"
       \put_name name for name in *args
+
+      for default in *default_args
+        name, value = unpack default
+        \stm {
+          'if', {'exp', name, '==', 'nil'}, {
+            {'assign', {name}, {value}}
+          }
+        }
+
       \ret_stms block
 
   table: (node) =>
