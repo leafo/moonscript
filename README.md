@@ -4,18 +4,18 @@ MoonScript is a programmer friendly language that compiles into
 [Lua](http://ww.lua.org/).  It gives you the power of the fastest scripting
 language combined with a rich set of features:
 
-- Provides a clean syntax using significant whitespace that avoids all the
-  keyword noise typically seen in a Lua script.
+ * Provides a clean syntax using significant whitespace that avoids all the
+   keyword noise typically seen in a Lua script.
+ 
+ * Adds table comprehensions, implicit return on functions, classes,
+   inheritance, scope management statements `import` & `export`, and a
+   convenient object creation statement called `with`.
+ 
+ * Can be loaded directly from a Lua script without an intermediate compile
+   step. It even knows how to tell you where errors occurred in the original
+   file when they happen.
 
-- Adds table comprehensions, implicit return on functions, classes,
-  inheritance, scope management statements `import` & `export`, and a
-  convenient object creation statement called `with`.
-
-- Can be loaded directly from a Lua script without an intermediate compile
-  step. It even knows how to tell you where errors occurred in the original
-  file when they happen.
-
-Creating an instance of a instance of a class and calling a method:
+Creating an instance of a class and calling a method:
 
      class Thing
        name: "unknown"
@@ -62,6 +62,39 @@ If you are on Linux and want to run *watch* mode, which compiles `moon` files to
 # Learning
 
 Read the [reference manual](docs/index.md).
+
+# Command Line Use
+
+Two tools are installed with MoonScript, `moon` and `moonc`.
+
+## moon
+
+`moon` can be used to run MoonsScript files directly from the command line,
+without needing a separate compile step. All MoonsScript files are compiled in
+memory as they are run.
+
+Any MoonScript files that are required will also be compiled and run
+automatically.
+
+In addition to this, when an error occurs during runtime, the stack trace is
+rewritten to give line numbers from the original `.moon` file.
+
+## moonc
+
+`moonc` is used for transforming a MoonsScript file into a Lua file.
+It takes a list of files, compiles them all, and creates the associated `.lua`
+files alongside the `.moon` files.
+
+You can control where the compiled files are put using the `-t` flag, followed
+by a directory.
+
+`moonc` can also take a directory as an argument, and it will recursively scan
+for all MoonScript files and compile them.
+
+Combined with `linotify` on linux, the `-w` flag can be used to watch all files
+that match the given search path for changes, and then compile them only when
+required.
+
 
 ## Overview of Differences & Highlights
 
