@@ -6,7 +6,6 @@
 
 - class expressions, x = class extends Hello do new: => print "hello"
 
-* issues with whitespace on the end of lines
 * multiline comments
 * table slices (almost)
 * add continue keyword (ouch)

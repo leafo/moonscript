@@ -242,7 +242,7 @@ local build_grammar = wrap(function()
 		File,
 		File = Block + Ct"",
 		Block = Ct(Line * (Break^1 * Line)^0),
-		Line = Cmt(Indent, check_indent) * Statement + _Space * Comment,
+		Line = Cmt(Indent, check_indent) * Statement + Space * #Break,
 
 		Statement = (Import + While + With + For + ForEach + Return
 			+ ClassDecl + Export + BreakLoop + Ct(ExpList) / flatten_or_mark"explist" * Space) * (
@@ -251,7 +251,8 @@ local build_grammar = wrap(function()
 				CompInner / mark"comprehension"
 			)^-1 / wrap_decorator,
 
-		Body = Break * InBlock + Ct(Statement),
+		EmptyLine = Space * Break,
+		Body = Break * EmptyLine^0 * InBlock + Ct(Statement),
 
 		InBlock = #Cmt(Indent, advance_indent) * Block * OutBlock,
 		OutBlock = Cmt("", pop_indent),
