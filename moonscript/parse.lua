@@ -244,7 +244,7 @@ local build_grammar = wrap(function()
 		Block = Ct(Line * (Break^1 * Line)^0),
 		Line = Cmt(Indent, check_indent) * Statement + _Space * Comment,
 
-		Statement = (Import + While + With + For + Foreach + Return
+		Statement = (Import + While + With + For + ForEach + Return
 			+ ClassDecl + Export + BreakLoop + Ct(ExpList) / flatten_or_mark"explist" * Space) * (
 				-- statement decorators
 				key"if" * Exp * (key"else" * Exp)^-1 * Space / mark"if" +
@@ -277,7 +277,7 @@ local build_grammar = wrap(function()
 		For = key"for" * (Name * sym"=" * Ct(Exp * sym"," * Exp * (sym"," * Exp)^-1)) *
 			key"do"^-1 * Body / mark"for",
 
-		Foreach = key"for" * Ct(NameList) * key"in" * (sym"*" * Exp / mark"unpack" + Exp) * key"do"^-1 * Body / mark"foreach",
+		ForEach = key"for" * Ct(NameList) * key"in" * (sym"*" * Exp / mark"unpack" + Exp) * key"do"^-1 * Body / mark"foreach",
 
 		Comprehension = sym"[" * Exp * CompInner * sym"]" / mark"comprehension",
 
@@ -303,6 +303,7 @@ local build_grammar = wrap(function()
 		SimpleValue =
 			If +
 			With +
+			ForEach + For + While +
 			sym"-" * -SomeSpace * Exp / mark"minus" +
 			sym"#" * Exp / mark"length" +
 			sym"not" * Exp / mark"not" +

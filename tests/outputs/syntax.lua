@@ -165,3 +165,13 @@ what(whack + 5)
 _ = 5 - what(wack)
 what(whack - 5)
 x = hello - world - something
+(function(something)
+  if something == nil then
+    do
+      local _with_0 = what
+      _with_0:cool(100)
+      something = _with_0
+    end
+  end
+  return print(something)
+end)()

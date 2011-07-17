@@ -20,3 +20,14 @@ with leaf
 
 zyzyzy = with something
   .set_state "hello world"
+
+
+x = 5 + with Something!
+  \write "hello world"
+
+
+x = {
+  hello: with yeah
+    \okay!
+}
+

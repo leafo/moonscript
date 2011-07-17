@@ -5,6 +5,56 @@ local dump = require("moonscript.dump")
 require("moonscript.compile.format")
 local ntype = data.ntype
 local concat, insert = table.concat, table.insert
+local create_accumulate_wrapper
+create_accumulate_wrapper = function(block_pos)
+  return function(self, node)
+    do
+      local _with_0 = self:block("(function()", "end)()")
+      local accum_name = _with_0:init_free_var("accum", {
+        "table"
+      })
+      local value_name = _with_0:free_name("value", true)
+      local inner = node[block_pos]
+      inner[#inner] = {
+        "assign",
+        {
+          value_name
+        },
+        {
+          inner[#inner]
+        }
+      }
+      insert(inner, {
+        "if",
+        {
+          "exp",
+          value_name,
+          "~=",
+          "nil"
+        },
+        {
+          {
+            "chain",
+            "table.insert",
+            {
+              "call",
+              {
+                accum_name,
+                value_name
+              }
+            }
+          }
+        }
+      })
+      _with_0:stm(node)
+      _with_0:stm({
+        "return",
+        accum_name
+      })
+      return _with_0
+    end
+  end
+end
 value_compile = {
   exp = function(self, node)
     local _comp
@@ -60,14 +110,14 @@ value_compile = {
   with = function(self, node)
     do
       local _with_0 = self:block("(function()", "end)()")
-      _with_0:stm(node, returner)
+      _with_0:stm(node, default_return)
       return _with_0
     end
   end,
   ["if"] = function(self, node)
     do
       local _with_0 = self:block("(function()", "end)()")
-      _with_0:stm(node, returner)
+      _with_0:stm(node, default_return)
       return _with_0
     end
   end,
@@ -100,6 +150,9 @@ value_compile = {
       return _with_0
     end
   end,
+  ["for"] = create_accumulate_wrapper(4),
+  foreach = create_accumulate_wrapper(4),
+  ["while"] = create_accumulate_wrapper(3),
   chain = function(self, node)
     local callee = node[2]
     if callee == -1 then

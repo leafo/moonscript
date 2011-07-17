@@ -205,7 +205,7 @@ class Block_
 
   ret_stms: (stms, ret) =>
     if not ret
-      ret = returner
+      ret = default_return
 
     -- wow I really need a for loop
     i = 1

@@ -304,7 +304,7 @@ Block_ = (function(_parent_0)
     end,
     ret_stms = function(self, stms, ret)
       if not ret then
-        ret = returner
+        ret = default_return
       end
       local i = 1
       while i < #stms do

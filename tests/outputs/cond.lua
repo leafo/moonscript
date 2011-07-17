@@ -37,17 +37,6 @@ if working then
     local _ = nah
   end
 end
-while true do
-  print("name")
-end
-while 5 + 5 do
-  print("okay world")
-  working(man)
-end
-while also do
-  i(work(too))
-  local _ = "okay"
-end
 if yeah then
   no(day)
 elseif cool(me) then

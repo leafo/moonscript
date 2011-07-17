@@ -11,8 +11,14 @@ user_error = function(...)
     ...
   })
 end
-returner = function(exp)
-  if ntype(exp) == "chain" and exp[2] == "return" then
+local manual_return = Set({
+  "foreach",
+  "for",
+  "while"
+})
+default_return = function(exp)
+  local t = ntype(exp)
+  if t == "chain" and exp[2] == "return" then
     local items = {
       "explist"
     }
@@ -27,6 +33,8 @@ returner = function(exp)
       "return",
       items
     }
+  elseif manual_return[t] then
+    return exp
   else
     return {
       "return",

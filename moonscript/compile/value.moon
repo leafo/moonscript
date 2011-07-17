@@ -12,6 +12,23 @@ import concat, insert from table
 
 export value_compile
 
+create_accumulate_wrapper = (block_pos) ->
+  (node) =>
+    with @block "(function()", "end)()"
+      accum_name = \init_free_var "accum", {"table"}
+      value_name = \free_name "value", true
+
+      inner = node[block_pos]
+      inner[#inner] = {"assign", {value_name}, {inner[#inner]}}
+      insert inner, {
+        "if", {"exp", value_name, "~=", "nil"}, {
+          {"chain", "table.insert", {"call", {accum_name, value_name}}}
+        }
+      }
+
+      \stm node
+      \stm {"return", accum_name}
+
 value_compile =
   exp: (node) =>
     _comp = (i, value) ->
@@ -40,11 +57,11 @@ value_compile =
 
   with: (node) =>
     with @block "(function()", "end)()"
-      \stm node, returner
+      \stm node, default_return
 
   if: (node) =>
     with @block "(function()", "end)()"
-      \stm node, returner
+      \stm node, default_return
 
   comprehension: (node) =>
     exp = node[2]
@@ -57,6 +74,10 @@ value_compile =
 
       \stm node, action
       \stm {"return", tmp_name}
+
+  for: create_accumulate_wrapper 4
+  foreach: create_accumulate_wrapper 4
+  while: create_accumulate_wrapper 3
 
   chain: (node) =>
     callee = node[2]

@@ -160,6 +160,8 @@ what whack - 5
 
 x = hello - world - something
 
-
+((something = with what
+  \cool 100) ->
+  print something)!
 
 

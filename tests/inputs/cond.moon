@@ -21,16 +21,6 @@ if cool then wow cool else
 if working
   if cool then if cool then okay else what else nah
 
-while true do print "name"
-
-while 5 + 5
-  print "okay world"
-  working man
-
-while also do
-  i work too
-  "okay"
-
 
 if yeah then no day elseif cool me then okay ya else u way
 if yeah then no dad else if cool you then okay bah else p way

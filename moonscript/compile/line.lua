@@ -35,8 +35,6 @@ line_compile = {
   end,
   assign = function(self, node)
     local _, names, values = unpack(node)
-    local undeclared = self:declare(names)
-    local declare = "local " .. concat(undeclared, ", ")
     if #values == 1 and cascading[ntype(values[1])] then
       return(self:stm({
         "assign",
@@ -44,6 +42,8 @@ line_compile = {
         values[1]
       }))
     end
+    local undeclared = self:declare(names)
+    local declare = "local " .. concat(undeclared, ", ")
     if self:is_stm(values) then
       if #undeclared > 0 then
         self:add(declare)

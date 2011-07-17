@@ -29,12 +29,12 @@ line_compile =
   assign: (node) =>
     _, names, values = unpack node
 
-    undeclared = @declare names
-    declare = "local "..concat(undeclared, ", ")
-
     -- can we extract single cascading value
     if #values == 1 and cascading[ntype values[1]]
       return @stm {"assign", names, values[1]}
+
+    undeclared = @declare names
+    declare = "local "..concat(undeclared, ", ")
 
     if @is_stm values
       @add declare if #undeclared > 0

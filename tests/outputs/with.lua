@@ -24,3 +24,19 @@ do
   _with_0.set_state("hello world")
   zyzyzy = _with_0
 end
+local x = 5 + (function()
+  do
+    local _with_0 = Something()
+    _with_0:write("hello world")
+    return _with_0
+  end
+end)()
+x = {
+  hello = (function()
+    do
+      local _with_0 = yeah
+      _with_0:okay()
+      return _with_0
+    end
+  end)()
+}

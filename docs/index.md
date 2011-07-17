@@ -195,6 +195,38 @@ single line:
 
     for j = 1,10,3 do print j
 
+A for loop can also be used an expression. The last statement in the body of
+the for loop is coerced into an expression and appended to an accumulating
+table if the value of that expression is not nil.
+
+Doubling every even number:
+
+    doubled_evens = for i=1,20
+      if i % 2 == 0
+        i * 2
+      else
+        i
+
+Filtering out odd numbers:
+    
+    my_numbers = {1,2,3,4,5,6}
+    odds = for x in *my_numbers
+      if x % 2 == 1 then x
+
+For loops at the end of a function body are not accumulated into a table for a
+return value (Instead the function will return `nil`).  Either an explicit
+`return` statement can be used, or the loop can be converted into a list
+comprehension.
+
+    func_a -> for i=1,10 do i
+    func_b -> return for i=1,10 do i
+
+    print func_a! -- prints nil
+    print func_b! -- prints table object
+
+This is done to avoid the needless creation of tables for functions that don't
+need to return the results of the loop.
+
 ## While Loop
 
 The while loop also comes in two variations:
@@ -205,6 +237,10 @@ The while loop also comes in two variations:
       i -= 1
 
     while running == true do my_function!
+
+Like for loops, the while loop can also be used an expression. Additionally,
+for a function to return the accumlated value of a while loop, the statement
+must be explicitly returned.
 
 ## Conditionals
 
