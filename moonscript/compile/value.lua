@@ -163,7 +163,7 @@ value_compile = {
     end
     local sup = self:get("super")
     if callee == "super" and sup then
-      return(self:value(sup(self, node)))
+      return self:value(sup(self, node))
     end
     local chain_item
     chain_item = function(node)

@@ -36,11 +36,11 @@ line_compile = {
   assign = function(self, node)
     local _, names, values = unpack(node)
     if #values == 1 and cascading[ntype(values[1])] then
-      return(self:stm({
+      return self:stm({
         "assign",
         names,
         values[1]
-      }))
+      })
     end
     local undeclared = self:declare(names)
     local declare = "local " .. concat(undeclared, ", ")
@@ -180,7 +180,7 @@ line_compile = {
         _with_0:append_list(values, ", ")
         line = _with_0
       end
-      return(line)
+      return line
     end
     self:add(self:line("local ", concat(final_names, ", ")))
     do
@@ -371,7 +371,7 @@ line_compile = {
         })
         loop = _with_0
       end
-      return(loop)
+      return loop
     end
     local loop
     do

@@ -208,10 +208,10 @@ Block_ = (function(_parent_0)
       local header = flatten(self.header)
       if #self._lines == 0 then
         local footer = flatten(self.footer)
-        return(concat({
+        return concat({
           header,
           footer
-        }, " "))
+        }, " ")
       end
       local indent = indent_char:rep(self.indent)
       if not self.delim then
@@ -252,7 +252,7 @@ Block_ = (function(_parent_0)
     end,
     value = function(self, node, ...)
       if type(node) ~= "table" then
-        return(tostring(node))
+        return tostring(node)
       end
       local fn = value_compile[node[1]]
       if not fn then
