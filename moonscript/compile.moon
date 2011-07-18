@@ -48,7 +48,7 @@ class Block_
   footer: "end"
 
   new: (@parent, @header, @footer) =>
-    @line_offset = 1
+    @current_line = 1
 
     @_lines = {}
     @_posmap = {}
@@ -105,12 +105,32 @@ class Block_
   mark_pos: (node) =>
     if node[-1]
       @last_pos = node[-1]
-      @_posmap[#@_lines + 1] = @last_pos
+      if not @_posmap[@current_line]
+        @_posmap[@current_line] = @last_pos
 
   -- add raw text as new line
   add_line_text: (text) =>
-    @line_offset += 1
     insert @_lines, text
+
+  append_line_table: (sub_table, offset) =>
+    offset = offset + @current_line
+
+    for line, source in pairs sub_table
+      line += offset
+      if not @_posmap[line]
+        @_posmap[line] = source
+
+  add_line_tables: (line) =>
+      for chunk in *line
+        if util.moon.type(chunk) == Block
+          current = chunk
+          while current
+            if util.moon.type(current.header) == Line
+              @add_line_tables current.header
+
+            @append_line_table current\line_table!, 0
+            @current_line += current.current_line
+            current = current.next
 
   -- add a line object
   add: (line) =>
@@ -121,7 +141,9 @@ class Block_
     elseif t == Block
       @add @line line
     elseif t == Line
+      @add_line_tables line
       @add_line_text line\render!
+      @current_line += 1
     else
       error "Adding unknown item"
 
@@ -200,6 +222,7 @@ class Block_
       else
         @add @value node
     else
+      @mark_pos node
       out = fn self, node, ...
       @add out if out
 
@@ -273,5 +296,6 @@ tree = (tree) ->
 
     nil, error_msg, scope.last_pos
   else
-    result, scope\line_table!
+    tbl = scope\line_table!
+    result, tbl
 

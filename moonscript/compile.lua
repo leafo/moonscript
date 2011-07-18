@@ -161,12 +161,41 @@ Block_ = (function(_parent_0)
     mark_pos = function(self, node)
       if node[-1] then
         self.last_pos = node[-1]
-        self._posmap[#self._lines + 1] = self.last_pos
+        if not self._posmap[self.current_line] then
+          self._posmap[self.current_line] = self.last_pos
+        end
       end
     end,
     add_line_text = function(self, text)
-      self.line_offset = self.line_offset + 1
       return insert(self._lines, text)
+    end,
+    append_line_table = function(self, sub_table, offset)
+      offset = offset + self.current_line
+      for line, source in pairs(sub_table) do
+        local line = line + offset
+        if not self._posmap[line] then
+          self._posmap[line] = source
+        end
+      end
+    end,
+    add_line_tables = function(self, line)
+      do
+        local _item_0 = line
+        for _index_0 = 1, #_item_0 do
+          local chunk = _item_0[_index_0]
+          if util.moon.type(chunk) == Block then
+            local current = chunk
+            while current do
+              if util.moon.type(current.header) == Line then
+                self:add_line_tables(current.header)
+              end
+              self:append_line_table(current:line_table(), 0)
+              self.current_line = self.current_line + current.current_line
+              current = current.next
+            end
+          end
+        end
+      end
     end,
     add = function(self, line)
       local t = util.moon.type(line)
@@ -175,7 +204,10 @@ Block_ = (function(_parent_0)
       elseif t == Block then
         return self:add(self:line(line))
       elseif t == Line then
-        return self:add_line_text(line:render())
+        self:add_line_tables(line)
+        self:add_line_text(line:render())
+        self.current_line = self.current_line + 1
+        return self.current_line
       else
         return error("Adding unknown item")
       end
@@ -296,6 +328,7 @@ Block_ = (function(_parent_0)
           return self:add(self:value(node))
         end
       else
+        self:mark_pos(node)
         local out = fn(self, node, ...)
         if out then
           return self:add(out)
@@ -350,7 +383,7 @@ Block_ = (function(_parent_0)
   local _class_0 = setmetatable({
     __init = function(self, parent, header, footer)
       self.parent, self.header, self.footer = parent, header, footer
-      self.line_offset = 1
+      self.current_line = 1
       self._lines = { }
       self._posmap = { }
       self._names = { }
@@ -448,6 +481,7 @@ tree = function(tree)
     end
     return nil, error_msg, scope.last_pos
   else
-    return result, scope:line_table()
+    local tbl = scope:line_table()
+    return result, tbl
   end
 end

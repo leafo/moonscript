@@ -124,20 +124,28 @@ local function rewrite_traceback(text, err)
 		Line = "\t" * lpeg.C((1 -Break)^0) * (Break + -1)
 	}
 
-	local match = g:match(text)
-	table.insert(match, 1, err)
-	for i, trace in pairs(match) do
+	local function rewrite_single(trace)
 		local fname, line, msg = trace:match('^%[string "(.-)"]:(%d+): (.*)$')
 		if fname then
 			if line_tables[fname] then
 				local table = line_tables[fname]
-				match[i] = fname .. ":" ..
-					reverse_line(fname, table, line) .. ": " .. msg
+				return fname .. ":" ..  reverse_line(fname, table, line) .. ": " .. msg
 			end
 		end
 	end
 
-	return header_text .. "\n\t" .. table.concat(match, "\n\t")
+
+	err = rewrite_single(err)
+	local match = g:match(text)
+	for i, trace in pairs(match) do
+		match[i] = rewrite_single(trace)
+	end
+
+	return table.concat({
+		"moon: "..err,
+		header_text,
+		"\t" .. table.concat(match, "\n\t")
+	}, "\n")
 end
 
 local file, err = io.open(script)
