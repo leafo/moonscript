@@ -77,17 +77,25 @@ files in the same directories.
 without needing a separate compile step. All MoonsScript files are compiled in
 memory as they are run.
 
+    ~> moon my_script.moon
+
 Any MoonScript files that are required will also be compiled and run
 automatically.
 
-In addition to this, when an error occurs during runtime, the stack trace is
-rewritten to give line numbers from the original `.moon` file.
+When an error occurs during runtime, the stack trace is rewritten to give line
+numbers from the original `.moon` file.
+
+If you want to disable error rewriting, you can pass the `-d` flag. A full list
+of flags can be seen by passing the `-h` or `--help` flag.
+
 
 ### moonc
 
 `moonc` is used for transforming a MoonsScript file into a Lua file.
 It takes a list of files, compiles them all, and creates the associated `.lua`
 files alongside the `.moon` files.
+
+    ~> moonc my_script1.moon my_script2.moon ...
 
 You can control where the compiled files are put using the `-t` flag, followed
 by a directory.
@@ -99,6 +107,7 @@ Combined with `linotify` on linux, the `-w` flag can be used to watch all files
 that match the given search path for changes, and then compile them only when
 required.
 
+A full list of flags can be seen by passing the `-h` or `--help` flag.
 
 ## Overview of Differences & Highlights
 

@@ -11,12 +11,13 @@ require "alt_getopt"
 require "lpeg"
 
 -- moonloader and repl
-local opts, ind = alt_getopt.get_opts(arg, "ch", { help = "h" })
+local opts, ind = alt_getopt.get_opts(arg, "chd", { help = "h" })
 
 local help = [=[Usage: %s [options] [script [args]]
 
     -c          Compile in memory, don't write .lua files
     -h          Print this message
+    -d          Disable stack trace rewriting
 ]=]
 
 local function print_help(err)
@@ -163,5 +164,10 @@ getfenv(chunk).arg = new_arg
 local runner = coroutine.create(chunk)
 local success, err = coroutine.resume(runner, unpack(new_arg))
 if not success then
-	print(rewrite_traceback(debug.traceback(runner), err))
+	local trace = debug.traceback(runner)
+	if not opts.d then
+		print(rewrite_traceback(trace, err))
+	else
+		print(trace)
+	end
 end
