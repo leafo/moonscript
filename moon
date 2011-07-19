@@ -4,15 +4,15 @@ require "alt_getopt"
 require "moonscript.errors"
 require "moonscript"
 
-
 -- moonloader and repl
-local opts, ind = alt_getopt.get_opts(arg, "chd", { help = "h" })
+local opts, ind = alt_getopt.get_opts(arg, "cvhd", { version = "v", help = "h" })
 
 local help = [=[Usage: %s [options] [script [args]]
 
     -c          Compile in memory, don't write .lua files
     -h          Print this message
     -d          Disable stack trace rewriting
+    -v          Print version
 ]=]
 
 local function print_help(err)
@@ -22,6 +22,13 @@ local function print_help(err)
 end
 
 if opts.h then print_help() end
+
+if opts.v then
+	local v = require "moonscript.version"
+	v.print_version()
+	os.exit()
+end
+
 
 local script_fname = arg[ind]
 if not script_fname then

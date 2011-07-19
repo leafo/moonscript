@@ -9,14 +9,21 @@ require "moonscript.util"
 require "alt_getopt"
 require "lfs"
 
-local opts, ind = alt_getopt.get_opts(arg, "hwt:", { help = "h" })
+local opts, ind = alt_getopt.get_opts(arg, "vhwt:", { version = "v", help = "h" })
 
 local help = [[Usage: %s [options] file...
 
     -h          Print this message
     -w          Watch file/directory
     -t path     Specify where to place compiled files
+    -v          Print version
 ]]
+
+if opts.v then
+	local v = require "moonscript.version"
+	v.print_version()
+	os.exit()
+end
 
 function print_help(err)
 	if err then print("Error: "..err) end

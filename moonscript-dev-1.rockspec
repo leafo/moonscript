@@ -32,6 +32,7 @@ build = {
 		["moonscript.util"] = "moonscript/util.lua",
 		["moonscript.init"] = "moonscript/init.lua",
 		["moonscript.errors"] = "moonscript/errors.lua",
+		["moonscript.version"] = "moonscript/version.lua",
 	},
 	install = {
 		bin = { "moon", "moonc" }
