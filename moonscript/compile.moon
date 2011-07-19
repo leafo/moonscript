@@ -146,6 +146,7 @@ class Block_
       @current_line += 1
     else
       error "Adding unknown item"
+    nil
 
   push: =>
     @_names = setmetatable {}, { __index: @_names }

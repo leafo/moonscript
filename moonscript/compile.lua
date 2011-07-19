@@ -200,17 +200,17 @@ Block_ = (function(_parent_0)
     add = function(self, line)
       local t = util.moon.type(line)
       if t == "string" then
-        return self:add_line_text(line)
+        self:add_line_text(line)
       elseif t == Block then
-        return self:add(self:line(line))
+        self:add(self:line(line))
       elseif t == Line then
         self:add_line_tables(line)
         self:add_line_text(line:render())
         self.current_line = self.current_line + 1
-        return self.current_line
       else
-        return error("Adding unknown item")
+        error("Adding unknown item")
       end
+      return nil
     end,
     push = function(self)
       self._names = setmetatable({ }, {
