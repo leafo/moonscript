@@ -42,7 +42,7 @@ local Name = Space * _Name
 local Num = Space * C(R("09")^1) / tonumber
 
 local FactorOp = Space * C(S"+-")
-local TermOp = Space * C(S"*/%")
+local TermOp = Space * C(S"*/%^")
 
 local function wrap(fn)
 	local env = getfenv(fi)
