@@ -22,6 +22,7 @@ dependencies = {
 build = {
 	type = "builtin",
 	modules = {
+		["moonscript"] = "moonscript/init.lua",
 		["moonscript.compile"] = "moonscript/compile.lua",
 		["moonscript.compile.line"] = "moonscript/compile/line.lua",
 		["moonscript.compile.value"] = "moonscript/compile/value.lua",
@@ -30,7 +31,6 @@ build = {
 		["moonscript.dump"] = "moonscript/dump.lua",
 		["moonscript.data"] = "moonscript/data.lua",
 		["moonscript.util"] = "moonscript/util.lua",
-		["moonscript.init"] = "moonscript/init.lua",
 		["moonscript.errors"] = "moonscript/errors.lua",
 		["moonscript.version"] = "moonscript/version.lua",
 	},
