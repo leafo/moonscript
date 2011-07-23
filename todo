@@ -39,6 +39,3 @@ or
 
 * any/every keywords for comprehensions?
 
-
-fix error when blank line is before else block
-

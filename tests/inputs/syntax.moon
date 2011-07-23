@@ -164,4 +164,24 @@ x = hello - world - something
   \cool 100) ->
   print something)!
 
+if something
+  03589
+
+-- okay what about this
+
+else
+  3434
+
+
+if something
+  yeah
+
+
+elseif "ymmm"
+
+  print "cool"
+
+else
+
+  okay
 

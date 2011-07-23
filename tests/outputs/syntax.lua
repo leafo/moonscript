@@ -175,3 +175,15 @@ x = hello - world - something
   end
   return print(something)
 end)()
+if something then
+  _ = 3589
+else
+  _ = 3434
+end
+if something then
+  _ = yeah
+elseif "ymmm" then
+  print("cool")
+else
+  _ = okay
+end

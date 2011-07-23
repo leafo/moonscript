@@ -270,8 +270,8 @@ local build_grammar = wrap(function()
 		With = key"with" * Exp * key"do"^-1 * Body / mark"with",
 
 		If = key"if" * Exp * key"then"^-1 * Body *
-			((Break * Cmt(Indent, check_indent))^-1 * key"elseif" * Exp * key"then"^-1 * Body / mark"elseif")^0 *
-			((Break * Cmt(Indent, check_indent))^-1 * key"else" * Body / mark"else")^-1 / mark"if",
+			((Break * Cmt(Indent, check_indent))^-1 * EmptyLine^0 * key"elseif" * Exp * key"then"^-1 * Body / mark"elseif")^0 *
+			((Break * Cmt(Indent, check_indent))^-1 * EmptyLine^0 * key"else" * Body / mark"else")^-1 / mark"if",
 
 		While = key"while" * Exp * key"do"^-1 * Body / mark"while",
 
