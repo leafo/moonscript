@@ -5,9 +5,12 @@ local dump = require("moonscript.dump")
 require("moonscript.compile.format")
 require("moonscript.compile.line")
 require("moonscript.compile.value")
-local ntype = data.ntype
+local ntype, Set = data.ntype, data.Set
 local concat, insert = table.concat, table.insert
 local pos_to_line, get_closest_line, trim = util.pos_to_line, util.get_closest_line, util.trim
+local bubble_names = {
+  "has_varargs"
+}
 local Line
 Line = (function(_parent_0)
   local _base_0 = {
@@ -202,6 +205,15 @@ Block_ = (function(_parent_0)
       if t == "string" then
         self:add_line_text(line)
       elseif t == Block then
+        do
+          local _item_0 = bubble_names
+          for _index_0 = 1, #_item_0 do
+            local name = _item_0[_index_0]
+            if line[name] then
+              self[name] = line.name
+            end
+          end
+        end
         self:add(self:line(line))
       elseif t == Line then
         self:add_line_tables(line)
@@ -283,14 +295,17 @@ Block_ = (function(_parent_0)
       return self:value(node)
     end,
     value = function(self, node, ...)
+      local action
       if type(node) ~= "table" then
-        return tostring(node)
+        action = "raw_value"
+      else
+        self:mark_pos(node)
+        action = node[1]
       end
-      local fn = value_compile[node[1]]
+      local fn = value_compile[action]
       if not fn then
         error("Failed to compile value: " .. dump.value(node))
       end
-      self:mark_pos(node)
       return fn(self, node, ...)
     end,
     values = function(self, values, delim)

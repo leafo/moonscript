@@ -122,9 +122,9 @@ value_compile = {
     end
   end,
   comprehension = function(self, node)
-    local exp = node[2]
+    local _, exp, iter = unpack(node)
     do
-      local _with_0 = self:block("(function()", "end)()")
+      local _with_0 = self:block()
       local tmp_name = _with_0:init_free_var("accum", {
         "table"
       })
@@ -147,6 +147,11 @@ value_compile = {
         "return",
         tmp_name
       })
+      if _with_0.has_varargs then
+        _with_0.header, _with_0.footer = "(function(...)", "end)(...)"
+      else
+        _with_0.header, _with_0.footer = "(function()", "end)()"
+      end
       return _with_0
     end
   end,
@@ -325,5 +330,11 @@ value_compile = {
   end,
   self_colon = function(self, node)
     return "self:" .. self:value(node[2])
+  end,
+  raw_value = function(self, value)
+    if value == "..." then
+      self.has_varargs = true
+    end
+    return tostring(value)
   end
 }

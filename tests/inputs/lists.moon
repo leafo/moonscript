@@ -58,3 +58,19 @@ print y for y in *x[2:]
 print y for y in *x[::2]
 print y for y in *x[2::2]
 
+-- vararg bubbling
+f = (...) -> #{...}
+
+x = (...) ->
+  [x*x for x in *{...} when f(...) > 4]
+
+normal = (hello) ->
+  [x for x in yeah]
+
+dont_bubble = ->
+  [x for x in ((...)-> print ...)("hello")]
+
+test = x 1,2,3,4,5
+print thing for thing in *test
+
+

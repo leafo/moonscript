@@ -8,12 +8,14 @@ require "moonscript.compile.format"
 require "moonscript.compile.line"
 require "moonscript.compile.value"
 
-import ntype from data
+import ntype, Set from data
 import concat, insert from table
 import pos_to_line, get_closest_line, trim from util
 
 export tree, format_error
 export Block
+
+bubble_names = { "has_varargs" }
 
 -- buffer for building up a line
 class Line
@@ -139,6 +141,9 @@ class Block_
     if t == "string"
       @add_line_text line
     elseif t == Block
+      for name in *bubble_names
+        self[name] = line.name if line[name]
+
       @add @line line
     elseif t == Line
       @add_line_tables line
@@ -203,10 +208,14 @@ class Block_
   -- line wise compile functions
   name: (node) => @value node
   value: (node, ...) =>
-    return tostring node if type(node) != "table"
-    fn = value_compile[node[1]]
+    action = if type(node) != "table"
+      "raw_value"
+    else
+      @mark_pos node
+      node[1]
+
+    fn = value_compile[action]
     error "Failed to compile value: "..dump.value node if not fn
-    @mark_pos node
     fn self, node, ...
 
   values: (values, delim) =>

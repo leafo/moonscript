@@ -64,9 +64,9 @@ value_compile =
       \stm node, default_return
 
   comprehension: (node) =>
-    exp = node[2]
+    _, exp, iter = unpack node
 
-    with @block "(function()", "end)()"
+    with @block!
       tmp_name = \init_free_var "accum", {"table"}
 
       action = (value) ->
@@ -74,6 +74,11 @@ value_compile =
 
       \stm node, action
       \stm {"return", tmp_name}
+
+      .header, .footer = if .has_varargs
+        "(function(...)", "end)(...)"
+      else
+        "(function()", "end)()"
 
   for: create_accumulate_wrapper 4
   foreach: create_accumulate_wrapper 4
@@ -186,3 +191,8 @@ value_compile =
 
   self_colon: (node) =>
     "self:"..@value node[2]
+
+  raw_value: (value) =>
+    if value == "..."
+      @has_varargs = true
+    tostring value
