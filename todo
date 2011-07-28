@@ -39,3 +39,10 @@ or
 
 * any/every keywords for comprehensions?
 
+
+... not working right
+
+
+double_args = (...) ->
+  [x * 2 for x in *{...}]
+

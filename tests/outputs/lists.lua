@@ -248,3 +248,56 @@ do
     print(y)
   end
 end
+local f
+f = function(...)
+  return #{
+    ...
+  }
+end
+x = function(...)
+  return (function(...)
+    local _accum_0 = { }
+    do
+      local _item_0 = {
+        ...
+      }
+      for _index_0 = 1, #_item_0 do
+        local x = _item_0[_index_0]
+        if f(...) > 4 then
+          table.insert(_accum_0, x * x)
+        end
+      end
+    end
+    return _accum_0
+  end)(...)
+end
+local normal
+normal = function(hello)
+  return (function()
+    local _accum_0 = { }
+    for x in yeah do
+      table.insert(_accum_0, x)
+    end
+    return _accum_0
+  end)()
+end
+local dont_bubble
+dont_bubble = function()
+  return (function()
+    local _accum_0 = { }
+    for x in (function(...)
+      return print(...)
+    end)("hello") do
+      table.insert(_accum_0, x)
+    end
+    return _accum_0
+  end)()
+end
+local test = x(1, 2, 3, 4, 5)
+do
+  local _item_0 = test
+  for _index_0 = 1, #_item_0 do
+    local thing = _item_0[_index_0]
+    print(thing)
+  end
+end
