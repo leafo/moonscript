@@ -46,3 +46,7 @@ or
 double_args = (...) ->
   [x * 2 for x in *{...}]
 
+
+still some issues with whitespace at end of line
+
+
