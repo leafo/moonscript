@@ -121,11 +121,21 @@ Block_ = (function(_parent_0)
       end
       return undeclared
     end,
+    whitelist_names = function(self, names)
+      self._name_whitelist = Set(names)
+    end,
     put_name = function(self, name)
       self._names[name] = true
     end,
     has_name = function(self, name)
-      return self._names[name]
+      local yes = self._names[name]
+      if yes == nil and self.parent then
+        if not self._name_whitelist or self._name_whitelist[name] then
+          return self.parent:has_name(name)
+        end
+      else
+        return yes
+      end
     end,
     shadow_name = function(self, name)
       self._names[name] = false
@@ -223,14 +233,6 @@ Block_ = (function(_parent_0)
         error("Adding unknown item")
       end
       return nil
-    end,
-    push = function(self)
-      self._names = setmetatable({ }, {
-        __index = self._names
-      })
-    end,
-    pop = function(self)
-      self._names = getmetatable(self._names).__index
     end,
     _insert_breaks = function(self)
       for i = 1, #self._lines - 1 do
@@ -405,11 +407,8 @@ Block_ = (function(_parent_0)
       self._state = { }
       if self.parent then
         self.indent = self.parent.indent + 1
-        setmetatable(self._state, {
+        return setmetatable(self._state, {
           __index = self.parent._state
-        })
-        return setmetatable(self._names, {
-          __index = self.parent._names
         })
       else
         self.indent = 0

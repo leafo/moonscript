@@ -2,7 +2,14 @@
 
 - varargs that get put in a nested generated function aren't valid anymore:
 
-- cascading expressions in function
+- cascading expressions in function call? this looks too much like line decorator
+* maybe with assigns only
+
+	my_func if something
+	  "one arg"
+	else
+	  "other arg"
+
 
 - class expressions, x = class extends Hello do new: => print "hello"
 
@@ -16,10 +23,7 @@
 * elseif with value that inserts lines
   - need to decompose elif into if inside else
 
-* export keyword, makes it so local is left off when variable is declared
-  - or copies to global var when local already exists
-  - or used for assignment to assign global var
-
+* export could also be used like so:
 
 	export a = -> "hello"
 
@@ -28,25 +32,21 @@ or
 	x = 232
 	export x
 
-or
-
-	export x
-	x = 3434
-
 
 * allow return anywhere in block
 * upercase constants and capital letter variables should automatically be exported (in the global scope?)
 
-* any/every keywords for comprehensions?
+* any/every keywords for comprehensions? (what about iterators)
 
+not working right:
 
-... not working right
-
-
-double_args = (...) ->
-  [x * 2 for x in *{...}]
+    double_args = (...) ->
+      [x * 2 for x in *{...}]
 
 
 still some issues with whitespace at end of line
+
+* let array items in table be defined without {} when indented
+* key,value table comprehensions with { }
 
 

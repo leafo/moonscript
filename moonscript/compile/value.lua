@@ -209,7 +209,7 @@ value_compile = {
     return self:line(callee_value, actions)
   end,
   fndef = function(self, node)
-    local _, args, arrow, block = unpack(node)
+    local _, args, whitelist, arrow, block = unpack(node)
     local default_args = { }
     local format_names
     format_names = function(arg)
@@ -236,6 +236,9 @@ value_compile = {
     end
     do
       local _with_0 = self:block("function(" .. concat(args, ", ") .. ")")
+      if #whitelist > 0 then
+        _with_0:whitelist_names(whitelist)
+      end
       do
         local _item_0 = args
         for _index_0 = 1, #_item_0 do

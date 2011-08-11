@@ -3,6 +3,7 @@ local util = require("moonscript.util")
 local data = require("moonscript.data")
 local dump = require("moonscript.dump")
 require("moonscript.compile.format")
+require("moonscript.compile.types")
 local reversed = util.reversed
 local ntype = data.ntype
 local concat, insert = table.concat, table.insert
@@ -425,6 +426,7 @@ line_compile = {
         {
           "..."
         },
+        { },
         "fat",
         {
           {
@@ -446,6 +448,7 @@ line_compile = {
         }
       }
     end
+    smart_node(constructor)
     local self_args = { }
     local get_initializers
     get_initializers = function(arg)
@@ -455,10 +458,10 @@ line_compile = {
       end
       return arg
     end
-    constructor[2] = (function()
+    constructor.args = (function()
       local _accum_0 = { }
       do
-        local _item_0 = constructor[2]
+        local _item_0 = constructor.args
         for _index_0 = 1, #_item_0 do
           local arg = _item_0[_index_0]
           table.insert(_accum_0, get_initializers(arg))
@@ -466,8 +469,7 @@ line_compile = {
       end
       return _accum_0
     end)()
-    constructor[3] = "fat"
-    local body = constructor[4]
+    constructor.arrow = "fat"
     local dests = (function()
       local _accum_0 = { }
       do
@@ -483,7 +485,7 @@ line_compile = {
       return _accum_0
     end)()
     if #self_args > 0 then
-      insert(body, 1, {
+      insert(constructor.body, 1, {
         "assign",
         dests,
         self_args
@@ -605,6 +607,7 @@ line_compile = {
                 "mt",
                 "..."
               },
+              { },
               "slim",
               {
                 {

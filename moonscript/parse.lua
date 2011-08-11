@@ -389,11 +389,14 @@ local build_grammar = wrap(function()
 		KeyValueList = KeyValue * (sym"," * KeyValue)^0,
 		KeyValueLine = Cmt(Indent, check_indent) * KeyValueList * sym","^-1,
 
-		FnArgsDef = sym"(" * Ct(FnArgDefList^-1) * sym")",
+		FnArgsDef = sym"(" * Ct(FnArgDefList^-1) *
+			(key"using" * Ct(NameList + Space * "nil") + Ct"") *
+			sym")" + Ct"" * Ct"",
+
 		FnArgDefList =  FnArgDef * (sym"," * FnArgDef)^0,
 		FnArgDef = Name * (sym"=" * Exp)^-1 / wrap_default_arg,
 
-		FunLit = (FnArgsDef + Ct("")) *
+		FunLit = FnArgsDef *
 			(sym"->" * Cc"slim" + sym"=>" * Cc"fat") *
 			(Body + Ct"") / mark"fndef",
 

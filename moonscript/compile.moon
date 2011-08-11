@@ -60,7 +60,6 @@ class Block_
     if @parent
       @indent = @parent.indent + 1
       setmetatable @_state, { __index: @parent._state }
-      setmetatable @_names, { __index: @parent._names }
     else
       @indent = 0
 
@@ -78,11 +77,19 @@ class Block_
     @put_name name for name in *undeclared
     undeclared
 
+  whitelist_names: (names) =>
+    @_name_whitelist = Set names
+
   put_name: (name) =>
     @_names[name] = true
 
   has_name: (name) =>
-    @_names[name]
+    yes = @_names[name]
+    if yes == nil and @parent
+      if not @_name_whitelist or @_name_whitelist[name]
+        @parent\has_name name
+    else
+      yes
 
   shadow_name: (name) =>
     @_names[name] = false
@@ -152,12 +159,6 @@ class Block_
     else
       error "Adding unknown item"
     nil
-
-  push: =>
-    @_names = setmetatable {}, { __index: @_names }
-
-  pop: =>
-    @_names = getmetatable(@_names).__index
 
   _insert_breaks: =>
     for i = 1, #@_lines - 1

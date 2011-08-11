@@ -5,6 +5,7 @@ data = require "moonscript.data"
 dump = require "moonscript.dump"
 
 require "moonscript.compile.format"
+require "moonscript.compile.types"
 
 import reversed from util
 import ntype from data
@@ -223,11 +224,13 @@ line_compile =
 
     -- synthesize constructor if needed
     if not constructor
-      constructor = {"fndef", {"..."}, "fat", {
+      constructor = {"fndef", {"..."}, {}, "fat", {
         {"if", parent_loc, {
           {"chain", "super", {"call", {"..."}}}
         }}
       }}
+
+    smart_node constructor
 
     -- organize constructor arguments
     -- extract self arguments
@@ -238,13 +241,12 @@ line_compile =
         insert self_args, arg
       arg
 
-    constructor[2] = [get_initializers arg for arg in *constructor[2]]
-    constructor[3] = "fat"
-    body = constructor[4]
+    constructor.args = [get_initializers arg for arg in *constructor.args]
+    constructor.arrow = "fat"
 
     -- insert self assigning arguments
     dests = [{"self", name} for name in *self_args]
-    insert body, 1, {"assign", dests, self_args} if #self_args > 0
+    insert constructor.body, 1, {"assign", dests, self_args} if #self_args > 0
 
     def_scope = with @block!
       parent_val = @value parent_val if parent_val != ""
@@ -280,7 +282,7 @@ line_compile =
       -- the class's meta table, gives us call and access to base methods
       cls_mt = {"table", {
         {"__index", base_name}
-        {"__call", {"fndef", {"mt", "..."}, "slim", {
+        {"__call", {"fndef", {"mt", "..."}, {}, "slim", {
             {"raw", ("local self = setmetatable({}, %s)")\format(base_name)}
             {"chain", "mt.__init", {"call", {"self", "..."}}}
             "self"

@@ -122,7 +122,7 @@ value_compile =
     @line callee_value, actions
 
   fndef: (node) =>
-    _, args, arrow, block = unpack node
+    _, args, whitelist, arrow, block = unpack node
 
     default_args = {}
     format_names = (arg) ->
@@ -138,6 +138,9 @@ value_compile =
       insert args, 1, "self"
 
     with @block "function("..concat(args, ", ")..")"
+      if #whitelist > 0
+        \whitelist_names whitelist
+
       \put_name name for name in *args
 
       for default in *default_args
