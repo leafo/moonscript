@@ -7,7 +7,7 @@ source = {
 
 description = {
 	summary = "A little language that compiles to Lua",
-	homepage = "http://leafo.net/moonscript",
+	homepage = "http://moonscript.org",
 	maintainer = "Leaf Corcoran <leafot@gmail.com>",
 	license = "MIT"
 }
