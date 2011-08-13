@@ -1,4 +1,4 @@
-#!/usr/bin/lua
+#!/usr/bin/env lua
 
 module("moonscript", package.seeall)
 
@@ -9,13 +9,18 @@ require "moonscript.util"
 require "alt_getopt"
 require "lfs"
 
-local opts, ind = alt_getopt.get_opts(arg, "vhwt:", { version = "v", help = "h" })
+local opts, ind = alt_getopt.get_opts(arg, "vhwt:pTb", {
+	print = "p", tree = "T", version = "v", help = "h"
+})
 
-local help = [[Usage: %s [options] file...
+local help = [[Usage: %s [options] files...
 
     -h          Print this message
     -w          Watch file/directory
     -t path     Specify where to place compiled files
+    -p          Write output to standard out
+    -T          Write parse tree instead of code (to stdout)
+    -b          Dump parse and compile time (doesn't write output)
     -v          Print version
 ]]
 
@@ -56,33 +61,93 @@ function convert_path(path)
 	return (path:gsub("%.moon$", ".lua"))
 end
 
-function compile_file(from, to)
+function msg(...)
+	if not opts.p then
+		print(...)
+	end
+end
+
+local gettime = nil
+if opts.b then
+	pcall(function()
+		require "socket"
+		gettime = socket.gettime
+	end)
+
+	function format_time(time)
+		return ("%.3fms"):format(time*1000)
+	end
+	if not gettime then
+		print_help"LuaSocket needed for benchmark"
+	end
+else
+	gettime = function() return 0 end
+end
+
+function write_file(fname, code)
+	if opts.p then
+		if code ~= "" then print(code) end
+	else
+		mkdir(get_dir(fname))
+		local out_f = io.open(fname, "w")
+		if not out_f then
+			return nil, "Failed to write output: "..fname
+		end
+
+		out_f:write(code.."\n")
+		out_f:close()
+	end
+	return true
+end
+
+function compile_file(text, fname)
+	local parse_time = gettime()
+	local tree, err = parse.string(text)
+	parse_time = gettime() - parse_time
+
+	if not tree then
+		return nil, err
+	end
+
+	if opts.T then
+		opts.p = true
+		dump.tree(tree)
+		return ""
+	else
+		local compile_time = gettime()
+		local code, err, pos = compile.tree(tree)
+		compile_time = gettime() - compile_time
+		if not code then
+			return nil, compile.format_error(err, pos, text)
+		end
+
+		if opts.b then
+			opts.p = true
+			return table.concat({
+				fname,
+				"Parse time  \t" .. format_time(parse_time),
+				"Compile time\t" .. format_time(compile_time),
+				""
+			}, "\n")
+		end
+
+		return code
+	end
+end
+
+function compile_and_write(from, to)
 	local f = io.open(from)
 	if not f then
 		return nil, "Can't find file"
 	end
 	local text = f:read("*a")
 
-	local tree, err = parse.string(text)
-	if not tree then
+	local code, err = compile_file(text, from)
+	if not code then
 		return nil, err
 	end
 
-	local code, err, pos = compile.tree(tree)
-	if not code then
-		return nil, compile.format_error(err, pos, text)
-	end
-
-	mkdir(get_dir(to))
-	local out_f = io.open(to, "w")
-	if not out_f then
-		return nil, "Failed to write output: "..to
-	end
-	
-	out_f:write(code.."\n")
-	out_f:close()
-
-	return true
+	return write_file(to, code)
 end
 
 function scan_directory(root, collected)
@@ -166,15 +231,6 @@ end
 
 files = remove_dups(files)
 
-
-function dump(tbl)
-	local items = {}
-	for k,v in pairs(tbl) do
-		table.insert(items, ('%s="%s"'):format(k,v))
-	end
-	return "{ "..table.concat(items, ", ").." }"
-end
-
 if opts.w then
 	local inotify
 	if not pcall(function()
@@ -210,7 +266,7 @@ if opts.w then
 				local fname = wd_table[ev.wd]..ev.name
 				if fname:match("%.moon$") then
 					local target = target_dir..convert_path(fname)
-					local success, err = compile_file(fname, target)
+					local success, err = compile_and_write(fname, target)
 
 					if not success then
 						print()
@@ -218,7 +274,7 @@ if opts.w then
 						print(err)
 						print()
 					else
-						print("Built", fname)
+						msg("Built", fname)
 					end
 				end
 			end
@@ -226,12 +282,12 @@ if opts.w then
 	end
 else
 	for _, fname in ipairs(files) do
-		local success, err = compile_file(fname, target_dir..convert_path(fname))
+		local success, err = compile_and_write(fname, target_dir..convert_path(fname))
 		if not success then
 			print(fname, err)
 			break
 		else
-			print("Built", fname)
+			msg("Built", fname)
 		end
 	end
 end

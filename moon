@@ -1,4 +1,4 @@
-#!/usr/bin/lua
+#!/usr/bin/env lua
 
 require "alt_getopt"
 require "moonscript.errors"
@@ -9,7 +9,6 @@ local opts, ind = alt_getopt.get_opts(arg, "cvhd", { version = "v", help = "h" }
 
 local help = [=[Usage: %s [options] [script [args]]
 
-    -c          Compile in memory, don't write .lua files
     -h          Print this message
     -d          Disable stack trace rewriting
     -v          Print version

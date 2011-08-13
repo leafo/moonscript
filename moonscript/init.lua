@@ -19,6 +19,9 @@ create_moonpath = function(package_path)
 end
 moon_chunk = function(file, file_path)
   local text = file:read("*a")
+  if not text then
+    error("Could not read file")
+  end
   local tree, err = parse.string(text)
   if not tree then
     error("Parse error: " .. err)
