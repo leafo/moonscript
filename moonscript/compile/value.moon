@@ -12,6 +12,11 @@ import concat, insert from table
 
 export value_compile
 
+table_append = (name, value) ->
+  {"assign", {
+    {"chain", name, {"index", {"exp", {"length", name}, "+", 1}}}
+  }, { value }}
+
 create_accumulate_wrapper = (block_pos) ->
   (node) =>
     with @block "(function()", "end)()"
@@ -22,7 +27,7 @@ create_accumulate_wrapper = (block_pos) ->
       inner[#inner] = {"assign", {value_name}, {inner[#inner]}}
       insert inner, {
         "if", {"exp", value_name, "~=", "nil"}, {
-          {"chain", "table.insert", {"call", {accum_name, value_name}}}
+          table_append accum_name, value_name
         }
       }
 
@@ -70,7 +75,7 @@ value_compile =
       tmp_name = \init_free_var "accum", {"table"}
 
       action = (value) ->
-        {"chain", "table.insert", {"call", {tmp_name, value}}}
+        table_append tmp_name, value
 
       \stm node, action
       \stm {"return", tmp_name}

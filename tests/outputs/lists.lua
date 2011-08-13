@@ -6,7 +6,7 @@ local hi = (function()
     3,
     4
   }) do
-    table.insert(_accum_0, x * 2)
+    _accum_0[#_accum_0 + 1] = x * 2
   end
   return _accum_0
 end)()
@@ -21,7 +21,7 @@ local items = {
 local mm = (function()
   local _accum_0 = { }
   for self.x in ipairs(items) do
-    table.insert(_accum_0, self.x)
+    _accum_0[#_accum_0 + 1] = self.x
   end
   return _accum_0
 end)()
@@ -41,9 +41,9 @@ local rad = (function()
     6
   }) do
     if good_number(a) then
-      table.insert(_accum_0, {
+      _accum_0[#_accum_0 + 1] = {
         a
-      })
+      }
     end
   end
   return _accum_0
@@ -73,7 +73,7 @@ end
 dump((function()
   local _accum_0 = { }
   for x in range(10) do
-    table.insert(_accum_0, x)
+    _accum_0[#_accum_0 + 1] = x
   end
   return _accum_0
 end)())
@@ -82,10 +82,10 @@ dump((function()
   for x in range(5) do
     if x > 2 then
       for y in range(5) do
-        table.insert(_accum_0, {
+        _accum_0[#_accum_0 + 1] = {
           x,
           y
-        })
+        }
       end
     end
   end
@@ -97,7 +97,7 @@ local things = (function()
     if x > 5 then
       for y in range(10) do
         if y > 7 then
-          table.insert(_accum_0, x + y)
+          _accum_0[#_accum_0 + 1] = x + y
         end
       end
     end
@@ -128,7 +128,7 @@ end
 local x = (function()
   local _accum_0 = { }
   for x in x do
-    table.insert(_accum_0, x)
+    _accum_0[#_accum_0 + 1] = x
   end
   return _accum_0
 end)()
@@ -153,7 +153,7 @@ local double = (function()
     local _item_0 = items
     for _index_0 = 1, #_item_0 do
       local x = _item_0[_index_0]
-      table.insert(_accum_0, x * 2)
+      _accum_0[#_accum_0 + 1] = x * 2
     end
   end
   return _accum_0
@@ -172,7 +172,7 @@ local cut = (function()
     for _index_0 = 1, #_item_0 do
       local x = _item_0[_index_0]
       if x > 3 then
-        table.insert(_accum_0, x)
+        _accum_0[#_accum_0 + 1] = x
       end
     end
   end
@@ -188,7 +188,7 @@ local hello = (function()
         local _item_1 = items
         for _index_1 = 1, #_item_1 do
           local y = _item_1[_index_1]
-          table.insert(_accum_0, x + y)
+          _accum_0[#_accum_0 + 1] = x + y
         end
       end
     end
@@ -264,7 +264,7 @@ x = function(...)
       for _index_0 = 1, #_item_0 do
         local x = _item_0[_index_0]
         if f(...) > 4 then
-          table.insert(_accum_0, x * x)
+          _accum_0[#_accum_0 + 1] = x * x
         end
       end
     end
@@ -276,7 +276,7 @@ normal = function(hello)
   return (function()
     local _accum_0 = { }
     for x in yeah do
-      table.insert(_accum_0, x)
+      _accum_0[#_accum_0 + 1] = x
     end
     return _accum_0
   end)()
@@ -288,7 +288,7 @@ dont_bubble = function()
     for x in (function(...)
       return print(...)
     end)("hello") do
-      table.insert(_accum_0, x)
+      _accum_0[#_accum_0 + 1] = x
     end
     return _accum_0
   end)()

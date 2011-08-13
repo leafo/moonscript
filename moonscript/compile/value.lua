@@ -5,6 +5,33 @@ local dump = require("moonscript.dump")
 require("moonscript.compile.format")
 local ntype = data.ntype
 local concat, insert = table.concat, table.insert
+local table_append
+table_append = function(name, value)
+  return {
+    "assign",
+    {
+      {
+        "chain",
+        name,
+        {
+          "index",
+          {
+            "exp",
+            {
+              "length",
+              name
+            },
+            "+",
+            1
+          }
+        }
+      }
+    },
+    {
+      value
+    }
+  }
+end
 local create_accumulate_wrapper
 create_accumulate_wrapper = function(block_pos)
   return function(self, node)
@@ -33,17 +60,7 @@ create_accumulate_wrapper = function(block_pos)
           "nil"
         },
         {
-          {
-            "chain",
-            "table.insert",
-            {
-              "call",
-              {
-                accum_name,
-                value_name
-              }
-            }
-          }
+          table_append(accum_name, value_name)
         }
       })
       _with_0:stm(node)
@@ -130,17 +147,7 @@ value_compile = {
       })
       local action
       action = function(value)
-        return {
-          "chain",
-          "table.insert",
-          {
-            "call",
-            {
-              tmp_name,
-              value
-            }
-          }
-        }
+        return table_append(tmp_name, value)
       end
       _with_0:stm(node, action)
       _with_0:stm({

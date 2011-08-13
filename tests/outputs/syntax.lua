@@ -92,7 +92,7 @@ local hi = -"herfef"
 x = -(function()
   local _accum_0 = { }
   for x in x do
-    table.insert(_accum_0, x)
+    _accum_0[#_accum_0 + 1] = x
   end
   return _accum_0
 end)()

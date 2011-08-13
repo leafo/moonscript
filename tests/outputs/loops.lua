@@ -55,7 +55,7 @@ x = (function()
         _value_0 = y
       end
       if _value_0 ~= nil then
-        table.insert(_accum_0, _value_0)
+        _accum_0[#_accum_0 + 1] = _value_0
       end
     end
   end
@@ -75,7 +75,7 @@ local t = (function()
   for i = 10, 20 do
     local _value_0 = i * 2
     if _value_0 ~= nil then
-      table.insert(_accum_0, _value_0)
+      _accum_0[#_accum_0 + 1] = _value_0
     end
   end
   return _accum_0
@@ -87,7 +87,7 @@ local y = (function()
     hmm = hmm + 1
     local _value_0 = j * hmm
     if _value_0 ~= nil then
-      table.insert(_accum_0, _value_0)
+      _accum_0[#_accum_0 + 1] = _value_0
     end
   end
   return _accum_0
@@ -104,7 +104,7 @@ _ = function()
     for k = 10, 40 do
       local _value_0 = "okay"
       if _value_0 ~= nil then
-        table.insert(_accum_0, _value_0)
+        _accum_0[#_accum_0 + 1] = _value_0
       end
     end
     return _accum_0
@@ -128,7 +128,7 @@ x = (function()
     i = i + 1
     local _value_0 = i
     if _value_0 ~= nil then
-      table.insert(_accum_0, _value_0)
+      _accum_0[#_accum_0 + 1] = _value_0
     end
   end
   return _accum_0
