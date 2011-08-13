@@ -48,6 +48,8 @@ Num = Space * (Num / function(value) return {"number", value} end)
 local FactorOp = Space * C(S"+-")
 local TermOp = Space * C(S"*/%^")
 
+local Shebang = P"#!" * P(1 - Stop)^0
+
 local function wrap(fn)
 	local env = getfenv(fi)
 
@@ -244,7 +246,7 @@ local build_grammar = wrap(function()
 
 	local g = lpeg.P{
 		File,
-		File = Block + Ct"",
+		File = Shebang^-1 * (Block + Ct""),
 		Block = Ct(Line * (Break^1 * Line)^0),
 		Line = Cmt(Indent, check_indent) * Statement + Space * #Break,
 

@@ -1,4 +1,4 @@
-
+#!/this/is/ignored
 
 a = 1 + 2* 3 / 6
 
