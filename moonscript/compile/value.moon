@@ -183,6 +183,9 @@ value_compile =
   minus: (node) =>
     @line "-", @value node[2]
 
+  number: (node) =>
+    node[2]
+
   length: (node) =>
     @line "#", @value node[2]
 

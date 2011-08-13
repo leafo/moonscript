@@ -39,7 +39,11 @@ local SomeSpace = S" \t"^1 * Comment^-1
 
 local _Name = C(R("az", "AZ", "__") * R("az", "AZ", "09", "__")^0)
 local Name = Space * _Name
-local Num = Space * C(R("09")^1) / tonumber
+
+local Num = P"0x" * R("09", "af", "AF")^1 +
+	R"09"^1 * (P"." * R"09"^1)^-1 * (S"eE" * P"-"^-1 * R"09"^1)^-1
+
+Num = Space * (Num / function(value) return {"number", value} end)
 
 local FactorOp = Space * C(S"+-")
 local TermOp = Space * C(S"*/%^")

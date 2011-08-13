@@ -176,7 +176,7 @@ x = hello - world - something
   return print(something)
 end)()
 if something then
-  _ = 3589
+  _ = 03589
 else
   _ = 3434
 end
