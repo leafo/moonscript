@@ -6,29 +6,29 @@ require("moonscript.compile.format")
 local ntype = data.ntype
 local concat, insert = table.concat, table.insert
 local table_append
-table_append = function(name, value)
+table_append = function(name, len, value)
   return {
-    "assign",
     {
-      {
-        "chain",
-        name,
-        {
-          "index",
-          {
-            "exp",
-            {
-              "length",
-              name
-            },
-            "+",
-            1
-          }
-        }
-      }
+      "update",
+      len,
+      "+=",
+      1
     },
     {
-      value
+      "assign",
+      {
+        {
+          "chain",
+          name,
+          {
+            "index",
+            len
+          }
+        }
+      },
+      {
+        value
+      }
     }
   }
 end
@@ -40,6 +40,7 @@ create_accumulate_wrapper = function(block_pos)
       local accum_name = _with_0:init_free_var("accum", {
         "table"
       })
+      local count_name = _with_0:init_free_var("len", 0)
       local value_name = _with_0:free_name("value", true)
       local inner = node[block_pos]
       inner[#inner] = {
@@ -59,9 +60,7 @@ create_accumulate_wrapper = function(block_pos)
           "~=",
           "nil"
         },
-        {
-          table_append(accum_name, value_name)
-        }
+        table_append(accum_name, count_name, value_name)
       })
       _with_0:stm(node)
       _with_0:stm({
@@ -85,9 +84,11 @@ value_compile = {
       local _with_0 = self:line()
       _with_0:append_list((function()
         local _accum_0 = { }
+        local _len_0 = 0
         for i, v in ipairs(node) do
           if i > 1 then
-            table.insert(_accum_0, _comp(i, v))
+            _len_0 = _len_0 + 1
+            _accum_0[_len_0] = _comp(i, v)
           end
         end
         return _accum_0
@@ -105,11 +106,13 @@ value_compile = {
       local _with_0 = self:line()
       _with_0:append_list((function()
         local _accum_0 = { }
+        local _len_0 = 0
         do
           local _item_0 = node
           for _index_0 = 2, #_item_0 do
             local v = _item_0[_index_0]
-            table.insert(_accum_0, self:value(v))
+            _len_0 = _len_0 + 1
+            _accum_0[_len_0] = self:value(v)
           end
         end
         return _accum_0
@@ -145,9 +148,10 @@ value_compile = {
       local tmp_name = _with_0:init_free_var("accum", {
         "table"
       })
+      local len_name = _with_0:init_free_var("len", 0)
       local action
       action = function(value)
-        return table_append(tmp_name, value)
+        return table_append(tmp_name, len_name, value)
       end
       _with_0:stm(node, action)
       _with_0:stm({
@@ -229,11 +233,13 @@ value_compile = {
     end
     args = (function()
       local _accum_0 = { }
+      local _len_0 = 0
       do
         local _item_0 = args
         for _index_0 = 1, #_item_0 do
           local arg = _item_0[_index_0]
-          table.insert(_accum_0, format_names(arg))
+          _len_0 = _len_0 + 1
+          _accum_0[_len_0] = format_names(arg)
         end
       end
       return _accum_0

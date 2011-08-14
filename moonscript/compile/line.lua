@@ -21,11 +21,13 @@ line_compile = {
         local _with_0 = self:line("local ")
         _with_0:append_list((function()
           local _accum_0 = { }
+          local _len_0 = 0
           do
             local _item_0 = names
             for _index_0 = 1, #_item_0 do
               local name = _item_0[_index_0]
-              table.insert(_accum_0, self:name(name))
+              _len_0 = _len_0 + 1
+              _accum_0[_len_0] = self:name(name)
             end
           end
           return _accum_0
@@ -83,11 +85,13 @@ line_compile = {
           end
           _with_0:append_list((function()
             local _accum_0 = { }
+            local _len_0 = 0
             do
               local _item_0 = names
               for _index_0 = 1, #_item_0 do
                 local name = _item_0[_index_0]
-                table.insert(_accum_0, self:value(name))
+                _len_0 = _len_0 + 1
+                _accum_0[_len_0] = self:value(name)
               end
             end
             return _accum_0
@@ -96,11 +100,13 @@ line_compile = {
         _with_0:append(" = ")
         _with_0:append_list((function()
           local _accum_0 = { }
+          local _len_0 = 0
           do
             local _item_0 = values
             for _index_0 = 1, #_item_0 do
               local v = _item_0[_index_0]
-              table.insert(_accum_0, self:value(v))
+              _len_0 = _len_0 + 1
+              _accum_0[_len_0] = self:value(v)
             end
           end
           return _accum_0
@@ -166,11 +172,13 @@ line_compile = {
     if type(source) == "string" then
       local values = (function()
         local _accum_0 = { }
+        local _len_0 = 0
         do
           local _item_0 = final_names
           for _index_0 = 1, #_item_0 do
             local name = _item_0[_index_0]
-            table.insert(_accum_0, get_value(name))
+            _len_0 = _len_0 + 1
+            _accum_0[_len_0] = get_value(name)
           end
         end
         return _accum_0
@@ -334,11 +342,13 @@ line_compile = {
         })
         block = (function()
           local _accum_0 = { }
+          local _len_0 = 0
           do
             local _item_0 = block
             for _index_0 = 1, #_item_0 do
               local s = _item_0[_index_0]
-              table.insert(_accum_0, s)
+              _len_0 = _len_0 + 1
+              _accum_0[_len_0] = s
             end
           end
           return _accum_0
@@ -380,11 +390,13 @@ line_compile = {
       _with_0:append("for ")
       _with_0:append_list((function()
         local _accum_0 = { }
+        local _len_0 = 0
         do
           local _item_0 = names
           for _index_0 = 1, #_item_0 do
             local name = _item_0[_index_0]
-            table.insert(_accum_0, self:name(name))
+            _len_0 = _len_0 + 1
+            _accum_0[_len_0] = self:name(name)
           end
         end
         return _accum_0
@@ -460,11 +472,13 @@ line_compile = {
     end
     constructor.args = (function()
       local _accum_0 = { }
+      local _len_0 = 0
       do
         local _item_0 = constructor.args
         for _index_0 = 1, #_item_0 do
           local arg = _item_0[_index_0]
-          table.insert(_accum_0, get_initializers(arg))
+          _len_0 = _len_0 + 1
+          _accum_0[_len_0] = get_initializers(arg)
         end
       end
       return _accum_0
@@ -472,14 +486,16 @@ line_compile = {
     constructor.arrow = "fat"
     local dests = (function()
       local _accum_0 = { }
+      local _len_0 = 0
       do
         local _item_0 = self_args
         for _index_0 = 1, #_item_0 do
           local name = _item_0[_index_0]
-          table.insert(_accum_0, {
+          _len_0 = _len_0 + 1
+          _accum_0[_len_0] = {
             "self",
             name
-          })
+          }
         end
       end
       return _accum_0
@@ -504,11 +520,13 @@ line_compile = {
         local calling_name = block:get("current_block")
         local slice = (function()
           local _accum_0 = { }
+          local _len_0 = 0
           do
             local _item_0 = chain
             for _index_0 = 3, #_item_0 do
               local item = _item_0[_index_0]
-              table.insert(_accum_0, item)
+              _len_0 = _len_0 + 1
+              _accum_0[_len_0] = item
             end
           end
           return _accum_0
@@ -676,38 +694,39 @@ line_compile = {
     local _, exp, clauses = unpack(node)
     if not action then
       action = function(exp)
-        return exp
+        return {
+          exp
+        }
       end
     end
-    local statement = action(exp)
+    local current_stms = action(exp)
     for _, clause in reversed(clauses) do
       local t = clause[1]
       if t == "for" then
         local names, iter
         _, names, iter = unpack(clause)
-        statement = {
+        current_stms = {
           "foreach",
           names,
           iter,
-          {
-            statement
-          }
+          current_stms
         }
       elseif t == "when" then
         local cond
         _, cond = unpack(clause)
-        statement = {
+        current_stms = {
           "if",
           cond,
-          {
-            statement
-          }
+          current_stms
         }
       else
-        statement = error("Unknown comprehension clause: " .. t)
+        current_stms = error("Unknown comprehension clause: " .. t)
       end
+      current_stms = {
+        current_stms
+      }
     end
-    return self:stm(statement)
+    return self:stms(current_stms)
   end,
   with = function(self, node, ret)
     local _, exp, block = unpack(node)

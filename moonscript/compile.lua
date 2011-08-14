@@ -101,12 +101,14 @@ Block_ = (function(_parent_0)
     declare = function(self, names)
       local undeclared = (function()
         local _accum_0 = { }
+        local _len_0 = 0
         do
           local _item_0 = names
           for _index_0 = 1, #_item_0 do
             local name = _item_0[_index_0]
             if type(name) == "string" and not self:has_name(name) then
-              table.insert(_accum_0, name)
+              _len_0 = _len_0 + 1
+              _accum_0[_len_0] = name
             end
           end
         end
@@ -316,11 +318,13 @@ Block_ = (function(_parent_0)
         local _with_0 = Line()
         _with_0:append_list((function()
           local _accum_0 = { }
+          local _len_0 = 0
           do
             local _item_0 = values
             for _index_0 = 1, #_item_0 do
               local v = _item_0[_index_0]
-              table.insert(_accum_0, self:value(v))
+              _len_0 = _len_0 + 1
+              _accum_0[_len_0] = self:value(v)
             end
           end
           return _accum_0

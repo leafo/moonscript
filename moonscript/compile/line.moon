@@ -307,21 +307,22 @@ line_compile =
     _, exp, clauses = unpack node
 
     if not action
-      action = (exp) -> exp
+      action = (exp) -> {exp}
 
-    statement = action exp
+    current_stms = action exp
     for _, clause in reversed clauses
       t = clause[1]
-      statement = if t == "for"
+      current_stms = if t == "for"
         _, names, iter = unpack clause
-        {"foreach", names, iter, {statement}}
+        {"foreach", names, iter, current_stms}
       elseif t == "when"
         _, cond = unpack clause
-        {"if", cond, {statement}}
+        {"if", cond, current_stms}
       else
         error "Unknown comprehension clause: "..t
+      current_stms = {current_stms}
 
-    @stm statement
+    @stms current_stms
 
 
   with: (node, ret) =>

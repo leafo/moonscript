@@ -91,8 +91,10 @@ x = -hello(world(one(two)))
 local hi = -"herfef"
 x = -(function()
   local _accum_0 = { }
+  local _len_0 = 0
   for x in x do
-    _accum_0[#_accum_0 + 1] = x
+    _len_0 = _len_0 + 1
+    _accum_0[_len_0] = x
   end
   return _accum_0
 end)()
