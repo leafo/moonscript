@@ -1,4 +1,3 @@
-
 module("moonscript.parse", package.seeall)
 
 local util = require"moonscript.util"
@@ -51,7 +50,7 @@ local TermOp = Space * C(S"*/%^")
 local Shebang = P"#!" * P(1 - Stop)^0
 
 local function wrap(fn)
-	local env = getfenv(fi)
+	local env = getfenv(fn)
 
 	return setfenv(fn, setmetatable({}, {
 		__index = function(self, name)
