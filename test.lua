@@ -29,6 +29,15 @@ local opts = {
 	output_ext = ".lua"
 }
 
+local total_time = {
+	parse = 0,
+	compile = 0
+}
+
+local function format_time(sec)
+	return ("%.3fms"):format(sec*1000)
+end
+
 local function diff(a_fname, b_fname)
 	return io.popen(diff_tool.." ".. a_fname.." "..b_fname, "r"):read("*a")
 end
@@ -129,8 +138,11 @@ local actions = {
 					-- break
 				else
 					if parse_time then
-						parse_time = ("%.3fms"):format(parse_time*1000)
-						compile_time = ("%.3fms"):format(compile_time*1000)
+						total_time.parse = total_time.parse + parse_time
+						total_time.compile = total_time.compile + compile_time
+
+						parse_time = format_time(parse_time)
+						compile_time = format_time(compile_time)
 						print("Test", file, "passed", "",
 							("p: %s, c: %s"):format(parse_time, compile_time))
 					else
@@ -139,6 +151,14 @@ local actions = {
 				end
 			end
 		end
+
+		if gettime then
+			print""
+			print"total:"
+			print("  parse time", format_time(total_time.parse))
+			print("  compile time", format_time(total_time.compile))
+		end
+
 
 		if tests_run == 0 then
 			if not pattern then
