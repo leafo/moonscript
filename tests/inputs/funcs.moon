@@ -43,5 +43,5 @@ what! the! heck!
 
 (x = if something then yeah else no) ->
 
-something = (hello=100, world=(x=[[yeah cool]])-> print "eat balls") ->
+something = (hello=100, world=(x=[[yeah cool]])-> print "eat rice") ->
   print hello

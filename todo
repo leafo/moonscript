@@ -1,5 +1,7 @@
 # TODO
 
+..= append string
+
 - varargs that get put in a nested generated function aren't valid anymore:
 
 - cascading expressions in function call? this looks too much like line decorator

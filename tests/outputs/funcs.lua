@@ -71,7 +71,7 @@ something = function(hello, world)
       if x == nil then
         x = [[yeah cool]]
       end
-      return print("eat balls")
+      return print("eat rice")
     end
   end
   return print(hello)
