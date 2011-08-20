@@ -142,6 +142,7 @@ local j = j - "hello"
 y = y * 2
 y = y / 100
 local m = m % 2
+local hello = hello .. "world"
 x = 0
 do
   local _item_0 = values
@@ -155,7 +156,7 @@ do
     end)())
   end
 end
-local hello = {
+hello = {
   something = world,
   ["if"] = "hello",
   ["else"] = 3434,

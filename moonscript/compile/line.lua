@@ -117,7 +117,7 @@ line_compile = {
   end,
   update = function(self, node)
     local _, name, op, exp = unpack(node)
-    local op_final = op:match("(.)=")
+    local op_final = op:match("^(.+)=$")
     if not op_final then
       error("Unknown op: " .. op)
     end
