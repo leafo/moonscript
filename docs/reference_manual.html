@@ -304,7 +304,7 @@ arrow, or it can be a series of statements indented on the following lines:</p>
 <span class="l_keyword">end</span></code></pre></td></tr></tbody></table>
 
 <p>If a function has no arguments, it can be called using the <code>!</code> operator,
-instead of empty parentheses. The <code>!</code> invocation is the prefered way to call
+instead of empty parentheses. The <code>!</code> invocation is the preferred way to call
 functions with no arguments.</p>
 
 <table style="width: 100%;" cellspacing="0" cellpadding="1"><tbody><tr class="code-header"><td>moonscript</td><td>lua</td></tr><tr><td style="width: 50%" class="code-border"><pre><code class="moon-code"><span class="l_atom">func_a</span><span class="l_symbol">!</span>
@@ -384,7 +384,7 @@ automatically includes a <code>self</code> argument.</p>
 
 <h3><a name="argument_defaults"></a>Argument Defaults</h3>
 
-<p>It is possible to provide deafult values for the arguments of a function. An
+<p>It is possible to provide default values for the arguments of a function. An
 argument is determined to be empty if it’s value is <code>nil</code>. Any <code>nil</code> arguments
 that have a default value will be replace before the body of the function is run.</p>
 
@@ -552,8 +552,10 @@ doubled.</p>
 <span class="l_symbol">}</span>
 <span class="l_keyword">local</span> <span class="l_atom">doubled</span> <span class="l_symbol">=</span> (<span class="l_fn_symbol">function</span>()
   <span class="l_keyword">local</span> <span class="l_atom">_accum_0</span> <span class="l_symbol">=</span> <span class="l_symbol">{</span> <span class="l_symbol">}</span>
+  <span class="l_keyword">local</span> <span class="l_atom">_len_0</span> <span class="l_symbol">=</span> <span class="l_number">0</span>
   <span class="l_keyword">for</span> <span class="l_atom">i</span>, <span class="l_atom">item</span> <span class="l_atom">in</span> <span class="l_builtins">ipairs</span>(<span class="l_atom">items</span>) <span class="l_keyword">do</span>
-    <span class="l_builtins">table.insert</span>(<span class="l_atom">_accum_0</span>, <span class="l_atom">item</span> * <span class="l_number">2</span>)
+    <span class="l_atom">_len_0</span> <span class="l_symbol">=</span> <span class="l_atom">_len_0</span> + <span class="l_number">1</span>
+    <span class="l_atom">_accum_0</span>[<span class="l_atom">_len_0</span>] <span class="l_symbol">=</span> <span class="l_atom">item</span> * <span class="l_number">2</span>
   <span class="l_keyword">end</span>
   <span class="l_keyword">return</span> <span class="l_atom">_accum_0</span>
 <span class="l_keyword">end</span>)()</code></pre></td></tr></tbody></table>
@@ -565,9 +567,11 @@ doubled.</p>
 </code></pre></td><td><pre><code class="lua-code"><span class="l_keyword">local</span> <span class="l_atom">iter</span> <span class="l_symbol">=</span> <span class="l_builtins">ipairs</span>(<span class="l_atom">items</span>)
 <span class="l_keyword">local</span> <span class="l_atom">slice</span> <span class="l_symbol">=</span> (<span class="l_fn_symbol">function</span>()
   <span class="l_keyword">local</span> <span class="l_atom">_accum_0</span> <span class="l_symbol">=</span> <span class="l_symbol">{</span> <span class="l_symbol">}</span>
+  <span class="l_keyword">local</span> <span class="l_atom">_len_0</span> <span class="l_symbol">=</span> <span class="l_number">0</span>
   <span class="l_keyword">for</span> <span class="l_atom">i</span>, <span class="l_atom">item</span> <span class="l_atom">in</span> <span class="l_atom">iter</span> <span class="l_keyword">do</span>
     <span class="l_keyword">if</span> <span class="l_atom">i</span> &gt; <span class="l_number">1</span> <span class="l_keyword">and</span> <span class="l_atom">i</span> &lt; <span class="l_number">3</span> <span class="l_keyword">then</span>
-      <span class="l_builtins">table.insert</span>(<span class="l_atom">_accum_0</span>, <span class="l_atom">item</span>)
+      <span class="l_atom">_len_0</span> <span class="l_symbol">=</span> <span class="l_atom">_len_0</span> + <span class="l_number">1</span>
+      <span class="l_atom">_accum_0</span>[<span class="l_atom">_len_0</span>] <span class="l_symbol">=</span> <span class="l_atom">item</span>
     <span class="l_keyword">end</span>
   <span class="l_keyword">end</span>
   <span class="l_keyword">return</span> <span class="l_atom">_accum_0</span>
@@ -579,11 +583,13 @@ an <code>*</code> operator is introduced. The doubled example can be rewritten a
 <table style="width: 100%;" cellspacing="0" cellpadding="1"><tbody><tr class="code-header"><td>moonscript</td><td>lua</td></tr><tr><td style="width: 50%" class="code-border"><pre><code class="moon-code"><span class="l_atom">doubled</span> <span class="l_symbol">=</span> <span class="l_fn_symbol">[</span><span class="l_atom">item</span> <span class="l_symbol">*</span> <span class="l_number">2</span> <span class="l_keyword">for</span> <span class="l_atom">item</span> <span class="l_keyword">in</span> <span class="l_symbol">*</span><span class="l_atom">items</span><span class="l_fn_symbol">]</span>
 </code></pre></td><td><pre><code class="lua-code"><span class="l_keyword">local</span> <span class="l_atom">doubled</span> <span class="l_symbol">=</span> (<span class="l_fn_symbol">function</span>()
   <span class="l_keyword">local</span> <span class="l_atom">_accum_0</span> <span class="l_symbol">=</span> <span class="l_symbol">{</span> <span class="l_symbol">}</span>
+  <span class="l_keyword">local</span> <span class="l_atom">_len_0</span> <span class="l_symbol">=</span> <span class="l_number">0</span>
   <span class="l_keyword">do</span>
     <span class="l_keyword">local</span> <span class="l_atom">_item_0</span> <span class="l_symbol">=</span> <span class="l_atom">items</span>
     <span class="l_keyword">for</span> <span class="l_atom">_index_0</span> <span class="l_symbol">=</span> <span class="l_number">1</span>, #<span class="l_atom">_item_0</span> <span class="l_keyword">do</span>
       <span class="l_keyword">local</span> <span class="l_atom">item</span> <span class="l_symbol">=</span> <span class="l_atom">_item_0</span>[<span class="l_atom">_index_0</span>]
-      <span class="l_builtins">table.insert</span>(<span class="l_atom">_accum_0</span>, <span class="l_atom">item</span> * <span class="l_number">2</span>)
+      <span class="l_atom">_len_0</span> <span class="l_symbol">=</span> <span class="l_atom">_len_0</span> + <span class="l_number">1</span>
+      <span class="l_atom">_accum_0</span>[<span class="l_atom">_len_0</span>] <span class="l_symbol">=</span> <span class="l_atom">item</span> * <span class="l_number">2</span>
     <span class="l_keyword">end</span>
   <span class="l_keyword">end</span>
   <span class="l_keyword">return</span> <span class="l_atom">_accum_0</span>
@@ -611,6 +617,7 @@ requirement is that a comprehension has at least one <code>for</code> clause.</p
 <span class="l_symbol">}</span>
 <span class="l_keyword">local</span> <span class="l_atom">points</span> <span class="l_symbol">=</span> (<span class="l_fn_symbol">function</span>()
   <span class="l_keyword">local</span> <span class="l_atom">_accum_0</span> <span class="l_symbol">=</span> <span class="l_symbol">{</span> <span class="l_symbol">}</span>
+  <span class="l_keyword">local</span> <span class="l_atom">_len_0</span> <span class="l_symbol">=</span> <span class="l_number">0</span>
   <span class="l_keyword">do</span>
     <span class="l_keyword">local</span> <span class="l_atom">_item_0</span> <span class="l_symbol">=</span> <span class="l_atom">x_coords</span>
     <span class="l_keyword">for</span> <span class="l_atom">_index_0</span> <span class="l_symbol">=</span> <span class="l_number">1</span>, #<span class="l_atom">_item_0</span> <span class="l_keyword">do</span>
@@ -619,10 +626,11 @@ requirement is that a comprehension has at least one <code>for</code> clause.</p
         <span class="l_keyword">local</span> <span class="l_atom">_item_1</span> <span class="l_symbol">=</span> <span class="l_atom">y_coords</span>
         <span class="l_keyword">for</span> <span class="l_atom">_index_1</span> <span class="l_symbol">=</span> <span class="l_number">1</span>, #<span class="l_atom">_item_1</span> <span class="l_keyword">do</span>
           <span class="l_keyword">local</span> <span class="l_atom">y</span> <span class="l_symbol">=</span> <span class="l_atom">_item_1</span>[<span class="l_atom">_index_1</span>]
-          <span class="l_builtins">table.insert</span>(<span class="l_atom">_accum_0</span>, <span class="l_symbol">{</span>
+          <span class="l_atom">_len_0</span> <span class="l_symbol">=</span> <span class="l_atom">_len_0</span> + <span class="l_number">1</span>
+          <span class="l_atom">_accum_0</span>[<span class="l_atom">_len_0</span>] <span class="l_symbol">=</span> <span class="l_symbol">{</span>
             <span class="l_atom">x</span>,
             <span class="l_atom">y</span>
-          <span class="l_symbol">}</span>)
+          <span class="l_symbol">}</span>
         <span class="l_keyword">end</span>
       <span class="l_keyword">end</span>
     <span class="l_keyword">end</span>
@@ -642,12 +650,14 @@ between 1 and 5 inclusive:</p>
 <table style="width: 100%;" cellspacing="0" cellpadding="1"><tbody><tr class="code-header"><td>moonscript</td><td>lua</td></tr><tr><td style="width: 50%" class="code-border"><pre><code class="moon-code"><span class="l_atom">slice</span> <span class="l_symbol">=</span> <span class="l_fn_symbol">[</span><span class="l_atom">item</span> <span class="l_keyword">for</span> <span class="l_atom">item</span> <span class="l_keyword">in</span> <span class="l_symbol">*</span><span class="l_atom">items</span><span class="l_fn_symbol">[</span><span class="l_number">1</span><span class="l_bold_symbol">:</span><span class="l_number">5</span><span class="l_fn_symbol">]</span><span class="l_fn_symbol">]</span>
 </code></pre></td><td><pre><code class="lua-code"><span class="l_keyword">local</span> <span class="l_atom">slice</span> <span class="l_symbol">=</span> (<span class="l_fn_symbol">function</span>()
   <span class="l_keyword">local</span> <span class="l_atom">_accum_0</span> <span class="l_symbol">=</span> <span class="l_symbol">{</span> <span class="l_symbol">}</span>
+  <span class="l_keyword">local</span> <span class="l_atom">_len_0</span> <span class="l_symbol">=</span> <span class="l_number">0</span>
   <span class="l_keyword">do</span>
     <span class="l_keyword">local</span> <span class="l_atom">_max_0</span> <span class="l_symbol">=</span> <span class="l_number">5</span>
     <span class="l_keyword">local</span> <span class="l_atom">_item_0</span> <span class="l_symbol">=</span> <span class="l_atom">items</span>
     <span class="l_keyword">for</span> <span class="l_atom">_index_0</span> <span class="l_symbol">=</span> <span class="l_number">1</span>, <span class="l_atom">_max_0</span> &lt; <span class="l_number">0</span> <span class="l_keyword">and</span> #<span class="l_atom">_item_0</span> + <span class="l_atom">_max_0</span> <span class="l_keyword">or</span> <span class="l_atom">_max_0</span> <span class="l_keyword">do</span>
       <span class="l_keyword">local</span> <span class="l_atom">item</span> <span class="l_symbol">=</span> <span class="l_atom">_item_0</span>[<span class="l_atom">_index_0</span>]
-      <span class="l_builtins">table.insert</span>(<span class="l_atom">_accum_0</span>, <span class="l_atom">item</span>)
+      <span class="l_atom">_len_0</span> <span class="l_symbol">=</span> <span class="l_atom">_len_0</span> + <span class="l_number">1</span>
+      <span class="l_atom">_accum_0</span>[<span class="l_atom">_len_0</span>] <span class="l_symbol">=</span> <span class="l_atom">item</span>
     <span class="l_keyword">end</span>
   <span class="l_keyword">end</span>
   <span class="l_keyword">return</span> <span class="l_atom">_accum_0</span>
@@ -657,14 +667,16 @@ between 1 and 5 inclusive:</p>
 example, if the max index is left off it defaults to the length of the table.
 This will take everything but the first element:</p>
 
-<table style="width: 100%;" cellspacing="0" cellpadding="1"><tbody><tr class="code-header"><td>moonscript</td><td>lua</td></tr><tr><td style="width: 50%" class="code-border"><pre><code class="moon-code"><span class="l_atom">slice</span> <span class="l_symbol">=</span> <span class="l_fn_symbol">[</span><span class="l_atom">item</span> <span class="l_keyword">for</span> <span class="l_atom">item</span> <span class="l_keyword">in</span> <span class="l_symbol">*</span><span class="l_atom">items</span><span class="l_fn_symbol">[</span><span class="l_number">1</span><span class="l_bold_symbol">:</span><span class="l_fn_symbol">]</span><span class="l_fn_symbol">]</span>
+<table style="width: 100%;" cellspacing="0" cellpadding="1"><tbody><tr class="code-header"><td>moonscript</td><td>lua</td></tr><tr><td style="width: 50%" class="code-border"><pre><code class="moon-code"><span class="l_atom">slice</span> <span class="l_symbol">=</span> <span class="l_fn_symbol">[</span><span class="l_atom">item</span> <span class="l_keyword">for</span> <span class="l_atom">item</span> <span class="l_keyword">in</span> <span class="l_symbol">*</span><span class="l_atom">items</span><span class="l_fn_symbol">[</span><span class="l_number">2</span><span class="l_bold_symbol">:</span><span class="l_fn_symbol">]</span><span class="l_fn_symbol">]</span>
 </code></pre></td><td><pre><code class="lua-code"><span class="l_keyword">local</span> <span class="l_atom">slice</span> <span class="l_symbol">=</span> (<span class="l_fn_symbol">function</span>()
   <span class="l_keyword">local</span> <span class="l_atom">_accum_0</span> <span class="l_symbol">=</span> <span class="l_symbol">{</span> <span class="l_symbol">}</span>
+  <span class="l_keyword">local</span> <span class="l_atom">_len_0</span> <span class="l_symbol">=</span> <span class="l_number">0</span>
   <span class="l_keyword">do</span>
     <span class="l_keyword">local</span> <span class="l_atom">_item_0</span> <span class="l_symbol">=</span> <span class="l_atom">items</span>
-    <span class="l_keyword">for</span> <span class="l_atom">_index_0</span> <span class="l_symbol">=</span> <span class="l_number">1</span>, #<span class="l_atom">_item_0</span> <span class="l_keyword">do</span>
+    <span class="l_keyword">for</span> <span class="l_atom">_index_0</span> <span class="l_symbol">=</span> <span class="l_number">2</span>, #<span class="l_atom">_item_0</span> <span class="l_keyword">do</span>
       <span class="l_keyword">local</span> <span class="l_atom">item</span> <span class="l_symbol">=</span> <span class="l_atom">_item_0</span>[<span class="l_atom">_index_0</span>]
-      <span class="l_builtins">table.insert</span>(<span class="l_atom">_accum_0</span>, <span class="l_atom">item</span>)
+      <span class="l_atom">_len_0</span> <span class="l_symbol">=</span> <span class="l_atom">_len_0</span> + <span class="l_number">1</span>
+      <span class="l_atom">_accum_0</span>[<span class="l_atom">_len_0</span>] <span class="l_symbol">=</span> <span class="l_atom">item</span>
     <span class="l_keyword">end</span>
   <span class="l_keyword">end</span>
   <span class="l_keyword">return</span> <span class="l_atom">_accum_0</span>
@@ -677,11 +689,13 @@ size and leave the other bounds blank. This takes all odd indexed items: (1, 3,
 <table style="width: 100%;" cellspacing="0" cellpadding="1"><tbody><tr class="code-header"><td>moonscript</td><td>lua</td></tr><tr><td style="width: 50%" class="code-border"><pre><code class="moon-code"><span class="l_atom">slice</span> <span class="l_symbol">=</span> <span class="l_fn_symbol">[</span><span class="l_atom">item</span> <span class="l_keyword">for</span> <span class="l_atom">items</span> <span class="l_keyword">in</span> <span class="l_symbol">*</span><span class="l_atom">items</span><span class="l_fn_symbol">[</span><span class="l_bold_symbol">:</span><span class="l_bold_symbol">:</span><span class="l_number">2</span><span class="l_fn_symbol">]</span><span class="l_fn_symbol">]</span>
 </code></pre></td><td><pre><code class="lua-code"><span class="l_keyword">local</span> <span class="l_atom">slice</span> <span class="l_symbol">=</span> (<span class="l_fn_symbol">function</span>()
   <span class="l_keyword">local</span> <span class="l_atom">_accum_0</span> <span class="l_symbol">=</span> <span class="l_symbol">{</span> <span class="l_symbol">}</span>
+  <span class="l_keyword">local</span> <span class="l_atom">_len_0</span> <span class="l_symbol">=</span> <span class="l_number">0</span>
   <span class="l_keyword">do</span>
     <span class="l_keyword">local</span> <span class="l_atom">_item_0</span> <span class="l_symbol">=</span> <span class="l_atom">items</span>
     <span class="l_keyword">for</span> <span class="l_atom">_index_0</span> <span class="l_symbol">=</span> <span class="l_number">1</span>, #<span class="l_atom">_item_0</span>, <span class="l_number">2</span> <span class="l_keyword">do</span>
       <span class="l_keyword">local</span> <span class="l_atom">items</span> <span class="l_symbol">=</span> <span class="l_atom">_item_0</span>[<span class="l_atom">_index_0</span>]
-      <span class="l_builtins">table.insert</span>(<span class="l_atom">_accum_0</span>, <span class="l_atom">item</span>)
+      <span class="l_atom">_len_0</span> <span class="l_symbol">=</span> <span class="l_atom">_len_0</span> + <span class="l_number">1</span>
+      <span class="l_atom">_accum_0</span>[<span class="l_atom">_len_0</span>] <span class="l_symbol">=</span> <span class="l_atom">item</span>
     <span class="l_keyword">end</span>
   <span class="l_keyword">end</span>
   <span class="l_keyword">return</span> <span class="l_atom">_accum_0</span>
@@ -752,6 +766,7 @@ table if the value of that expression is not nil.</p>
     <span class="l_atom">i</span>
 </code></pre></td><td><pre><code class="lua-code"><span class="l_keyword">local</span> <span class="l_atom">doubled_evens</span> <span class="l_symbol">=</span> (<span class="l_fn_symbol">function</span>()
   <span class="l_keyword">local</span> <span class="l_atom">_accum_0</span> <span class="l_symbol">=</span> <span class="l_symbol">{</span> <span class="l_symbol">}</span>
+  <span class="l_keyword">local</span> <span class="l_atom">_len_0</span> <span class="l_symbol">=</span> <span class="l_number">0</span>
   <span class="l_keyword">for</span> <span class="l_atom">i</span> <span class="l_symbol">=</span> <span class="l_number">1</span>, <span class="l_number">20</span> <span class="l_keyword">do</span>
     <span class="l_keyword">local</span> <span class="l_atom">_value_0</span>
     <span class="l_keyword">if</span> <span class="l_atom">i</span> % <span class="l_number">2</span> <span class="l_symbol">=</span><span class="l_symbol">=</span> <span class="l_number">0</span> <span class="l_keyword">then</span>
@@ -760,7 +775,8 @@ table if the value of that expression is not nil.</p>
       <span class="l_atom">_value_0</span> <span class="l_symbol">=</span> <span class="l_atom">i</span>
     <span class="l_keyword">end</span>
     <span class="l_keyword">if</span> <span class="l_atom">_value_0</span> ~<span class="l_symbol">=</span> <span class="l_special">nil</span> <span class="l_keyword">then</span>
-      <span class="l_builtins">table.insert</span>(<span class="l_atom">_accum_0</span>, <span class="l_atom">_value_0</span>)
+      <span class="l_atom">_len_0</span> <span class="l_symbol">=</span> <span class="l_atom">_len_0</span> + <span class="l_number">1</span>
+      <span class="l_atom">_accum_0</span>[<span class="l_atom">_len_0</span>] <span class="l_symbol">=</span> <span class="l_atom">_value_0</span>
     <span class="l_keyword">end</span>
   <span class="l_keyword">end</span>
   <span class="l_keyword">return</span> <span class="l_atom">_accum_0</span>
@@ -781,6 +797,7 @@ table if the value of that expression is not nil.</p>
 <span class="l_symbol">}</span>
 <span class="l_keyword">local</span> <span class="l_atom">odds</span> <span class="l_symbol">=</span> (<span class="l_fn_symbol">function</span>()
   <span class="l_keyword">local</span> <span class="l_atom">_accum_0</span> <span class="l_symbol">=</span> <span class="l_symbol">{</span> <span class="l_symbol">}</span>
+  <span class="l_keyword">local</span> <span class="l_atom">_len_0</span> <span class="l_symbol">=</span> <span class="l_number">0</span>
   <span class="l_keyword">do</span>
     <span class="l_keyword">local</span> <span class="l_atom">_item_0</span> <span class="l_symbol">=</span> <span class="l_atom">my_numbers</span>
     <span class="l_keyword">for</span> <span class="l_atom">_index_0</span> <span class="l_symbol">=</span> <span class="l_number">1</span>, #<span class="l_atom">_item_0</span> <span class="l_keyword">do</span>
@@ -790,7 +807,8 @@ table if the value of that expression is not nil.</p>
         <span class="l_atom">_value_0</span> <span class="l_symbol">=</span> <span class="l_atom">x</span>
       <span class="l_keyword">end</span>
       <span class="l_keyword">if</span> <span class="l_atom">_value_0</span> ~<span class="l_symbol">=</span> <span class="l_special">nil</span> <span class="l_keyword">then</span>
-        <span class="l_builtins">table.insert</span>(<span class="l_atom">_accum_0</span>, <span class="l_atom">_value_0</span>)
+        <span class="l_atom">_len_0</span> <span class="l_symbol">=</span> <span class="l_atom">_len_0</span> + <span class="l_number">1</span>
+        <span class="l_atom">_accum_0</span>[<span class="l_atom">_len_0</span>] <span class="l_symbol">=</span> <span class="l_atom">_value_0</span>
       <span class="l_keyword">end</span>
     <span class="l_keyword">end</span>
   <span class="l_keyword">end</span>
@@ -817,10 +835,12 @@ comprehension.</p>
 <span class="l_atom">func_b</span> <span class="l_symbol">=</span> <span class="l_fn_symbol">function</span>()
   <span class="l_keyword">return</span> (<span class="l_fn_symbol">function</span>()
     <span class="l_keyword">local</span> <span class="l_atom">_accum_0</span> <span class="l_symbol">=</span> <span class="l_symbol">{</span> <span class="l_symbol">}</span>
+    <span class="l_keyword">local</span> <span class="l_atom">_len_0</span> <span class="l_symbol">=</span> <span class="l_number">0</span>
     <span class="l_keyword">for</span> <span class="l_atom">i</span> <span class="l_symbol">=</span> <span class="l_number">1</span>, <span class="l_number">10</span> <span class="l_keyword">do</span>
       <span class="l_keyword">local</span> <span class="l_atom">_value_0</span> <span class="l_symbol">=</span> <span class="l_atom">i</span>
       <span class="l_keyword">if</span> <span class="l_atom">_value_0</span> ~<span class="l_symbol">=</span> <span class="l_special">nil</span> <span class="l_keyword">then</span>
-        <span class="l_builtins">table.insert</span>(<span class="l_atom">_accum_0</span>, <span class="l_atom">_value_0</span>)
+        <span class="l_atom">_len_0</span> <span class="l_symbol">=</span> <span class="l_atom">_len_0</span> + <span class="l_number">1</span>
+        <span class="l_atom">_accum_0</span>[<span class="l_atom">_len_0</span>] <span class="l_symbol">=</span> <span class="l_atom">_value_0</span>
       <span class="l_keyword">end</span>
     <span class="l_keyword">end</span>
     <span class="l_keyword">return</span> <span class="l_atom">_accum_0</span>
@@ -852,7 +872,7 @@ need to return the results of the loop.</p>
 <span class="l_keyword">end</span></code></pre></td></tr></tbody></table>
 
 <p>Like for loops, the while loop can also be used an expression. Additionally,
-for a function to return the accumlated value of a while loop, the statement
+for a function to return the accumulated value of a while loop, the statement
 must be explicitly returned.</p>
 
 <h2><a name="conditionals"></a>Conditionals</h2>
@@ -1077,6 +1097,35 @@ instances, so modifications to it in one instance will show up in another:</p>
     <span class="l_builtins">print</span>(<span class="l_atom">item</span>)
   <span class="l_keyword">end</span>
 <span class="l_keyword">end</span></code></pre></td></tr></tbody></table>
+
+<p>The proper way to avoid this problem is to create the mutable state of the
+object in the constructor:</p>
+
+<table style="width: 100%;" cellspacing="0" cellpadding="1"><tbody><tr class="code-header"><td>moonscript</td><td>lua</td></tr><tr><td style="width: 50%" class="code-border"><pre><code class="moon-code"><span class="l_keyword">class</span> <span class="l_proper">Person</span>
+  <span class="l_table_key">new</span><span class="l_bold_symbol">:</span> <span class="l_fn_symbol">=&gt;</span>
+    <span class="l_self_var">@clothes</span> <span class="l_symbol">=</span> <span class="l_fn_symbol">{</span><span class="l_fn_symbol">}</span>
+</code></pre></td><td><pre><code class="lua-code"><span class="l_keyword">local</span> <span class="l_atom">Person</span>
+<span class="l_atom">Person</span> <span class="l_symbol">=</span> (<span class="l_fn_symbol">function</span>(<span class="l_atom">_parent_0</span>)
+  <span class="l_keyword">local</span> <span class="l_atom">_base_0</span> <span class="l_symbol">=</span> <span class="l_symbol">{</span> <span class="l_symbol">}</span>
+  <span class="l_atom">_base_0</span><span class="l_symbol">.</span><span class="l_atom">__index</span> <span class="l_symbol">=</span> <span class="l_atom">_base_0</span>
+  <span class="l_keyword">if</span> <span class="l_atom">_parent_0</span> <span class="l_keyword">then</span>
+    <span class="l_atom">setmetatable</span>(<span class="l_atom">_base_0</span>, <span class="l_atom">getmetatable</span>(<span class="l_atom">_parent_0</span>)<span class="l_symbol">.</span><span class="l_atom">__index</span>)
+  <span class="l_keyword">end</span>
+  <span class="l_keyword">local</span> <span class="l_atom">_class_0</span> <span class="l_symbol">=</span> <span class="l_atom">setmetatable</span>(<span class="l_symbol">{</span>
+    <span class="l_atom">__init</span> <span class="l_symbol">=</span> <span class="l_fn_symbol">function</span>(<span class="l_atom">self</span>)
+      <span class="l_atom">self</span><span class="l_symbol">.</span><span class="l_atom">clothes</span> <span class="l_symbol">=</span> <span class="l_symbol">{</span> <span class="l_symbol">}</span>
+    <span class="l_keyword">end</span>
+  <span class="l_symbol">}</span>, <span class="l_symbol">{</span>
+    <span class="l_atom">__index</span> <span class="l_symbol">=</span> <span class="l_atom">_base_0</span>,
+    <span class="l_atom">__call</span> <span class="l_symbol">=</span> <span class="l_fn_symbol">function</span>(<span class="l_atom">mt</span>, <span class="l_symbol">.</span><span class="l_symbol">.</span><span class="l_symbol">.</span>)
+      <span class="l_keyword">local</span> <span class="l_atom">self</span> <span class="l_symbol">=</span> <span class="l_atom">setmetatable</span>(<span class="l_symbol">{</span><span class="l_symbol">}</span>, <span class="l_atom">_base_0</span>)
+      <span class="l_atom">mt</span><span class="l_symbol">.</span><span class="l_atom">__init</span>(<span class="l_atom">self</span>, <span class="l_symbol">.</span><span class="l_symbol">.</span><span class="l_symbol">.</span>)
+      <span class="l_keyword">return</span> <span class="l_atom">self</span>
+    <span class="l_keyword">end</span>
+  <span class="l_symbol">}</span>)
+  <span class="l_atom">_base_0</span><span class="l_symbol">.</span><span class="l_atom">__class</span> <span class="l_symbol">=</span> <span class="l_atom">_class_0</span>
+  <span class="l_keyword">return</span> <span class="l_atom">_class_0</span>
+<span class="l_keyword">end</span>)()</code></pre></td></tr></tbody></table>
 
 <h3><a name="inheritance"></a>Inheritance</h3>
 
@@ -1543,7 +1592,7 @@ THE SOFTWARE.</p>
 
 	</div>
 
-	<div class="footer">Generated on Sun Aug 14 16:19:23 2011; MoonScript v0.1.0</div>
+	<div class="footer">Generated on Mon Aug 22 07:59:03 2011; MoonScript v0.2.0-dev</div>
 
 	
 
