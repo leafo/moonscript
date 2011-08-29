@@ -1,7 +1,6 @@
 module("moonscript.compile", package.seeall)
 local util = require("moonscript.util")
 local data = require("moonscript.data")
-local dump = require("moonscript.dump")
 require("moonscript.compile.format")
 require("moonscript.compile.types")
 local reversed = util.reversed

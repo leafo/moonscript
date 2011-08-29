@@ -1,7 +1,6 @@
 module("moonscript.compile", package.seeall)
 local util = require("moonscript.util")
 local data = require("moonscript.data")
-local itwos = util.itwos
 local Set, ntype = data.Set, data.ntype
 local concat, insert = table.concat, table.insert
 indent_char = "  "

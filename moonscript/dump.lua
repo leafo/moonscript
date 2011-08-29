@@ -1,29 +1,46 @@
-
 module("moonscript.dump", package.seeall)
-
-local function flat_value(op, depth)
-	depth = depth or 1
-
-	if type(op) == "string" then return '"'..op..'"' end
-	if type(op) ~= "table" then return tostring(op) end
-	local items = {}
-	for _, item in ipairs(op) do
-		table.insert(items, flat_value(item, depth+1))
-	end
-
-	local pos = op[-1]
-
-	return "{"..(pos and "["..pos.."] " or "")..table.concat(items, ", ").."}"
+local flat_value
+flat_value = function(op, depth)
+  if depth == nil then
+    depth = 1
+  end
+  if type(op) == "string" then
+    return '"' .. op .. '"'
+  end
+  if type(op) ~= "table" then
+    return tostring(op)
+  end
+  local items = (function()
+    local _accum_0 = { }
+    local _len_0 = 0
+    do
+      local _item_0 = op
+      for _index_0 = 1, #_item_0 do
+        local item = _item_0[_index_0]
+        _len_0 = _len_0 + 1
+        _accum_0[_len_0] = flat_value(item, depth + 1)
+      end
+    end
+    return _accum_0
+  end)()
+  local pos = op[-1]
+  return "{" .. (pos and "[" .. pos .. "] " or "") .. table.concat(items, ", ") .. "}"
 end
-
-function value(op)
-	return flat_value(op)
+value = function(op)
+  return flat_value(op)
 end
-
-function tree(block, depth)
-	depth = depth or 0
-	for _, op in ipairs(block) do
-		print(flat_value(op))
-	end
+tree = function(block)
+  return (function()
+    local _accum_0 = { }
+    local _len_0 = 0
+    do
+      local _item_0 = block
+      for _index_0 = 1, #_item_0 do
+        local value = _item_0[_index_0]
+        _len_0 = _len_0 + 1
+        _accum_0[_len_0] = print(flat_value(value))
+      end
+    end
+    return _accum_0
+  end)()
 end
-

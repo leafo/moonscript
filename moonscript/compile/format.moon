@@ -3,7 +3,6 @@ module "moonscript.compile", package.seeall
 util = require "moonscript.util"
 data = require "moonscript.data"
 
-import itwos from util
 import Set, ntype from data
 import concat, insert from table
 
