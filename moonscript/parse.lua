@@ -251,6 +251,11 @@ local build_grammar = wrap(function()
 		return #left == #right
 	end
 
+	-- :name in table literal
+	local function self_assign(name)
+		return {name, name}
+	end
+
 	-- can't have P(false) because it causes preceding patterns not to run
 	local Cut = P(function() return false end)
 
@@ -402,7 +407,7 @@ local build_grammar = wrap(function()
 		ClassDecl = key"class" * Name * (key"extends" * Exp + C"")^-1 * TableBlock / mark"class",
 		Export = key"export" * Ct(NameList) / mark"export",
 
-		KeyValue = Ct((SimpleName + sym"[" * Exp * sym"]") * symx":" * (Exp + TableBlock)),
+		KeyValue = (sym":" * Name) / self_assign + Ct((SimpleName + sym"[" * Exp * sym"]") * symx":" * (Exp + TableBlock)),
 		KeyValueList = KeyValue * (sym"," * KeyValue)^0,
 		KeyValueLine = CheckIndent * KeyValueList * sym","^-1,
 

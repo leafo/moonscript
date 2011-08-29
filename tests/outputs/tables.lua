@@ -101,3 +101,19 @@ x = {
     return self:value(node)
   end
 }
+x = {
+  something = something,
+  something = something
+}
+local y = {
+  hi = hi,
+  there = there,
+  how = how,
+  you = you,
+  thing = thing
+}
+call_me("hello", {
+  x = x,
+  y = y,
+  z = z
+})

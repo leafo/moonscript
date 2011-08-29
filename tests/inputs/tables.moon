@@ -81,5 +81,12 @@ x =
 -- okay
 
 
+x = { :something, something: something }
 
+y = {
+  :hi, :there, :how, :you
+  :thing
+}
+
+call_me "hello", :x, :y, :z
 
