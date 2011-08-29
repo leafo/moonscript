@@ -38,3 +38,9 @@ x\cool()
 
 print x.__class == Simple
 
+
+class Okay
+  -- what is going on
+  something: 20323
+  -- yeaha
+

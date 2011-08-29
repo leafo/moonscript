@@ -395,8 +395,9 @@ local build_grammar = wrap(function()
 		TableValueList = TableValue * (sym"," * TableValue)^0,
 		TableLitLine = PushIndent * ((TableValueList * PopIndent) + (PopIndent * Cut)) + Space,
 
-		TableBlockInner = Ct(KeyValueLine * (Break^1 * KeyValueLine)^0),
-		TableBlock = Break * Advance * TableBlockInner * PopIndent / mark"table",
+		-- the unbounded table
+		TableBlockInner = Ct(KeyValueLine * (SpaceBreak^1 * KeyValueLine)^0),
+		TableBlock = SpaceBreak^1 * Advance * TableBlockInner * PopIndent / mark"table",
 
 		ClassDecl = key"class" * Name * (key"extends" * Exp + C"")^-1 * TableBlock / mark"class",
 		Export = key"export" * Ct(NameList) / mark"export",

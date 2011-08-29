@@ -137,3 +137,29 @@ end)(Hi)
 x = Simple()
 x:cool()
 print(x.__class == Simple)
+local Okay
+Okay = (function(_parent_0)
+  local _base_0 = {
+    something = 20323
+  }
+  _base_0.__index = _base_0
+  if _parent_0 then
+    setmetatable(_base_0, getmetatable(_parent_0).__index)
+  end
+  local _class_0 = setmetatable({
+    __init = function(self, ...)
+      if _parent_0 then
+        return _parent_0.__init(self, ...)
+      end
+    end
+  }, {
+    __index = _base_0,
+    __call = function(mt, ...)
+      local self = setmetatable({}, _base_0)
+      mt.__init(self, ...)
+      return self
+    end
+  })
+  _base_0.__class = _class_0
+  return _class_0
+end)()

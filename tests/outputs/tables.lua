@@ -86,3 +86,18 @@ local whatabout = {
   yeah,
   hello("world", yeah)
 }
+x = {
+  something = function(self)
+    return "hello"
+  end,
+  cool = {
+    bed = {
+      2323,
+      2323
+    },
+    red = 2343
+  },
+  name = function(self, node)
+    return self:value(node)
+  end
+}

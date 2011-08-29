@@ -66,5 +66,20 @@ whatabout = {
   hello "world", yeah
 }
 
+x =
+  -- yeah
+  something: => "hello"
+  cool: -- umm
+    --so ething
+    bed: {
+      2323,2323
+    }
+    red: 2343 -- here
+  -- what
+  name: (node) => @value node -- here
+  -- comment me
+-- okay
+
+
 
 
