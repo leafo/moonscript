@@ -24,7 +24,7 @@ end
 local R, S, V, P = lpeg.R, lpeg.S, lpeg.V, lpeg.P
 local C, Ct, Cmt, Cg, Cb, Cc = lpeg.C, lpeg.Ct, lpeg.Cmt, lpeg.Cg, lpeg.Cb, lpeg.Cc
 
-lpeg.setmaxstack(3000)
+lpeg.setmaxstack(10000)
 
 local White = S" \t\r\n"^0
 local _Space = S" \t"^0
