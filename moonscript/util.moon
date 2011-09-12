@@ -59,7 +59,7 @@ dump = (what) ->
     elseif t == "table"
       if seen[what]
         return "recursion("..tostring(what) ..")...\n"
-      seen[what] == true
+      seen[what] = true
 
       depth += 1
       lines = for k,v in pairs what

@@ -77,7 +77,7 @@ dump = function(what)
       if seen[what] then
         return "recursion(" .. tostring(what) .. ")...\n"
       end
-      local _ = seen[what] == true
+      seen[what] = true
       depth = depth + 1
       local lines = (function()
         local _accum_0 = { }
