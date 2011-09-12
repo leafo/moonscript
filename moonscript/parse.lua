@@ -26,13 +26,13 @@ local C, Ct, Cmt, Cg, Cb, Cc = lpeg.C, lpeg.Ct, lpeg.Cmt, lpeg.Cg, lpeg.Cb, lpeg
 
 lpeg.setmaxstack(3000)
 
-local White = S" \t\n"^0
+local White = S" \t\r\n"^0
 local _Space = S" \t"^0
-local Break = P"\n"
+local Break = P"\r"^-1 * P"\n"
 local Stop = Break + -1
 local Indent = C(S"\t "^0) / count_indent
 
-local Comment = P"--" * (1 - S"\n")^0 * #Stop
+local Comment = P"--" * (1 - S"\r\n")^0 * #Stop
 local Space = _Space * Comment^-1
 local SomeSpace = S" \t"^1 * Comment^-1
 
@@ -212,7 +212,7 @@ local build_grammar = wrap(function()
 	local Name = sym"@" * Name / mark"self" + Name + Space * "..." / trim
 
 	local function simple_string(delim, x)
-		return C(symx(delim)) * C((P('\\'..delim) + (1 - S('\n'..delim)))^0) * sym(delim) / mark"string"
+		return C(symx(delim)) * C((P('\\'..delim) + (1 - S('\r\n'..delim)))^0) * sym(delim) / mark"string"
 	end
 
 	-- wrap if statement if there is a conditional decorator
@@ -345,7 +345,7 @@ local build_grammar = wrap(function()
 		SingleString = simple_string("'"),
 		DoubleString = simple_string('"'),
 
-		LuaString = Cg(LuaStringOpen, "string_open") * Cb"string_open" * P"\n"^-1 *
+		LuaString = Cg(LuaStringOpen, "string_open") * Cb"string_open" * Break^-1 *
 			C((1 - Cmt(C(LuaStringClose) * Cb"string_open", check_lua_string))^0) *
 			C(LuaStringClose) / mark"string",
 
