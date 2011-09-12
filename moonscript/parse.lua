@@ -212,7 +212,9 @@ local build_grammar = wrap(function()
 	local Name = sym"@" * Name / mark"self" + Name + Space * "..." / trim
 
 	local function simple_string(delim, x)
-		return C(symx(delim)) * C((P('\\'..delim) + (1 - S('\r\n'..delim)))^0) * sym(delim) / mark"string"
+		return C(symx(delim)) * C((P('\\'..delim) +
+			"\\\\" +
+			(1 - S('\r\n'..delim)))^0) * sym(delim) / mark"string"
 	end
 
 	-- wrap if statement if there is a conditional decorator

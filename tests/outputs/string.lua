@@ -12,3 +12,7 @@ local hi_there = [[  hi there
 local well = [==[ "helo" ]==]
 local hola = [===[  eat noots]===]
 local mm = [[well trhere]]
+local x = "\\"
+x = "a\\b"
+x = "\\\n"
+x = "\""
