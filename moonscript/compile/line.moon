@@ -223,29 +223,14 @@ line_compile =
 
     -- synthesize constructor if needed
     if not constructor
-      constructor = {"fndef", {"..."}, {}, "fat", {
+      constructor = {"fndef", {{"..."}}, {}, "fat", {
         {"if", parent_loc, {
           {"chain", "super", {"call", {"..."}}}
         }}
       }}
 
     smart_node constructor
-
-    -- organize constructor arguments
-    -- extract self arguments
-    self_args = {}
-    get_initializers = (arg) ->
-      if ntype(arg) == "self"
-        arg = arg[2]
-        insert self_args, arg
-      arg
-
-    constructor.args = [get_initializers arg for arg in *constructor.args]
     constructor.arrow = "fat"
-
-    -- insert self assigning arguments
-    dests = [{"self", name} for name in *self_args]
-    insert constructor.body, 1, {"assign", dests, self_args} if #self_args > 0
 
     def_scope = with @block!
       parent_val = @value parent_val if parent_val != ""
@@ -281,7 +266,7 @@ line_compile =
       -- the class's meta table, gives us call and access to base methods
       cls_mt = {"table", {
         {"__index", base_name}
-        {"__call", {"fndef", {"mt", "..."}, {}, "slim", {
+        {"__call", {"fndef", {{"mt"}, {"..."}}, {}, "slim", {
             {"raw", ("local self = setmetatable({}, %s)")\format(base_name)}
             {"chain", "mt.__init", {"call", {"self", "..."}}}
             "self"

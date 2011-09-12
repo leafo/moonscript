@@ -45,3 +45,10 @@ what! the! heck!
 
 something = (hello=100, world=(x=[[yeah cool]])-> print "eat rice") ->
   print hello
+
+(x, y) =>
+(@x, @y) =>
+(x=1) =>
+(@x=1,y,@z="hello world") =>
+
+

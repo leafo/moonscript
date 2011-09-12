@@ -221,38 +221,45 @@ value_compile = {
   fndef = function(self, node)
     local _, args, whitelist, arrow, block = unpack(node)
     local default_args = { }
-    local format_names
-    format_names = function(arg)
-      if type(arg) == "string" then
-        return arg
-      else
-        insert(default_args, arg)
-        return arg[1]
-      end
-    end
-    args = (function()
+    local self_args = { }
+    local arg_names = (function()
       local _accum_0 = { }
       local _len_0 = 0
       do
         local _item_0 = args
         for _index_0 = 1, #_item_0 do
           local arg = _item_0[_index_0]
-          _len_0 = _len_0 + 1
-          _accum_0[_len_0] = format_names(arg)
+          local name, default_value = unpack(arg)
+          if type(name) == "string" then
+            name = name
+          else
+            if name[1] == "self" then
+              insert(self_args, name)
+            end
+            name = name[2]
+          end
+          if default_value then
+            insert(default_args, arg)
+          end
+          local _value_0 = name
+          if _value_0 ~= nil then
+            _len_0 = _len_0 + 1
+            _accum_0[_len_0] = _value_0
+          end
         end
       end
       return _accum_0
     end)()
     if arrow == "fat" then
-      insert(args, 1, "self")
+      insert(arg_names, 1, "self")
     end
     do
-      local _with_0 = self:block("function(" .. concat(args, ", ") .. ")")
+      local _with_0 = self:block("function(" .. concat(arg_names, ", ") .. ")")
       if #whitelist > 0 then
         _with_0:whitelist_names(whitelist)
       end
       do
-        local _item_0 = args
+        local _item_0 = arg_names
         for _index_0 = 1, #_item_0 do
           local name = _item_0[_index_0]
           _with_0:put_name(name)
@@ -263,6 +270,9 @@ value_compile = {
         for _index_0 = 1, #_item_0 do
           local default = _item_0[_index_0]
           local name, value = unpack(default)
+          if type(name) == "table" then
+            name = name[2]
+          end
           _with_0:stm({
             'if',
             {
@@ -284,6 +294,26 @@ value_compile = {
             }
           })
         end
+      end
+      local self_arg_values = (function()
+        local _accum_0 = { }
+        local _len_0 = 0
+        do
+          local _item_0 = self_args
+          for _index_0 = 1, #_item_0 do
+            local arg = _item_0[_index_0]
+            _len_0 = _len_0 + 1
+            _accum_0[_len_0] = arg[2]
+          end
+        end
+        return _accum_0
+      end)()
+      if #self_args > 0 then
+        _with_0:stm({
+          "assign",
+          self_args,
+          self_arg_values
+        })
       end
       _with_0:ret_stms(block)
       return _with_0

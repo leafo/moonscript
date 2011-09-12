@@ -242,11 +242,6 @@ local build_grammar = wrap(function()
 		return stm
 	end
 
-	local function wrap_default_arg(name, default)
-		if not default then return name end
-		return {name, default}
-	end
-
 	local function check_lua_string(str, pos, right, left)
 		return #left == #right
 	end
@@ -416,7 +411,7 @@ local build_grammar = wrap(function()
 			sym")" + Ct"" * Ct"",
 
 		FnArgDefList =  FnArgDef * (sym"," * FnArgDef)^0,
-		FnArgDef = Name * (sym"=" * Exp)^-1 / wrap_default_arg,
+		FnArgDef = Ct(Name * (sym"=" * Exp)^-1),
 
 		FunLit = FnArgsDef *
 			(sym"->" * Cc"slim" + sym"=>" * Cc"fat") *

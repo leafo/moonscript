@@ -76,3 +76,21 @@ something = function(hello, world)
   end
   return print(hello)
 end
+_ = function(self, x, y) end
+_ = function(self, x, y)
+  self.x, self.y = x, y
+end
+_ = function(self, x)
+  if x == nil then
+    x = 1
+  end
+end
+_ = function(self, x, y, z)
+  if x == nil then
+    x = 1
+  end
+  if z == nil then
+    z = "hello world"
+  end
+  self.x, self.z = x, z
+end

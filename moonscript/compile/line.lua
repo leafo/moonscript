@@ -435,7 +435,9 @@ line_compile = {
       constructor = {
         "fndef",
         {
-          "..."
+          {
+            "..."
+          }
         },
         { },
         "fat",
@@ -460,52 +462,7 @@ line_compile = {
       }
     end
     smart_node(constructor)
-    local self_args = { }
-    local get_initializers
-    get_initializers = function(arg)
-      if ntype(arg) == "self" then
-        arg = arg[2]
-        insert(self_args, arg)
-      end
-      return arg
-    end
-    constructor.args = (function()
-      local _accum_0 = { }
-      local _len_0 = 0
-      do
-        local _item_0 = constructor.args
-        for _index_0 = 1, #_item_0 do
-          local arg = _item_0[_index_0]
-          _len_0 = _len_0 + 1
-          _accum_0[_len_0] = get_initializers(arg)
-        end
-      end
-      return _accum_0
-    end)()
     constructor.arrow = "fat"
-    local dests = (function()
-      local _accum_0 = { }
-      local _len_0 = 0
-      do
-        local _item_0 = self_args
-        for _index_0 = 1, #_item_0 do
-          local name = _item_0[_index_0]
-          _len_0 = _len_0 + 1
-          _accum_0[_len_0] = {
-            "self",
-            name
-          }
-        end
-      end
-      return _accum_0
-    end)()
-    if #self_args > 0 then
-      insert(constructor.body, 1, {
-        "assign",
-        dests,
-        self_args
-      })
-    end
     local def_scope
     do
       local _with_0 = self:block()
@@ -621,8 +578,12 @@ line_compile = {
             {
               "fndef",
               {
-                "mt",
-                "..."
+                {
+                  "mt"
+                },
+                {
+                  "..."
+                }
               },
               { },
               "slim",

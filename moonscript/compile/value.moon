@@ -132,31 +132,38 @@ value_compile =
     _, args, whitelist, arrow, block = unpack node
 
     default_args = {}
-    format_names = (arg) ->
-      if type(arg) == "string"
-        arg
+    self_args = {}
+    arg_names = for arg in *args
+      name, default_value = unpack arg
+      name = if type(name) == "string"
+        name
       else
-        insert default_args, arg
-        arg[1]
-
-    args = [format_names arg for arg in *args]
+        if name[1] == "self"
+          insert self_args, name
+        name[2]
+      insert default_args, arg if default_value
+      name
 
     if arrow == "fat"
-      insert args, 1, "self"
+      insert arg_names, 1, "self"
 
-    with @block "function("..concat(args, ", ")..")"
+    with @block "function("..concat(arg_names, ", ")..")"
       if #whitelist > 0
         \whitelist_names whitelist
 
-      \put_name name for name in *args
+      \put_name name for name in *arg_names
 
       for default in *default_args
         name, value = unpack default
+        name = name[2] if type(name) == "table"
         \stm {
           'if', {'exp', name, '==', 'nil'}, {
             {'assign', {name}, {value}}
           }
         }
+
+      self_arg_values = [arg[2] for arg in *self_args]
+      \stm {"assign", self_args, self_arg_values} if #self_args > 0
 
       \ret_stms block
 
