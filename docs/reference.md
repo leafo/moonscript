@@ -210,7 +210,7 @@ arguments if we know we will be using a lower indentation futher on.
     }
 
 The same thing can be done with other block level statements like
-[conditionals](#Conditionals). We can use indentation level to determine what
+[conditionals](#conditionals). We can use indentation level to determine what
 statement a value belongs to:
 
     if func 1,2,3,
