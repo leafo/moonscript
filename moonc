@@ -285,7 +285,7 @@ else
 		local success, err = compile_and_write(fname, target_dir..convert_path(fname))
 		if not success then
 			print(fname, err)
-			break
+			os.exit(1)
 		else
 			msg("Built", fname)
 		end
