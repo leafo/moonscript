@@ -12,7 +12,7 @@ import ntype, Set from data
 import concat, insert from table
 import pos_to_line, get_closest_line, trim from util
 
-export tree, format_error
+export tree, value, format_error
 export Block
 
 bubble_names = { "has_varargs" }
@@ -286,6 +286,13 @@ format_error = (msg, pos, file_str) ->
     "Compile error: "..msg
     (" [%d] >>    %s")\format line, trim line_str
   }, "\n"
+
+value = (value) ->
+  out = nil
+  with RootBlock!
+    \add \value value
+    out = \render!
+  out
 
 tree = (tree) ->
   scope = RootBlock!

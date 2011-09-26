@@ -469,6 +469,15 @@ format_error = function(msg, pos, file_str)
     (" [%d] >>    %s"):format(line, trim(line_str))
   }, "\n")
 end
+value = function(value)
+  local out = nil
+  do
+    local _with_0 = RootBlock()
+    _with_0:add(_with_0:value(value))
+    out = _with_0:render()
+  end
+  return out
+end
 tree = function(tree)
   local scope = RootBlock()
   local runner = coroutine.create(function()

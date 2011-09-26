@@ -2,25 +2,77 @@ module("moonscript.compile", package.seeall)
 local util = require("moonscript.util")
 local data = require("moonscript.data")
 local ntype = data.ntype
-local key_table = {
+local t = { }
+local node_types = {
   fndef = {
-    "args",
-    "whitelist",
-    "arrow",
-    "body"
+    {
+      "args",
+      t
+    },
+    {
+      "whitelist",
+      t
+    },
+    {
+      "arrow",
+      "slim"
+    },
+    {
+      "body",
+      t
+    }
   }
 }
 local build_table
 build_table = function()
-  for key, value in pairs(key_table) do
+  local key_table = { }
+  for name, args in pairs(node_types) do
     local index = { }
-    for i, name in ipairs(value) do
+    for i, tuple in ipairs(args) do
+      local name = tuple[1]
       index[name] = i + 1
     end
-    key_table[key] = index
+    key_table[name] = index
+  end
+  return key_table
+end
+local key_table = build_table()
+local make_builder
+make_builder = function(name)
+  local spec = node_types[name]
+  if not spec then
+    error("don't know how to build node: " .. name)
+  end
+  return function(props)
+    if props == nil then
+      props = { }
+    end
+    local node = {
+      name
+    }
+    for i, arg in ipairs(spec) do
+      local default_value
+      name, default_value = unpack(arg)
+      local val
+      if props[name] then
+        val = props[name]
+      else
+        val = default_value
+      end
+      if val == t then
+        val = { }
+      end
+      node[i + 1] = val
+    end
+    return node
   end
 end
-build_table()
+build = setmetatable({ }, {
+  __index = function(self, name)
+    self[name] = make_builder(name)
+    return rawget(self, name)
+  end
+})
 smart_node = function(node)
   local index = key_table[ntype(node)]
   if not index then
