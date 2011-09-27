@@ -1,14 +1,15 @@
 module "moonscript.compile", package.seeall
 
 util = require "moonscript.util"
-data = require "moonscript.data"
 dump = require "moonscript.dump"
 
 require "moonscript.compile.format"
 require "moonscript.compile.line"
 require "moonscript.compile.value"
 
-import ntype, Set from data
+import Set from require "moonscript.data"
+import ntype from require "moonscript.types"
+
 import concat, insert from table
 import pos_to_line, get_closest_line, trim from util
 

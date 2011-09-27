@@ -1,11 +1,19 @@
 module("moonscript.compile", package.seeall)
 local util = require("moonscript.util")
-local data = require("moonscript.data")
 local dump = require("moonscript.dump")
 require("moonscript.compile.format")
 require("moonscript.compile.line")
 require("moonscript.compile.value")
-local ntype, Set = data.ntype, data.Set
+local Set
+do
+  local _table_0 = require("moonscript.data")
+  Set = _table_0.Set
+end
+local ntype
+do
+  local _table_0 = require("moonscript.types")
+  ntype = _table_0.ntype
+end
 local concat, insert = table.concat, table.insert
 local pos_to_line, get_closest_line, trim = util.pos_to_line, util.get_closest_line, util.trim
 local bubble_names = {

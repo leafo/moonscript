@@ -1,18 +1,10 @@
--- data structure utils
-
+-- data structures & static data
 module "moonscript.data", package.seeall
 
 export Set, Stack
-export ntype, lua_keywords
+export lua_keywords
 
 import concat from table
-
--- type of node as string
-ntype = (node) ->
-  if type(node) != "table"
-    "value"
-  else
-    node[1]
 
 Set = (items) ->
   self = {}

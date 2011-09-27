@@ -1,8 +1,8 @@
 
 module "moonscript", package.seeall
 
-require "moonscript.parse"
 require "moonscript.compile"
+require "moonscript.parse"
 require "moonscript.util"
 
 import concat, insert from table

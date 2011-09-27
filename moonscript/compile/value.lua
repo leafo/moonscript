@@ -2,7 +2,11 @@ module("moonscript.compile", package.seeall)
 local util = require("moonscript.util")
 local data = require("moonscript.data")
 require("moonscript.compile.format")
-local ntype = data.ntype
+local ntype
+do
+  local _table_0 = require("moonscript.types")
+  ntype = _table_0.ntype
+end
 local concat, insert = table.concat, table.insert
 local table_append
 table_append = function(name, len, value)

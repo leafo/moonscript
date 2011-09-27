@@ -1,12 +1,5 @@
 module("moonscript.data", package.seeall)
 local concat = table.concat
-ntype = function(node)
-  if type(node) ~= "table" then
-    return "value"
-  else
-    return node[1]
-  end
-end
 Set = function(items)
   local self = { }
   do

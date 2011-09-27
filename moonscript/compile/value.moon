@@ -6,7 +6,7 @@ data = require "moonscript.data"
 
 require "moonscript.compile.format"
 
-import ntype from data
+import ntype from require "moonscript.types"
 import concat, insert from table
 
 export value_compile

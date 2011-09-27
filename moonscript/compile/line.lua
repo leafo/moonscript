@@ -1,10 +1,13 @@
 module("moonscript.compile", package.seeall)
 local util = require("moonscript.util")
-local data = require("moonscript.data")
 require("moonscript.compile.format")
-require("moonscript.compile.types")
 local reversed = util.reversed
-local ntype = data.ntype
+local ntype, smart_node
+do
+  local _table_0 = require("moonscript.types")
+  ntype = _table_0.ntype
+  smart_node = _table_0.smart_node
+end
 local concat, insert = table.concat, table.insert
 local constructor_name = "new"
 line_compile = {

@@ -1,13 +1,15 @@
-module "moonscript.compile", package.seeall
-
+module "moonscript.types", package.seeall
 util = require "moonscript.util"
 data = require "moonscript.data"
 
-import ntype from data
-export smart_node, build
+export ntype, smart_node, build
 
--- todo: this should be merged into data
--- lets us index a node by item name based on it's type
+-- type of node as string
+ntype = (node) ->
+  if type(node) != "table"
+    "value"
+  else
+    node[1]
 
 t = {}
 
@@ -51,6 +53,7 @@ build = setmetatable {}, {
     rawget self, name
 }
 
+-- makes it so node properties can be accessed by name instead of index
 smart_node = (node) ->
   index = key_table[ntype node]
   if not index then return node

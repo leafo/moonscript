@@ -3,7 +3,8 @@ module "moonscript.compile", package.seeall
 util = require "moonscript.util"
 data = require "moonscript.data"
 
-import Set, ntype from data
+import Set from require "moonscript.data"
+import ntype from require "moonscript.types"
 import concat, insert from table
 
 export indent_char, default_return, moonlib, cascading, non_atomic, has_value, is_non_atomic

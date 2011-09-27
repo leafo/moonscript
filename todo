@@ -1,6 +1,11 @@
 # TODO
 
-..= append string
+if hello else world
+ ->  if hello then hello else world
+
+
+- enhance with documentation
+- fix variable names starting with and, not, or, etc..
 
 - varargs that get put in a nested generated function aren't valid anymore:
 

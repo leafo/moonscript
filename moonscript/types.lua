@@ -1,7 +1,13 @@
-module("moonscript.compile", package.seeall)
+module("moonscript.types", package.seeall)
 local util = require("moonscript.util")
 local data = require("moonscript.data")
-local ntype = data.ntype
+ntype = function(node)
+  if type(node) ~= "table" then
+    return "value"
+  else
+    return node[1]
+  end
+end
 local t = { }
 local node_types = {
   fndef = {

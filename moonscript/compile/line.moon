@@ -1,13 +1,11 @@
 module "moonscript.compile", package.seeall
 
 util = require "moonscript.util"
-data = require "moonscript.data"
 
 require "moonscript.compile.format"
-require "moonscript.compile.types"
 
 import reversed from util
-import ntype from data
+import ntype, smart_node from require "moonscript.types"
 import concat, insert from table
 
 export line_compile
