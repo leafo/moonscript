@@ -1,6 +1,7 @@
 module("moonscript.compile", package.seeall)
 local util = require("moonscript.util")
 require("moonscript.compile.format")
+local dump = require("moonscript.dump")
 local reversed = util.reversed
 local ntype, smart_node
 do
@@ -40,34 +41,24 @@ line_compile = {
   end,
   assign = function(self, node)
     local _, names, values = unpack(node)
-    if #values == 1 and cascading[ntype(values[1])] then
-      return self:stm({
-        "assign",
-        names,
-        values[1]
-      })
-    end
     local undeclared = self:declare(names)
     local declare = "local " .. concat(undeclared, ", ")
-    if self:is_stm(values) then
+    if #values == 1 and self:is_stm(values[1]) and cascading[ntype(values[1])] then
+      local stm = values[1]
       if #undeclared > 0 then
         self:add(declare)
       end
-      if cascading[ntype(values)] then
-        local decorate
-        decorate = function(value)
-          return {
-            "assign",
-            names,
-            {
-              value
-            }
+      local decorate
+      decorate = function(value)
+        return {
+          "assign",
+          names,
+          {
+            value
           }
-        end
-        return self:stm(values, decorate)
-      else
-        return error("Assigning unsupported statement")
+        }
       end
+      return self:stm(stm, decorate)
     else
       local has_fndef = false
       local i = 1

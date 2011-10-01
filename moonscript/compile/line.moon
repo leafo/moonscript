@@ -3,6 +3,7 @@ module "moonscript.compile", package.seeall
 util = require "moonscript.util"
 
 require "moonscript.compile.format"
+dump = require "moonscript.dump"
 
 import reversed from util
 import ntype, smart_node from require "moonscript.types"
@@ -27,22 +28,17 @@ line_compile =
   assign: (node) =>
     _, names, values = unpack node
 
-    -- can we extract single cascading value
-    if #values == 1 and cascading[ntype values[1]]
-      return @stm {"assign", names, values[1]}
-
     undeclared = @declare names
     declare = "local "..concat(undeclared, ", ")
 
-    if @is_stm values
+    -- todo: tree transformation
+    if #values == 1 and @is_stm(values[1]) and cascading[ntype(values[1])]
+      stm = values[1]
       @add declare if #undeclared > 0
-      if cascading[ntype(values)]
-        decorate = (value) ->
-          {"assign", names, {value}}
+      decorate = (value) ->
+        {"assign", names, {value}}
 
-        @stm values, decorate
-      else
-        error "Assigning unsupported statement"
+      @stm stm, decorate
     else
       has_fndef = false
       i = 1
