@@ -1,4 +1,9 @@
 *.o
 *.exe
 *.dll
+
+moon
+moonc
+*.so
+
 /*.h
