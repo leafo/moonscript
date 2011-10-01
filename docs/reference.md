@@ -28,8 +28,8 @@ a certain amount. They are aliases for their expanded equivalents.
     x = 0
     x += 10
 
-	s = "hello "
-	s ..= "world"
+    s = "hello "
+    s ..= "world"
 
 ## Comments 
 
@@ -81,9 +81,9 @@ of the variable where the function is stored. When chaining together function
 calls, the arguments are applied to the closest function to the left.
 
     sum 10, 20
-	print sum 10, 20
+    print sum 10, 20
 
-	a b c "a", "b", "c"
+    a b c "a", "b", "c"
 
 In order to avoid ambiguity in when calling functions, parentheses can also be
 used to surround the arguments. This is required here in order to make sure the
@@ -412,19 +412,19 @@ must be explicitly returned.
     have_coins = false
     if have_coins
       print "Got coins"
-	else
+    else
       print "No coins"
 
 A short syntax for single statements can also be used:
 
-	have_coins = false
-    if have_coins then print "Got coins" else print "No coins"
+    have_coins = false
+      if have_coins then print "Got coins" else print "No coins"
 
 
 Because if statements can be used as expressions, this can able be written as:
 
-	have_coins = false
-	print if have_coins then "Got coins" else "No coins"
+    have_coins = false
+    print if have_coins then "Got coins" else "No coins"
 
 Conditionals can also be used in return statements and assignments:
 
@@ -558,8 +558,8 @@ be declared as local, special syntax is required to declare a variable globally.
 The export keyword makes it so any following assignments to the specified names
 will not be assigned locally.
 
-	export var_name, var_name2
-	var_name, var_name3 = "hello", "world"
+    export var_name, var_name2
+    var_name, var_name3 = "hello", "world"
 
 
 This is especially useful when declaring what will be externally visible in a
@@ -655,23 +655,25 @@ The function stub syntax is a shorthand for creating a new closure function
 that bundles both the object and function. This new function calls the wrapped
 function in the correct context of the object.
 
-Its syntax is the same as calling an instance method with the `\` operator but
+Its syntax is the same as calling an instance method with the <code>\\</code> operator but
 with no argument list provided.
 
     my_object = {
       value: 1000
-      print: => print "the value:", @value
+      write: => print "the value:", @value
     }
 
     run_callback (func) ->
       print "running callback..."
       func!
 
-    -- this will not work, the function has to no reference to my_object
-    run_callback my_object.print
+    -- this will not work:
+	-- the function has to no reference to my_object
+    run_callback my_object.write
 
-    -- function stub syntax lets us bundle the object into a new function
-    run_callback my_object\print
+    -- function stub syntax
+	-- lets us bundle the object into a new function
+    run_callback my_object\write
 
 ## The Using Clause; Controlling Destructive Assignment
 
