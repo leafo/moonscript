@@ -185,3 +185,11 @@ else
 
   okay
 
+
+-- test names containing keywords
+x = notsomething
+y = ifsomething
+z = x and b
+z = x andb
+
+

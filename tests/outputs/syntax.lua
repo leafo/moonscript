@@ -190,3 +190,7 @@ elseif "ymmm" then
 else
   _ = okay
 end
+x = notsomething
+y = ifsomething
+local z = x and b
+z = x(andb)

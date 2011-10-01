@@ -41,7 +41,9 @@ local SomeSpace = S" \t"^1 * Comment^-1
 local SpaceBreak = Space * Break
 local EmptyLine = SpaceBreak
 
-local _Name = C(R("az", "AZ", "__") * R("az", "AZ", "09", "__")^0)
+local AlphaNum = R("az", "AZ", "09", "__")
+
+local _Name = C(R("az", "AZ", "__") * AlphaNum^0)
 local Name = Space * _Name
 
 local Num = P"0x" * R("09", "af", "AF")^1 +
@@ -148,16 +150,18 @@ local build_grammar = wrap(function()
 	end
 
 	local keywords = {}
-	local function key(word)
-		keywords[word] = true
-		return Space * word
+	local function key(chars)
+		keywords[chars] = true
+		return Space * chars * -AlphaNum
 	end
 
 	local function op(word)
+		local patt = Space * C(word)
 		if word:match("^%w*$") then
 			keywords[word] = true
+			patt = patt * -AlphaNum
 		end
-		return Space * C(word)
+		return patt
 	end
 
 	local function sym(chars)
@@ -329,7 +333,7 @@ local build_grammar = wrap(function()
 			ForEach + For + While +
 			sym"-" * -SomeSpace * Exp / mark"minus" +
 			sym"#" * Exp / mark"length" +
-			sym"not" * Exp / mark"not" +
+			key"not" * Exp / mark"not" +
 			TableLit +
 			Comprehension +
 			Assign + Update + FunLit + String +
