@@ -605,7 +605,7 @@ to bind it to that table:
 
     import \add from my_module
 
-    print add(22) -- equivalent to calling my_module:get(22)
+    print add(22) -- equivalent to calling my_module\get 22
 
 ## With Statement
 
@@ -617,8 +617,11 @@ unnecessary noise. A common solution to this is to pass a table in as an
 argument which contains a collection of keys and values to overwrite. The
 downside to this is that the constructor of this object must support this form.
 
-The `with` block helps to alleviate this. It lets us use a bare function and
-index syntax in order to work with the object:
+The `with` block helps to alleviate this. Within a `with` block we can use a
+special statements that begin with either `.` or `\` which represent
+those operations applied to the object we are using `with` on.
+
+For example, we work with a newly created object:
 
     with Person!
       .name = "Oswald"
