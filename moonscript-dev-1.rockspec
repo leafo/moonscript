@@ -27,6 +27,7 @@ build = {
 		["moonscript.compile.line"] = "moonscript/compile/line.lua",
 		["moonscript.compile.value"] = "moonscript/compile/value.lua",
 		["moonscript.compile.format"] = "moonscript/compile/format.lua",
+		["moonscript.transform"] = "moonscript/transform.lua",
 		["moonscript.types"] = "moonscript/types.lua",
 		["moonscript.parse"] = "moonscript/parse.lua",
 		["moonscript.dump"] = "moonscript/dump.lua",
