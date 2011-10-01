@@ -197,6 +197,9 @@ value_compile =
   minus: (node) =>
     @line "-", @value node[2]
 
+  temp_name: (node) =>
+    node\get_name self
+
   number: (node) =>
     node[2]
 

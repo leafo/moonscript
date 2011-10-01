@@ -7,6 +7,9 @@ require "moonscript.compile.format"
 require "moonscript.compile.line"
 require "moonscript.compile.value"
 
+transform = require "moonscript.transform"
+
+import NameProxy from transform
 import Set from require "moonscript.data"
 import ntype from require "moonscript.types"
 
@@ -74,7 +77,14 @@ class Block_
     @_state[name]
 
   declare: (names) =>
-    undeclared = [name for name in *names when type(name) == "string" and not @has_name name]
+    undeclared = for name in *names
+      t = util.moon.type(name)
+      real_name = if t == NameProxy
+        name\get_name self
+      elseif t == "string"
+        name
+      real_name if real_name and not @has_name real_name
+
     @put_name name for name in *undeclared
     undeclared
 
@@ -82,6 +92,7 @@ class Block_
     @_name_whitelist = Set names
 
   put_name: (name) =>
+    name = name\get_name self if util.moon.type(name) == NameProxy
     @_names[name] = true
 
   has_name: (name) =>
@@ -218,6 +229,7 @@ class Block_
 
     fn = value_compile[action]
     error "Failed to compile value: "..dump.value node if not fn
+    node = transform.node node
     fn self, node, ...
 
   values: (values, delim) =>

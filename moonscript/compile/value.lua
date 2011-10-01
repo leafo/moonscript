@@ -368,6 +368,9 @@ value_compile = {
   minus = function(self, node)
     return self:line("-", self:value(node[2]))
   end,
+  temp_name = function(self, node)
+    return node:get_name(self)
+  end,
   number = function(self, node)
     return node[2]
   end,

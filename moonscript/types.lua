@@ -1,6 +1,7 @@
 module("moonscript.types", package.seeall)
 local util = require("moonscript.util")
 local data = require("moonscript.data")
+local insert = table.insert
 ntype = function(node)
   if type(node) ~= "table" then
     return "value"
@@ -25,6 +26,16 @@ local node_types = {
     },
     {
       "body",
+      t
+    }
+  },
+  assign = {
+    {
+      "names",
+      t
+    },
+    {
+      "values",
       t
     }
   }
@@ -57,11 +68,10 @@ make_builder = function(name)
       name
     }
     for i, arg in ipairs(spec) do
-      local default_value
-      name, default_value = unpack(arg)
+      local key, default_value = unpack(arg)
       local val
-      if props[name] then
-        val = props[name]
+      if props[key] then
+        val = props[key]
       else
         val = default_value
       end
@@ -73,7 +83,39 @@ make_builder = function(name)
     return node
   end
 end
-build = setmetatable({ }, {
+build = nil
+build = setmetatable({
+  block_exp = function(body)
+    local fn = build.fndef({
+      body = body
+    })
+    return build.chain({
+      base = {
+        "parens",
+        fn
+      },
+      {
+        "call",
+        { }
+      }
+    })
+  end,
+  chain = function(parts)
+    local base = parts.base or error("expecting base property for chain")
+    local node = {
+      "chain",
+      base
+    }
+    do
+      local _item_0 = parts
+      for _index_0 = 1, #_item_0 do
+        local part = _item_0[_index_0]
+        insert(node, part)
+      end
+    end
+    return node
+  end
+}, {
   __index = function(self, name)
     self[name] = make_builder(name)
     return rawget(self, name)

@@ -3,6 +3,8 @@ util = require "moonscript.util"
 data = require "moonscript.data"
 
 export ntype, smart_node, build
+import insert from table
+
 
 -- type of node as string
 ntype = (node) ->
@@ -19,6 +21,10 @@ node_types = {
     {"whitelist", t}
     {"arrow", "slim"}
     {"body", t}
+  }
+  assign: {
+    {"names", t}
+    {"values", t}
   }
 }
 
@@ -41,13 +47,24 @@ make_builder = (name) ->
   (props={}) ->
     node = { name }
     for i, arg in ipairs spec
-      name, default_value = unpack arg
-      val = if props[name] then props[name] else default_value
+      key, default_value = unpack arg
+      val = if props[key] then props[key] else default_value
       val = {} if val == t
       node[i + 1] = val
     node
 
-build = setmetatable {}, {
+build = nil
+build = setmetatable {
+  block_exp: (body) ->
+    fn = build.fndef body: body
+    build.chain { base: {"parens", fn}, {"call", {}} }
+  chain: (parts) ->
+    base = parts.base or error"expecting base property for chain"
+    node = {"chain", base}
+    for part in *parts
+      insert node, part
+    node
+}, {
   __index: (name) =>
     self[name] = make_builder name
     rawget self, name

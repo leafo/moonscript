@@ -1,18 +1,17 @@
 # TODO
 
+- dump node in mark, see why values are being parsed multiple times
+
 if hello else world
  ->  if hello then hello else world
 
 - varargs that get put in a nested generated function aren't valid anymore:
-
-- allow a return without an argument
 
 - class expressions, x = class extends Hello do new: => print "hello"
 
 * multiline comments
 * table slices (almost)
 * add continue keyword (ouch)
-* vim syntax file
 
 * combine for and if line decorators
 

@@ -4,6 +4,8 @@ local dump = require("moonscript.dump")
 require("moonscript.compile.format")
 require("moonscript.compile.line")
 require("moonscript.compile.value")
+local transform = require("moonscript.transform")
+local NameProxy = transform.NameProxy
 local Set
 do
   local _table_0 = require("moonscript.data")
@@ -114,9 +116,20 @@ Block_ = (function(_parent_0)
           local _item_0 = names
           for _index_0 = 1, #_item_0 do
             local name = _item_0[_index_0]
-            if type(name) == "string" and not self:has_name(name) then
+            local t = util.moon.type(name)
+            local real_name
+            if t == NameProxy then
+              real_name = name:get_name(self)
+            elseif t == "string" then
+              real_name = name
+            end
+            local _value_0
+            if real_name and not self:has_name(real_name) then
+              _value_0 = real_name
+            end
+            if _value_0 ~= nil then
               _len_0 = _len_0 + 1
-              _accum_0[_len_0] = name
+              _accum_0[_len_0] = _value_0
             end
           end
         end
@@ -135,6 +148,9 @@ Block_ = (function(_parent_0)
       self._name_whitelist = Set(names)
     end,
     put_name = function(self, name)
+      if util.moon.type(name) == NameProxy then
+        name = name:get_name(self)
+      end
       self._names[name] = true
     end,
     has_name = function(self, name)
@@ -318,6 +334,7 @@ Block_ = (function(_parent_0)
       if not fn then
         error("Failed to compile value: " .. dump.value(node))
       end
+      node = transform.node(node)
       return fn(self, node, ...)
     end,
     values = function(self, values, delim)
