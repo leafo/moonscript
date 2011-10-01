@@ -3,20 +3,9 @@
 if hello else world
  ->  if hello then hello else world
 
-
-- enhance with documentation
-- fix variable names starting with and, not, or, etc..
-
 - varargs that get put in a nested generated function aren't valid anymore:
 
-- cascading expressions in function call? this looks too much like line decorator
-* maybe with assigns only
-
-	my_func if something
-	  "one arg"
-	else
-	  "other arg"
-
+- allow a return without an argument
 
 - class expressions, x = class extends Hello do new: => print "hello"
 

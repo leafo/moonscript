@@ -291,7 +291,7 @@ local build_grammar = wrap(function()
 
 		BreakLoop = Ct(key"break"/trim),
 
-		Return = key"return" * (ExpListLow/ mark"explist") / mark"return",
+		Return = key"return" * (ExpListLow/mark"explist" + C"") / mark"return",
 
 		With = key"with" * Exp * key"do"^-1 * Body / mark"with",
 

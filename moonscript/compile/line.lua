@@ -130,7 +130,11 @@ line_compile = {
     })
   end,
   ["return"] = function(self, node)
-    return self:line("return ", self:value(node[2]))
+    return self:line("return ", (function()
+      if node[2] ~= "" then
+        return self:value(node[2])
+      end
+    end)())
   end,
   ["break"] = function(self, node)
     return "break"

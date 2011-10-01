@@ -94,3 +94,19 @@ _ = function(self, x, y, z)
   end
   self.x, self.z = x, z
 end
+x(function()
+  return 
+end)
+y(function()
+  return 1
+end)
+z(function()
+  return 1, "hello", "world"
+end)
+k(function()
+  if yes then
+    return 
+  else
+    return 
+  end
+end)

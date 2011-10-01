@@ -64,7 +64,7 @@ line_compile =
     @stm {"assign", {name}, {{"exp", name, op_final, exp}}}
 
   return: (node) =>
-    @line "return ", @value node[2]
+    @line "return ", if node[2] != "" then @value node[2]
 
   break: (node) =>
     "break"

@@ -52,3 +52,10 @@ something = (hello=100, world=(x=[[yeah cool]])-> print "eat rice") ->
 (@x=1,y,@z="hello world") =>
 
 
+x -> return
+y -> return 1
+z -> return 1, "hello", "world"
+k -> if yes then return else return
+
+
+
