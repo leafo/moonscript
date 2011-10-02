@@ -22,7 +22,8 @@ local bubble_names = {
   "has_varargs"
 }
 local Line
-Line = (function(_parent_0)
+Line = (function()
+  local _parent_0 = nil
   local _base_0 = {
     _append_single = function(self, item)
       if util.moon.type(item) == Line then
@@ -85,17 +86,18 @@ Line = (function(_parent_0)
     end
   }, {
     __index = _base_0,
-    __call = function(mt, ...)
-      local self = setmetatable({}, _base_0)
-      mt.__init(self, ...)
-      return self
+    __call = function(cls, ...)
+      local _self_0 = setmetatable({}, _base_0)
+      cls.__init(_self_0, ...)
+      return _self_0
     end
   })
   _base_0.__class = _class_0
   return _class_0
 end)()
 local Block_
-Block_ = (function(_parent_0)
+Block_ = (function()
+  local _parent_0 = nil
   local _base_0 = {
     header = "do",
     footer = "end",
@@ -446,17 +448,18 @@ Block_ = (function(_parent_0)
     end
   }, {
     __index = _base_0,
-    __call = function(mt, ...)
-      local self = setmetatable({}, _base_0)
-      mt.__init(self, ...)
-      return self
+    __call = function(cls, ...)
+      local _self_0 = setmetatable({}, _base_0)
+      cls.__init(_self_0, ...)
+      return _self_0
     end
   })
   _base_0.__class = _class_0
   return _class_0
 end)()
 local RootBlock
-RootBlock = (function(_parent_0)
+RootBlock = (function()
+  local _parent_0 = Block_
   local _base_0 = {
     render = function(self)
       self:_insert_breaks()
@@ -475,15 +478,15 @@ RootBlock = (function(_parent_0)
     end
   }, {
     __index = _base_0,
-    __call = function(mt, ...)
-      local self = setmetatable({}, _base_0)
-      mt.__init(self, ...)
-      return self
+    __call = function(cls, ...)
+      local _self_0 = setmetatable({}, _base_0)
+      cls.__init(_self_0, ...)
+      return _self_0
     end
   })
   _base_0.__class = _class_0
   return _class_0
-end)(Block_)
+end)()
 Block = Block_
 format_error = function(msg, pos, file_str)
   local line = pos_to_line(file_str, pos)

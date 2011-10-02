@@ -4,7 +4,8 @@ local util = require("moonscript.util")
 local data = require("moonscript.data")
 local ntype, build, smart_node = types.ntype, types.build, types.smart_node
 local insert = table.insert
-NameProxy = (function(_parent_0)
+NameProxy = (function()
+  local _parent_0 = nil
   local _base_0 = {
     get_name = function(self, scope)
       if not self.name then
@@ -64,17 +65,18 @@ NameProxy = (function(_parent_0)
     end
   }, {
     __index = _base_0,
-    __call = function(mt, ...)
-      local self = setmetatable({}, _base_0)
-      mt.__init(self, ...)
-      return self
+    __call = function(cls, ...)
+      local _self_0 = setmetatable({}, _base_0)
+      cls.__init(_self_0, ...)
+      return _self_0
     end
   })
   _base_0.__class = _class_0
   return _class_0
 end)()
 local Run
-Run = (function(_parent_0)
+Run = (function()
+  local _parent_0 = nil
   local _base_0 = {
     call = function(self, state)
       return self.fn(state)
@@ -91,10 +93,10 @@ Run = (function(_parent_0)
     end
   }, {
     __index = _base_0,
-    __call = function(mt, ...)
-      local self = setmetatable({}, _base_0)
-      mt.__init(self, ...)
-      return self
+    __call = function(cls, ...)
+      local _self_0 = setmetatable({}, _base_0)
+      cls.__init(_self_0, ...)
+      return _self_0
     end
   })
   _base_0.__class = _class_0
