@@ -48,17 +48,14 @@ line_compile =
         i = i +1
 
       with @line!
-        skip_values = false
         if #undeclared == #names and not has_fndef
           \append declare
-          skip_values = true if #values == 0
         else
           @add declare if #undeclared > 0
           \append_list [@value name for name in *names], ", "
 
-        if not skip_values
-          \append " = "
-          \append_list [@value v for v in *values], ", "
+        \append " = "
+        \append_list [@value v for v in *values], ", "
 
   update: (node) =>
     _, name, op, exp = unpack node

@@ -39,6 +39,12 @@ local node_types = {
       t
     }
   },
+  declare = {
+    {
+      "names",
+      t
+    }
+  },
   ["if"] = {
     {
       "cond",

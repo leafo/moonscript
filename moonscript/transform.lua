@@ -298,7 +298,11 @@ local transformers = {
         cls_name
       })
       value = _with_0.group({
-        _with_0.assign_one(name),
+        _with_0.declare({
+          names = {
+            name
+          }
+        }),
         _with_0.assign({
           names = {
             name

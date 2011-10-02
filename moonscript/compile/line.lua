@@ -70,12 +70,8 @@ line_compile = {
       end
       do
         local _with_0 = self:line()
-        local skip_values = false
         if #undeclared == #names and not has_fndef then
           _with_0:append(declare)
-          if #values == 0 then
-            skip_values = true
-          end
         else
           if #undeclared > 0 then
             self:add(declare)
@@ -94,22 +90,20 @@ line_compile = {
             return _accum_0
           end)(), ", ")
         end
-        if not skip_values then
-          _with_0:append(" = ")
-          _with_0:append_list((function()
-            local _accum_0 = { }
-            local _len_0 = 0
-            do
-              local _item_0 = values
-              for _index_0 = 1, #_item_0 do
-                local v = _item_0[_index_0]
-                _len_0 = _len_0 + 1
-                _accum_0[_len_0] = self:value(v)
-              end
+        _with_0:append(" = ")
+        _with_0:append_list((function()
+          local _accum_0 = { }
+          local _len_0 = 0
+          do
+            local _item_0 = values
+            for _index_0 = 1, #_item_0 do
+              local v = _item_0[_index_0]
+              _len_0 = _len_0 + 1
+              _accum_0[_len_0] = self:value(v)
             end
-            return _accum_0
-          end)(), ", ")
-        end
+          end
+          return _accum_0
+        end)(), ", ")
         return _with_0
       end
     end

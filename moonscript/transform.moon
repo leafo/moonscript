@@ -148,7 +148,7 @@ transformers = {
       }
 
       value = .group {
-        .assign_one name
+        .declare names: {name}
         .assign {
           names: {name}
           values: {value}

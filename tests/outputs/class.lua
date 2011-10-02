@@ -113,7 +113,6 @@ Hi = (function()
   _base_0.__class = _class_0
   return _class_0
 end)()
-Simple = 
 Simple = (function()
   local _parent_0 = Hi
   local _base_0 = {

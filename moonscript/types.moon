@@ -26,6 +26,9 @@ node_types = {
     {"names", t}
     {"values", t}
   }
+  declare: {
+    {"names", t}
+  }
   if: {
     {"cond", t}
     {"then", t}
