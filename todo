@@ -1,5 +1,8 @@
 # TODO
 
+- error with stray comma at end of line
+- ugly error if attempting to assign to rvalue like #hello
+
 - dump node in mark, see why values are being parsed multiple times
 
 if hello else world

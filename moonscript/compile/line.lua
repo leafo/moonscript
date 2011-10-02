@@ -70,8 +70,12 @@ line_compile = {
       end
       do
         local _with_0 = self:line()
+        local skip_values = false
         if #undeclared == #names and not has_fndef then
           _with_0:append(declare)
+          if #values == 0 then
+            skip_values = true
+          end
         else
           if #undeclared > 0 then
             self:add(declare)
@@ -90,20 +94,22 @@ line_compile = {
             return _accum_0
           end)(), ", ")
         end
-        _with_0:append(" = ")
-        _with_0:append_list((function()
-          local _accum_0 = { }
-          local _len_0 = 0
-          do
-            local _item_0 = values
-            for _index_0 = 1, #_item_0 do
-              local v = _item_0[_index_0]
-              _len_0 = _len_0 + 1
-              _accum_0[_len_0] = self:value(v)
+        if not skip_values then
+          _with_0:append(" = ")
+          _with_0:append_list((function()
+            local _accum_0 = { }
+            local _len_0 = 0
+            do
+              local _item_0 = values
+              for _index_0 = 1, #_item_0 do
+                local v = _item_0[_index_0]
+                _len_0 = _len_0 + 1
+                _accum_0[_len_0] = self:value(v)
+              end
             end
-          end
-          return _accum_0
-        end)(), ", ")
+            return _accum_0
+          end)(), ", ")
+        end
         return _with_0
       end
     end
@@ -412,242 +418,6 @@ line_compile = {
     self:declare(names)
     return nil
   end,
-  class = function(self, node)
-    local _, name, parent_val, tbl = unpack(node)
-    local constructor = nil
-    local final_properties = { }
-    do
-      local _item_0 = tbl[2]
-      for _index_0 = 1, #_item_0 do
-        local entry = _item_0[_index_0]
-        if entry[1] == constructor_name then
-          constructor = entry[2]
-        else
-          insert(final_properties, entry)
-        end
-      end
-    end
-    tbl[2] = final_properties
-    local parent_loc = self:free_name("parent", true)
-    if not constructor then
-      constructor = {
-        "fndef",
-        {
-          {
-            "..."
-          }
-        },
-        { },
-        "fat",
-        {
-          {
-            "if",
-            parent_loc,
-            {
-              {
-                "chain",
-                "super",
-                {
-                  "call",
-                  {
-                    "..."
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    end
-    smart_node(constructor)
-    constructor.arrow = "fat"
-    local def_scope
-    do
-      local _with_0 = self:block()
-      if parent_val ~= "" then
-        parent_val = self:value(parent_val)
-      end
-      _with_0:put_name(parent_loc)
-      _with_0.header = self:line("(function(", parent_loc, ")")
-      _with_0.footer = self:line("end)(", parent_val, ")")
-      _with_0:set("super", function(block, chain)
-        local calling_name = block:get("current_block")
-        local slice = (function()
-          local _accum_0 = { }
-          local _len_0 = 0
-          do
-            local _item_0 = chain
-            for _index_0 = 3, #_item_0 do
-              local item = _item_0[_index_0]
-              _len_0 = _len_0 + 1
-              _accum_0[_len_0] = item
-            end
-          end
-          return _accum_0
-        end)()
-        slice[1] = {
-          "call",
-          {
-            "self",
-            unpack(slice[1][2])
-          }
-        }
-        local act
-        if ntype(calling_name) ~= "value" then
-          act = "index"
-        else
-          act = "dot"
-        end
-        return {
-          "chain",
-          parent_loc,
-          {
-            act,
-            calling_name
-          },
-          unpack(slice)
-        }
-      end)
-      local base_name = _with_0:init_free_var("base", tbl)
-      _with_0:stm({
-        "assign",
-        {
-          {
-            "chain",
-            base_name,
-            {
-              "dot",
-              "__index"
-            }
-          }
-        },
-        {
-          base_name
-        }
-      })
-      _with_0:stm({
-        "if",
-        parent_loc,
-        {
-          {
-            "chain",
-            "setmetatable",
-            {
-              "call",
-              {
-                base_name,
-                {
-                  "chain",
-                  "getmetatable",
-                  {
-                    "call",
-                    {
-                      parent_loc
-                    }
-                  },
-                  {
-                    "dot",
-                    "__index"
-                  }
-                }
-              }
-            }
-          }
-        }
-      })
-      local cls = {
-        "table",
-        {
-          {
-            "__init",
-            constructor
-          }
-        }
-      }
-      local cls_mt = {
-        "table",
-        {
-          {
-            "__index",
-            base_name
-          },
-          {
-            "__call",
-            {
-              "fndef",
-              {
-                {
-                  "mt"
-                },
-                {
-                  "..."
-                }
-              },
-              { },
-              "slim",
-              {
-                {
-                  "raw",
-                  ("local self = setmetatable({}, %s)"):format(base_name)
-                },
-                {
-                  "chain",
-                  "mt.__init",
-                  {
-                    "call",
-                    {
-                      "self",
-                      "..."
-                    }
-                  }
-                },
-                "self"
-              }
-            }
-          }
-        }
-      }
-      local cls_name = _with_0:init_free_var("class", {
-        "chain",
-        "setmetatable",
-        {
-          "call",
-          {
-            cls,
-            cls_mt
-          }
-        }
-      })
-      _with_0:stm({
-        "assign",
-        {
-          {
-            "chain",
-            base_name,
-            {
-              "dot",
-              "__class"
-            }
-          }
-        },
-        {
-          cls_name
-        }
-      })
-      _with_0:stm({
-        "return",
-        cls_name
-      })
-      def_scope = _with_0
-    end
-    self:stm({
-      "declare",
-      {
-        name
-      }
-    })
-    return self:line(name, " = ", def_scope)
-  end,
   comprehension = function(self, node, action)
     local _, exp, clauses = unpack(node)
     if not action then
@@ -698,5 +468,12 @@ line_compile = {
       end
       return _with_0
     end
+  end,
+  run = function(self, code)
+    code:call(self)
+    return nil
+  end,
+  group = function(self, node)
+    return self:stms(node[2])
   end
 }

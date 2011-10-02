@@ -238,6 +238,7 @@ class Block_
       \append_list [@value v for v in *values], delim
 
   stm: (node, ...) =>
+    node = transform.node node
     fn = line_compile[ntype(node)]
     if not fn
       -- coerce value into statement

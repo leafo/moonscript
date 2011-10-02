@@ -358,6 +358,7 @@ Block_ = (function(_parent_0)
       end
     end,
     stm = function(self, node, ...)
+      node = transform.node(node)
       local fn = line_compile[ntype(node)]
       if not fn then
         if has_value(node) then

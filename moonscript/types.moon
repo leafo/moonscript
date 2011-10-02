@@ -26,6 +26,10 @@ node_types = {
     {"names", t}
     {"values", t}
   }
+  if: {
+    {"cond", t}
+    {"then", t}
+  }
 }
 
 build_table =  ->
@@ -55,6 +59,15 @@ make_builder = (name) ->
 
 build = nil
 build = setmetatable {
+  group: (body) ->
+    {"group", body}
+  assign_one: (name, value) ->
+    build.assign {
+      names: {name}
+      values: {value}
+    }
+  table: (tbl) ->
+    {"table", tbl}
   block_exp: (body) ->
     fn = build.fndef body: body
     build.chain { base: {"parens", fn}, {"call", {}} }

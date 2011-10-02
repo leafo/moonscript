@@ -38,6 +38,16 @@ local node_types = {
       "values",
       t
     }
+  },
+  ["if"] = {
+    {
+      "cond",
+      t
+    },
+    {
+      "then",
+      t
+    }
   }
 }
 local build_table
@@ -85,6 +95,28 @@ make_builder = function(name)
 end
 build = nil
 build = setmetatable({
+  group = function(body)
+    return {
+      "group",
+      body
+    }
+  end,
+  assign_one = function(name, value)
+    return build.assign({
+      names = {
+        name
+      },
+      values = {
+        value
+      }
+    })
+  end,
+  table = function(tbl)
+    return {
+      "table",
+      tbl
+    }
+  end,
   block_exp = function(body)
     local fn = build.fndef({
       body = body

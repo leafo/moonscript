@@ -48,14 +48,17 @@ line_compile =
         i = i +1
 
       with @line!
+        skip_values = false
         if #undeclared == #names and not has_fndef
           \append declare
+          skip_values = true if #values == 0
         else
           @add declare if #undeclared > 0
           \append_list [@value name for name in *names], ", "
 
-        \append " = "
-        \append_list [@value v for v in *values], ", "
+        if not skip_values
+          \append " = "
+          \append_list [@value v for v in *values], ", "
 
   update: (node) =>
     _, name, op, exp = unpack node
@@ -197,90 +200,6 @@ line_compile =
     @declare names
     nil
 
-  class: (node) =>
-    _, name, parent_val, tbl = unpack node
-
-    constructor = nil
-    final_properties = {}
-
-    -- organize constructor and everything else
-    for entry in *tbl[2]
-      if entry[1] == constructor_name
-        constructor = entry[2]
-      else
-        insert final_properties, entry
-
-    tbl[2] = final_properties
-
-    -- now create the class's initialization block
-    parent_loc = @free_name "parent", true
-
-    -- synthesize constructor if needed
-    if not constructor
-      constructor = {"fndef", {{"..."}}, {}, "fat", {
-        {"if", parent_loc, {
-          {"chain", "super", {"call", {"..."}}}
-        }}
-      }}
-
-    smart_node constructor
-    constructor.arrow = "fat"
-
-    def_scope = with @block!
-      parent_val = @value parent_val if parent_val != ""
-      \put_name parent_loc
-
-      .header = @line "(function(", parent_loc, ")"
-      .footer = @line "end)(", parent_val, ")"
-
-      \set "super", (block, chain) ->
-        calling_name = block\get"current_block"
-        slice = [item for item in *chain[3:]]
-        -- inject self
-        slice[1] = {"call", {"self", unpack slice[1][2]}}
-
-        act = if ntype(calling_name) != "value" then "index" else "dot"
-        {"chain", parent_loc, {act, calling_name}, unpack slice}
-
-      -- the metatable holding all the class methods
-      base_name = \init_free_var "base", tbl
-      \stm {"assign", { {"chain", base_name, {"dot", "__index"}} }, { base_name }}
-
-      -- handle super class if there is one
-      \stm {"if", parent_loc,
-        {{"chain", "setmetatable", {"call",
-        {base_name, {"chain", "getmetatable",
-          {"call", {parent_loc}}, {"dot", "__index"}}}}}}}
-
-      -- the class object that is returned
-      cls = {"table", {
-        {"__init", constructor}
-      }}
-
-      -- the class's meta table, gives us call and access to base methods
-      cls_mt = {"table", {
-        {"__index", base_name}
-        {"__call", {"fndef", {{"mt"}, {"..."}}, {}, "slim", {
-            {"raw", ("local self = setmetatable({}, %s)")\format(base_name)}
-            {"chain", "mt.__init", {"call", {"self", "..."}}}
-            "self"
-          }}}
-      }}
-
-      cls_name = \init_free_var "class", {
-        "chain", "setmetatable", {"call", {cls, cls_mt}}
-      }
-
-      \stm {"assign"
-        {{"chain", base_name, {"dot", "__class"}}}
-        {cls_name}
-      }
-
-      \stm {"return", cls_name}
-
-    @stm {"declare", {name}}
-    @line name, " = ", def_scope
-
   comprehension: (node, action) =>
     _, exp, clauses = unpack node
 
@@ -311,4 +230,11 @@ line_compile =
       @set "scope_var", var
       \stms block
       \stm ret var if ret
+
+  run: (code) =>
+    code\call self
+    nil
+
+  group: (node) =>
+    @stms node[2]
 
