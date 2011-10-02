@@ -53,6 +53,9 @@ class Block_
   header: "do"
   footer: "end"
 
+  export_all: false
+  export_proper: false
+
   new: (@parent, @header, @footer) =>
     @current_line = 1
 
@@ -95,11 +98,15 @@ class Block_
     name = name\get_name self if util.moon.type(name) == NameProxy
     @_names[name] = true
 
-  has_name: (name) =>
+  has_name: (name, skip_exports) =>
+    if not skip_exports
+      return true if @export_all
+      return true if @export_proper and name\match"^[A-Z]"
+
     yes = @_names[name]
     if yes == nil and @parent
       if not @_name_whitelist or @_name_whitelist[name]
-        @parent\has_name name
+        @parent\has_name name, true
     else
       yes
 
@@ -113,7 +120,7 @@ class Block_
     while searching
       name = concat {"", prefix, i}, "_"
       i = i + 1
-      searching = @has_name name
+      searching = @has_name name, true
 
     @put_name name if not dont_put
     name

@@ -409,7 +409,15 @@ line_compile = {
   end,
   export = function(self, node)
     local _, names = unpack(node)
-    self:declare(names)
+    if type(names) == "string" then
+      if names == "*" then
+        self.export_all = true
+      elseif names == "^" then
+        self.export_proper = true
+      end
+    else
+      self:declare(names)
+    end
     return nil
   end,
   comprehension = function(self, node, action)

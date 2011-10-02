@@ -194,7 +194,13 @@ line_compile =
 
   export: (node) =>
     _, names = unpack node
-    @declare names
+    if type(names) == "string"
+      if names == "*"
+        @export_all = true
+      elseif names == "^"
+        @export_proper = true
+    else
+      @declare names
     nil
 
   comprehension: (node, action) =>

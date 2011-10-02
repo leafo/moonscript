@@ -581,6 +581,13 @@ module:
 
 	print my_module.length 6, 7 -- errors, `length` not visible
 
+### Export All & Export Proper
+
+The `export` statement can also take special symbols `*` and `^`.
+
+`export *` is used to export any name declared after the statement in the
+current scope. `export ^` will export all proper names, names that begin with a
+capital letter.
 
 ## Import Statement
 

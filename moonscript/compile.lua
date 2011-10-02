@@ -101,6 +101,8 @@ Block_ = (function()
   local _base_0 = {
     header = "do",
     footer = "end",
+    export_all = false,
+    export_proper = false,
     line_table = function(self)
       return self._posmap
     end,
@@ -155,11 +157,19 @@ Block_ = (function()
       end
       self._names[name] = true
     end,
-    has_name = function(self, name)
+    has_name = function(self, name, skip_exports)
+      if not skip_exports then
+        if self.export_all then
+          return true
+        end
+        if self.export_proper and name:match("^[A-Z]") then
+          return true
+        end
+      end
       local yes = self._names[name]
       if yes == nil and self.parent then
         if not self._name_whitelist or self._name_whitelist[name] then
-          return self.parent:has_name(name)
+          return self.parent:has_name(name, true)
         end
       else
         return yes
@@ -179,7 +189,7 @@ Block_ = (function()
           i
         }, "_")
         i = i + 1
-        searching = self:has_name(name)
+        searching = self:has_name(name, true)
       end
       if not dont_put then
         self:put_name(name)
