@@ -124,19 +124,10 @@ build = setmetatable({
     }
   end,
   block_exp = function(body)
-    local fn = build.fndef({
-      body = body
-    })
-    return build.chain({
-      base = {
-        "parens",
-        fn
-      },
-      {
-        "call",
-        { }
-      }
-    })
+    return {
+      "block_exp",
+      body
+    }
   end,
   chain = function(parts)
     local base = parts.base or error("expecting base property for chain")

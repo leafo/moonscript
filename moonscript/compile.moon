@@ -228,6 +228,7 @@ class Block_
   -- line wise compile functions
   name: (node) => @value node
   value: (node, ...) =>
+    node = transform.value node
     action = if type(node) != "table"
       "raw_value"
     else
@@ -236,7 +237,6 @@ class Block_
 
     fn = value_compile[action]
     error "Failed to compile value: "..dump.value node if not fn
-    node = transform.node node
     fn self, node, ...
 
   values: (values, delim) =>
@@ -245,7 +245,7 @@ class Block_
       \append_list [@value v for v in *values], delim
 
   stm: (node, ...) =>
-    node = transform.node node
+    node = transform.stm node
     fn = line_compile[ntype(node)]
     if not fn
       -- coerce value into statement

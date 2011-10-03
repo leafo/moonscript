@@ -4,8 +4,7 @@ local util = require("moonscript.util")
 local data = require("moonscript.data")
 local ntype, build, smart_node = types.ntype, types.build, types.smart_node
 local insert = table.insert
-NameProxy = (function()
-  local _parent_0 = nil
+NameProxy = (function(_parent_0)
   local _base_0 = {
     get_name = function(self, scope)
       if not self.name then
@@ -65,18 +64,17 @@ NameProxy = (function()
     end
   }, {
     __index = _base_0,
-    __call = function(cls, ...)
-      local _self_0 = setmetatable({}, _base_0)
-      cls.__init(_self_0, ...)
-      return _self_0
+    __call = function(mt, ...)
+      local self = setmetatable({}, _base_0)
+      mt.__init(self, ...)
+      return self
     end
   })
   _base_0.__class = _class_0
   return _class_0
 end)()
 local Run
-Run = (function()
-  local _parent_0 = nil
+Run = (function(_parent_0)
   local _base_0 = {
     call = function(self, state)
       return self.fn(state)
@@ -93,17 +91,28 @@ Run = (function()
     end
   }, {
     __index = _base_0,
-    __call = function(cls, ...)
-      local _self_0 = setmetatable({}, _base_0)
-      cls.__init(_self_0, ...)
-      return _self_0
+    __call = function(mt, ...)
+      local self = setmetatable({}, _base_0)
+      mt.__init(self, ...)
+      return self
     end
   })
   _base_0.__class = _class_0
   return _class_0
 end)()
 local constructor_name = "new"
-local transformers = {
+local transformer
+transformer = function(transformers)
+  return function(n)
+    transformer = transformers[ntype(n)]
+    if transformer then
+      return transformer(n) or n
+    else
+      return n
+    end
+  end
+end
+stm = transformer({
   class = function(node)
     local _, name, parent_val, tbl = unpack(node)
     local constructor = nil
@@ -316,7 +325,9 @@ local transformers = {
       })
     end
     return value
-  end,
+  end
+})
+value = transformer({
   chain = function(node)
     local stub = node[#node]
     if type(stub) == "table" and stub[1] == "colon_stub" then
@@ -367,13 +378,21 @@ local transformers = {
         })
       })
     end
+  end,
+  block_exp = function(node)
+    local _, body = unpack(node)
+    local fn = build.fndef({
+      body = body
+    })
+    return build.chain({
+      base = {
+        "parens",
+        fn
+      },
+      {
+        "call",
+        { }
+      }
+    })
   end
-}
-node = function(n)
-  local transformer = transformers[ntype(n)]
-  if transformer then
-    return transformer(n) or n
-  else
-    return n
-  end
-end
+})

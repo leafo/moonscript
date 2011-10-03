@@ -72,8 +72,7 @@ build = setmetatable {
   table: (tbl) ->
     {"table", tbl}
   block_exp: (body) ->
-    fn = build.fndef body: body
-    build.chain { base: {"parens", fn}, {"call", {}} }
+    {"block_exp", body}
   chain: (parts) ->
     base = parts.base or error"expecting base property for chain"
     node = {"chain", base}

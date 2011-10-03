@@ -22,8 +22,7 @@ local bubble_names = {
   "has_varargs"
 }
 local Line
-Line = (function()
-  local _parent_0 = nil
+Line = (function(_parent_0)
   local _base_0 = {
     _append_single = function(self, item)
       if util.moon.type(item) == Line then
@@ -86,18 +85,17 @@ Line = (function()
     end
   }, {
     __index = _base_0,
-    __call = function(cls, ...)
-      local _self_0 = setmetatable({}, _base_0)
-      cls.__init(_self_0, ...)
-      return _self_0
+    __call = function(mt, ...)
+      local self = setmetatable({}, _base_0)
+      mt.__init(self, ...)
+      return self
     end
   })
   _base_0.__class = _class_0
   return _class_0
 end)()
 local Block_
-Block_ = (function()
-  local _parent_0 = nil
+Block_ = (function(_parent_0)
   local _base_0 = {
     header = "do",
     footer = "end",
@@ -335,6 +333,7 @@ Block_ = (function()
       return self:value(node)
     end,
     value = function(self, node, ...)
+      node = transform.value(node)
       local action
       if type(node) ~= "table" then
         action = "raw_value"
@@ -346,7 +345,6 @@ Block_ = (function()
       if not fn then
         error("Failed to compile value: " .. dump.value(node))
       end
-      node = transform.node(node)
       return fn(self, node, ...)
     end,
     values = function(self, values, delim)
@@ -370,7 +368,7 @@ Block_ = (function()
       end
     end,
     stm = function(self, node, ...)
-      node = transform.node(node)
+      node = transform.stm(node)
       local fn = line_compile[ntype(node)]
       if not fn then
         if has_value(node) then
@@ -458,18 +456,17 @@ Block_ = (function()
     end
   }, {
     __index = _base_0,
-    __call = function(cls, ...)
-      local _self_0 = setmetatable({}, _base_0)
-      cls.__init(_self_0, ...)
-      return _self_0
+    __call = function(mt, ...)
+      local self = setmetatable({}, _base_0)
+      mt.__init(self, ...)
+      return self
     end
   })
   _base_0.__class = _class_0
   return _class_0
 end)()
 local RootBlock
-RootBlock = (function()
-  local _parent_0 = Block_
+RootBlock = (function(_parent_0)
   local _base_0 = {
     render = function(self)
       self:_insert_breaks()
@@ -488,15 +485,15 @@ RootBlock = (function()
     end
   }, {
     __index = _base_0,
-    __call = function(cls, ...)
-      local _self_0 = setmetatable({}, _base_0)
-      cls.__init(_self_0, ...)
-      return _self_0
+    __call = function(mt, ...)
+      local self = setmetatable({}, _base_0)
+      mt.__init(self, ...)
+      return self
     end
   })
   _base_0.__class = _class_0
   return _class_0
-end)()
+end)(Block_)
 Block = Block_
 format_error = function(msg, pos, file_str)
   local line = pos_to_line(file_str, pos)
