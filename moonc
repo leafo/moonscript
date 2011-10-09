@@ -13,6 +13,8 @@ local opts, ind = alt_getopt.get_opts(arg, "vhwt:pTb", {
 	print = "p", tree = "T", version = "v", help = "h"
 })
 
+local polling_rate = 1.0
+
 local help = [[Usage: %s [options] files...
 
     -h          Print this message
@@ -231,7 +233,21 @@ end
 
 files = remove_dups(files)
 
-if opts.w then
+function get_sleep_func()
+	local sleep
+	if not pcall(function()
+		require "socket"
+		sleep = socket.sleep
+	end) then
+		sleep = moonscript._sleep
+	end
+	return sleep
+end
+
+-- returns an iterator that returns files that have been updated
+function create_watcher(files)
+	local msg = "Starting watch loop, Ctrl-C to exit"
+
 	local inotify
 	if not pcall(function()
 		inotify = require "inotify"
@@ -239,47 +255,91 @@ if opts.w then
 		print_help("inotify not installed")
 	end
 
-	local dirs = {}
-	for _, fname in ipairs(files) do
-		table.insert(dirs, get_dir(fname))
-	end
-	dirs = remove_dups(dirs)
-
-	print(("Starting watch loop, Ctrl-C to exit [%d dirs]"):format(#dirs))
-
-	local wd_table = {}
-	local handle = inotify:init()
-	for _, dir in ipairs(dirs) do
-		local wd = handle:addwatch(dir, inotify.IN_MODIFY)
-		wd_table[wd] = dir
-	end
-
-	while true do
-		local success, events = pcall(handle.read, handle)
-		if not success then
-			print"\nQuitting..."
-			break
+	if false and inotify then
+		local dirs = {}
+		for _, fname in ipairs(files) do
+			table.insert(dirs, get_dir(fname))
 		end
+		dirs = remove_dups(dirs)
 
-		if events then
-			for _, ev in ipairs(events) do
-				local fname = wd_table[ev.wd]..ev.name
-				if fname:match("%.moon$") then
-					local target = target_dir..convert_path(fname)
-					local success, err = compile_and_write(fname, target)
+		return coroutine.wrap(function()
+			print(("%s with inotify [%d dirs]"):format(msg, #dirs))
 
-					if not success then
-						print()
-						print("Error: "..fname)
-						print(err)
-						print()
-					else
-						msg("Built", fname)
+			local wd_table = {}
+			local handle = inotify:init()
+			for _, dir in ipairs(dirs) do
+				local wd = handle:addwatch(dir, inotify.IN_MODIFY)
+				wd_table[wd] = dir
+			end
+
+			while true do
+				local success, events = pcall(handle.read, handle)
+				if not success then
+					print "break in handler"
+					break
+				end
+
+				if events then
+					for _, ev in ipairs(events) do
+						local fname = wd_table[ev.wd]..ev.name
+						if fname:match("%.moon$") then
+							coroutine.yield(fname)
+						end
 					end
+				else
+					break
 				end
 			end
-		else break end
+		end)
+	else
+		-- poll the filesystem instead
+		local sleep = get_sleep_func()
+		return coroutine.wrap(function()
+			print(("%s with polling [%d files]"):format(msg, #files))
+
+			local mod_time = {}
+			while true do
+				for _, file in ipairs(files) do
+					local time = lfs.attributes(file, "modification")
+					if not mod_time[file] then
+						mod_time[file] = time
+					else
+						if time ~= mod_time[file] then
+							if time > mod_time[file] then
+								coroutine.yield(file)
+								mod_time[file] = time
+							end
+						end
+					end
+				end
+				sleep(polling_rate)
+			end
+		end)
 	end
+end
+
+if opts.w then
+	local watcher = create_watcher(files)
+	-- catches interrupt error for ctl-c
+	local protected = function()
+		local status, file = pcall(watcher)
+		if status then return file end
+	end
+
+	for fname in protected do
+		local target = target_dir..convert_path(fname)
+		local success, err = compile_and_write(fname, target)
+		if not success then
+			print()
+			print("Error:", fname)
+			print(err)
+			print()
+		else
+			msg("Built:", fname, "->", target)
+		end
+	end
+
+	print "\nQuitting..."
 else
 	for _, fname in ipairs(files) do
 		local success, err = compile_and_write(fname, target_dir..convert_path(fname))
