@@ -244,6 +244,14 @@ function get_sleep_func()
 	return sleep
 end
 
+
+function plural(count, word)
+	if count ~= 1 then
+		word = word .. "s"
+	end
+	return table.concat({count, word}, " ")
+end
+
 -- returns an iterator that returns files that have been updated
 function create_watcher(files)
 	local msg = "Starting watch loop, Ctrl-C to exit"
@@ -261,7 +269,7 @@ function create_watcher(files)
 		dirs = remove_dups(dirs)
 
 		return coroutine.wrap(function()
-			print(("%s with inotify [%d dirs]"):format(msg, #dirs))
+			print(("%s with inotify [%s]"):format(msg, plural(#dirs, "dir")))
 
 			local wd_table = {}
 			local handle = inotify:init()
@@ -271,12 +279,7 @@ function create_watcher(files)
 			end
 
 			while true do
-				local success, events = pcall(handle.read, handle)
-				if not success then
-					print "break in handler"
-					break
-				end
-
+				local events = handle:read()
 				if events then
 					for _, ev in ipairs(events) do
 						local fname = wd_table[ev.wd]..ev.name
@@ -293,7 +296,7 @@ function create_watcher(files)
 		-- poll the filesystem instead
 		local sleep = get_sleep_func()
 		return coroutine.wrap(function()
-			print(("%s with polling [%d files]"):format(msg, #files))
+			print(("%s with polling [%s]"):format(msg, plural(#files, "file")))
 
 			local mod_time = {}
 			while true do
