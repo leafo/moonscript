@@ -13,3 +13,10 @@ local fn = (function()
 end)()
 print(fn())
 print(x:val())
+x = (function(...)
+  local _base_0 = hello(...)
+  local _fn_0 = _base_0.world
+  return function(...)
+    return _fn_0(_base_0, ...)
+  end
+end)(...)

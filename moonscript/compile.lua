@@ -18,11 +18,9 @@ do
 end
 local concat, insert = table.concat, table.insert
 local pos_to_line, get_closest_line, trim = util.pos_to_line, util.get_closest_line, util.trim
-local bubble_names = {
-  "has_varargs"
-}
 local Line
-Line = (function(_parent_0)
+Line = (function()
+  local _parent_0 = nil
   local _base_0 = {
     _append_single = function(self, item)
       if util.moon.type(item) == Line then
@@ -85,17 +83,18 @@ Line = (function(_parent_0)
     end
   }, {
     __index = _base_0,
-    __call = function(mt, ...)
-      local self = setmetatable({}, _base_0)
-      mt.__init(self, ...)
-      return self
+    __call = function(cls, ...)
+      local _self_0 = setmetatable({}, _base_0)
+      cls.__init(_self_0, ...)
+      return _self_0
     end
   })
   _base_0.__class = _class_0
   return _class_0
 end)()
 local Block_
-Block_ = (function(_parent_0)
+Block_ = (function()
+  local _parent_0 = nil
   local _base_0 = {
     header = "do",
     footer = "end",
@@ -251,15 +250,6 @@ Block_ = (function(_parent_0)
       if t == "string" then
         self:add_line_text(line)
       elseif t == Block then
-        do
-          local _item_0 = bubble_names
-          for _index_0 = 1, #_item_0 do
-            local name = _item_0[_index_0]
-            if line[name] then
-              self[name] = line.name
-            end
-          end
-        end
         self:add(self:line(line))
       elseif t == Line then
         self:add_line_tables(line)
@@ -396,24 +386,30 @@ Block_ = (function(_parent_0)
       if not ret then
         ret = default_return
       end
-      local i = 1
-      while i < #stms do
-        self:stm(stms[i])
-        i = i + 1
+      local last_exp_id = 0
+      for i = #stms, 1, -1 do
+        local stm = stms[i]
+        if stm and util.moon.type(stm) ~= transform.Run then
+          last_exp_id = i
+          break
+        end
       end
-      local last_exp = stms[i]
-      if last_exp then
-        if cascading[ntype(last_exp)] then
-          self:stm(last_exp, ret)
-        elseif self:is_value(last_exp) then
-          local line = ret(stms[i])
-          if self:is_stm(line) then
-            self:stm(line)
+      for i, stm in ipairs(stms) do
+        if i == last_exp_id then
+          if cascading[ntype(stm)] then
+            self:stm(stm, ret)
+          elseif self:is_value(stm) then
+            local line = ret(stms[i])
+            if self:is_stm(line) then
+              self:stm(line)
+            else
+              error("got a value from implicit return")
+            end
           else
-            error("got a value from implicit return")
+            self:stm(stm)
           end
         else
-          self:stm(last_exp)
+          self:stm(stm)
         end
       end
       return nil
@@ -456,17 +452,18 @@ Block_ = (function(_parent_0)
     end
   }, {
     __index = _base_0,
-    __call = function(mt, ...)
-      local self = setmetatable({}, _base_0)
-      mt.__init(self, ...)
-      return self
+    __call = function(cls, ...)
+      local _self_0 = setmetatable({}, _base_0)
+      cls.__init(_self_0, ...)
+      return _self_0
     end
   })
   _base_0.__class = _class_0
   return _class_0
 end)()
 local RootBlock
-RootBlock = (function(_parent_0)
+RootBlock = (function()
+  local _parent_0 = Block_
   local _base_0 = {
     render = function(self)
       self:_insert_breaks()
@@ -485,15 +482,15 @@ RootBlock = (function(_parent_0)
     end
   }, {
     __index = _base_0,
-    __call = function(mt, ...)
-      local self = setmetatable({}, _base_0)
-      mt.__init(self, ...)
-      return self
+    __call = function(cls, ...)
+      local _self_0 = setmetatable({}, _base_0)
+      cls.__init(_self_0, ...)
+      return _self_0
     end
   })
   _base_0.__class = _class_0
   return _class_0
-end)(Block_)
+end)()
 Block = Block_
 format_error = function(msg, pos, file_str)
   local line = pos_to_line(file_str, pos)

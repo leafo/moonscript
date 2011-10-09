@@ -8,7 +8,7 @@ data = require "moonscript.data"
 import ntype, build, smart_node from types
 import insert from table
 
-export stm, value, NameProxy
+export stm, value, NameProxy, Run
 
 class NameProxy
   new: (@prefix) =>
@@ -49,11 +49,14 @@ constructor_name = "new"
 
 transformer = (transformers) ->
   (n) ->
-    transformer = transformers[ntype n]
-    if transformer
-      transformer(n) or n
-    else
-      n
+    while true
+      transformer = transformers[ntype n]
+      res = if transformer
+        transformer(n) or n
+      else
+        n
+      return n if res == n
+      n = res
 
 stm = transformer {
   class: (node using nil) ->
@@ -176,7 +179,7 @@ value = transformer {
       base_name = NameProxy "base"
       fn_name = NameProxy "fn"
 
-      build.block_exp {
+      value build.block_exp {
         build.assign {
           names: {base_name}
           values: {node}
@@ -201,7 +204,16 @@ value = transformer {
 
   block_exp: (node) ->
     _, body = unpack node
-    fn = build.fndef body: body
-    build.chain { base: {"parens", fn}, {"call", {}} }
+
+    fn = nil
+    arg_list = {}
+
+    insert body, Run =>
+      if @has_varargs
+        insert arg_list, "..."
+        insert fn.args, {"..."}
+
+    fn = smart_node build.fndef body: body
+    build.chain { base: {"parens", fn}, {"call", arg_list} }
 }
 

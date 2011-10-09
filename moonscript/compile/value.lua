@@ -201,6 +201,13 @@ value_compile = {
         return error("Unknown chain action: " .. t)
       end
     end
+    if ntype(callee) == "self" and node[3] and ntype(node[3]) == "call" then
+      callee[1] = "self_colon"
+    end
+    local callee_value = self:value(callee)
+    if ntype(callee) == "exp" then
+      callee_value = self:line("(", callee_value, ")")
+    end
     local actions
     do
       local _with_0 = self:line()
@@ -212,13 +219,6 @@ value_compile = {
         end
       end
       actions = _with_0
-    end
-    if ntype(callee) == "self" and node[3] and ntype(node[3]) == "call" then
-      callee[1] = "self_colon"
-    end
-    local callee_value = self:name(callee)
-    if ntype(callee) == "exp" then
-      callee_value = self:line("(", callee_value, ")")
     end
     return self:line(callee_value, actions)
   end,
@@ -258,7 +258,7 @@ value_compile = {
       insert(arg_names, 1, "self")
     end
     do
-      local _with_0 = self:block("function(" .. concat(arg_names, ", ") .. ")")
+      local _with_0 = self:block()
       if #whitelist > 0 then
         _with_0:whitelist_names(whitelist)
       end
@@ -320,6 +320,25 @@ value_compile = {
         })
       end
       _with_0:ret_stms(block)
+      if #args > #arg_names then
+        arg_names = (function()
+          local _accum_0 = { }
+          local _len_0 = 0
+          do
+            local _item_0 = args
+            for _index_0 = 1, #_item_0 do
+              local arg = _item_0[_index_0]
+              local _value_0 = arg[1]
+              if _value_0 ~= nil then
+                _len_0 = _len_0 + 1
+                _accum_0[_len_0] = _value_0
+              end
+            end
+          end
+          return _accum_0
+        end)()
+      end
+      _with_0.header = "function(" .. concat(arg_names, ", ") .. ")"
       return _with_0
     end
   end,

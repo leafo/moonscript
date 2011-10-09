@@ -73,7 +73,6 @@ NameProxy = (function(_parent_0)
   _base_0.__class = _class_0
   return _class_0
 end)()
-local Run
 Run = (function(_parent_0)
   local _base_0 = {
     call = function(self, state)
@@ -104,11 +103,18 @@ local constructor_name = "new"
 local transformer
 transformer = function(transformers)
   return function(n)
-    transformer = transformers[ntype(n)]
-    if transformer then
-      return transformer(n) or n
-    else
-      return n
+    while true do
+      transformer = transformers[ntype(n)]
+      local res
+      if transformer then
+        res = transformer(n) or n
+      else
+        res = n
+      end
+      if res == n then
+        return n
+      end
+      n = res
     end
   end
 end
@@ -334,7 +340,7 @@ value = transformer({
       table.remove(node, #node)
       local base_name = NameProxy("base")
       local fn_name = NameProxy("fn")
-      return build.block_exp({
+      return value(build.block_exp({
         build.assign({
           names = {
             base_name
@@ -376,14 +382,24 @@ value = transformer({
             })
           }
         })
-      })
+      }))
     end
   end,
   block_exp = function(node)
     local _, body = unpack(node)
-    local fn = build.fndef({
+    local fn = nil
+    local arg_list = { }
+    insert(body, Run(function(self)
+      if self.has_varargs then
+        insert(arg_list, "...")
+        return insert(fn.args, {
+          "..."
+        })
+      end
+    end))
+    fn = smart_node(build.fndef({
       body = body
-    })
+    }))
     return build.chain({
       base = {
         "parens",
@@ -391,7 +407,7 @@ value = transformer({
       },
       {
         "call",
-        { }
+        arg_list
       }
     })
   end

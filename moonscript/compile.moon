@@ -19,8 +19,6 @@ import pos_to_line, get_closest_line, trim from util
 export tree, value, format_error
 export Block
 
-bubble_names = { "has_varargs" }
-
 -- buffer for building up a line
 class Line
   _append_single: (item) =>
@@ -167,9 +165,6 @@ class Block_
     if t == "string"
       @add_line_text line
     elseif t == Block
-      for name in *bubble_names
-        self[name] = line.name if line[name]
-
       @add @line line
     elseif t == Line
       @add_line_tables line
@@ -262,26 +257,29 @@ class Block_
     if not ret
       ret = default_return
 
-    -- wow I really need a for loop
-    i = 1
-    while i < #stms
-      @stm stms[i]
-      i = i + 1
+    -- find last exp for explicit return
+    last_exp_id = 0
+    for i = #stms, 1, -1
+      stm = stms[i]
+      if stm and util.moon.type(stm) != transform.Run
+        last_exp_id = i
+        break
 
-    last_exp = stms[i]
-
-    if last_exp
-      if cascading[ntype(last_exp)]
-        @stm last_exp, ret
-      elseif @is_value last_exp
-        line = ret stms[i]
-        if @is_stm line
-          @stm line
+    for i, stm in ipairs stms
+      if i == last_exp_id
+        if cascading[ntype(stm)]
+          @stm stm, ret
+        elseif @is_value stm
+          line = ret stms[i]
+          if @is_stm line
+            @stm line
+          else
+            error "got a value from implicit return"
         else
-          error "got a value from implicit return"
+          -- nothing we can do with a statement except show it
+          @stm stm
       else
-        -- nothing we can do with a statement except show it
-        @stm last_exp
+        @stm stm
 
     nil
 

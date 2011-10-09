@@ -105,6 +105,7 @@ value_compile =
     chain_item = (node) ->
       t, arg = unpack node
       if t == "call"
+        -- print arg, util.dump arg
         "(", @values(arg), ")"
       elseif t == "index"
         "[", @value(arg), "]"
@@ -117,14 +118,14 @@ value_compile =
       else
         error "Unknown chain action: "..t
 
-    actions = with @line!
-      \append chain_item action for action in *node[3:]
-
     if ntype(callee) == "self" and node[3] and ntype(node[3]) == "call"
       callee[1] = "self_colon"
 
-    callee_value = @name callee
+    callee_value = @value callee
     callee_value = @line "(", callee_value, ")" if ntype(callee) == "exp"
+
+    actions = with @line!
+      \append chain_item action for action in *node[3:]
 
     @line callee_value, actions
 
@@ -147,7 +148,7 @@ value_compile =
     if arrow == "fat"
       insert arg_names, 1, "self"
 
-    with @block "function("..concat(arg_names, ", ")..")"
+    with @block!
       if #whitelist > 0
         \whitelist_names whitelist
 
@@ -166,6 +167,11 @@ value_compile =
       \stm {"assign", self_args, self_arg_values} if #self_args > 0
 
       \ret_stms block
+      if #args > #arg_names -- will only work for simple adjustments
+        arg_names = for arg in *args
+          arg[1]
+
+      .header = "function("..concat(arg_names, ", ")..")"
 
   table: (node) =>
     _, items = unpack node
