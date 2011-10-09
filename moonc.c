@@ -10,6 +10,17 @@
 
 #include "luafilesystem/src/lfs.h"
 
+#ifdef _WIN32
+#include <windows.h>
+
+int _l_sleep(lua_State *l) {
+	double time = luaL_checknumber(l, -1);
+	Sleep((int)(time*1000));
+	return 0;
+}
+
+#endif
+
 int main(int argc, char **argv) {
 	lua_State *l = luaL_newstate();
 	luaL_openlibs(l);
@@ -22,6 +33,14 @@ int main(int argc, char **argv) {
 		return 1;
 	}
 	lua_call(l, 0, 0);
+
+	// add sleep method
+#ifdef _WIN32
+	lua_getfield(l, LUA_GLOBALSINDEX, "moonscript");
+	lua_pushcfunction(l, _l_sleep);
+	lua_setfield(l, -2, "_sleep");
+	lua_pop(l, 1);
+#endif
 
 	if (!luaL_loadbuffer(l, (const char *)alt_getopt_lua, alt_getopt_lua_len, "alt_getopt.lua") == 0) {
 		fprintf(stderr, "Failed to load alt_getopt.lua\n");
