@@ -19,8 +19,7 @@ end
 local concat, insert = table.concat, table.insert
 local pos_to_line, get_closest_line, trim = util.pos_to_line, util.get_closest_line, util.trim
 local Line
-Line = (function()
-  local _parent_0 = nil
+Line = (function(_parent_0)
   local _base_0 = {
     _append_single = function(self, item)
       if util.moon.type(item) == Line then
@@ -83,18 +82,17 @@ Line = (function()
     end
   }, {
     __index = _base_0,
-    __call = function(cls, ...)
-      local _self_0 = setmetatable({}, _base_0)
-      cls.__init(_self_0, ...)
-      return _self_0
+    __call = function(mt, ...)
+      local self = setmetatable({}, _base_0)
+      mt.__init(self, ...)
+      return self
     end
   })
   _base_0.__class = _class_0
   return _class_0
 end)()
 local Block_
-Block_ = (function()
-  local _parent_0 = nil
+Block_ = (function(_parent_0)
   local _base_0 = {
     header = "do",
     footer = "end",
@@ -171,9 +169,6 @@ Block_ = (function()
       else
         return yes
       end
-    end,
-    shadow_name = function(self, name)
-      self._names[name] = false
     end,
     free_name = function(self, prefix, dont_put)
       prefix = prefix or "moon"
@@ -358,11 +353,14 @@ Block_ = (function()
       end
     end,
     stm = function(self, node, ...)
+      if not node then
+        return 
+      end
       node = transform.stm(node)
       local fn = line_compile[ntype(node)]
       if not fn then
         if has_value(node) then
-          return self:stm({
+          self:stm({
             "assign",
             {
               "_"
@@ -372,15 +370,16 @@ Block_ = (function()
             }
           })
         else
-          return self:add(self:value(node))
+          self:add(self:value(node))
         end
       else
         self:mark_pos(node)
         local out = fn(self, node, ...)
         if out then
-          return self:add(out)
+          self:add(out)
         end
       end
+      return nil
     end,
     ret_stms = function(self, stms, ret)
       if not ret then
@@ -452,18 +451,17 @@ Block_ = (function()
     end
   }, {
     __index = _base_0,
-    __call = function(cls, ...)
-      local _self_0 = setmetatable({}, _base_0)
-      cls.__init(_self_0, ...)
-      return _self_0
+    __call = function(mt, ...)
+      local self = setmetatable({}, _base_0)
+      mt.__init(self, ...)
+      return self
     end
   })
   _base_0.__class = _class_0
   return _class_0
 end)()
 local RootBlock
-RootBlock = (function()
-  local _parent_0 = Block_
+RootBlock = (function(_parent_0)
   local _base_0 = {
     render = function(self)
       self:_insert_breaks()
@@ -482,15 +480,15 @@ RootBlock = (function()
     end
   }, {
     __index = _base_0,
-    __call = function(cls, ...)
-      local _self_0 = setmetatable({}, _base_0)
-      cls.__init(_self_0, ...)
-      return _self_0
+    __call = function(mt, ...)
+      local self = setmetatable({}, _base_0)
+      mt.__init(self, ...)
+      return self
     end
   })
   _base_0.__class = _class_0
   return _class_0
-end)()
+end)(Block_)
 Block = Block_
 format_error = function(msg, pos, file_str)
   local line = pos_to_line(file_str, pos)

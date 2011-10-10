@@ -144,17 +144,15 @@ y = y / 100
 local m = m % 2
 local hello = hello .. "world"
 x = 0
-do
-  local _item_0 = values
-  for _index_0 = 1, #_item_0 do
-    local v = _item_0[_index_0]
-    _ = ((function()
-      if ntype(v) == "fndef" then
-        x = x + 1
-        return x
-      end
-    end)())
-  end
+local _list_0 = values
+for _index_0 = 1, #_list_0 do
+  local v = _list_0[_index_0]
+  _ = ((function()
+    if ntype(v) == "fndef" then
+      x = x + 1
+      return x
+    end
+  end)())
 end
 hello = {
   something = world,

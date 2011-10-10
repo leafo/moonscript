@@ -3,11 +3,10 @@ local util = require("moonscript.util")
 require("moonscript.compile.format")
 local dump = require("moonscript.dump")
 local reversed = util.reversed
-local ntype, smart_node
+local ntype
 do
   local _table_0 = require("moonscript.types")
   ntype = _table_0.ntype
-  smart_node = _table_0.smart_node
 end
 local concat, insert = table.concat, table.insert
 local constructor_name = "new"
@@ -283,104 +282,6 @@ line_compile = {
   end,
   foreach = function(self, node)
     local _, names, exp, block = unpack(node)
-    if ntype(exp) == "unpack" then
-      local iter = exp[2]
-      local loop
-      do
-        local _with_0 = self:block()
-        local items_tmp = _with_0:free_name("item", true)
-        local bounds
-        if is_slice(iter) then
-          local slice = iter[#iter]
-          table.remove(iter)
-          table.remove(slice, 1)
-          if slice[2] and slice[2] ~= "" then
-            local max_tmp = _with_0:init_free_var("max", slice[2])
-            slice[2] = {
-              "exp",
-              max_tmp,
-              "<",
-              0,
-              "and",
-              {
-                "length",
-                items_tmp
-              },
-              "+",
-              max_tmp,
-              "or",
-              max_tmp
-            }
-          else
-            slice[2] = {
-              "length",
-              items_tmp
-            }
-          end
-          bounds = slice
-        else
-          bounds = {
-            1,
-            {
-              "length",
-              items_tmp
-            }
-          }
-        end
-        local index_tmp = _with_0:free_name("index")
-        _with_0:stm({
-          "assign",
-          {
-            items_tmp
-          },
-          {
-            iter
-          }
-        })
-        block = (function()
-          local _accum_0 = { }
-          local _len_0 = 0
-          do
-            local _item_0 = block
-            for _index_0 = 1, #_item_0 do
-              local s = _item_0[_index_0]
-              _len_0 = _len_0 + 1
-              _accum_0[_len_0] = s
-            end
-          end
-          return _accum_0
-        end)()
-        do
-          local _item_0 = names
-          for _index_0 = 1, #_item_0 do
-            local name = _item_0[_index_0]
-            _with_0:shadow_name(name)
-          end
-        end
-        insert(block, 1, {
-          "assign",
-          names,
-          {
-            {
-              "chain",
-              items_tmp,
-              {
-                "index",
-                index_tmp
-              }
-            }
-          }
-        })
-        _with_0:stm({
-          "for",
-          index_tmp,
-          bounds,
-          block
-        })
-        loop = _with_0
-      end
-      return loop
-    end
     local loop
     do
       local _with_0 = self:line()

@@ -108,9 +108,6 @@ class Block_
     else
       yes
 
-  shadow_name: (name) =>
-    @_names[name] = false
-
   free_name: (prefix, dont_put) =>
     prefix = prefix or "moon"
     searching = true
@@ -240,6 +237,7 @@ class Block_
       \append_list [@value v for v in *values], delim
 
   stm: (node, ...) =>
+    return if not node -- slip blank statements
     node = transform.stm node
     fn = line_compile[ntype(node)]
     if not fn
@@ -252,6 +250,7 @@ class Block_
       @mark_pos node
       out = fn self, node, ...
       @add out if out
+    nil
 
   ret_stms: (stms, ret) =>
     if not ret

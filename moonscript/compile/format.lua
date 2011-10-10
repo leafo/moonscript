@@ -81,9 +81,6 @@ end
 is_non_atomic = function(node)
   return non_atomic[ntype(node)]
 end
-is_slice = function(node)
-  return ntype(node) == "chain" and ntype(node[#node]) == "slice"
-end
 count_lines = function(str)
   local count = 1
   for _ in str:gmatch("\n") do

@@ -3,6 +3,7 @@ util = require "moonscript.util"
 data = require "moonscript.data"
 
 export ntype, smart_node, build
+export is_slice
 import insert from table
 
 
@@ -13,13 +14,26 @@ ntype = (node) ->
   else
     node[1]
 
-t = {}
 
+is_slice = (node) ->
+  ntype(node) == "chain" and ntype(node[#node]) == "slice"
+
+t = {}
 node_types = {
   fndef: {
     {"args", t}
     {"whitelist", t}
     {"arrow", "slim"}
+    {"body", t}
+  }
+  foreach: {
+    {"names", t}
+    {"iter"}
+    {"body", {}}
+  }
+  for: {
+    {"name"}
+    {"bounds", t}
     {"body", t}
   }
   assign: {

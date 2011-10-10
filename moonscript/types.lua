@@ -9,6 +9,9 @@ ntype = function(node)
     return node[1]
   end
 end
+is_slice = function(node)
+  return ntype(node) == "chain" and ntype(node[#node]) == "slice"
+end
 local t = { }
 local node_types = {
   fndef = {
@@ -23,6 +26,32 @@ local node_types = {
     {
       "arrow",
       "slim"
+    },
+    {
+      "body",
+      t
+    }
+  },
+  foreach = {
+    {
+      "names",
+      t
+    },
+    {
+      "iter"
+    },
+    {
+      "body",
+      { }
+    }
+  },
+  ["for"] = {
+    {
+      "name"
+    },
+    {
+      "bounds",
+      t
     },
     {
       "body",

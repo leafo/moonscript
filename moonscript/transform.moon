@@ -5,7 +5,7 @@ types = require "moonscript.types"
 util = require "moonscript.util"
 data = require "moonscript.data"
 
-import ntype, build, smart_node from types
+import ntype, build, smart_node, is_slice from types
 import insert from table
 
 export stm, value, NameProxy, Run
@@ -69,7 +69,10 @@ apply_to_last = (stms, fn using nil) ->
 constructor_name = "new"
 
 Transformer = (transformers) ->
+  seen_nodes = {}
   (n) ->
+    return n if seen_nodes[n]
+    seen_nodes[n] = true
     while true
       transformer = transformers[ntype n]
       res = if transformer
@@ -80,6 +83,46 @@ Transformer = (transformers) ->
       n = res
 
 stm = Transformer {
+  foreach: (node) ->
+    smart_node node
+    if ntype(node.iter) == "unpack"
+      list = node.iter[2]
+
+      index_name = NameProxy "index"
+      list_name = NameProxy "list"
+
+      slice_var = nil
+      bounds = if is_slice list
+        slice = list[#list]
+        table.remove list
+        table.remove slice, 1
+
+        slice[2] = if slice[2] and slice[2] != ""
+          max_tmp_name = NameProxy "max"
+          slice_var = build.assign_one max_tmp_name, slice[2]
+          {"exp", max_tmp_name, "<", 0
+            "and", {"length", list_name}, "+", max_tmp_name
+            "or", max_tmp_name }
+        else
+          {"length", list_name}
+
+        slice
+      else
+        {1, {"length", list_name}}
+
+      build.group {
+        build.assign_one list_name, list
+        slice_var
+        build["for"] {
+          name: index_name
+          bounds: bounds
+          body: {
+            {"assign", node.names, {list_name\index index_name}}
+            build.group node.body
+          }
+        }
+      }
+
   class: (node using nil) ->
     _, name, parent_val, tbl = unpack node
 
@@ -218,8 +261,8 @@ create_accumulator = (body_index) ->
 
 value = Transformer {
   for: create_accumulator 4
-  foreach: create_accumulator 4
   while: create_accumulator 3
+  foreach: create_accumulator 4
 
   -- pull out colon chain
   chain: (node) ->

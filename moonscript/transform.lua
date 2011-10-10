@@ -2,7 +2,7 @@ module("moonscript.transform", package.seeall)
 local types = require("moonscript.types")
 local util = require("moonscript.util")
 local data = require("moonscript.data")
-local ntype, build, smart_node = types.ntype, types.build, types.smart_node
+local ntype, build, smart_node, is_slice = types.ntype, types.build, types.smart_node, types.is_slice
 local insert = table.insert
 NameProxy = (function(_parent_0)
   local _base_0 = {
@@ -139,7 +139,12 @@ end
 local constructor_name = "new"
 local Transformer
 Transformer = function(transformers)
+  local seen_nodes = { }
   return function(n)
+    if seen_nodes[n] then
+      return n
+    end
+    seen_nodes[n] = true
     while true do
       local transformer = transformers[ntype(n)]
       local res
@@ -156,6 +161,72 @@ Transformer = function(transformers)
   end
 end
 stm = Transformer({
+  foreach = function(node)
+    smart_node(node)
+    if ntype(node.iter) == "unpack" then
+      local list = node.iter[2]
+      local index_name = NameProxy("index")
+      local list_name = NameProxy("list")
+      local slice_var = nil
+      local bounds
+      if is_slice(list) then
+        local slice = list[#list]
+        table.remove(list)
+        table.remove(slice, 1)
+        if slice[2] and slice[2] ~= "" then
+          local max_tmp_name = NameProxy("max")
+          slice_var = build.assign_one(max_tmp_name, slice[2])
+          slice[2] = {
+            "exp",
+            max_tmp_name,
+            "<",
+            0,
+            "and",
+            {
+              "length",
+              list_name
+            },
+            "+",
+            max_tmp_name,
+            "or",
+            max_tmp_name
+          }
+        else
+          slice[2] = {
+            "length",
+            list_name
+          }
+        end
+        bounds = slice
+      else
+        bounds = {
+          1,
+          {
+            "length",
+            list_name
+          }
+        }
+      end
+      return build.group({
+        build.assign_one(list_name, list),
+        slice_var,
+        build["for"]({
+          name = index_name,
+          bounds = bounds,
+          body = {
+            {
+              "assign",
+              node.names,
+              {
+                list_name:index(index_name)
+              }
+            },
+            build.group(node.body)
+          }
+        })
+      })
+    end
+  end,
   class = function(node)
     local _, name, parent_val, tbl = unpack(node)
     local constructor = nil
@@ -407,8 +478,8 @@ create_accumulator = function(body_index)
 end
 value = Transformer({
   ["for"] = create_accumulator(4),
-  foreach = create_accumulator(4),
   ["while"] = create_accumulator(3),
+  foreach = create_accumulator(4),
   chain = function(node)
     local stub = node[#node]
     if type(stub) == "table" and stub[1] == "colon_stub" then

@@ -6,7 +6,7 @@ require "moonscript.compile.format"
 dump = require "moonscript.dump"
 
 import reversed from util
-import ntype, smart_node from require "moonscript.types"
+import ntype from require "moonscript.types"
 import concat, insert from table
 
 export line_compile
@@ -147,42 +147,6 @@ line_compile =
   -- {"foreach", {names...}, exp, body}
   foreach: (node) =>
     _, names, exp, block = unpack node
-
-    if ntype(exp) == "unpack"
-      iter = exp[2]
-      loop = with @block!
-        items_tmp = \free_name "item", true
-        -- handle unpacked slices directly
-        bounds = if is_slice iter
-          slice = iter[#iter]
-          table.remove iter
-          table.remove slice, 1
-
-          slice[2] = if slice[2] and slice[2] != ""
-            max_tmp = \init_free_var "max", slice[2]
-            {"exp", max_tmp, "<", 0
-              "and", {"length", items_tmp}, "+", max_tmp
-              "or", max_tmp }
-          else
-            {"length", items_tmp}
-
-          slice
-        else
-          {1, {"length", items_tmp}}
-
-        index_tmp = \free_name "index"
-
-        \stm {"assign", {items_tmp}, {iter}}
-
-        block = [s for s in *block]
-        \shadow_name name for name in *names
-        insert block, 1, {"assign", names, {
-          {"chain", items_tmp, {"index", index_tmp}}
-        }}
-
-        \stm {"for", index_tmp, bounds, block }
-
-      return loop
 
     loop = with @line!
       \append "for "

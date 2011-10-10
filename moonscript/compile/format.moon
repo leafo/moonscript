@@ -8,7 +8,7 @@ import ntype from require "moonscript.types"
 import concat, insert from table
 
 export indent_char, default_return, moonlib, cascading, non_atomic, has_value, is_non_atomic
-export count_lines, is_slice, user_error
+export count_lines, user_error
 
 indent_char = "  "
 
@@ -48,9 +48,6 @@ has_value = (node) ->
 
 is_non_atomic = (node) ->
   non_atomic[ntype(node)]
-
-is_slice = (node) ->
-  ntype(node) == "chain" and ntype(node[#node]) == "slice"
 
 count_lines = (str) ->
   count = 1

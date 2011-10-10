@@ -52,6 +52,7 @@ value_compile =
     with @block "(function()", "end)()"
       \stm node, default_return
 
+  -- todo: convert to transformation
   comprehension: (node) =>
     _, exp, iter = unpack node
 
