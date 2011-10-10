@@ -32,6 +32,11 @@ class NameProxy
       unpack items
     }
 
+  index: (key) =>
+    build.chain {
+      base: self, {"index", key}
+    }
+
   __tostring: =>
     if @name
       ("name<%s>")\format @name
@@ -45,9 +50,25 @@ class Run
   call: (state) =>
     self.fn state
 
+-- transform the last stm is a list of stms
+apply_to_last = (stms, fn using nil) ->
+  -- find last (real) exp
+  last_exp_id = 0
+  for i = #stms, 1, -1
+    stm = stms[i]
+    if stm and util.moon.type(stm) != Run
+      last_exp_id = i
+      break
+
+  return for i, stm in ipairs stms
+    if i == last_exp_id
+      fn stm
+    else
+      stm
+
 constructor_name = "new"
 
-transformer = (transformers) ->
+Transformer = (transformers) ->
   (n) ->
     while true
       transformer = transformers[ntype n]
@@ -58,7 +79,7 @@ transformer = (transformers) ->
       return n if res == n
       n = res
 
-stm = transformer {
+stm = Transformer {
   class: (node using nil) ->
     _, name, parent_val, tbl = unpack node
 
@@ -169,7 +190,37 @@ stm = transformer {
     value
 }
 
-value = transformer {
+create_accumulator = (body_index) ->
+  (node) ->
+    accum_name = NameProxy "accum"
+    value_name = NameProxy "value"
+    len_name = NameProxy "len"
+
+    body = apply_to_last node[body_index], (n) ->
+      build.assign_one value_name, n
+
+    table.insert body, build["if"] {
+      cond: {"exp", value_name, "!=", "nil"}
+      then: {
+        {"update", len_name, "+=", 1}
+        build.assign_one accum_name\index(len_name), value_name
+      }
+    }
+
+    node[body_index] = body
+
+    build.block_exp {
+      build.assign_one accum_name, build.table!
+      build.assign_one len_name, 0
+      node
+      accum_name
+    }
+
+value = Transformer {
+  for: create_accumulator 4
+  foreach: create_accumulator 4
+  while: create_accumulator 3
+
   -- pull out colon chain
   chain: (node) ->
     stub = node[#node]

@@ -18,23 +18,6 @@ table_append = (name, len, value) ->
       {"chain", name, {"index", len}} }, { value }}
   }
 
-create_accumulate_wrapper = (block_pos) ->
-  (node) =>
-    with @block "(function()", "end)()"
-      accum_name = \init_free_var "accum", {"table"}
-      count_name = \init_free_var "len", 0
-      value_name = \free_name "value", true
-
-      inner = node[block_pos]
-      inner[#inner] = {"assign", {value_name}, {inner[#inner]}}
-      insert inner, {
-        "if", {"exp", value_name, "~=", "nil"},
-        table_append accum_name, count_name, value_name
-      }
-
-      \stm node
-      \stm {"return", accum_name}
-
 value_compile =
   exp: (node) =>
     _comp = (i, value) ->
@@ -86,10 +69,6 @@ value_compile =
         "(function(...)", "end)(...)"
       else
         "(function()", "end)()"
-
-  for: create_accumulate_wrapper 4
-  foreach: create_accumulate_wrapper 4
-  while: create_accumulate_wrapper 3
 
   chain: (node) =>
     callee = node[2]

@@ -45,6 +45,15 @@ NameProxy = (function(_parent_0)
         unpack(items)
       })
     end,
+    index = function(self, key)
+      return build.chain({
+        base = self,
+        {
+          "index",
+          key
+        }
+      })
+    end,
     __tostring = function(self)
       if self.name then
         return ("name<%s>"):format(self.name)
@@ -99,12 +108,40 @@ Run = (function(_parent_0)
   _base_0.__class = _class_0
   return _class_0
 end)()
+local apply_to_last
+apply_to_last = function(stms, fn)
+  local last_exp_id = 0
+  for i = #stms, 1, -1 do
+    local stm = stms[i]
+    if stm and util.moon.type(stm) ~= Run then
+      last_exp_id = i
+      break
+    end
+  end
+  return (function()
+    local _accum_0 = { }
+    local _len_0 = 0
+    for i, stm in ipairs(stms) do
+      local _value_0
+      if i == last_exp_id then
+        _value_0 = fn(stm)
+      else
+        _value_0 = stm
+      end
+      if _value_0 ~= nil then
+        _len_0 = _len_0 + 1
+        _accum_0[_len_0] = _value_0
+      end
+    end
+    return _accum_0
+  end)()
+end
 local constructor_name = "new"
-local transformer
-transformer = function(transformers)
+local Transformer
+Transformer = function(transformers)
   return function(n)
     while true do
-      transformer = transformers[ntype(n)]
+      local transformer = transformers[ntype(n)]
       local res
       if transformer then
         res = transformer(n) or n
@@ -118,7 +155,7 @@ transformer = function(transformers)
     end
   end
 end
-stm = transformer({
+stm = Transformer({
   class = function(node)
     local _, name, parent_val, tbl = unpack(node)
     local constructor = nil
@@ -333,7 +370,45 @@ stm = transformer({
     return value
   end
 })
-value = transformer({
+local create_accumulator
+create_accumulator = function(body_index)
+  return function(node)
+    local accum_name = NameProxy("accum")
+    local value_name = NameProxy("value")
+    local len_name = NameProxy("len")
+    local body = apply_to_last(node[body_index], function(n)
+      return build.assign_one(value_name, n)
+    end)
+    table.insert(body, build["if"]({
+      cond = {
+        "exp",
+        value_name,
+        "!=",
+        "nil"
+      },
+      ["then"] = {
+        {
+          "update",
+          len_name,
+          "+=",
+          1
+        },
+        build.assign_one(accum_name:index(len_name), value_name)
+      }
+    }))
+    node[body_index] = body
+    return build.block_exp({
+      build.assign_one(accum_name, build.table()),
+      build.assign_one(len_name, 0),
+      node,
+      accum_name
+    })
+  end
+end
+value = Transformer({
+  ["for"] = create_accumulator(4),
+  foreach = create_accumulator(4),
+  ["while"] = create_accumulator(3),
   chain = function(node)
     local stub = node[#node]
     if type(stub) == "table" and stub[1] == "colon_stub" then
