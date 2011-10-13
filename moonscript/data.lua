@@ -11,8 +11,7 @@ Set = function(items)
   end
   return self
 end
-Stack = (function()
-  local _parent_0 = nil
+Stack = (function(_parent_0)
   local _base_0 = {
     __tostring = function(self)
       return "<Stack {" .. concat(self, ", ") .. "}>"
@@ -47,10 +46,10 @@ Stack = (function()
     end
   }, {
     __index = _base_0,
-    __call = function(cls, ...)
-      local _self_0 = setmetatable({}, _base_0)
-      cls.__init(_self_0, ...)
-      return _self_0
+    __call = function(mt, ...)
+      local self = setmetatable({}, _base_0)
+      mt.__init(self, ...)
+      return self
     end
   })
   _base_0.__class = _class_0
