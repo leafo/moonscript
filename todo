@@ -1,5 +1,7 @@
 # TODO
 
+- or= and=
+
 - move stuff out of format that should be in types
 
 - a do block for making a quick anon func and calling it

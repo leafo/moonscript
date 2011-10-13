@@ -42,6 +42,7 @@ class Line
     for i = 1,#self
       c = self[i]
       insert buff, if util.moon.type(c) == Block
+        c\bubble!
         c\render!
       else
         c
@@ -67,6 +68,11 @@ class Block_
       setmetatable @_state, { __index: @parent._state }
     else
       @indent = 0
+
+  -- bubble properties into parent
+  bubble: (other=@parent) =>
+    has_varargs = @has_varargs and not @has_name "..."
+    other.has_varargs = other.has_varargs or has_varargs
 
   line_table: =>
     @_posmap

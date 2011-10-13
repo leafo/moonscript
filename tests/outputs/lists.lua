@@ -246,49 +246,12 @@ for _index_0 = 2, #_list_6, 2 do
   local y = _list_6[_index_0]
   print(y)
 end
-local f
-f = function(...)
-  return #{
-    ...
-  }
-end
-x = function(...)
-  return (function()
-    local _accum_0 = { }
-    local _len_0 = 0
-    local _list_7 = {
-      ...
-    }
-    for _index_0 = 1, #_list_7 do
-      x = _list_7[_index_0]
-      if f(...) > 4 then
-        _len_0 = _len_0 + 1
-        _accum_0[_len_0] = x * x
-      end
-    end
-    return _accum_0
-  end)()
-end
 local normal
 normal = function(hello)
   return (function()
     local _accum_0 = { }
     local _len_0 = 0
     for x in yeah do
-      _len_0 = _len_0 + 1
-      _accum_0[_len_0] = x
-    end
-    return _accum_0
-  end)()
-end
-local dont_bubble
-dont_bubble = function()
-  return (function()
-    local _accum_0 = { }
-    local _len_0 = 0
-    for x in (function(...)
-      return print(...)
-    end)("hello") do
       _len_0 = _len_0 + 1
       _accum_0[_len_0] = x
     end

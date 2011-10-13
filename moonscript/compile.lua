@@ -61,6 +61,7 @@ Line = (function(_parent_0)
         local c = self[i]
         insert(buff, (function()
           if util.moon.type(c) == Block then
+            c:bubble()
             return c:render()
           else
             return c
@@ -98,6 +99,13 @@ Block_ = (function(_parent_0)
     footer = "end",
     export_all = false,
     export_proper = false,
+    bubble = function(self, other)
+      if other == nil then
+        other = self.parent
+      end
+      local has_varargs = self.has_varargs and not self:has_name("...")
+      other.has_varargs = other.has_varargs or has_varargs
+    end,
     line_table = function(self)
       return self._posmap
     end,
