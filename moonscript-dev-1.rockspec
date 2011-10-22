@@ -37,7 +37,7 @@ build = {
 		["moonscript.version"] = "moonscript/version.lua",
 	},
 	install = {
-		bin = { "moon", "moonc" }
+		bin = { "bin/moon", "bin/moonc" }
 	}
 }
 
