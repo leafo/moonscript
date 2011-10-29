@@ -13,7 +13,6 @@ run_with_scope = (fn, scope, ...) ->
   old_env = getfenv fn
   env = setmetatable {}, {
     __index: (name) =>
-      print "indexing ", name
       val = scope[name]
       if val != nil
         val
@@ -24,7 +23,7 @@ run_with_scope = (fn, scope, ...) ->
   fn ...
 
 -- wrap obj such that calls to methods do not need a reference to self
-bound_methods = (obj) ->
+bind_methods = (obj) ->
   setmetatable {}, {
     __index: (name) =>
       val = obj[name]
@@ -51,9 +50,18 @@ defaultbl = (t, fn) ->
       val
   }
 
--- helper function to set metatable with index
-extend = (base) =>
-  setmetatable self, __index: base
+-- chain together tables by __index metatables
+extend = (...) ->
+  tbls = {...}
+  return if #tbls < 2
+
+  for i = 1, #tbls - 1
+    a = tbls[i]
+    b = tbls[i + 1]
+
+    setmetatable a, __index: b
+
+  tbls[1]
 
 -- shallow copy
 copy = =>
