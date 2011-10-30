@@ -13,13 +13,11 @@ flat_value = function(op, depth)
   local items = (function()
     local _accum_0 = { }
     local _len_0 = 0
-    do
-      local _item_0 = op
-      for _index_0 = 1, #_item_0 do
-        local item = _item_0[_index_0]
-        _len_0 = _len_0 + 1
-        _accum_0[_len_0] = flat_value(item, depth + 1)
-      end
+    local _list_0 = op
+    for _index_0 = 1, #_list_0 do
+      local item = _list_0[_index_0]
+      _len_0 = _len_0 + 1
+      _accum_0[_len_0] = flat_value(item, depth + 1)
     end
     return _accum_0
   end)()
@@ -33,13 +31,11 @@ tree = function(block)
   return (function()
     local _accum_0 = { }
     local _len_0 = 0
-    do
-      local _item_0 = block
-      for _index_0 = 1, #_item_0 do
-        local value = _item_0[_index_0]
-        _len_0 = _len_0 + 1
-        _accum_0[_len_0] = print(flat_value(value))
-      end
+    local _list_0 = block
+    for _index_0 = 1, #_list_0 do
+      value = _list_0[_index_0]
+      _len_0 = _len_0 + 1
+      _accum_0[_len_0] = print(flat_value(value))
     end
     return _accum_0
   end)()

@@ -71,13 +71,11 @@ value_compile = {
       _with_0:append_list((function()
         local _accum_0 = { }
         local _len_0 = 0
-        do
-          local _item_0 = node
-          for _index_0 = 2, #_item_0 do
-            local v = _item_0[_index_0]
-            _len_0 = _len_0 + 1
-            _accum_0[_len_0] = self:value(v)
-          end
+        local _list_0 = node
+        for _index_0 = 2, #_list_0 do
+          local v = _list_0[_index_0]
+          _len_0 = _len_0 + 1
+          _accum_0[_len_0] = self:value(v)
         end
         return _accum_0
       end)(), ", ")
@@ -169,12 +167,10 @@ value_compile = {
     local actions
     do
       local _with_0 = self:line()
-      do
-        local _item_0 = node
-        for _index_0 = 3, #_item_0 do
-          local action = _item_0[_index_0]
-          _with_0:append(chain_item(action))
-        end
+      local _list_0 = node
+      for _index_0 = 3, #_list_0 do
+        local action = _list_0[_index_0]
+        _with_0:append(chain_item(action))
       end
       actions = _with_0
     end
@@ -187,27 +183,25 @@ value_compile = {
     local arg_names = (function()
       local _accum_0 = { }
       local _len_0 = 0
-      do
-        local _item_0 = args
-        for _index_0 = 1, #_item_0 do
-          local arg = _item_0[_index_0]
-          local name, default_value = unpack(arg)
-          if type(name) == "string" then
-            name = name
-          else
-            if name[1] == "self" then
-              insert(self_args, name)
-            end
-            name = name[2]
+      local _list_0 = args
+      for _index_0 = 1, #_list_0 do
+        local arg = _list_0[_index_0]
+        local name, default_value = unpack(arg)
+        if type(name) == "string" then
+          name = name
+        else
+          if name[1] == "self" then
+            insert(self_args, name)
           end
-          if default_value then
-            insert(default_args, arg)
-          end
-          local _value_0 = name
-          if _value_0 ~= nil then
-            _len_0 = _len_0 + 1
-            _accum_0[_len_0] = _value_0
-          end
+          name = name[2]
+        end
+        if default_value then
+          insert(default_args, arg)
+        end
+        local _value_0 = name
+        if _value_0 ~= nil then
+          _len_0 = _len_0 + 1
+          _accum_0[_len_0] = _value_0
         end
       end
       return _accum_0
@@ -220,53 +214,47 @@ value_compile = {
       if #whitelist > 0 then
         _with_0:whitelist_names(whitelist)
       end
-      do
-        local _item_0 = arg_names
-        for _index_0 = 1, #_item_0 do
-          local name = _item_0[_index_0]
-          _with_0:put_name(name)
-        end
+      local _list_0 = arg_names
+      for _index_0 = 1, #_list_0 do
+        local name = _list_0[_index_0]
+        _with_0:put_name(name)
       end
-      do
-        local _item_0 = default_args
-        for _index_0 = 1, #_item_0 do
-          local default = _item_0[_index_0]
-          local name, value = unpack(default)
-          if type(name) == "table" then
-            name = name[2]
-          end
-          _with_0:stm({
-            'if',
+      local _list_1 = default_args
+      for _index_0 = 1, #_list_1 do
+        local default = _list_1[_index_0]
+        local name, value = unpack(default)
+        if type(name) == "table" then
+          name = name[2]
+        end
+        _with_0:stm({
+          'if',
+          {
+            'exp',
+            name,
+            '==',
+            'nil'
+          },
+          {
             {
-              'exp',
-              name,
-              '==',
-              'nil'
-            },
-            {
+              'assign',
               {
-                'assign',
-                {
-                  name
-                },
-                {
-                  value
-                }
+                name
+              },
+              {
+                value
               }
             }
-          })
-        end
+          }
+        })
       end
       local self_arg_values = (function()
         local _accum_0 = { }
         local _len_0 = 0
-        do
-          local _item_0 = self_args
-          for _index_0 = 1, #_item_0 do
-            local arg = _item_0[_index_0]
-            _len_0 = _len_0 + 1
-            _accum_0[_len_0] = arg[2]
-          end
+        local _list_2 = self_args
+        for _index_0 = 1, #_list_2 do
+          local arg = _list_2[_index_0]
+          _len_0 = _len_0 + 1
+          _accum_0[_len_0] = arg[2]
         end
         return _accum_0
       end)()
@@ -282,15 +270,13 @@ value_compile = {
         arg_names = (function()
           local _accum_0 = { }
           local _len_0 = 0
-          do
-            local _item_0 = args
-            for _index_0 = 1, #_item_0 do
-              local arg = _item_0[_index_0]
-              local _value_0 = arg[1]
-              if _value_0 ~= nil then
-                _len_0 = _len_0 + 1
-                _accum_0[_len_0] = _value_0
-              end
+          local _list_2 = args
+          for _index_0 = 1, #_list_2 do
+            local arg = _list_2[_index_0]
+            local _value_0 = arg[1]
+            if _value_0 ~= nil then
+              _len_0 = _len_0 + 1
+              _accum_0[_len_0] = _value_0
             end
           end
           return _accum_0
@@ -331,12 +317,10 @@ value_compile = {
         end
       end
       if items then
-        do
-          local _item_0 = items
-          for _index_0 = 1, #_item_0 do
-            local line = _item_0[_index_0]
-            _with_0:add(format_line(line))
-          end
+        local _list_0 = items
+        for _index_0 = 1, #_list_0 do
+          local line = _list_0[_index_0]
+          _with_0:add(format_line(line))
         end
       end
       return _with_0

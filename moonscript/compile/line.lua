@@ -24,13 +24,11 @@ line_compile = {
         _with_0:append_list((function()
           local _accum_0 = { }
           local _len_0 = 0
-          do
-            local _item_0 = names
-            for _index_0 = 1, #_item_0 do
-              local name = _item_0[_index_0]
-              _len_0 = _len_0 + 1
-              _accum_0[_len_0] = self:name(name)
-            end
+          local _list_0 = names
+          for _index_0 = 1, #_list_0 do
+            local name = _list_0[_index_0]
+            _len_0 = _len_0 + 1
+            _accum_0[_len_0] = self:name(name)
           end
           return _accum_0
         end)(), ", ")
@@ -78,13 +76,11 @@ line_compile = {
           _with_0:append_list((function()
             local _accum_0 = { }
             local _len_0 = 0
-            do
-              local _item_0 = names
-              for _index_0 = 1, #_item_0 do
-                local name = _item_0[_index_0]
-                _len_0 = _len_0 + 1
-                _accum_0[_len_0] = self:value(name)
-              end
+            local _list_0 = names
+            for _index_0 = 1, #_list_0 do
+              local name = _list_0[_index_0]
+              _len_0 = _len_0 + 1
+              _accum_0[_len_0] = self:value(name)
             end
             return _accum_0
           end)(), ", ")
@@ -93,13 +89,11 @@ line_compile = {
         _with_0:append_list((function()
           local _accum_0 = { }
           local _len_0 = 0
-          do
-            local _item_0 = values
-            for _index_0 = 1, #_item_0 do
-              local v = _item_0[_index_0]
-              _len_0 = _len_0 + 1
-              _accum_0[_len_0] = self:value(v)
-            end
+          local _list_0 = values
+          for _index_0 = 1, #_list_0 do
+            local v = _list_0[_index_0]
+            _len_0 = _len_0 + 1
+            _accum_0[_len_0] = self:value(v)
           end
           return _accum_0
         end)(), ", ")
@@ -141,21 +135,19 @@ line_compile = {
   import = function(self, node)
     local _, names, source = unpack(node)
     local final_names, to_bind = { }, { }
-    do
-      local _item_0 = names
-      for _index_0 = 1, #_item_0 do
-        local name = _item_0[_index_0]
-        local final
-        if ntype(name) == ":" then
-          local tmp = self:name(name[2])
-          to_bind[tmp] = true
-          final = tmp
-        else
-          final = self:name(name)
-        end
-        self:put_name(final)
-        insert(final_names, final)
+    local _list_0 = names
+    for _index_0 = 1, #_list_0 do
+      local name = _list_0[_index_0]
+      local final
+      if ntype(name) == ":" then
+        local tmp = self:name(name[2])
+        to_bind[tmp] = true
+        final = tmp
+      else
+        final = self:name(name)
       end
+      self:put_name(final)
+      insert(final_names, final)
     end
     local get_value
     get_value = function(name)
@@ -169,13 +161,11 @@ line_compile = {
       local values = (function()
         local _accum_0 = { }
         local _len_0 = 0
-        do
-          local _item_0 = final_names
-          for _index_0 = 1, #_item_0 do
-            local name = _item_0[_index_0]
-            _len_0 = _len_0 + 1
-            _accum_0[_len_0] = get_value(name)
-          end
+        local _list_1 = final_names
+        for _index_0 = 1, #_list_1 do
+          local name = _list_1[_index_0]
+          _len_0 = _len_0 + 1
+          _accum_0[_len_0] = get_value(name)
         end
         return _accum_0
       end)()
@@ -191,20 +181,18 @@ line_compile = {
     do
       local _with_0 = self:block("do")
       source = _with_0:init_free_var("table", source)
-      do
-        local _item_0 = final_names
-        for _index_0 = 1, #_item_0 do
-          local name = _item_0[_index_0]
-          _with_0:stm({
-            "assign",
-            {
-              name
-            },
-            {
-              get_value(name)
-            }
-          })
-        end
+      local _list_1 = final_names
+      for _index_0 = 1, #_list_1 do
+        local name = _list_1[_index_0]
+        _with_0:stm({
+          "assign",
+          {
+            name
+          },
+          {
+            get_value(name)
+          }
+        })
       end
       return _with_0
     end
@@ -233,12 +221,10 @@ line_compile = {
       current.next = next
       current = next
     end
-    do
-      local _item_0 = node
-      for _index_0 = 4, #_item_0 do
-        local cond = _item_0[_index_0]
-        add_clause(cond)
-      end
+    local _list_0 = node
+    for _index_0 = 4, #_list_0 do
+      cond = _list_0[_index_0]
+      add_clause(cond)
     end
     return root
   end,
@@ -289,13 +275,11 @@ line_compile = {
       _with_0:append_list((function()
         local _accum_0 = { }
         local _len_0 = 0
-        do
-          local _item_0 = names
-          for _index_0 = 1, #_item_0 do
-            local name = _item_0[_index_0]
-            _len_0 = _len_0 + 1
-            _accum_0[_len_0] = self:name(name)
-          end
+        local _list_0 = names
+        for _index_0 = 1, #_list_0 do
+          local name = _list_0[_index_0]
+          _len_0 = _len_0 + 1
+          _accum_0[_len_0] = self:name(name)
         end
         return _accum_0
       end)(), ", ")

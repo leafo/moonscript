@@ -164,12 +164,10 @@ build = setmetatable({
       "chain",
       base
     }
-    do
-      local _item_0 = parts
-      for _index_0 = 1, #_item_0 do
-        local part = _item_0[_index_0]
-        insert(node, part)
-      end
+    local _list_0 = parts
+    for _index_0 = 1, #_list_0 do
+      local part = _list_0[_index_0]
+      insert(node, part)
     end
     return node
   end

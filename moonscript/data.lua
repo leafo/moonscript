@@ -2,16 +2,15 @@ module("moonscript.data", package.seeall)
 local concat = table.concat
 Set = function(items)
   local self = { }
-  do
-    local _item_0 = items
-    for _index_0 = 1, #_item_0 do
-      local key = _item_0[_index_0]
-      self[key] = true
-    end
+  local _list_0 = items
+  for _index_0 = 1, #_list_0 do
+    local key = _list_0[_index_0]
+    self[key] = true
   end
   return self
 end
-Stack = (function(_parent_0)
+Stack = (function()
+  local _parent_0 = nil
   local _base_0 = {
     __tostring = function(self)
       return "<Stack {" .. concat(self, ", ") .. "}>"
@@ -33,23 +32,21 @@ Stack = (function(_parent_0)
   end
   local _class_0 = setmetatable({
     __init = function(self, ...)
-      do
-        local _item_0 = {
-          ...
-        }
-        for _index_0 = 1, #_item_0 do
-          local v = _item_0[_index_0]
-          self:push(v)
-        end
+      local _list_0 = {
+        ...
+      }
+      for _index_0 = 1, #_list_0 do
+        local v = _list_0[_index_0]
+        self:push(v)
       end
       return nil
     end
   }, {
     __index = _base_0,
-    __call = function(mt, ...)
-      local self = setmetatable({}, _base_0)
-      mt.__init(self, ...)
-      return self
+    __call = function(cls, ...)
+      local _self_0 = setmetatable({}, _base_0)
+      cls.__init(_self_0, ...)
+      return _self_0
     end
   })
   _base_0.__class = _class_0

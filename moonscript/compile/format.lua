@@ -30,12 +30,10 @@ default_return = function(exp)
     local items = {
       "explist"
     }
-    do
-      local _item_0 = exp[3][2]
-      for _index_0 = 1, #_item_0 do
-        local v = _item_0[_index_0]
-        insert(items, v)
-      end
+    local _list_0 = exp[3][2]
+    for _index_0 = 1, #_list_0 do
+      local v = _list_0[_index_0]
+      insert(items, v)
     end
     return {
       "return",

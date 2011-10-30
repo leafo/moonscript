@@ -4,7 +4,8 @@ local util = require("moonscript.util")
 local data = require("moonscript.data")
 local ntype, build, smart_node, is_slice = types.ntype, types.build, types.smart_node, types.is_slice
 local insert = table.insert
-NameProxy = (function(_parent_0)
+NameProxy = (function()
+  local _parent_0 = nil
   local _base_0 = {
     get_name = function(self, scope)
       if not self.name then
@@ -19,23 +20,21 @@ NameProxy = (function(_parent_0)
       items = (function()
         local _accum_0 = { }
         local _len_0 = 0
-        do
-          local _item_0 = items
-          for _index_0 = 1, #_item_0 do
-            local i = _item_0[_index_0]
-            local _value_0
-            if type(i) == "string" then
-              _value_0 = {
-                "dot",
-                i
-              }
-            else
-              _value_0 = i
-            end
-            if _value_0 ~= nil then
-              _len_0 = _len_0 + 1
-              _accum_0[_len_0] = _value_0
-            end
+        local _list_0 = items
+        for _index_0 = 1, #_list_0 do
+          local i = _list_0[_index_0]
+          local _value_0
+          if type(i) == "string" then
+            _value_0 = {
+              "dot",
+              i
+            }
+          else
+            _value_0 = i
+          end
+          if _value_0 ~= nil then
+            _len_0 = _len_0 + 1
+            _accum_0[_len_0] = _value_0
           end
         end
         return _accum_0
@@ -73,16 +72,17 @@ NameProxy = (function(_parent_0)
     end
   }, {
     __index = _base_0,
-    __call = function(mt, ...)
-      local self = setmetatable({}, _base_0)
-      mt.__init(self, ...)
-      return self
+    __call = function(cls, ...)
+      local _self_0 = setmetatable({}, _base_0)
+      cls.__init(_self_0, ...)
+      return _self_0
     end
   })
   _base_0.__class = _class_0
   return _class_0
 end)()
-Run = (function(_parent_0)
+Run = (function()
+  local _parent_0 = nil
   local _base_0 = {
     call = function(self, state)
       return self.fn(state)
@@ -99,10 +99,10 @@ Run = (function(_parent_0)
     end
   }, {
     __index = _base_0,
-    __call = function(mt, ...)
-      local self = setmetatable({}, _base_0)
-      mt.__init(self, ...)
-      return self
+    __call = function(cls, ...)
+      local _self_0 = setmetatable({}, _base_0)
+      cls.__init(_self_0, ...)
+      return _self_0
     end
   })
   _base_0.__class = _class_0
@@ -233,21 +233,19 @@ stm = Transformer({
     local properties = (function()
       local _accum_0 = { }
       local _len_0 = 0
-      do
-        local _item_0 = tbl[2]
-        for _index_0 = 1, #_item_0 do
-          local entry = _item_0[_index_0]
-          local _value_0
-          if entry[1] == constructor_name then
-            constructor = entry[2]
-            _value_0 = nil
-          else
-            _value_0 = entry
-          end
-          if _value_0 ~= nil then
-            _len_0 = _len_0 + 1
-            _accum_0[_len_0] = _value_0
-          end
+      local _list_0 = tbl[2]
+      for _index_0 = 1, #_list_0 do
+        local entry = _list_0[_index_0]
+        local _value_0
+        if entry[1] == constructor_name then
+          constructor = entry[2]
+          _value_0 = nil
+        else
+          _value_0 = entry
+        end
+        if _value_0 ~= nil then
+          _len_0 = _len_0 + 1
+          _accum_0[_len_0] = _value_0
         end
       end
       return _accum_0
@@ -354,13 +352,11 @@ stm = Transformer({
             local slice = (function()
               local _accum_0 = { }
               local _len_0 = 0
-              do
-                local _item_0 = chain
-                for _index_0 = 3, #_item_0 do
-                  local item = _item_0[_index_0]
-                  _len_0 = _len_0 + 1
-                  _accum_0[_len_0] = item
-                end
+              local _list_0 = chain
+              for _index_0 = 3, #_list_0 do
+                local item = _list_0[_index_0]
+                _len_0 = _len_0 + 1
+                _accum_0[_len_0] = item
               end
               return _accum_0
             end)()
