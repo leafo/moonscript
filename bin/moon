@@ -36,7 +36,7 @@ if not script_fname then
 end
 
 local file, err = io.open(script_fname)
-if not file then error(err) end
+if not file then error(err, 2) end
 
 local new_arg = {
 	[-1] = arg[0],
