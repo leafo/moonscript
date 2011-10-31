@@ -418,7 +418,7 @@ must be explicitly returned.
 A short syntax for single statements can also be used:
 
     have_coins = false
-      if have_coins then print "Got coins" else print "No coins"
+    if have_coins then print "Got coins" else print "No coins"
 
 
 Because if statements can be used as expressions, this can able be written as:
@@ -585,7 +585,7 @@ module:
 
 The `export` statement can also take special symbols `*` and `^`.
 
-`export *` is used to export any name declared after the statement in the
+`export *` will cause any name declared after the statement to be exported in the
 current scope. `export ^` will export all proper names, names that begin with a
 capital letter.
 
@@ -601,8 +601,8 @@ The multiple names can be given, each separated by a comma:
     import C, Ct, Cmt from lpeg
 
 Sometimes a function requires that the table be sent in as the first argument
-(when using the `\` syntax). As a shortcut, we can prefix the name with a `\`
-to bind it to that table:
+(when using the <code>\\</code> syntax). As a shortcut, we can prefix the name
+with a <code>\\</code> to bind it to that table:
 
     -- some object
     my_module =
@@ -625,7 +625,7 @@ argument which contains a collection of keys and values to overwrite. The
 downside to this is that the constructor of this object must support this form.
 
 The `with` block helps to alleviate this. Within a `with` block we can use a
-special statements that begin with either `.` or `\` which represent
+special statements that begin with either `.` or <code>\\</code> which represent
 those operations applied to the object we are using `with` on.
 
 For example, we work with a newly created object:
