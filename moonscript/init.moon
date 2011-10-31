@@ -8,7 +8,7 @@ require "moonscript.util"
 import concat, insert from table
 import split, dump from util
 
-lua = :loadstring, :load
+lua = :loadstring
 
 export to_lua, moon_chunk, moon_loader, dirsep, line_tables
 export dofile, loadfile, loadstring
@@ -25,6 +25,10 @@ create_moonpath = (package_path) ->
   concat paths, ";"
 
 to_lua = (text) ->
+  if "string" != type text
+    t = type text
+    error "expecting string (got ".. t ..")", 2
+
   tree, err = parse.string text
   if not tree
     error "Parse error: " .. err, 2
@@ -34,14 +38,6 @@ to_lua = (text) ->
     error compile.format_error(ltable, pos, text), 2
 
   code, ltable
-
--- load the chunk function from a file objec:
-moon_chunk = (text, source_path) ->
-  code, ltable = to_lua text
-  line_tables[source_path] = ltable if source_path
-
-  runner = -> with code do code = nil
-  lua.load runner, source_path
 
 moon_loader = (name) ->
   name_path = name\gsub "%.", dirsep
@@ -54,11 +50,9 @@ moon_loader = (name) ->
 
   if file
     text = file\read "*a"
-    if not text then error "Could not read file", 2
-    moon_chunk file, file_path
+    loadstring text, file_path
   else
     nil, "Could not find moon file"
-
 
 if not package.moonpath
   package.moonpath = create_moonpath package.path
@@ -68,14 +62,16 @@ init_loader = ->
 
 init_loader! if not _G.moon_no_loader
 
-loadstring = (str) ->
-  code = to_lua str
-  lua.loadstring code
+loadstring = (str, chunk_name) ->
+  code, ltable = to_lua str
+  line_tables[chunk_name] = ltable if chunk_name
+  lua.loadstring code, chunk_name or "=(moonscript.loadstring)"
 
 loadfile = (fname) ->
   file, err = io.open fname
   return nil, err if not file
-  loadstring file\read "*a"
+  text = assert file\read "*a"
+  loadstring text, fname
 
 -- throws errros
 dofile = (fname) ->

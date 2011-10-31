@@ -35,16 +35,13 @@ if not script_fname then
 	return
 end
 
-local file, err = io.open(script_fname)
-if not file then error(err, 2) end
-
 local new_arg = {
 	[-1] = arg[0],
 	[0] = arg[ind],
 	select(ind + 1, unpack(arg))
 }
 
-local chunk = moonscript.moon_chunk(file, script_fname)
+local chunk = moonscript.loadfile(script_fname)
 getfenv(chunk).arg = new_arg
 
 local runner = coroutine.create(chunk)
