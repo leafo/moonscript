@@ -40,3 +40,9 @@ x = {
     end
   end)()
 }
+do
+  local _with_0 = foo
+  local _ = _with_0:prop("something").hello
+  _with_0.prop:send(one)
+  _with_0.prop:send(one)
+end

@@ -31,3 +31,8 @@ x = {
     \okay!
 }
 
+with foo
+  \prop"something".hello
+  .prop\send(one)
+  .prop\send one
+

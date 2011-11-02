@@ -365,14 +365,16 @@ local build_grammar = wrap(function()
 
 		FnArgs = symx"(" * Ct(ExpList^-1) * sym")" + sym"!" * -P"=" * Ct"",
 
+		ChainTail = (ChainItem^1 * ColonSuffix^-1 + ColonSuffix),
+
 		-- a list of funcalls and indexs on a callable
 		Chain = Callable * (ChainItem^1 * ColonSuffix^-1 + ColonSuffix) / mark"chain",
 
 		-- shorthand dot call for use in with statement
 		DotChain =
-			(sym"." * Cc(-1) * (_Name / mark"dot") * ChainItem^0) / mark"chain" + 
+			(sym"." * Cc(-1) * (_Name / mark"dot") * ChainTail^-1) / mark"chain" +
 			(sym"\\" * Cc(-1) * (
-				(_Name * Invoke / mark"colon") * ChainItem^0 + 
+				(_Name * Invoke / mark"colon") * ChainTail^-1 +
 				(_Name / mark"colon_stub")
 			)) / mark"chain",
 
@@ -448,15 +450,9 @@ local build_grammar = wrap(function()
 
 			local tree
 			local args = {...}
-			local pass, err = pcall(function()
+			local pass, err = assert(pcall(function()
 				tree = self._g:match(str, unpack(args))
-			end)
-
-			if not pass then
-				local line_no = pos_to_line(last_pos)
-				print("stopped at", line_no)
-				error(err)
-			end
+			end))
 
 			if not tree then
 				local line_no = pos_to_line(last_pos)
