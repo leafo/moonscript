@@ -31,7 +31,7 @@ to_lua = (text) ->
 
   tree, err = parse.string text
   if not tree
-    error "Parse error: " .. err, 2
+    error err, 2
 
   code, ltable, pos = compile.tree tree
   if not code
@@ -63,7 +63,10 @@ init_loader = ->
 init_loader! if not _G.moon_no_loader
 
 loadstring = (str, chunk_name) ->
-  code, ltable = to_lua str
+  passed, code, ltable = pcall -> to_lua str
+  if not passed
+    error chunk_name .. ": " .. code, 2
+
   line_tables[chunk_name] = ltable if chunk_name
   lua.loadstring code, chunk_name or "=(moonscript.loadstring)"
 

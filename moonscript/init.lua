@@ -27,7 +27,7 @@ to_lua = function(text)
   end
   local tree, err = parse.string(text)
   if not tree then
-    error("Parse error: " .. err, 2)
+    error(err, 2)
   end
   local code, ltable, pos = compile.tree(tree)
   if not code then
@@ -65,7 +65,12 @@ if not _G.moon_no_loader then
   init_loader()
 end
 loadstring = function(str, chunk_name)
-  local code, ltable = to_lua(str)
+  local passed, code, ltable = pcall(function()
+    return to_lua(str)
+  end)
+  if not passed then
+    error(chunk_name .. ": " .. code, 2)
+  end
   if chunk_name then
     line_tables[chunk_name] = ltable
   end

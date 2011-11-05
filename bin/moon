@@ -41,7 +41,16 @@ local new_arg = {
 	select(ind + 1, unpack(arg))
 }
 
-local chunk = moonscript.loadfile(script_fname)
+local chunk
+local passed, err = pcall(function()
+	chunk = moonscript.loadfile(script_fname)
+end)
+
+if not passed then
+	print(err)
+	os.exit()
+end
+
 getfenv(chunk).arg = new_arg
 
 local runner = coroutine.create(chunk)
