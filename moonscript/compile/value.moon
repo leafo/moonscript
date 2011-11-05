@@ -35,7 +35,7 @@ value_compile =
 
   explist: (node) =>
     with @line!
-      \append_list [@value v for v in *node[2:]], ", "
+      \append_list [@value v for v in *node[2,]], ", "
 
   parens: (node) =>
     @line "(", @value(node[2]), ")"
@@ -105,7 +105,7 @@ value_compile =
     callee_value = @line "(", callee_value, ")" if ntype(callee) == "exp"
 
     actions = with @line!
-      \append chain_item action for action in *node[3:]
+      \append chain_item action for action in *node[3,]
 
     @line callee_value, actions
 

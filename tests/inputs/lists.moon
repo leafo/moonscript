@@ -52,11 +52,14 @@ print z for z in *hello
 
 -- slice
 x = {1, 2, 3, 4, 5, 6, 7}
-print y for y in *x[2:-5:2]
-print y for y in *x[:3]
-print y for y in *x[2:]
-print y for y in *x[::2]
-print y for y in *x[2::2]
+print y for y in *x[2,-5,2]
+print y for y in *x[,3]
+print y for y in *x[2,]
+print y for y in *x[,,2]
+print y for y in *x[2,,2]
+
+a, b, c = 1, 5, 2
+print y for y in *x[a,b,c]
 
 
 normal = (hello) ->

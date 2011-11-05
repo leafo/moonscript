@@ -191,7 +191,7 @@ stm = Transformer {
         Run =>
           @set "super", (block, chain) ->
             calling_name = block\get"current_block"
-            slice = [item for item in *chain[3:]]
+            slice = [item for item in *chain[3,]]
             -- inject self
             slice[1] = {"call", {"self", unpack slice[1][2]}}
 

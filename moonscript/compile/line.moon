@@ -122,7 +122,7 @@ line_compile =
       current.next = next
       current = next
 
-    add_clause cond for cond in *node[4:]
+    add_clause cond for cond in *node[4,]
     root
 
   while: (node) =>

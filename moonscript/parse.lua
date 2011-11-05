@@ -385,8 +385,8 @@ local build_grammar = wrap(function()
 			symx"." * _Name/mark"dot" +
 			ColonCall,
 
-		Slice = symx"[" * (SliceValue + Cc(1)) * sym":" * (SliceValue + Cc"")  *
-			(sym":" * SliceValue)^-1 *sym"]" / mark"slice",
+		Slice = symx"[" * (SliceValue + Cc(1)) * sym"," * (SliceValue + Cc"")  *
+			(sym"," * SliceValue)^-1 *sym"]" / mark"slice",
 
 		ColonCall = symx"\\" * (_Name * Invoke) / mark"colon",
 		ColonSuffix = symx"\\" * _Name / mark"colon_stub",
