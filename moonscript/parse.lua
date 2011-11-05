@@ -267,7 +267,7 @@ local build_grammar = wrap(function()
 		File = Shebang^-1 * (Block + Ct""),
 		Block = Ct(Line * (Break^1 * Line)^0),
 		CheckIndent = Cmt(Indent, check_indent), -- validates line is in correct indent
-		Line = CheckIndent * Statement + Space * #Break,
+		Line = (CheckIndent * Statement + Space * #Stop),
 
 		Statement = (Import + While + With + For + ForEach + Return
 			+ ClassDecl + Export + BreakLoop + Ct(ExpList) / flatten_or_mark"explist" * Space) * ((
