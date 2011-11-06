@@ -1,5 +1,8 @@
 # TODO
 
+- don't reuse _, put a local on it, so we don't keep around trash
+
+
 - or= and=
 
 - move stuff out of format that should be in types

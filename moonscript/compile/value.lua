@@ -240,7 +240,7 @@ value_compile = {
           self_arg_values
         })
       end
-      _with_0:ret_stms(block)
+      _with_0:stms(block)
       if #args > #arg_names then
         arg_names = (function()
           local _accum_0 = { }

@@ -11,6 +11,10 @@ import insert from table
 
 export stm, value, NameProxy, Run
 
+-- TODO refactor
+is_value = (stm) ->
+  moonscript.compile.Block\is_value(stm) or value.can_transform stm
+
 class NameProxy
   new: (@prefix) =>
     self[1] = "temp_name"
@@ -81,17 +85,25 @@ constructor_name = "new"
 Transformer = (transformers) ->
   -- this is bad, instance it for compiler
   seen_nodes = {}
-  (n, ...) ->
-    return n if seen_nodes[n]
-    seen_nodes[n] = true
-    while true
-      transformer = transformers[ntype n]
-      res = if transformer
-        transformer(n, ...) or n
-      else
-        n
-      return n if res == n
-      n = res
+  tf = {
+    transform: (n, ...) ->
+      return n if seen_nodes[n]
+      seen_nodes[n] = true
+      while true
+        transformer = transformers[ntype n]
+        res = if transformer
+          transformer(n, ...) or n
+        else
+          n
+        return n if res == n
+        n = res
+    can_transform: (node) ->
+      transformers[ntype node] != nil
+  }
+
+  setmetatable tf, {
+    __call: (...) => self.transform ...
+  }
 
 stm = Transformer {
   comprehension: (node, action) ->
@@ -327,6 +339,18 @@ value = Transformer {
       a\mutate_body {exp}, false
     a\wrap node
 
+  fndef: (node) ->
+    smart_node node
+
+    node.body = apply_to_last node.body, (stm) ->
+      t = ntype stm
+      -- TODO okay this needs a refactor
+      if types.manual_return[t] or not is_value stm
+        stm
+      else
+        {"return", stm}
+
+    node
   -- pull out colon chain
   chain: (node) ->
     stub = node[#node]

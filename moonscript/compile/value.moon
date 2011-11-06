@@ -127,7 +127,9 @@ value_compile =
       self_arg_values = [arg[2] for arg in *self_args]
       \stm {"assign", self_args, self_arg_values} if #self_args > 0
 
-      \ret_stms block
+      \stms block
+
+      -- inject more args if the block manipulated arguments
       if #args > #arg_names -- will only work for simple adjustments
         arg_names = for arg in *args
           arg[1]

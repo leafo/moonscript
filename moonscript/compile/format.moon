@@ -19,7 +19,7 @@ manual_return = Set{"foreach", "for", "while"}
 
 default_return = (exp) ->
   t = ntype exp
-  if t == "chain" and exp[2] == "return"
+  if t == "chain" and exp[2] == "return" -- return is a first class citizen now
     -- extract the return
     items = {"explist"}
     insert items, v for v in *exp[3][2]

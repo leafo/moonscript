@@ -5,6 +5,10 @@ local data = require("moonscript.data")
 local reversed = util.reversed
 local ntype, build, smart_node, is_slice = types.ntype, types.build, types.smart_node, types.is_slice
 local insert = table.insert
+local is_value
+is_value = function(stm)
+  return moonscript.compile.Block:is_value(stm) or value.can_transform(stm)
+end
 NameProxy = (function()
   local _parent_0 = nil
   local _base_0 = {
@@ -152,25 +156,35 @@ local constructor_name = "new"
 local Transformer
 Transformer = function(transformers)
   local seen_nodes = { }
-  return function(n, ...)
-    if seen_nodes[n] then
-      return n
-    end
-    seen_nodes[n] = true
-    while true do
-      local transformer = transformers[ntype(n)]
-      local res
-      if transformer then
-        res = transformer(n, ...) or n
-      else
-        res = n
-      end
-      if res == n then
+  local tf = {
+    transform = function(n, ...)
+      if seen_nodes[n] then
         return n
       end
-      n = res
+      seen_nodes[n] = true
+      while true do
+        local transformer = transformers[ntype(n)]
+        local res
+        if transformer then
+          res = transformer(n, ...) or n
+        else
+          res = n
+        end
+        if res == n then
+          return n
+        end
+        n = res
+      end
+    end,
+    can_transform = function(node)
+      return transformers[ntype(node)] ~= nil
     end
-  end
+  }
+  return setmetatable(tf, {
+    __call = function(self, ...)
+      return self.transform(...)
+    end
+  })
 end
 stm = Transformer({
   comprehension = function(node, action)
@@ -586,6 +600,21 @@ value = Transformer({
       }, false)
     end)
     return a:wrap(node)
+  end,
+  fndef = function(node)
+    smart_node(node)
+    node.body = apply_to_last(node.body, function(stm)
+      local t = ntype(stm)
+      if types.manual_return[t] or not is_value(stm) then
+        return stm
+      else
+        return {
+          "return",
+          stm
+        }
+      end
+    end)
+    return node
   end,
   chain = function(node)
     local stub = node[#node]

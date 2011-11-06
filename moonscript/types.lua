@@ -2,6 +2,12 @@ module("moonscript.types", package.seeall)
 local util = require("moonscript.util")
 local data = require("moonscript.data")
 local insert = table.insert
+manual_return = data.Set({
+  "foreach",
+  "for",
+  "while",
+  "return"
+})
 ntype = function(node)
   if type(node) ~= "table" then
     return "value"

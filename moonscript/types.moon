@@ -3,9 +3,11 @@ util = require "moonscript.util"
 data = require "moonscript.data"
 
 export ntype, smart_node, build
-export is_slice
+export is_slice, manual_return
+
 import insert from table
 
+manual_return = data.Set{"foreach", "for", "while", "return"}
 
 -- type of node as string
 ntype = (node) ->
