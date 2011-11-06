@@ -29,31 +29,22 @@ line_compile =
     undeclared = @declare names
     declare = "local "..concat(undeclared, ", ")
 
-    -- todo: tree transformation
-    if #values == 1 and @is_stm(values[1]) and cascading[ntype(values[1])]
-      stm = values[1]
-      @add declare if #undeclared > 0
-      decorate = (value) ->
-        {"assign", names, {value}}
+    has_fndef = false
+    i = 1
+    while i <= #values
+      if ntype(values[i]) == "fndef"
+        has_fndef = true
+      i = i +1
 
-      @stm stm, decorate
-    else
-      has_fndef = false
-      i = 1
-      while i <= #values
-        if ntype(values[i]) == "fndef"
-          has_fndef = true
-        i = i +1
+    with @line!
+      if #undeclared == #names and not has_fndef
+        \append declare
+      else
+        @add declare if #undeclared > 0
+        \append_list [@value name for name in *names], ", "
 
-      with @line!
-        if #undeclared == #names and not has_fndef
-          \append declare
-        else
-          @add declare if #undeclared > 0
-          \append_list [@value name for name in *names], ", "
-
-        \append " = "
-        \append_list [@value v for v in *values], ", "
+      \append " = "
+      \append_list [@value v for v in *values], ", "
 
   update: (node) =>
     _, name, op, exp = unpack node
@@ -100,10 +91,10 @@ line_compile =
       source = \init_free_var "table", source
       \stm {"assign", {name}, {get_value name}} for name in *final_names
 
-  if: (node, ret) =>
+  if: (node) =>
     cond, block = node[2], node[3]
     root = with @block @line "if ", @value(cond), " then"
-      \stms block, ret
+      \stms block
 
     current = root
     add_clause = (clause)->
@@ -115,7 +106,7 @@ line_compile =
         i += 1
         @block @line "elseif ", @value(clause[2]), " then"
 
-      next\stms clause[i], ret
+      next\stms clause[i]
 
       current.next = next
       current = next

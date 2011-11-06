@@ -39,65 +39,47 @@ line_compile = {
     local _, names, values = unpack(node)
     local undeclared = self:declare(names)
     local declare = "local " .. concat(undeclared, ", ")
-    if #values == 1 and self:is_stm(values[1]) and cascading[ntype(values[1])] then
-      local stm = values[1]
-      if #undeclared > 0 then
-        self:add(declare)
+    local has_fndef = false
+    local i = 1
+    while i <= #values do
+      if ntype(values[i]) == "fndef" then
+        has_fndef = true
       end
-      local decorate
-      decorate = function(value)
-        return {
-          "assign",
-          names,
-          {
-            value
-          }
-        }
-      end
-      return self:stm(stm, decorate)
-    else
-      local has_fndef = false
-      local i = 1
-      while i <= #values do
-        if ntype(values[i]) == "fndef" then
-          has_fndef = true
+      i = i + 1
+    end
+    do
+      local _with_0 = self:line()
+      if #undeclared == #names and not has_fndef then
+        _with_0:append(declare)
+      else
+        if #undeclared > 0 then
+          self:add(declare)
         end
-        i = i + 1
-      end
-      do
-        local _with_0 = self:line()
-        if #undeclared == #names and not has_fndef then
-          _with_0:append(declare)
-        else
-          if #undeclared > 0 then
-            self:add(declare)
-          end
-          _with_0:append_list((function()
-            local _accum_0 = { }
-            local _len_0 = 0
-            local _list_0 = names
-            for _index_0 = 1, #_list_0 do
-              local name = _list_0[_index_0]
-              _len_0 = _len_0 + 1
-              _accum_0[_len_0] = self:value(name)
-            end
-            return _accum_0
-          end)(), ", ")
-        end
-        _with_0:append(" = ")
         _with_0:append_list((function()
           local _accum_0 = { }
           local _len_0 = 0
-          local _list_0 = values
+          local _list_0 = names
           for _index_0 = 1, #_list_0 do
-            local v = _list_0[_index_0]
+            local name = _list_0[_index_0]
             _len_0 = _len_0 + 1
-            _accum_0[_len_0] = self:value(v)
+            _accum_0[_len_0] = self:value(name)
           end
           return _accum_0
         end)(), ", ")
-        return _with_0
       end
+      _with_0:append(" = ")
+      _with_0:append_list((function()
+        local _accum_0 = { }
+        local _len_0 = 0
+        local _list_0 = values
+        for _index_0 = 1, #_list_0 do
+          local v = _list_0[_index_0]
+          _len_0 = _len_0 + 1
+          _accum_0[_len_0] = self:value(v)
+        end
+        return _accum_0
+      end)(), ", ")
+      return _with_0
     end
   end,
   update = function(self, node)
@@ -196,12 +178,12 @@ line_compile = {
       return _with_0
     end
   end,
-  ["if"] = function(self, node, ret)
+  ["if"] = function(self, node)
     local cond, block = node[2], node[3]
     local root
     do
       local _with_0 = self:block(self:line("if ", self:value(cond), " then"))
-      _with_0:stms(block, ret)
+      _with_0:stms(block)
       root = _with_0
     end
     local current = root
@@ -216,7 +198,7 @@ line_compile = {
         i = i + 1
         next = self:block(self:line("elseif ", self:value(clause[2]), " then"))
       end
-      next:stms(clause[i], ret)
+      next:stms(clause[i])
       current.next = next
       current = next
     end

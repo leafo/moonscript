@@ -258,38 +258,9 @@ class Block_
       @add out if out
     nil
 
-  ret_stms: (stms, ret=error"missing return handler") =>
-    -- find last exp for explicit return
-    last_exp_id = 0
-    for i = #stms, 1, -1
-      stm = stms[i]
-      if stm and util.moon.type(stm) != transform.Run
-        last_exp_id = i
-        break
-
-    for i, stm in ipairs stms
-      if i == last_exp_id
-        if cascading[ntype(stm)]
-          @stm stm, ret
-        elseif @is_value stm
-          line = ret stms[i]
-          if @is_stm line
-            @stm line
-          else
-            error "got a value from implicit return"
-        else
-          -- nothing we can do with a statement except show it
-          @stm stm
-      else
-        @stm stm
-
-    nil
-
   stms: (stms, ret) =>
-    if ret
-      @ret_stms stms, ret
-    else
-      @stm stm for stm in *stms
+    error "deprecated stms call, use transformer" if ret
+    @stm stm for stm in *stms
     nil
 
 class RootBlock extends Block_

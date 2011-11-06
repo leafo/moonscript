@@ -19,15 +19,6 @@ user_error = function(...)
     ...
   })
 end
-local manual_return = Set({
-  "foreach",
-  "for",
-  "while"
-})
-cascading = Set({
-  "if",
-  "with"
-})
 moonlib = {
   bind = function(tbl, name)
     return concat({

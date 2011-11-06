@@ -187,6 +187,34 @@ Transformer = function(transformers)
   })
 end
 Statement = Transformer({
+  assign = function(node)
+    local _, names, values = unpack(node)
+    if #values == 1 and types.cascading[ntype(values[1])] then
+      values[1] = Statement(values[1], function(stm)
+        local t = ntype(stm)
+        if is_value(stm) then
+          return {
+            "assign",
+            names,
+            {
+              stm
+            }
+          }
+        else
+          return stm
+        end
+      end)
+      return build.group({
+        {
+          "declare",
+          names
+        },
+        values[1]
+      })
+    else
+      return node
+    end
+  end,
   comprehension = function(node, action)
     local _, exp, clauses = unpack(node)
     action = action or function(exp)

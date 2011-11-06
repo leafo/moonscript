@@ -15,8 +15,8 @@ indent_char = "  "
 user_error = (...) ->
   error {"user-error", ...}
 
-manual_return = Set{"foreach", "for", "while"}
-cascading = Set{ "if", "with" }
+-- manual_return = Set{"foreach", "for", "while"}
+-- cascading = Set{ "if", "with" }
 
 -- TODO get RID OF THIAS
 moonlib =

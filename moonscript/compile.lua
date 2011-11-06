@@ -379,47 +379,14 @@ Block_ = (function()
       end
       return nil
     end,
-    ret_stms = function(self, stms, ret)
-      if ret == nil then
-        ret = error("missing return handler")
-      end
-      local last_exp_id = 0
-      for i = #stms, 1, -1 do
-        local stm = stms[i]
-        if stm and util.moon.type(stm) ~= transform.Run then
-          last_exp_id = i
-          break
-        end
-      end
-      for i, stm in ipairs(stms) do
-        if i == last_exp_id then
-          if cascading[ntype(stm)] then
-            self:stm(stm, ret)
-          elseif self:is_value(stm) then
-            local line = ret(stms[i])
-            if self:is_stm(line) then
-              self:stm(line)
-            else
-              error("got a value from implicit return")
-            end
-          else
-            self:stm(stm)
-          end
-        else
-          self:stm(stm)
-        end
-      end
-      return nil
-    end,
     stms = function(self, stms, ret)
       if ret then
-        self:ret_stms(stms, ret)
-      else
-        local _list_0 = stms
-        for _index_0 = 1, #_list_0 do
-          local stm = _list_0[_index_0]
-          self:stm(stm)
-        end
+        error("deprecated stms call, use transformer")
+      end
+      local _list_0 = stms
+      for _index_0 = 1, #_list_0 do
+        local stm = _list_0[_index_0]
+        self:stm(stm)
       end
       return nil
     end

@@ -106,6 +106,24 @@ Transformer = (transformers) ->
   }
 
 Statement = Transformer {
+  assign: (node) ->
+    _, names, values = unpack node
+    -- bubble cascading assigns
+    if #values == 1 and types.cascading[ntype values[1]]
+      values[1] = Statement values[1], (stm) ->
+        t = ntype stm
+        if is_value stm
+          {"assign", names, {stm}}
+        else
+          stm
+
+      build.group {
+        {"declare", names}
+        values[1]
+      }
+    else
+      node
+
   comprehension: (node, action) ->
     _, exp, clauses = unpack node
 
