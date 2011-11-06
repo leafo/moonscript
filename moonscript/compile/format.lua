@@ -24,30 +24,10 @@ local manual_return = Set({
   "for",
   "while"
 })
-default_return = function(exp)
-  local t = ntype(exp)
-  if t == "chain" and exp[2] == "return" then
-    local items = {
-      "explist"
-    }
-    local _list_0 = exp[3][2]
-    for _index_0 = 1, #_list_0 do
-      local v = _list_0[_index_0]
-      insert(items, v)
-    end
-    return {
-      "return",
-      items
-    }
-  elseif manual_return[t] then
-    return exp
-  else
-    return {
-      "return",
-      exp
-    }
-  end
-end
+cascading = Set({
+  "if",
+  "with"
+})
 moonlib = {
   bind = function(tbl, name)
     return concat({
@@ -61,10 +41,6 @@ moonlib = {
     })
   end
 }
-cascading = Set({
-  "if",
-  "with"
-})
 non_atomic = Set({
   "update"
 })

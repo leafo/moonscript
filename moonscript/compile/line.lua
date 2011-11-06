@@ -9,7 +9,6 @@ do
   ntype = _table_0.ntype
 end
 local concat, insert = table.concat, table.insert
-local constructor_name = "new"
 line_compile = {
   raw = function(self, node)
     local _, text = unpack(node)

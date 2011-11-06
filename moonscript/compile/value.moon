@@ -19,6 +19,7 @@ table_append = (name, len, value) ->
   }
 
 value_compile =
+  -- list of values separated by binary operators
   exp: (node) =>
     _comp = (i, value) ->
       if i % 2 == 1 and value == "!="
@@ -28,11 +29,13 @@ value_compile =
     with @line!
       \append_list [_comp i,v for i,v in ipairs node when i > 1], " "
 
+  -- TODO refactor
   update: (node) =>
     _, name = unpack node
     @stm node
     @name name
 
+  -- list of expressions separated by paretheses
   explist: (node) =>
     with @line!
       \append_list [@value v for v in *node[2,]], ", "
@@ -176,6 +179,7 @@ value_compile =
   self_colon: (node) =>
     "self:"..@value node[2]
 
+  -- catch all pure string values
   raw_value: (value) =>
     if value == "..."
       @has_varargs = true

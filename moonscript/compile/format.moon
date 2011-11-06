@@ -16,24 +16,12 @@ user_error = (...) ->
   error {"user-error", ...}
 
 manual_return = Set{"foreach", "for", "while"}
+cascading = Set{ "if", "with" }
 
-default_return = (exp) ->
-  t = ntype exp
-  if t == "chain" and exp[2] == "return" -- return is a first class citizen now
-    -- extract the return
-    items = {"explist"}
-    insert items, v for v in *exp[3][2]
-    {"return", items}
-  elseif manual_return[t]
-    exp
-  else
-    {"return", exp}
-
+-- TODO get RID OF THIAS
 moonlib =
   bind: (tbl, name) ->
     concat {"moon.bind(", tbl, ".", name, ", ", tbl, ")"}
-
-cascading = Set{ "if", "with" }
 
 -- an action that can't be completed in a single line
 non_atomic = Set{ "update" }

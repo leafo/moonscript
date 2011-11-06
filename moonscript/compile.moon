@@ -258,10 +258,7 @@ class Block_
       @add out if out
     nil
 
-  ret_stms: (stms, ret) =>
-    if not ret
-      ret = default_return
-
+  ret_stms: (stms, ret=error"missing return handler") =>
     -- find last exp for explicit return
     last_exp_id = 0
     for i = #stms, 1, -1

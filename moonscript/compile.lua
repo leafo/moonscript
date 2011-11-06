@@ -380,8 +380,8 @@ Block_ = (function()
       return nil
     end,
     ret_stms = function(self, stms, ret)
-      if not ret then
-        ret = default_return
+      if ret == nil then
+        ret = error("missing return handler")
       end
       local last_exp_id = 0
       for i = #stms, 1, -1 do

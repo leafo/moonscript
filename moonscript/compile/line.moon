@@ -11,8 +11,6 @@ import concat, insert from table
 
 export line_compile
 
-constructor_name = "new"
-
 line_compile =
   raw: (node) =>
     _, text = unpack node
