@@ -128,8 +128,6 @@ Statement = Transformer {
 
   -- handle cascading return decorator
   if: (node, ret) ->
-    print "node:", node, "ret:", ret
-    print util.dump node
     if ret
       smart_node node
       -- mutate all the bodies
@@ -139,6 +137,17 @@ Statement = Transformer {
         body_idx = #node[i]
         case[body_idx] = apply_to_last case[body_idx], ret
     node
+
+  with: (node, ret) ->
+    _, exp, block = unpack node
+    scope_name = NameProxy "with"
+    build.group {
+      build.assign_one scope_name, exp
+      Run => @set "scope_var", scope_name
+      build.group block
+      if ret
+        ret scope_name
+    }
 
   foreach: (node) ->
     smart_node node
@@ -366,6 +375,10 @@ Value = Transformer {
     smart_node node
     node.body = apply_to_last node.body, implicitly_return
     node
+
+  if: (node) -> build.block_exp { node }
+  with: (node) -> build.block_exp { node }
+
   -- pull out colon chain
   chain: (node) ->
     stub = node[#node]

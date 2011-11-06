@@ -305,19 +305,6 @@ line_compile = {
     end
     return nil
   end,
-  with = function(self, node, ret)
-    local _, exp, block = unpack(node)
-    do
-      local _with_0 = self:block()
-      local var = _with_0:init_free_var("with", exp)
-      self:set("scope_var", var)
-      _with_0:stms(block)
-      if ret then
-        _with_0:stm(ret(var))
-      end
-      return _with_0
-    end
-  end,
   run = function(self, code)
     code:call(self)
     return nil

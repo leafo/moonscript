@@ -44,14 +44,6 @@ value_compile =
     _, delim, inner, delim_end = unpack node
     delim..inner..(delim_end or delim)
 
-  with: (node) =>
-    with @block "(function()", "end)()"
-      \stm node, default_return
-
-  if: (node) =>
-    with @block "(function()", "end)()"
-      \stm node, default_return
-
   chain: (node) =>
     callee = node[2]
 

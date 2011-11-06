@@ -167,15 +167,6 @@ line_compile =
       @declare names
     nil
 
-  with: (node, ret) =>
-    _, exp, block = unpack node
-
-    with @block!
-      var = \init_free_var "with", exp
-      @set "scope_var", var
-      \stms block
-      \stm ret var if ret
-
   run: (code) =>
     code\call self
     nil

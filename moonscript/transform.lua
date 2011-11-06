@@ -224,8 +224,6 @@ Statement = Transformer({
     return current_stms[1]
   end,
   ["if"] = function(node, ret)
-    print("node:", node, "ret:", ret)
-    print(util.dump(node))
     if ret then
       smart_node(node)
       node['then'] = apply_to_last(node['then'], ret)
@@ -236,6 +234,22 @@ Statement = Transformer({
       end
     end
     return node
+  end,
+  with = function(node, ret)
+    local _, exp, block = unpack(node)
+    local scope_name = NameProxy("with")
+    return build.group({
+      build.assign_one(scope_name, exp),
+      Run(function(self)
+        return self:set("scope_var", scope_name)
+      end),
+      build.group(block),
+      (function()
+        if ret then
+          return ret(scope_name)
+        end
+      end)()
+    })
   end,
   foreach = function(node)
     smart_node(node)
@@ -633,6 +647,16 @@ Value = Transformer({
     smart_node(node)
     node.body = apply_to_last(node.body, implicitly_return)
     return node
+  end,
+  ["if"] = function(node)
+    return build.block_exp({
+      node
+    })
+  end,
+  with = function(node)
+    return build.block_exp({
+      node
+    })
   end,
   chain = function(node)
     local stub = node[#node]
