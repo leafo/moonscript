@@ -266,7 +266,7 @@ Statement = Transformer({
   with = function(node, ret)
     local _, exp, block = unpack(node)
     local scope_name = NameProxy("with")
-    return build.group({
+    return build["do"]({
       build.assign_one(scope_name, exp),
       Run(function(self)
         return self:set("scope_var", scope_name)
@@ -692,7 +692,7 @@ Value = Transformer({
       table.remove(node, #node)
       local base_name = NameProxy("base")
       local fn_name = NameProxy("fn")
-      return value(build.block_exp({
+      return Value(build.block_exp({
         build.assign({
           names = {
             base_name

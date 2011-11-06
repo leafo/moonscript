@@ -163,3 +163,7 @@ line_compile =
   group: (node) =>
     @stms node[2]
 
+  do: (node) =>
+    with @block!
+      \stms node[2]
+

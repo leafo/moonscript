@@ -83,6 +83,8 @@ build = nil
 build = setmetatable {
   group: (body) ->
     {"group", body}
+  do: (body) ->
+    {"do", body}
   assign_one: (name, value) ->
     build.assign {
       names: {name}

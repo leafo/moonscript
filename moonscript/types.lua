@@ -146,6 +146,12 @@ build = setmetatable({
       body
     }
   end,
+  ["do"] = function(body)
+    return {
+      "do",
+      body
+    }
+  end,
   assign_one = function(name, value)
     return build.assign({
       names = {

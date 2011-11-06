@@ -292,5 +292,12 @@ line_compile = {
   end,
   group = function(self, node)
     return self:stms(node[2])
+  end,
+  ["do"] = function(self, node)
+    do
+      local _with_0 = self:block()
+      _with_0:stms(node[2])
+      return _with_0
+    end
   end
 }

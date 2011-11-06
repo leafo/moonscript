@@ -159,7 +159,7 @@ Statement = Transformer {
   with: (node, ret) ->
     _, exp, block = unpack node
     scope_name = NameProxy "with"
-    build.group {
+    build["do"] {
       build.assign_one scope_name, exp
       Run => @set "scope_var", scope_name
       build.group block
@@ -406,7 +406,7 @@ Value = Transformer {
       base_name = NameProxy "base"
       fn_name = NameProxy "fn"
 
-      value build.block_exp {
+      Value build.block_exp {
         build.assign {
           names: {base_name}
           values: {node}
