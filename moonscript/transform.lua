@@ -225,6 +225,16 @@ Statement = Transformer({
   end,
   ["if"] = function(node, ret)
     print("node:", node, "ret:", ret)
+    print(util.dump(node))
+    if ret then
+      smart_node(node)
+      node['then'] = apply_to_last(node['then'], ret)
+      for i = 4, #node do
+        local case = node[i]
+        local body_idx = #node[i]
+        case[body_idx] = apply_to_last(case[body_idx], ret)
+      end
+    end
     return node
   end,
   foreach = function(node)
@@ -592,6 +602,20 @@ local default_accumulator
 default_accumulator = function(node)
   return Accumulator():convert(node)
 end
+local implicitly_return
+implicitly_return = function(stm)
+  local t = ntype(stm)
+  if types.manual_return[t] or not is_value(stm) then
+    return stm
+  elseif types.cascading[t] then
+    return Statement(stm, implicitly_return)
+  else
+    return {
+      "return",
+      stm
+    }
+  end
+end
 Value = Transformer({
   ["for"] = default_accumulator,
   ["while"] = default_accumulator,
@@ -607,17 +631,7 @@ Value = Transformer({
   end,
   fndef = function(node)
     smart_node(node)
-    node.body = apply_to_last(node.body, function(stm)
-      local t = ntype(stm)
-      if types.manual_return[t] or not is_value(stm) then
-        return stm
-      else
-        return {
-          "return",
-          stm
-        }
-      end
-    end)
+    node.body = apply_to_last(node.body, implicitly_return)
     return node
   end,
   chain = function(node)

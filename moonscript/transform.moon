@@ -129,6 +129,15 @@ Statement = Transformer {
   -- handle cascading return decorator
   if: (node, ret) ->
     print "node:", node, "ret:", ret
+    print util.dump node
+    if ret
+      smart_node node
+      -- mutate all the bodies
+      node['then'] = apply_to_last node['then'], ret
+      for i = 4, #node
+        case = node[i]
+        body_idx = #node[i]
+        case[body_idx] = apply_to_last case[body_idx], ret
     node
 
   foreach: (node) ->
@@ -333,6 +342,15 @@ class Accumulator
 default_accumulator = (node) ->
   Accumulator!\convert node
 
+implicitly_return = (stm) ->
+  t = ntype stm
+  if types.manual_return[t] or not is_value stm
+    stm
+  elseif types.cascading[t]
+    Statement stm, implicitly_return
+  else
+    {"return", stm}
+
 Value = Transformer {
   for: default_accumulator
   while: default_accumulator
@@ -346,15 +364,7 @@ Value = Transformer {
 
   fndef: (node) ->
     smart_node node
-
-    node.body = apply_to_last node.body, (stm) ->
-      t = ntype stm
-      if types.manual_return[t] or not is_value stm
-        stm
-      -- elseif types.cascading[t]
-      else
-        {"return", stm}
-
+    node.body = apply_to_last node.body, implicitly_return
     node
   -- pull out colon chain
   chain: (node) ->
