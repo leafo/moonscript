@@ -246,6 +246,13 @@ for _index_0 = 2, #_list_6, 2 do
   local y = _list_6[_index_0]
   print(y)
 end
+local a, b, c = 1, 5, 2
+local _list_7 = x
+local _max_2 = b
+for _index_0 = a, _max_2 < 0 and #_list_7 + _max_2 or _max_2, c do
+  local y = _list_7[_index_0]
+  print(y)
+end
 local normal
 normal = function(hello)
   return (function()
@@ -259,8 +266,8 @@ normal = function(hello)
   end)()
 end
 local test = x(1, 2, 3, 4, 5)
-local _list_7 = test
-for _index_0 = 1, #_list_7 do
-  local thing = _list_7[_index_0]
+local _list_8 = test
+for _index_0 = 1, #_list_8 do
+  local thing = _list_8[_index_0]
   print(thing)
 end
