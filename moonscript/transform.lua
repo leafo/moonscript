@@ -7,7 +7,7 @@ local ntype, build, smart_node, is_slice = types.ntype, types.build, types.smart
 local insert = table.insert
 local is_value
 is_value = function(stm)
-  return moonscript.compile.Block:is_value(stm) or value.can_transform(stm)
+  return moonscript.compile.Block:is_value(stm) or Value.can_transform(stm)
 end
 NameProxy = (function()
   local _parent_0 = nil
@@ -186,7 +186,7 @@ Transformer = function(transformers)
     end
   })
 end
-stm = Transformer({
+Statement = Transformer({
   comprehension = function(node, action)
     local _, exp, clauses = unpack(node)
     action = action or function(exp)
@@ -222,6 +222,10 @@ stm = Transformer({
       }
     end
     return current_stms[1]
+  end,
+  ["if"] = function(node, ret)
+    print("node:", node, "ret:", ret)
+    return node
   end,
   foreach = function(node)
     smart_node(node)
@@ -588,13 +592,13 @@ local default_accumulator
 default_accumulator = function(node)
   return Accumulator():convert(node)
 end
-value = Transformer({
+Value = Transformer({
   ["for"] = default_accumulator,
   ["while"] = default_accumulator,
   foreach = default_accumulator,
   comprehension = function(node)
     local a = Accumulator()
-    node = stm(node, function(exp)
+    node = Statement(node, function(exp)
       return a:mutate_body({
         exp
       }, false)

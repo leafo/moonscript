@@ -8,6 +8,10 @@ manual_return = data.Set({
   "while",
   "return"
 })
+cascading = data.Set({
+  "if",
+  "with"
+})
 ntype = function(node)
   if type(node) ~= "table" then
     return "value"

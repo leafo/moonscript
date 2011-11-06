@@ -9,11 +9,11 @@ import reversed from util
 import ntype, build, smart_node, is_slice from types
 import insert from table
 
-export stm, value, NameProxy, Run
+export Statement, Value, NameProxy, Run
 
 -- TODO refactor
 is_value = (stm) ->
-  moonscript.compile.Block\is_value(stm) or value.can_transform stm
+  moonscript.compile.Block\is_value(stm) or Value.can_transform stm
 
 class NameProxy
   new: (@prefix) =>
@@ -57,7 +57,7 @@ class Run
 
 -- transform the last stm is a list of stms
 -- will puke on group
-apply_to_last = (stms, fn using nil) ->
+apply_to_last = (stms, fn) ->
   -- find last (real) exp
   last_exp_id = 0
   for i = #stms, 1, -1
@@ -105,7 +105,7 @@ Transformer = (transformers) ->
     __call: (...) => self.transform ...
   }
 
-stm = Transformer {
+Statement = Transformer {
   comprehension: (node, action) ->
     _, exp, clauses = unpack node
 
@@ -125,6 +125,11 @@ stm = Transformer {
       current_stms = {current_stms}
 
     current_stms[1]
+
+  -- handle cascading return decorator
+  if: (node, ret) ->
+    print "node:", node, "ret:", ret
+    node
 
   foreach: (node) ->
     smart_node node
@@ -166,7 +171,7 @@ stm = Transformer {
         }
       }
 
-  class: (node using nil) ->
+  class: (node) ->
     _, name, parent_val, tbl = unpack node
 
     constructor = nil
@@ -328,14 +333,14 @@ class Accumulator
 default_accumulator = (node) ->
   Accumulator!\convert node
 
-value = Transformer {
+Value = Transformer {
   for: default_accumulator
   while: default_accumulator
   foreach: default_accumulator
 
   comprehension: (node) ->
     a = Accumulator!
-    node = stm node, (exp) ->
+    node = Statement node, (exp) ->
       a\mutate_body {exp}, false
     a\wrap node
 
@@ -344,9 +349,9 @@ value = Transformer {
 
     node.body = apply_to_last node.body, (stm) ->
       t = ntype stm
-      -- TODO okay this needs a refactor
       if types.manual_return[t] or not is_value stm
         stm
+      -- elseif types.cascading[t]
       else
         {"return", stm}
 

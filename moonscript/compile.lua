@@ -318,7 +318,7 @@ Block_ = (function()
       return self:value(node)
     end,
     value = function(self, node, ...)
-      node = transform.value(node)
+      node = transform.Value(node)
       local action
       if type(node) ~= "table" then
         action = "raw_value"
@@ -354,7 +354,7 @@ Block_ = (function()
       if not node then
         return 
       end
-      node = transform.stm(node)
+      node = transform.Statement(node)
       local fn = line_compile[ntype(node)]
       if not fn then
         if has_value(node) then

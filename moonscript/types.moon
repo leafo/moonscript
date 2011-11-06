@@ -3,11 +3,15 @@ util = require "moonscript.util"
 data = require "moonscript.data"
 
 export ntype, smart_node, build
-export is_slice, manual_return
+export is_slice, manual_return, cascading
 
 import insert from table
 
+-- implicit return does not work on these statements
 manual_return = data.Set{"foreach", "for", "while", "return"}
+
+-- assigns and returns are bubbled into their bodies
+cascading = data.Set{ "if", "with" }
 
 -- type of node as string
 ntype = (node) ->
@@ -15,7 +19,6 @@ ntype = (node) ->
     "value"
   else
     node[1]
-
 
 is_slice = (node) ->
   ntype(node) == "chain" and ntype(node[#node]) == "slice"

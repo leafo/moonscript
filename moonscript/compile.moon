@@ -226,7 +226,7 @@ class Block_
   -- line wise compile functions
   name: (node) => @value node
   value: (node, ...) =>
-    node = transform.value node
+    node = transform.Value node
     action = if type(node) != "table"
       "raw_value"
     else
@@ -244,7 +244,7 @@ class Block_
 
   stm: (node, ...) =>
     return if not node -- slip blank statements
-    node = transform.stm node
+    node = transform.Statement node
     fn = line_compile[ntype(node)]
     if not fn
       -- coerce value into statement
