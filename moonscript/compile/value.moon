@@ -52,25 +52,6 @@ value_compile =
     with @block "(function()", "end)()"
       \stm node, default_return
 
-  -- todo: convert to transformation
-  comprehension: (node) =>
-    _, exp, iter = unpack node
-
-    with @block!
-      tmp_name = \init_free_var "accum", {"table"}
-      len_name = \init_free_var "len", 0
-
-      action = (value) ->
-        table_append tmp_name, len_name, value
-
-      \stm node, action
-      \stm {"return", tmp_name}
-
-      .header, .footer = if .has_varargs
-        "(function(...)", "end)(...)"
-      else
-        "(function()", "end)()"
-
   chain: (node) =>
     callee = node[2]
 

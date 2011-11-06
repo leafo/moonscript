@@ -5,6 +5,7 @@ types = require "moonscript.types"
 util = require "moonscript.util"
 data = require "moonscript.data"
 
+import reversed from util
 import ntype, build, smart_node, is_slice from types
 import insert from table
 
@@ -51,6 +52,7 @@ class Run
     self.fn state
 
 -- transform the last stm is a list of stms
+-- will puke on group
 apply_to_last = (stms, fn using nil) ->
   -- find last (real) exp
   last_exp_id = 0
@@ -66,23 +68,52 @@ apply_to_last = (stms, fn using nil) ->
     else
       stm
 
+-- is a body a sindle expression/statement
+is_singular = (body) ->
+  return false if #body != 1
+  if "group" == ntype body
+    is_singular body[2]
+  else
+    true
+
 constructor_name = "new"
 
 Transformer = (transformers) ->
+  -- this is bad, instance it for compiler
   seen_nodes = {}
-  (n) ->
+  (n, ...) ->
     return n if seen_nodes[n]
     seen_nodes[n] = true
     while true
       transformer = transformers[ntype n]
       res = if transformer
-        transformer(n) or n
+        transformer(n, ...) or n
       else
         n
       return n if res == n
       n = res
 
 stm = Transformer {
+  comprehension: (node, action) ->
+    _, exp, clauses = unpack node
+
+    action = action or (exp) -> {exp}
+
+    current_stms = action exp
+    for _, clause in reversed clauses
+      t = clause[1]
+      current_stms = if t == "for"
+        _, names, iter = unpack clause
+        {"foreach", names, iter, current_stms}
+      elseif t == "when"
+        _, cond = unpack clause
+        {"if", cond, current_stms}
+      else
+        error "Unknown comprehension clause: "..t
+      current_stms = {current_stms}
+
+    current_stms[1]
+
   foreach: (node) ->
     smart_node node
     if ntype(node.iter) == "unpack"
@@ -233,36 +264,68 @@ stm = Transformer {
     value
 }
 
-create_accumulator = (body_index) ->
-  (node) ->
-    accum_name = NameProxy "accum"
-    value_name = NameProxy "value"
-    len_name = NameProxy "len"
+class Accumulator
+  body_idx: { for: 4, while: 3, foreach: 4 }
 
-    body = apply_to_last node[body_index], (n) ->
-      build.assign_one value_name, n
+  new: =>
+    @accum_name = NameProxy "accum"
+    @value_name = NameProxy "value"
+    @len_name = NameProxy "len"
 
-    table.insert body, build["if"] {
-      cond: {"exp", value_name, "!=", "nil"}
-      then: {
-        {"update", len_name, "+=", 1}
-        build.assign_one accum_name\index(len_name), value_name
-      }
-    }
+  -- wraps node and mutates body
+  convert: (node) =>
+    index = @body_idx[ntype node]
+    node[index] = @mutate_body node[index]
+    @wrap node
 
-    node[body_index] = body
-
+  -- wrap the node into a block_exp
+  wrap: (node) =>
     build.block_exp {
-      build.assign_one accum_name, build.table!
-      build.assign_one len_name, 0
+      build.assign_one @accum_name, build.table!
+      build.assign_one @len_name, 0
       node
-      accum_name
+      @accum_name
     }
+
+  -- mutates the body of a loop construct to save last value into accumulator
+  -- can optionally skip nil results
+  mutate_body: (body, skip_nil=true) =>
+    val = if not skip_nil and is_singular body
+      with body[1]
+        body = {}
+    else
+      body = apply_to_last body, (n) ->
+        build.assign_one @value_name, n
+      @value_name
+
+    update = {
+      {"update", @len_name, "+=", 1}
+      build.assign_one @accum_name\index(@len_name), val
+    }
+
+    if skip_nil
+      table.insert body, build["if"] {
+        cond: {"exp", @value_name, "!=", "nil"}
+        then: update
+      }
+    else
+      table.insert body, build.group update
+
+    body
+
+default_accumulator = (node) ->
+  Accumulator!\convert node
 
 value = Transformer {
-  for: create_accumulator 4
-  while: create_accumulator 3
-  foreach: create_accumulator 4
+  for: default_accumulator
+  while: default_accumulator
+  foreach: default_accumulator
+
+  comprehension: (node) ->
+    a = Accumulator!
+    node = stm node, (exp) ->
+      a\mutate_body {exp}, false
+    a\wrap node
 
   -- pull out colon chain
   chain: (node) ->

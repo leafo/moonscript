@@ -2,6 +2,7 @@ module("moonscript.transform", package.seeall)
 local types = require("moonscript.types")
 local util = require("moonscript.util")
 local data = require("moonscript.data")
+local reversed = util.reversed
 local ntype, build, smart_node, is_slice = types.ntype, types.build, types.smart_node, types.is_slice
 local insert = table.insert
 NameProxy = (function()
@@ -136,11 +137,22 @@ apply_to_last = function(stms, fn)
     return _accum_0
   end)()
 end
+local is_singular
+is_singular = function(body)
+  if #body ~= 1 then
+    return false
+  end
+  if "group" == ntype(body) then
+    return is_singular(body[2])
+  else
+    return true
+  end
+end
 local constructor_name = "new"
 local Transformer
 Transformer = function(transformers)
   local seen_nodes = { }
-  return function(n)
+  return function(n, ...)
     if seen_nodes[n] then
       return n
     end
@@ -149,7 +161,7 @@ Transformer = function(transformers)
       local transformer = transformers[ntype(n)]
       local res
       if transformer then
-        res = transformer(n) or n
+        res = transformer(n, ...) or n
       else
         res = n
       end
@@ -161,6 +173,42 @@ Transformer = function(transformers)
   end
 end
 stm = Transformer({
+  comprehension = function(node, action)
+    local _, exp, clauses = unpack(node)
+    action = action or function(exp)
+      return {
+        exp
+      }
+    end
+    local current_stms = action(exp)
+    for _, clause in reversed(clauses) do
+      local t = clause[1]
+      if t == "for" then
+        local names, iter
+        _, names, iter = unpack(clause)
+        current_stms = {
+          "foreach",
+          names,
+          iter,
+          current_stms
+        }
+      elseif t == "when" then
+        local cond
+        _, cond = unpack(clause)
+        current_stms = {
+          "if",
+          cond,
+          current_stms
+        }
+      else
+        current_stms = error("Unknown comprehension clause: " .. t)
+      end
+      current_stms = {
+        current_stms
+      }
+    end
+    return current_stms[1]
+  end,
   foreach = function(node)
     smart_node(node)
     if ntype(node.iter) == "unpack" then
@@ -437,45 +485,108 @@ stm = Transformer({
     return value
   end
 })
-local create_accumulator
-create_accumulator = function(body_index)
-  return function(node)
-    local accum_name = NameProxy("accum")
-    local value_name = NameProxy("value")
-    local len_name = NameProxy("len")
-    local body = apply_to_last(node[body_index], function(n)
-      return build.assign_one(value_name, n)
-    end)
-    table.insert(body, build["if"]({
-      cond = {
-        "exp",
-        value_name,
-        "!=",
-        "nil"
-      },
-      ["then"] = {
+local Accumulator
+Accumulator = (function()
+  local _parent_0 = nil
+  local _base_0 = {
+    body_idx = {
+      ["for"] = 4,
+      ["while"] = 3,
+      foreach = 4
+    },
+    convert = function(self, node)
+      local index = self.body_idx[ntype(node)]
+      node[index] = self:mutate_body(node[index])
+      return self:wrap(node)
+    end,
+    wrap = function(self, node)
+      return build.block_exp({
+        build.assign_one(self.accum_name, build.table()),
+        build.assign_one(self.len_name, 0),
+        node,
+        self.accum_name
+      })
+    end,
+    mutate_body = function(self, body, skip_nil)
+      if skip_nil == nil then
+        skip_nil = true
+      end
+      local val
+      if not skip_nil and is_singular(body) then
+        do
+          local _with_0 = body[1]
+          body = { }
+          val = _with_0
+        end
+      else
+        body = apply_to_last(body, function(n)
+          return build.assign_one(self.value_name, n)
+        end)
+        val = self.value_name
+      end
+      local update = {
         {
           "update",
-          len_name,
+          self.len_name,
           "+=",
           1
         },
-        build.assign_one(accum_name:index(len_name), value_name)
+        build.assign_one(self.accum_name:index(self.len_name), val)
       }
-    }))
-    node[body_index] = body
-    return build.block_exp({
-      build.assign_one(accum_name, build.table()),
-      build.assign_one(len_name, 0),
-      node,
-      accum_name
-    })
+      if skip_nil then
+        table.insert(body, build["if"]({
+          cond = {
+            "exp",
+            self.value_name,
+            "!=",
+            "nil"
+          },
+          ["then"] = update
+        }))
+      else
+        table.insert(body, build.group(update))
+      end
+      return body
+    end
+  }
+  _base_0.__index = _base_0
+  if _parent_0 then
+    setmetatable(_base_0, getmetatable(_parent_0).__index)
   end
+  local _class_0 = setmetatable({
+    __init = function(self)
+      self.accum_name = NameProxy("accum")
+      self.value_name = NameProxy("value")
+      self.len_name = NameProxy("len")
+    end
+  }, {
+    __index = _base_0,
+    __call = function(cls, ...)
+      local _self_0 = setmetatable({}, _base_0)
+      cls.__init(_self_0, ...)
+      return _self_0
+    end
+  })
+  _base_0.__class = _class_0
+  return _class_0
+end)()
+local default_accumulator
+default_accumulator = function(node)
+  return Accumulator():convert(node)
 end
 value = Transformer({
-  ["for"] = create_accumulator(4),
-  ["while"] = create_accumulator(3),
-  foreach = create_accumulator(4),
+  ["for"] = default_accumulator,
+  ["while"] = default_accumulator,
+  foreach = default_accumulator,
+  comprehension = function(node)
+    local a = Accumulator()
+    node = stm(node, function(exp)
+      return a:mutate_body({
+        exp
+      }, false)
+    end)
+    return a:wrap(node)
+  end,
   chain = function(node)
     local stub = node[#node]
     if type(stub) == "table" and stub[1] == "colon_stub" then

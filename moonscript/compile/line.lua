@@ -305,44 +305,6 @@ line_compile = {
     end
     return nil
   end,
-  comprehension = function(self, node, action)
-    local _, exp, clauses = unpack(node)
-    if not action then
-      action = function(exp)
-        return {
-          exp
-        }
-      end
-    end
-    local current_stms = action(exp)
-    for _, clause in reversed(clauses) do
-      local t = clause[1]
-      if t == "for" then
-        local names, iter
-        _, names, iter = unpack(clause)
-        current_stms = {
-          "foreach",
-          names,
-          iter,
-          current_stms
-        }
-      elseif t == "when" then
-        local cond
-        _, cond = unpack(clause)
-        current_stms = {
-          "if",
-          cond,
-          current_stms
-        }
-      else
-        current_stms = error("Unknown comprehension clause: " .. t)
-      end
-      current_stms = {
-        current_stms
-      }
-    end
-    return self:stms(current_stms)
-  end,
   with = function(self, node, ret)
     local _, exp, block = unpack(node)
     do

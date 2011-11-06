@@ -103,31 +103,6 @@ value_compile = {
       return _with_0
     end
   end,
-  comprehension = function(self, node)
-    local _, exp, iter = unpack(node)
-    do
-      local _with_0 = self:block()
-      local tmp_name = _with_0:init_free_var("accum", {
-        "table"
-      })
-      local len_name = _with_0:init_free_var("len", 0)
-      local action
-      action = function(value)
-        return table_append(tmp_name, len_name, value)
-      end
-      _with_0:stm(node, action)
-      _with_0:stm({
-        "return",
-        tmp_name
-      })
-      if _with_0.has_varargs then
-        _with_0.header, _with_0.footer = "(function(...)", "end)(...)"
-      else
-        _with_0.header, _with_0.footer = "(function()", "end)()"
-      end
-      return _with_0
-    end
-  end,
   chain = function(self, node)
     local callee = node[2]
     if callee == -1 then

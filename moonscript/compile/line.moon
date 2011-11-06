@@ -167,28 +167,6 @@ line_compile =
       @declare names
     nil
 
-  comprehension: (node, action) =>
-    _, exp, clauses = unpack node
-
-    if not action
-      action = (exp) -> {exp}
-
-    current_stms = action exp
-    for _, clause in reversed clauses
-      t = clause[1]
-      current_stms = if t == "for"
-        _, names, iter = unpack clause
-        {"foreach", names, iter, current_stms}
-      elseif t == "when"
-        _, cond = unpack clause
-        {"if", cond, current_stms}
-      else
-        error "Unknown comprehension clause: "..t
-      current_stms = {current_stms}
-
-    @stms current_stms
-
-
   with: (node, ret) =>
     _, exp, block = unpack node
 
