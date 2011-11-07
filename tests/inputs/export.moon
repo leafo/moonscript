@@ -35,3 +35,6 @@ y = ->
 with tmp
   j = 2000
 
+
+export a,b,c = 223, 343
+export cool = "dad"

@@ -410,7 +410,7 @@ local build_grammar = wrap(function()
 		TableBlock = SpaceBreak^1 * Advance * TableBlockInner * PopIndent / mark"table",
 
 		ClassDecl = key"class" * Name * (key"extends" * Exp + C"")^-1 * TableBlock / mark"class",
-		Export = key"export" * (Ct(NameList) + op"*" + op"^") / mark"export",
+		Export = key"export" * (Ct(NameList) * (sym"=" * Ct(ExpListLow))^-1  + op"*" + op"^") / mark"export",
 
 		KeyValue = (sym":" * Name) / self_assign + Ct((SimpleName + sym"[" * Exp * sym"]") * symx":" * (Exp + TableBlock)),
 		KeyValueList = KeyValue * (sym"," * KeyValue)^0,

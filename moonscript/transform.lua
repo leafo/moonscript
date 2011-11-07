@@ -215,6 +215,19 @@ Statement = Transformer({
       return node
     end
   end,
+  export = function(node)
+    if #node > 2 then
+      return build.group({
+        node,
+        build.assign({
+          names = node[2],
+          values = node[3]
+        })
+      })
+    else
+      return nil
+    end
+  end,
   update = function(node)
     local _, name, op, exp = unpack(node)
     local op_final = op:match("^(.+)=$")

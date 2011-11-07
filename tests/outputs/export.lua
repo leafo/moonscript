@@ -29,3 +29,5 @@ do
   local _with_0 = tmp
   local j = 2000
 end
+a, b, c = 223, 343
+cool = "dad"

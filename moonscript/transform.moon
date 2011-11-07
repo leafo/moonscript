@@ -124,6 +124,19 @@ Statement = Transformer {
     else
       node
 
+  export: (node) ->
+    -- assign values if they are included
+    if #node > 2
+      build.group {
+        node
+        build.assign {
+          names: node[2]
+          values: node[3]
+        }
+      }
+    else
+      nil
+
   update: (node) ->
     _, name, op, exp = unpack node
     op_final = op\match "^(.+)=$"
