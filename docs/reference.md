@@ -217,13 +217,13 @@ statement a value belongs to:
       "hello",
       "world"
         print "hello"
-		print "I am inside if"
+        print "I am inside if"
 
     if func 1,2,3,
         "hello",
         "world"
       print "hello"
-	  print "I am inside if"
+      print "I am inside if"
 
 
 ## Table Literals
@@ -294,7 +294,7 @@ doubled.
 
 The items included in the new table can be restricted with a `when` clause:
 
-	iter = ipairs items
+    iter = ipairs items
     slice = [item for i, item in iter when i > 1 and i < 3]
 
 Because it is common to iterate over the values of a numerically indexed table,
@@ -510,15 +510,15 @@ instances, so modifications to it in one instance will show up in another:
     a\give_item "pants"
     b\give_item "shirt"
 
-	-- will print both pants and shirt
+    -- will print both pants and shirt
     print item for item in *a.clothes
 
 The proper way to avoid this problem is to create the mutable state of the
 object in the constructor:
 
     class Person
-	  new: =>
-	    @clothes = {}
+      new: =>
+        @clothes = {}
 
 ### Inheritance
 
@@ -565,21 +565,26 @@ will not be assigned locally.
 This is especially useful when declaring what will be externally visible in a
 module:
 
-	-- my_module.moon
-	module "my_module", package.seeall
+    -- my_module.moon
+    module "my_module", package.seeall
     export print_result
 
-	length = (x, y) -> math.sqrt x*x + y*y
+    length = (x, y) -> math.sqrt x*x + y*y
 
-	print_result = (x, y) ->
-	  print "Length is ", length x, y
+    print_result = (x, y) ->
+      print "Length is ", length x, y
 
-	-- main.moon
-	require "my_module"
+    -- main.moon
+    require "my_module"
 
-	my_module.print_result 4, 5 -- prints the result
+    my_module.print_result 4, 5 -- prints the result
 
-	print my_module.length 6, 7 -- errors, `length` not visible
+    print my_module.length 6, 7 -- errors, `length` not visible
+
+Assignment can be combined with the export keyword to assign to global
+variables directly:
+
+    export some_number, message_str = 100, "hello world"
 
 ### Export All & Export Proper
 
@@ -675,11 +680,11 @@ with no argument list provided.
       func!
 
     -- this will not work:
-	-- the function has to no reference to my_object
+    -- the function has to no reference to my_object
     run_callback my_object.write
 
     -- function stub syntax
-	-- lets us bundle the object into a new function
+    -- lets us bundle the object into a new function
     run_callback my_object\write
 
 ## The Using Clause; Controlling Destructive Assignment
