@@ -2,7 +2,7 @@ module("moonscript.compile", package.seeall)
 local util = require("moonscript.util")
 local dump = require("moonscript.dump")
 require("moonscript.compile.format")
-require("moonscript.compile.line")
+require("moonscript.compile.statement")
 require("moonscript.compile.value")
 local transform = require("moonscript.transform")
 local NameProxy = transform.NameProxy
@@ -89,8 +89,7 @@ Line = (function()
   _base_0.__class = _class_0
   return _class_0
 end)()
-local Block_
-Block_ = (function()
+Block = (function()
   local _parent_0 = nil
   local _base_0 = {
     header = "do",
@@ -425,7 +424,7 @@ Block_ = (function()
 end)()
 local RootBlock
 RootBlock = (function()
-  local _parent_0 = Block_
+  local _parent_0 = Block
   local _base_0 = {
     render = function(self)
       self:_insert_breaks()
@@ -453,7 +452,6 @@ RootBlock = (function()
   _base_0.__class = _class_0
   return _class_0
 end)()
-Block = Block_
 format_error = function(msg, pos, file_str)
   local line = pos_to_line(file_str, pos)
   local line_str

@@ -4,7 +4,7 @@ util = require "moonscript.util"
 dump = require "moonscript.dump"
 
 require "moonscript.compile.format"
-require "moonscript.compile.line"
+require "moonscript.compile.statement"
 require "moonscript.compile.value"
 
 transform = require "moonscript.transform"
@@ -48,7 +48,7 @@ class Line
         c
     concat buff
 
-class Block_
+class Block
   header: "do"
   footer: "end"
 
@@ -263,12 +263,10 @@ class Block_
     @stm stm for stm in *stms
     nil
 
-class RootBlock extends Block_
+class RootBlock extends Block
   render: =>
     @_insert_breaks!
     concat @_lines, "\n"
-
-Block = Block_
 
 format_error = (msg, pos, file_str) ->
   line = pos_to_line file_str, pos
