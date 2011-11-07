@@ -1,4 +1,10 @@
 
+export a,b,c = 223, 343
+export cool = "dad"
+
+export class Something
+  umm: "cool"
+
 What = if this
   232
 else
@@ -36,5 +42,3 @@ with tmp
   j = 2000
 
 
-export a,b,c = 223, 343
-export cool = "dad"

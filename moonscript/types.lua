@@ -24,6 +24,16 @@ is_slice = function(node)
 end
 local t = { }
 local node_types = {
+  class = {
+    {
+      "name",
+      "Tmp"
+    },
+    {
+      "body",
+      t
+    }
+  },
   fndef = {
     {
       "args",

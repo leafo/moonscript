@@ -25,6 +25,10 @@ is_slice = (node) ->
 
 t = {}
 node_types = {
+  class: {
+    {"name", "Tmp"}
+    {"body", t}
+  }
   fndef: {
     {"args", t}
     {"whitelist", t}

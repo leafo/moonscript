@@ -127,13 +127,20 @@ Statement = Transformer {
   export: (node) ->
     -- assign values if they are included
     if #node > 2
-      build.group {
-        node
-        build.assign {
-          names: node[2]
-          values: node[3]
+      if node[2] == "class"
+        cls = smart_node node[3]
+        build.group {
+          {"export", {cls.name}}
+          cls
         }
-      }
+      else
+        build.group {
+          node
+          build.assign {
+            names: node[2]
+            values: node[3]
+          }
+        }
     else
       nil
 

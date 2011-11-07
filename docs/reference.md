@@ -586,6 +586,9 @@ variables directly:
 
     export some_number, message_str = 100, "hello world"
 
+Additionally, a class declaration can be prefixed with the export keyword in
+order to export it.
+
 ### Export All & Export Proper
 
 The `export` statement can also take special symbols `*` and `^`.
