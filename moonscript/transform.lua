@@ -228,6 +228,92 @@ Statement = Transformer({
       exp
     })
   end,
+  import = function(node)
+    local _, names, source = unpack(node)
+    local stubs = (function()
+      local _accum_0 = { }
+      local _len_0 = 0
+      local _list_0 = names
+      for _index_0 = 1, #_list_0 do
+        local name = _list_0[_index_0]
+        local _value_0
+        if type(name) == "table" then
+          _value_0 = name
+        else
+          _value_0 = {
+            "dot",
+            name
+          }
+        end
+        if _value_0 ~= nil then
+          _len_0 = _len_0 + 1
+          _accum_0[_len_0] = _value_0
+        end
+      end
+      return _accum_0
+    end)()
+    local real_names = (function()
+      local _accum_0 = { }
+      local _len_0 = 0
+      local _list_0 = names
+      for _index_0 = 1, #_list_0 do
+        local name = _list_0[_index_0]
+        local _value_0 = type(name) == "table" and name[2] or name
+        if _value_0 ~= nil then
+          _len_0 = _len_0 + 1
+          _accum_0[_len_0] = _value_0
+        end
+      end
+      return _accum_0
+    end)()
+    if type(source) == "string" then
+      return build.assign({
+        names = real_names,
+        values = (function()
+          local _accum_0 = { }
+          local _len_0 = 0
+          local _list_0 = stubs
+          for _index_0 = 1, #_list_0 do
+            local stub = _list_0[_index_0]
+            _len_0 = _len_0 + 1
+            _accum_0[_len_0] = build.chain({
+              base = source,
+              stub
+            })
+          end
+          return _accum_0
+        end)()
+      })
+    else
+      local source_name = NameProxy("table")
+      return build.group({
+        {
+          "declare",
+          real_names
+        },
+        build["do"]({
+          build.assign_one(source_name, source),
+          build.assign({
+            names = real_names,
+            values = (function()
+              local _accum_0 = { }
+              local _len_0 = 0
+              local _list_0 = stubs
+              for _index_0 = 1, #_list_0 do
+                local stub = _list_0[_index_0]
+                _len_0 = _len_0 + 1
+                _accum_0[_len_0] = build.chain({
+                  base = source_name,
+                  stub
+                })
+              end
+              return _accum_0
+            end)()
+          })
+        })
+      })
+    end
+  end,
   comprehension = function(node, action)
     local _, exp, clauses = unpack(node)
     action = action or function(exp)

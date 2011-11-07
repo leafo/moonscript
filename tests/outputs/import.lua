@@ -2,15 +2,25 @@ local hello = yeah.hello
 local hello, world
 do
   local _table_0 = table["cool"]
-  hello = _table_0.hello
-  world = _table_0.world
+  hello, world = _table_0.hello, _table_0.world
 end
-local a, b, c = items.a, moon.bind(items.b, items), items.c
+local a, b, c = items.a, (function()
+  local _base_0 = items
+  local _fn_0 = _base_0.b
+  return function(...)
+    return _fn_0(_base_0, ...)
+  end
+end)(), items.c
 local master, ghost
 do
   local _table_0 = find("mytable")
-  master = _table_0.master
-  ghost = moon.bind(_table_0.ghost, _table_0)
+  master, ghost = _table_0.master, (function()
+    local _base_0 = _table_0
+    local _fn_0 = _base_0.ghost
+    return function(...)
+      return _fn_0(_base_0, ...)
+    end
+  end)()
 end
 local yumm
 a, yumm = 3434, "hello"
@@ -24,7 +34,12 @@ if indent then
   local okay, well
   do
     local _table_1 = tables[100]
-    okay = _table_1.okay
-    well = moon.bind(_table_1.well, _table_1)
+    okay, well = _table_1.okay, (function()
+      local _base_0 = _table_1
+      local _fn_0 = _base_0.well
+      return function(...)
+        return _fn_0(_base_0, ...)
+      end
+    end)()
   end
 end

@@ -52,39 +52,6 @@ line_compile =
   break: (node) =>
     "break"
 
-  import: (node) =>
-    _, names, source = unpack node
-
-    final_names, to_bind = {}, {}
-    for name in *names
-      final = if ntype(name) == ":"
-        tmp = @name name[2]
-        to_bind[tmp] = true
-        tmp
-      else
-        @name name
-
-      @put_name final
-      insert final_names, final
-
-    get_value = (name) ->
-      if to_bind[name]
-        moonlib.bind source, name
-      else
-        source.."."..name
-
-    -- from constant expression, put it on one line
-    if type(source) == "string"
-      values = [get_value name for name in *final_names]
-      line = with @line "local ", concat(final_names, ", "), " = "
-        \append_list values, ", "
-      return line
-
-    @add @line "local ", concat(final_names, ", ")
-    with @block "do"
-      source = \init_free_var "table", source
-      \stm {"assign", {name}, {get_value name}} for name in *final_names
-
   if: (node) =>
     cond, block = node[2], node[3]
     root = with @block @line "if ", @value(cond), " then"

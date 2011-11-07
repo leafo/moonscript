@@ -130,6 +130,36 @@ Statement = Transformer {
     error "Unknown op: "..op if not op_final
     build.assign_one name, {"exp", name, op_final, exp}
 
+  import: (node) ->
+    _, names, source = unpack node
+
+    stubs = for name in *names
+      if type(name) == "table"
+        name
+      else
+        {"dot", name}
+
+    real_names = for name in *names
+      type(name) == "table" and name[2] or name
+
+    if type(source) == "string"
+      build.assign {
+        names: real_names
+        values: [build.chain { base: source, stub} for stub in *stubs]
+      }
+    else
+      source_name = NameProxy "table"
+      build.group {
+        {"declare", real_names}
+        build["do"] {
+          build.assign_one source_name, source
+          build.assign {
+            names: real_names
+            values: [build.chain { base: source_name, stub} for stub in *stubs]
+          }
+        }
+      }
+
   comprehension: (node, action) ->
     _, exp, clauses = unpack node
 

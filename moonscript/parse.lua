@@ -284,7 +284,7 @@ local build_grammar = wrap(function()
 		InBlock = Advance * Block * PopIndent,
 
 		Import = key"import" *  Ct(ImportNameList) * key"from" * Exp / mark"import", 
-		ImportName = (sym"\\" * Ct(Cc":" * Name) + Name),
+		ImportName = (sym"\\" * Ct(Cc"colon_stub" * Name) + Name),
 		ImportNameList = ImportName * (sym"," * ImportName)^0,
 
 		NameList = Name * (sym"," * Name)^0,
