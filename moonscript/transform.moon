@@ -124,6 +124,12 @@ Statement = Transformer {
     else
       node
 
+  update: (node) ->
+    _, name, op, exp = unpack node
+    op_final = op\match "^(.+)=$"
+    error "Unknown op: "..op if not op_final
+    build.assign_one name, {"exp", name, op_final, exp}
+
   comprehension: (node, action) ->
     _, exp, clauses = unpack node
 

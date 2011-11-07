@@ -82,27 +82,6 @@ line_compile = {
       return _with_0
     end
   end,
-  update = function(self, node)
-    local _, name, op, exp = unpack(node)
-    local op_final = op:match("^(.+)=$")
-    if not op_final then
-      error("Unknown op: " .. op)
-    end
-    return self:stm({
-      "assign",
-      {
-        name
-      },
-      {
-        {
-          "exp",
-          name,
-          op_final,
-          exp
-        }
-      }
-    })
-  end,
   ["return"] = function(self, node)
     return self:line("return ", (function()
       if node[2] ~= "" then

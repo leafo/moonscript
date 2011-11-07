@@ -215,6 +215,19 @@ Statement = Transformer({
       return node
     end
   end,
+  update = function(node)
+    local _, name, op, exp = unpack(node)
+    local op_final = op:match("^(.+)=$")
+    if not op_final then
+      error("Unknown op: " .. op)
+    end
+    return build.assign_one(name, {
+      "exp",
+      name,
+      op_final,
+      exp
+    })
+  end,
   comprehension = function(node, action)
     local _, exp, clauses = unpack(node)
     action = action or function(exp)

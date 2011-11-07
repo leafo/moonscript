@@ -46,12 +46,6 @@ line_compile =
       \append " = "
       \append_list [@value v for v in *values], ", "
 
-  update: (node) =>
-    _, name, op, exp = unpack node
-    op_final = op\match "^(.+)=$"
-    error "Unknown op: "..op if not op_final
-    @stm {"assign", {name}, {{"exp", name, op_final, exp}}}
-
   return: (node) =>
     @line "return ", if node[2] != "" then @value node[2]
 
