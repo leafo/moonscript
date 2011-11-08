@@ -56,7 +56,11 @@ local TermOp = Space * C(S"*/%^")
 
 local Shebang = P"#!" * P(1 - Stop)^0
 
-local function wrap(fn)
+-- can't have P(false) because it causes preceding patterns not to run
+local Cut = P(function() return false end)
+
+-- auto declare Proper variables with lpeg.V
+local function wrap_env(fn)
 	local env = getfenv(fn)
 
 	return setfenv(fn, setmetatable({}, {
@@ -121,9 +125,96 @@ local function flatten_or_mark(name)
 	end
 end
 
-local build_grammar = wrap(function()
-	local err_msg = "Failed to parse:\n [%d] >>    %s (%d)"
+-- makes sure the last item in a chain is an index
+local _assignable = { index = true, dot = true, slice = true }
+local function check_assignable(str, pos, value)
+	if ntype(value) == "chain" and _assignable[ntype(value[#value])]
+		or type(value) == "string"
+	then
+		return true, value
+	end
+	return false
+end
 
+local function sym(chars)
+	return Space * chars
+end
+
+local function symx(chars)
+	return chars
+end
+
+local function simple_string(delim, x)
+	return C(symx(delim)) * C((P('\\'..delim) +
+		"\\\\" +
+		(1 - S('\r\n'..delim)))^0) * sym(delim) / mark"string"
+end
+
+local function wrap_func_arg(value)
+	return {"call", {value}}
+end
+
+-- DOCME
+local function flatten_func(callee, args)
+	if #args == 0 then return callee end
+
+	args = {"call", args}
+	if ntype(callee) == "chain" then
+		-- check for colon stub that needs arguments
+		if ntype(callee[#callee]) == "colon_stub" then
+			local stub = callee[#callee]
+			stub[1] = "colon"
+			table.insert(stub, args)
+		else
+			table.insert(callee, args)
+		end
+
+		return callee
+	end
+
+	return {"chain", callee, args}
+end
+
+-- wraps a statement that has a line decorator
+local function wrap_decorator(stm, dec)
+	if not dec then return stm end
+
+	local arg = {stm, dec}
+
+	if dec[1] == "if" then
+		local _, cond, fail = unpack(dec)
+		if fail then fail = {"else", {fail}} end
+		stm = {"if", cond, {stm}, fail}
+	elseif dec[1] == "comprehension" then
+		local _, clauses = unpack(dec)
+		stm = {"comprehension", stm, clauses}
+	end
+
+	return stm
+end
+
+-- wrap if statement if there is a conditional decorator
+local function wrap_if(stm, cond)
+	if cond then
+		local pass, fail = unpack(cond)
+		if fail then fail = {"else", {fail}} end
+		return {"if", cond[2], {stm}, fail}
+	end
+	return stm
+end
+
+local function check_lua_string(str, pos, right, left)
+	return #left == #right
+end
+
+-- :name in table literal
+local function self_assign(name)
+	return {name, name}
+end
+
+local err_msg = "Failed to parse:\n [%d] >>    %s (%d)"
+
+local build_grammar = wrap_env(function()
 	local _indent = Stack(0) -- current indent
 
 	local last_pos = 0 -- used to know where to report error
@@ -164,49 +255,6 @@ local build_grammar = wrap(function()
 		return patt
 	end
 
-	local function sym(chars)
-		return Space * chars
-	end
-
-	local function symx(chars)
-		return chars
-	end
-
-	local function flatten_func(callee, args)
-		if #args == 0 then return callee end
-
-		args = {"call", args}
-		if ntype(callee) == "chain" then
-			-- check for colon stub that needs arguments
-			if ntype(callee[#callee]) == "colon_stub" then
-				local stub = callee[#callee]
-				stub[1] = "colon"
-				table.insert(stub, args)
-			else
-				table.insert(callee, args)
-			end
-
-			return callee
-		end
-
-		return {"chain", callee, args}
-	end
-
-	local function wrap_func_arg(value)
-		return {"call", {value}}
-	end
-
-	-- makes sure the last item in a chain is an index
-	local _assignable = { index = true, dot = true, slice = true }
-	local function check_assignable(str, pos, value)
-		if ntype(value) == "chain" and _assignable[ntype(value[#value])]
-			or type(value) == "string"
-		then
-			return true, value
-		end
-		return false
-	end
-
 	local SimpleName = Name -- for table key
 
 	-- make sure name is not a keyword
@@ -216,51 +264,6 @@ local build_grammar = wrap(function()
 	end) / trim
 
 	local Name = sym"@" * Name / mark"self" + Name + Space * "..." / trim
-
-	local function simple_string(delim, x)
-		return C(symx(delim)) * C((P('\\'..delim) +
-			"\\\\" +
-			(1 - S('\r\n'..delim)))^0) * sym(delim) / mark"string"
-	end
-
-	-- wrap if statement if there is a conditional decorator
-	local function wrap_if(stm, cond)
-		if cond then
-			local pass, fail = unpack(cond)
-			if fail then fail = {"else", {fail}} end
-			return {"if", cond[2], {stm}, fail}
-		end
-		return stm
-	end
-
-	local function wrap_decorator(stm, dec)
-		if not dec then return stm end
-
-		local arg = {stm, dec}
-
-		if dec[1] == "if" then
-			local _, cond, fail = unpack(dec)
-			if fail then fail = {"else", {fail}} end
-			stm = {"if", cond, {stm}, fail}
-		elseif dec[1] == "comprehension" then
-			local _, clauses = unpack(dec)
-			stm = {"comprehension", stm, clauses}
-		end
-
-		return stm
-	end
-
-	local function check_lua_string(str, pos, right, left)
-		return #left == #right
-	end
-
-	-- :name in table literal
-	local function self_assign(name)
-		return {name, name}
-	end
-
-	-- can't have P(false) because it causes preceding patterns not to run
-	local Cut = P(function() return false end)
 
 	local g = lpeg.P{
 		File,
