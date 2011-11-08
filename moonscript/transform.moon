@@ -13,7 +13,7 @@ export Statement, Value, NameProxy, Run
 
 -- TODO refactor
 is_value = (stm) ->
-  moonscript.compile.Block\is_value(stm) or Value.can_transform stm
+  moonscript.compile.Block\is_value(stm) or Value\can_transform stm
 
 class NameProxy
   new: (@prefix) =>
@@ -82,35 +82,38 @@ is_singular = (body) ->
 
 constructor_name = "new"
 
-Transformer = (transformers) ->
-  -- this is bad, instance it for compiler
-  seen_nodes = {}
-  tf = {
-    transform: (n, ...) ->
-      return n if seen_nodes[n]
-      seen_nodes[n] = true
-      while true
-        transformer = transformers[ntype n]
-        res = if transformer
-          transformer(n, ...) or n
-        else
-          n
-        return n if res == n
-        n = res
-    can_transform: (node) ->
-      transformers[ntype node] != nil
-  }
+class Transformer
+  new: (@transformers, @scope) =>
+    @seen_nodes = {}
 
-  setmetatable tf, {
-    __call: (...) => self.transform ...
-  }
+  transform: (scope, node, ...) =>
+    -- print scope, node, ...
+    return node if @seen_nodes[node]
+    @seen_nodes[node] = true
+    while true
+      transformer = @transformers[ntype node]
+      res = if transformer
+        transformer(scope, node, ...) or node
+      else
+        node
+      return node if res == node
+      node = res
+
+  __call: (node, ...) =>
+    @transform @scope, node, ...
+
+  instance: (scope) =>
+    Transformer @transformers, scope
+
+  can_transform: (node) =>
+    @transformers[ntype node] != nil
 
 Statement = Transformer {
-  assign: (node) ->
+  assign: (node) =>
     _, names, values = unpack node
     -- bubble cascading assigns
     if #values == 1 and types.cascading[ntype values[1]]
-      values[1] = Statement values[1], (stm) ->
+      values[1] = @transform.statement values[1], (stm) ->
         t = ntype stm
         if is_value stm
           {"assign", names, {stm}}
@@ -124,7 +127,7 @@ Statement = Transformer {
     else
       node
 
-  export: (node) ->
+  export: (node) =>
     -- assign values if they are included
     if #node > 2
       if node[2] == "class"
@@ -144,13 +147,13 @@ Statement = Transformer {
     else
       nil
 
-  update: (node) ->
+  update: (node) =>
     _, name, op, exp = unpack node
     op_final = op\match "^(.+)=$"
     error "Unknown op: "..op if not op_final
     build.assign_one name, {"exp", name, op_final, exp}
 
-  import: (node) ->
+  import: (node) =>
     _, names, source = unpack node
 
     stubs = for name in *names
@@ -180,7 +183,7 @@ Statement = Transformer {
         }
       }
 
-  comprehension: (node, action) ->
+  comprehension: (node, action) =>
     _, exp, clauses = unpack node
 
     action = action or (exp) -> {exp}
@@ -201,7 +204,7 @@ Statement = Transformer {
     current_stms[1]
 
   -- handle cascading return decorator
-  if: (node, ret) ->
+  if: (node, ret) =>
     if ret
       smart_node node
       -- mutate all the bodies
@@ -212,7 +215,7 @@ Statement = Transformer {
         case[body_idx] = apply_to_last case[body_idx], ret
     node
 
-  with: (node, ret) ->
+  with: (node, ret) =>
     _, exp, block = unpack node
     scope_name = NameProxy "with"
     build["do"] {
@@ -223,7 +226,7 @@ Statement = Transformer {
         ret scope_name
     }
 
-  foreach: (node) ->
+  foreach: (node) =>
     smart_node node
     if ntype(node.iter) == "unpack"
       list = node.iter[2]
@@ -263,7 +266,7 @@ Statement = Transformer {
         }
       }
 
-  class: (node) ->
+  class: (node) =>
     _, name, parent_val, tbl = unpack node
 
     constructor = nil
@@ -422,39 +425,42 @@ class Accumulator
 
     body
 
-default_accumulator = (node) ->
+default_accumulator = (node) =>
   Accumulator!\convert node
 
-implicitly_return = (stm) ->
-  t = ntype stm
-  if types.manual_return[t] or not is_value stm
-    stm
-  elseif types.cascading[t]
-    Statement stm, implicitly_return
-  else
-    {"return", stm}
+implicitly_return = (scope) ->
+  fn = (stm) ->
+    t = ntype stm
+    if types.manual_return[t] or not is_value stm
+      stm
+    elseif types.cascading[t]
+      scope.transform.statement stm, fn
+    else
+      {"return", stm}
+
+  fn
 
 Value = Transformer {
   for: default_accumulator
   while: default_accumulator
   foreach: default_accumulator
 
-  comprehension: (node) ->
+  comprehension: (node) =>
     a = Accumulator!
-    node = Statement node, (exp) ->
+    node = @transform.statement node, (exp) ->
       a\mutate_body {exp}, false
     a\wrap node
 
-  fndef: (node) ->
+  fndef: (node) =>
     smart_node node
-    node.body = apply_to_last node.body, implicitly_return
+    node.body = apply_to_last node.body, implicitly_return self
     node
 
-  if: (node) -> build.block_exp { node }
-  with: (node) -> build.block_exp { node }
+  if: (node) => build.block_exp { node }
+  with: (node) => build.block_exp { node }
 
   -- pull out colon chain
-  chain: (node) ->
+  chain: (node) =>
     stub = node[#node]
     if type(stub) == "table" and stub[1] == "colon_stub"
       table.remove node, #node
@@ -462,7 +468,7 @@ Value = Transformer {
       base_name = NameProxy "base"
       fn_name = NameProxy "fn"
 
-      Value build.block_exp {
+      @transform.value build.block_exp {
         build.assign {
           names: {base_name}
           values: {node}
@@ -485,7 +491,7 @@ Value = Transformer {
         }
       }
 
-  block_exp: (node) ->
+  block_exp: (node) =>
     _, body = unpack node
 
     fn = nil

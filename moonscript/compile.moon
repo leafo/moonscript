@@ -64,6 +64,7 @@ class Block
     @_state = {}
 
     if @parent
+      @root = @parent.root
       @indent = @parent.indent + 1
       setmetatable @_state, { __index: @parent._state }
     else
@@ -226,7 +227,7 @@ class Block
   -- line wise compile functions
   name: (node) => @value node
   value: (node, ...) =>
-    node = transform.Value node
+    node = @root.transform.value node
     action = if type(node) != "table"
       "raw_value"
     else
@@ -244,7 +245,7 @@ class Block
 
   stm: (node, ...) =>
     return if not node -- slip blank statements
-    node = transform.Statement node
+    node = @root.transform.statement node
     fn = line_compile[ntype(node)]
     if not fn
       -- coerce value into statement
@@ -264,6 +265,16 @@ class Block
     nil
 
 class RootBlock extends Block
+  new: (...) =>
+    @root = self
+    @transform = {
+      value: transform.Value\instance self
+      statement: transform.Statement\instance self
+    }
+    super ...
+
+  __tostring: => "RootBlock<>"
+
   render: =>
     @_insert_breaks!
     concat @_lines, "\n"

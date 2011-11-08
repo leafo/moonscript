@@ -7,7 +7,7 @@ local ntype, build, smart_node, is_slice = types.ntype, types.build, types.smart
 local insert = table.insert
 local is_value
 is_value = function(stm)
-  return moonscript.compile.Block:is_value(stm) or Value.can_transform(stm)
+  return moonscript.compile.Block:is_value(stm) or Value:can_transform(stm)
 end
 NameProxy = (function()
   local _parent_0 = nil
@@ -154,43 +154,63 @@ is_singular = function(body)
 end
 local constructor_name = "new"
 local Transformer
-Transformer = function(transformers)
-  local seen_nodes = { }
-  local tf = {
-    transform = function(n, ...)
-      if seen_nodes[n] then
-        return n
+Transformer = (function()
+  local _parent_0 = nil
+  local _base_0 = {
+    transform = function(self, scope, node, ...)
+      if self.seen_nodes[node] then
+        return node
       end
-      seen_nodes[n] = true
+      self.seen_nodes[node] = true
       while true do
-        local transformer = transformers[ntype(n)]
+        local transformer = self.transformers[ntype(node)]
         local res
         if transformer then
-          res = transformer(n, ...) or n
+          res = transformer(scope, node, ...) or node
         else
-          res = n
+          res = node
         end
-        if res == n then
-          return n
+        if res == node then
+          return node
         end
-        n = res
+        node = res
       end
     end,
-    can_transform = function(node)
-      return transformers[ntype(node)] ~= nil
+    __call = function(self, node, ...)
+      return self:transform(self.scope, node, ...)
+    end,
+    instance = function(self, scope)
+      return Transformer(self.transformers, scope)
+    end,
+    can_transform = function(self, node)
+      return self.transformers[ntype(node)] ~= nil
     end
   }
-  return setmetatable(tf, {
-    __call = function(self, ...)
-      return self.transform(...)
+  _base_0.__index = _base_0
+  if _parent_0 then
+    setmetatable(_base_0, getmetatable(_parent_0).__index)
+  end
+  local _class_0 = setmetatable({
+    __init = function(self, transformers, scope)
+      self.transformers, self.scope = transformers, scope
+      self.seen_nodes = { }
+    end
+  }, {
+    __index = _base_0,
+    __call = function(cls, ...)
+      local _self_0 = setmetatable({}, _base_0)
+      cls.__init(_self_0, ...)
+      return _self_0
     end
   })
-end
+  _base_0.__class = _class_0
+  return _class_0
+end)()
 Statement = Transformer({
-  assign = function(node)
+  assign = function(self, node)
     local _, names, values = unpack(node)
     if #values == 1 and types.cascading[ntype(values[1])] then
-      values[1] = Statement(values[1], function(stm)
+      values[1] = self.transform.statement(values[1], function(stm)
         local t = ntype(stm)
         if is_value(stm) then
           return {
@@ -215,7 +235,7 @@ Statement = Transformer({
       return node
     end
   end,
-  export = function(node)
+  export = function(self, node)
     if #node > 2 then
       if node[2] == "class" then
         local cls = smart_node(node[3])
@@ -241,7 +261,7 @@ Statement = Transformer({
       return nil
     end
   end,
-  update = function(node)
+  update = function(self, node)
     local _, name, op, exp = unpack(node)
     local op_final = op:match("^(.+)=$")
     if not op_final then
@@ -254,7 +274,7 @@ Statement = Transformer({
       exp
     })
   end,
-  import = function(node)
+  import = function(self, node)
     local _, names, source = unpack(node)
     local stubs = (function()
       local _accum_0 = { }
@@ -340,7 +360,7 @@ Statement = Transformer({
       })
     end
   end,
-  comprehension = function(node, action)
+  comprehension = function(self, node, action)
     local _, exp, clauses = unpack(node)
     action = action or function(exp)
       return {
@@ -376,7 +396,7 @@ Statement = Transformer({
     end
     return current_stms[1]
   end,
-  ["if"] = function(node, ret)
+  ["if"] = function(self, node, ret)
     if ret then
       smart_node(node)
       node['then'] = apply_to_last(node['then'], ret)
@@ -388,7 +408,7 @@ Statement = Transformer({
     end
     return node
   end,
-  with = function(node, ret)
+  with = function(self, node, ret)
     local _, exp, block = unpack(node)
     local scope_name = NameProxy("with")
     return build["do"]({
@@ -404,7 +424,7 @@ Statement = Transformer({
       end)()
     })
   end,
-  foreach = function(node)
+  foreach = function(self, node)
     smart_node(node)
     if ntype(node.iter) == "unpack" then
       local list = node.iter[2]
@@ -470,7 +490,7 @@ Statement = Transformer({
       })
     end
   end,
-  class = function(node)
+  class = function(self, node)
     local _, name, parent_val, tbl = unpack(node)
     local constructor = nil
     local properties = (function()
@@ -766,58 +786,62 @@ Accumulator = (function()
   return _class_0
 end)()
 local default_accumulator
-default_accumulator = function(node)
+default_accumulator = function(self, node)
   return Accumulator():convert(node)
 end
 local implicitly_return
-implicitly_return = function(stm)
-  local t = ntype(stm)
-  if types.manual_return[t] or not is_value(stm) then
-    return stm
-  elseif types.cascading[t] then
-    return Statement(stm, implicitly_return)
-  else
-    return {
-      "return",
-      stm
-    }
+implicitly_return = function(scope)
+  local fn
+  fn = function(stm)
+    local t = ntype(stm)
+    if types.manual_return[t] or not is_value(stm) then
+      return stm
+    elseif types.cascading[t] then
+      return scope.transform.statement(stm, fn)
+    else
+      return {
+        "return",
+        stm
+      }
+    end
   end
+  return fn
 end
 Value = Transformer({
   ["for"] = default_accumulator,
   ["while"] = default_accumulator,
   foreach = default_accumulator,
-  comprehension = function(node)
+  comprehension = function(self, node)
     local a = Accumulator()
-    node = Statement(node, function(exp)
+    node = self.transform.statement(node, function(exp)
       return a:mutate_body({
         exp
       }, false)
     end)
     return a:wrap(node)
   end,
-  fndef = function(node)
+  fndef = function(self, node)
     smart_node(node)
-    node.body = apply_to_last(node.body, implicitly_return)
+    node.body = apply_to_last(node.body, implicitly_return(self))
     return node
   end,
-  ["if"] = function(node)
+  ["if"] = function(self, node)
     return build.block_exp({
       node
     })
   end,
-  with = function(node)
+  with = function(self, node)
     return build.block_exp({
       node
     })
   end,
-  chain = function(node)
+  chain = function(self, node)
     local stub = node[#node]
     if type(stub) == "table" and stub[1] == "colon_stub" then
       table.remove(node, #node)
       local base_name = NameProxy("base")
       local fn_name = NameProxy("fn")
-      return Value(build.block_exp({
+      return self.transform.value(build.block_exp({
         build.assign({
           names = {
             base_name
@@ -862,7 +886,7 @@ Value = Transformer({
       }))
     end
   end,
-  block_exp = function(node)
+  block_exp = function(self, node)
     local _, body = unpack(node)
     local fn = nil
     local arg_list = { }
