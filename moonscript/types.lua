@@ -173,6 +173,9 @@ build = setmetatable({
     })
   end,
   table = function(tbl)
+    if tbl == nil then
+      tbl = { }
+    end
     return {
       "table",
       tbl

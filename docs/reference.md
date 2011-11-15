@@ -281,10 +281,16 @@ same as the variable names, then the `:` prefix operator can be used:
 
     print_table :hair, :height
 
-## Table Comprehensions
+## Comprehensions
 
-Table comprehensions provide a quick way to iterate over a table's values while
-applying a statement and accumulating the result.
+Compiling provide a convenient syntax for constructing a new table by iterating
+over some existing object and applying an expression to its values. There are
+two kinds of comprehensions: list comprehensions and table comprehensions. They
+both produce Lua tables; _list comprehensions_ accumulate values into an
+array-like table, and _table comprehensions_ let you set both the key and the
+value on each iteration.
+
+### List Comprehensions
 
 The following creates a copy of the `items` table but with all the values
 doubled.
@@ -311,6 +317,33 @@ Using multiple `for` clauses is the same as using nested loops:
     y_coords = {9, 2, 3}
 
     points = [{x,y} for x in *x_coords for y in *y_coords]
+
+### Table Comprehensions
+
+The syntax for table comprehensions is very similar, differing by using `{` and
+`}` and taking two values from each iteration.
+
+This example copies the key-value table `thing`:
+
+    thing = {
+      color: "red"
+      name: "fast"
+      width: 123
+    }
+
+    thing_copy = {k,v for k,v in pairs thing}
+
+Table comprehensions, like list comprehensions, also support multiple `for` and
+`when` clauses`. In this example we use a `where` clause to prevent the value
+associated with the `color` key from being copied.
+
+    no_color = {k,v for k,v in pairs thing when k != "color"}
+
+The `*` operator is also supported. Here we create a square root look up table
+for a few numbers.
+
+    numbers = {1,2,3,4}
+    sqrts = {i, math.sqrt i for i in *numbers}
 
 ### Slicing
 

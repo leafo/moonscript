@@ -206,6 +206,35 @@ Transformer = (function()
   _base_0.__class = _class_0
   return _class_0
 end)()
+local construct_comprehension
+construct_comprehension = function(inner, clauses)
+  local current_stms = inner
+  for _, clause in reversed(clauses) do
+    local t = clause[1]
+    if t == "for" then
+      local _, names, iter = unpack(clause)
+      current_stms = {
+        "foreach",
+        names,
+        iter,
+        current_stms
+      }
+    elseif t == "when" then
+      local _, cond = unpack(clause)
+      current_stms = {
+        "if",
+        cond,
+        current_stms
+      }
+    else
+      current_stms = error("Unknown comprehension clause: " .. t)
+    end
+    current_stms = {
+      current_stms
+    }
+  end
+  return current_stms[1]
+end
 Statement = Transformer({
   assign = function(self, node)
     local _, names, values = unpack(node)
@@ -367,34 +396,7 @@ Statement = Transformer({
         exp
       }
     end
-    local current_stms = action(exp)
-    for _, clause in reversed(clauses) do
-      local t = clause[1]
-      if t == "for" then
-        local names, iter
-        _, names, iter = unpack(clause)
-        current_stms = {
-          "foreach",
-          names,
-          iter,
-          current_stms
-        }
-      elseif t == "when" then
-        local cond
-        _, cond = unpack(clause)
-        current_stms = {
-          "if",
-          cond,
-          current_stms
-        }
-      else
-        current_stms = error("Unknown comprehension clause: " .. t)
-      end
-      current_stms = {
-        current_stms
-      }
-    end
-    return current_stms[1]
+    return construct_comprehension(action(exp), clauses)
   end,
   ["if"] = function(self, node, ret)
     if ret then
@@ -819,6 +821,25 @@ Value = Transformer({
       }, false)
     end)
     return a:wrap(node)
+  end,
+  tblcomprehension = function(self, node)
+    local _, key_exp, value_exp, clauses = unpack(node)
+    local accum = NameProxy("tbl")
+    local dest = build.chain({
+      base = accum,
+      {
+        "index",
+        key_exp
+      }
+    })
+    local inner = build.assign_one(dest, value_exp)
+    return build.block_exp({
+      build.assign_one(accum, build.table()),
+      construct_comprehension({
+        inner
+      }, clauses),
+      accum
+    })
   end,
   fndef = function(self, node)
     smart_node(node)

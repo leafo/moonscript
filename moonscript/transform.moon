@@ -108,6 +108,22 @@ class Transformer
   can_transform: (node) =>
     @transformers[ntype node] != nil
 
+construct_comprehension = (inner, clauses) ->
+  current_stms = inner
+  for _, clause in reversed clauses
+    t = clause[1]
+    current_stms = if t == "for"
+      _, names, iter = unpack clause
+      {"foreach", names, iter, current_stms}
+    elseif t == "when"
+      _, cond = unpack clause
+      {"if", cond, current_stms}
+    else
+      error "Unknown comprehension clause: "..t
+    current_stms = {current_stms}
+
+  current_stms[1]
+
 Statement = Transformer {
   assign: (node) =>
     _, names, values = unpack node
@@ -185,23 +201,8 @@ Statement = Transformer {
 
   comprehension: (node, action) =>
     _, exp, clauses = unpack node
-
     action = action or (exp) -> {exp}
-
-    current_stms = action exp
-    for _, clause in reversed clauses
-      t = clause[1]
-      current_stms = if t == "for"
-        _, names, iter = unpack clause
-        {"foreach", names, iter, current_stms}
-      elseif t == "when"
-        _, cond = unpack clause
-        {"if", cond, current_stms}
-      else
-        error "Unknown comprehension clause: "..t
-      current_stms = {current_stms}
-
-    current_stms[1]
+    construct_comprehension action(exp), clauses
 
   -- handle cascading return decorator
   if: (node, ret) =>
@@ -428,6 +429,7 @@ class Accumulator
 default_accumulator = (node) =>
   Accumulator!\convert node
 
+
 implicitly_return = (scope) ->
   fn = (stm) ->
     t = ntype stm
@@ -450,6 +452,19 @@ Value = Transformer {
     node = @transform.statement node, (exp) ->
       a\mutate_body {exp}, false
     a\wrap node
+
+  tblcomprehension: (node) =>
+    _, key_exp, value_exp, clauses = unpack node
+
+    accum = NameProxy "tbl"
+    dest = build.chain { base: accum, {"index", key_exp} }
+    inner = build.assign_one dest, value_exp
+
+    build.block_exp {
+      build.assign_one accum, build.table!
+      construct_comprehension {inner}, clauses
+      accum
+    }
 
   fndef: (node) =>
     smart_node node

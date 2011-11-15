@@ -94,7 +94,7 @@ build = setmetatable {
       names: {name}
       values: {value}
     }
-  table: (tbl) ->
+  table: (tbl={}) ->
     {"table", tbl}
   block_exp: (body) ->
     {"block_exp", body}
