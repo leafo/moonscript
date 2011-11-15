@@ -4,9 +4,32 @@ if not moon or not moon.inject
 
 util = require "moonscript.util"
 
+lua = { :debug }
+
 export *
 
 dump = util.dump
+
+debug = {
+  upvalue: (fn, k, v) ->
+    upvalues = {}
+    i = 1
+    while true
+      name = lua.debug.getupvalue(fn, i)
+      break if name == nil
+      upvalues[name] = i
+      i += 1
+
+    if not upvalues[k]
+      error "Failed to find upvalue: " .. tostring k
+
+    if not v
+      _, value = lua.debug.getupvalue fn, upvalues[k]
+      value
+    else
+      lua.debug.setupvalue fn, upvalues[k], v
+}
+
 
 -- run a function with scope injected before its function environment
 run_with_scope = (fn, scope, ...) ->

@@ -2,7 +2,33 @@ if not moon or not moon.inject then
   module("moon", package.seeall)
 end
 local util = require("moonscript.util")
+local lua = {
+  debug = debug
+}
 dump = util.dump
+debug = {
+  upvalue = function(fn, k, v)
+    local upvalues = { }
+    local i = 1
+    while true do
+      local name = lua.debug.getupvalue(fn, i)
+      if name == nil then
+        break
+      end
+      upvalues[name] = i
+      i = i + 1
+    end
+    if not upvalues[k] then
+      error("Failed to find upvalue: " .. tostring(k))
+    end
+    if not v then
+      local _, value = lua.debug.getupvalue(fn, upvalues[k])
+      return value
+    else
+      return lua.debug.setupvalue(fn, upvalues[k], v)
+    end
+  end
+}
 run_with_scope = function(fn, scope, ...)
   local old_env = getfenv(fn)
   local env = setmetatable({ }, {
