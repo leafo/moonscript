@@ -267,6 +267,45 @@ Statement = Transformer {
         }
       }
 
+  switch: (node, ret) =>
+    _, exp, conds = unpack node
+    print "compiling switch", ret
+
+    exp_name = NameProxy "exp"
+
+    -- convert switch conds into if statment conds
+    convert_cond = (cond) ->
+      t, case_exp, body = unpack cond
+      out = {}
+      insert out, t == "case" and "elseif" or "else"
+      if  t != "else"
+        insert out, {"exp", case_exp, "==", exp_name} if t != "else"
+      else
+        body = case_exp
+
+      if ret
+        body = apply_to_last body, ret
+
+      insert out, body
+
+      out
+
+    first = true
+    if_stm = {"if"}
+    for cond in *conds
+      if_cond = convert_cond cond
+      if first
+        first = false
+        insert if_stm, if_cond[2]
+        insert if_stm, if_cond[3]
+      else
+        insert if_stm, if_cond
+
+    build.group {
+      build.assign_one exp_name, exp
+      if_stm
+    }
+
   class: (node) =>
     _, name, parent_val, tbl = unpack node
 
@@ -473,6 +512,8 @@ Value = Transformer {
 
   if: (node) => build.block_exp { node }
   with: (node) => build.block_exp { node }
+  switch: (node) =>
+    build.block_exp { node }
 
   -- pull out colon chain
   chain: (node) =>

@@ -272,7 +272,7 @@ local build_grammar = wrap_env(function()
 		CheckIndent = Cmt(Indent, check_indent), -- validates line is in correct indent
 		Line = (CheckIndent * Statement + Space * #Stop),
 
-		Statement = (Import + While + With + For + ForEach + Return
+		Statement = (Import + While + With + For + ForEach + Switch + Return
 			+ ClassDecl + Export + BreakLoop + Ct(ExpList) / flatten_or_mark"explist" * Space) * ((
 				-- statement decorators
 				key"if" * Exp * (key"else" * Exp)^-1 * Space / mark"if" +
@@ -298,6 +298,12 @@ local build_grammar = wrap_env(function()
 
 		With = key"with" * Exp * key"do"^-1 * Body / mark"with",
 
+		Switch = key"switch" * Exp * key"do"^-1 * Space^-1 * Break * SwitchBlock / mark"switch",
+
+		SwitchBlock = EmptyLine^0 * Advance * Ct(SwitchCase * (Break^1 * SwitchCase)^0 * (Break^1 * SwitchElse)^-1) * PopIndent,
+		SwitchCase = key"when" * Exp * key"then"^-1 * Body / mark"case",
+		SwitchElse = key"else" * Body / mark"else",
+
 		If = key"if" * Exp * key"then"^-1 * Body *
 			((Break * CheckIndent)^-1 * EmptyLine^0 * key"elseif" * Exp * key"then"^-1 * Body / mark"elseif")^0 *
 			((Break * CheckIndent)^-1 * EmptyLine^0 * key"else" * Body / mark"else")^-1 / mark"if",
@@ -317,7 +323,7 @@ local build_grammar = wrap_env(function()
 		CompFor = key"for" * Ct(NameList) * key"in" * (sym"*" * Exp / mark"unpack" + Exp) / mark"for",
 		CompClause = CompFor + key"when" * Exp / mark"when",
 
-		Assign = Ct(AssignableList) * sym"=" * (Ct(With + If) + Ct(TableBlock + ExpListLow)) / mark"assign",
+		Assign = Ct(AssignableList) * sym"=" * (Ct(With + If + Switch) + Ct(TableBlock + ExpListLow)) / mark"assign",
 		Update = Assignable * ((sym"..=" + sym"+=" + sym"-=" + sym"*=" + sym"/=" + sym"%=")/trim) * Exp / mark"update",
 
 		-- we can ignore precedence for now

@@ -10,7 +10,8 @@ manual_return = data.Set({
 })
 cascading = data.Set({
   "if",
-  "with"
+  "with",
+  "switch"
 })
 ntype = function(node)
   if type(node) ~= "table" then

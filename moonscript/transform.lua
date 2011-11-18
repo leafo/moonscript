@@ -492,6 +492,54 @@ Statement = Transformer({
       })
     end
   end,
+  switch = function(self, node, ret)
+    local _, exp, conds = unpack(node)
+    print("compiling switch", ret)
+    local exp_name = NameProxy("exp")
+    local convert_cond
+    convert_cond = function(cond)
+      local t, case_exp, body = unpack(cond)
+      local out = { }
+      insert(out, t == "case" and "elseif" or "else")
+      if t ~= "else" then
+        if t ~= "else" then
+          insert(out, {
+            "exp",
+            case_exp,
+            "==",
+            exp_name
+          })
+        end
+      else
+        body = case_exp
+      end
+      if ret then
+        body = apply_to_last(body, ret)
+      end
+      insert(out, body)
+      return out
+    end
+    local first = true
+    local if_stm = {
+      "if"
+    }
+    local _list_0 = conds
+    for _index_0 = 1, #_list_0 do
+      local cond = _list_0[_index_0]
+      local if_cond = convert_cond(cond)
+      if first then
+        first = false
+        insert(if_stm, if_cond[2])
+        insert(if_stm, if_cond[3])
+      else
+        insert(if_stm, if_cond)
+      end
+    end
+    return build.group({
+      build.assign_one(exp_name, exp),
+      if_stm
+    })
+  end,
   class = function(self, node)
     local _, name, parent_val, tbl = unpack(node)
     local constructor = nil
@@ -852,6 +900,11 @@ Value = Transformer({
     })
   end,
   with = function(self, node)
+    return build.block_exp({
+      node
+    })
+  end,
+  switch = function(self, node)
     return build.block_exp({
       node
     })

@@ -11,7 +11,7 @@ import insert from table
 manual_return = data.Set{"foreach", "for", "while", "return"}
 
 -- assigns and returns are bubbled into their bodies
-cascading = data.Set{ "if", "with" }
+cascading = data.Set{ "if", "with", "switch" }
 
 -- type of node as string
 ntype = (node) ->
