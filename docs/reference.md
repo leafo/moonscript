@@ -486,6 +486,47 @@ And with basic loops:
 
     print "item: ", item for item in *items
 
+## Switch
+
+The switch statement is shorthand for writing a series of if statements that
+check against the same value. Note that the value is only evaluated once. Like
+if statements, switches can have an else block to handle no matches. Comparison
+is done with the `==` operator.
+
+    name = "Dan"
+    switch name
+      case "Robert"
+        print "You are robert"
+      case "Dan"
+        print "Your name, it's Dan"
+      else
+        print "I don't know about your name"
+
+Switches can be used as expressions as well, here we can assign the result of
+the switch to a variable:
+
+    b = 1
+    next_number = switch b
+      case 1
+        2
+      case 2
+        3
+      else
+        error "can't count that high!"
+
+We can use the `then` keyword to write a switch case's block on a single line.
+No extra keyword is needed to write the else block on a single line.
+
+    msg = switch math.random(1, 5)
+      case 1 then "you are lucky"
+      case 2 then "you are almost lucky"
+      else "not so lucky"
+
+It is worth noting the order of the case comparison expression. The case's
+expression is on the left hand side. This can be useful if the case's
+expression wants to overwrite how the comparison is done by defining an `eq`
+metamethod.
+
 ## Object Oriented Programming
 
 In these examples, the generated Lua code may appear overwhelming. It is best
