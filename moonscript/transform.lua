@@ -494,7 +494,6 @@ Statement = Transformer({
   end,
   switch = function(self, node, ret)
     local _, exp, conds = unpack(node)
-    print("compiling switch", ret)
     local exp_name = NameProxy("exp")
     local convert_cond
     convert_cond = function(cond)

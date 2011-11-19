@@ -2,6 +2,7 @@
 
 - don't reuse _, put a local on it, so we don't keep around trash
 
+-- swithc X with Func
 
 - or= and=
 

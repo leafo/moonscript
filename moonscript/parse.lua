@@ -340,6 +340,7 @@ local build_grammar = wrap_env(function()
 
 		SimpleValue =
 			If +
+			Switch +
 			With +
 			ForEach + For + While +
 			sym"-" * -SomeSpace * Exp / mark"minus" +

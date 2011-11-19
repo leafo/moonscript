@@ -269,8 +269,6 @@ Statement = Transformer {
 
   switch: (node, ret) =>
     _, exp, conds = unpack node
-    print "compiling switch", ret
-
     exp_name = NameProxy "exp"
 
     -- convert switch conds into if statment conds
