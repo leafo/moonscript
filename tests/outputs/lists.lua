@@ -271,3 +271,11 @@ for _index_0 = 1, #_list_8 do
   local thing = _list_8[_index_0]
   print(thing)
 end
+local _
+_ = function()
+  local _list_9 = rows
+  for _index_0 = 1, #_list_9 do
+    local row = _list_9[_index_0]
+    a = b
+  end
+end

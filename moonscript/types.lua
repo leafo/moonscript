@@ -13,6 +13,13 @@ cascading = data.Set({
   "with",
   "switch"
 })
+is_value = function(stm)
+  local compile, transform = moonscript.compile, moonscript.transform
+  return compile.Block:is_value(stm) or transform.Value:can_transform(stm)
+end
+comprehension_has_value = function(comp)
+  return is_value(comp[2])
+end
 ntype = function(node)
   if type(node) ~= "table" then
     return "value"

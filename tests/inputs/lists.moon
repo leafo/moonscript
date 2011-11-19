@@ -69,4 +69,5 @@ normal = (hello) ->
 test = x 1,2,3,4,5
 print thing for thing in *test
 
+-> a = b for row in *rows
 

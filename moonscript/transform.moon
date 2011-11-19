@@ -11,10 +11,6 @@ import insert from table
 
 export Statement, Value, NameProxy, Run
 
--- TODO refactor
-is_value = (stm) ->
-  moonscript.compile.Block\is_value(stm) or Value\can_transform stm
-
 class NameProxy
   new: (@prefix) =>
     self[1] = "temp_name"
@@ -131,7 +127,7 @@ Statement = Transformer {
     if #values == 1 and types.cascading[ntype values[1]]
       values[1] = @transform.statement values[1], (stm) ->
         t = ntype stm
-        if is_value stm
+        if types.is_value stm
           {"assign", names, {stm}}
         else
           stm
@@ -201,6 +197,7 @@ Statement = Transformer {
 
   comprehension: (node, action) =>
     _, exp, clauses = unpack node
+
     action = action or (exp) -> {exp}
     construct_comprehension action(exp), clauses
 
@@ -470,12 +467,15 @@ default_accumulator = (node) =>
 implicitly_return = (scope) ->
   fn = (stm) ->
     t = ntype stm
-    if types.manual_return[t] or not is_value stm
+    if types.manual_return[t] or not types.is_value stm
       stm
     elseif types.cascading[t]
       scope.transform.statement stm, fn
     else
-      {"return", stm}
+      if t == "comprehension" and not types.comprehension_has_value stm
+        stm
+      else
+        {"return", stm}
 
   fn
 

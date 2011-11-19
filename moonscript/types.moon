@@ -2,8 +2,9 @@ module "moonscript.types", package.seeall
 util = require "moonscript.util"
 data = require "moonscript.data"
 
-export ntype, smart_node, build
+export ntype, smart_node, build, is_value
 export is_slice, manual_return, cascading
+export comprehension_has_value
 
 import insert from table
 
@@ -12,6 +13,13 @@ manual_return = data.Set{"foreach", "for", "while", "return"}
 
 -- assigns and returns are bubbled into their bodies
 cascading = data.Set{ "if", "with", "switch" }
+
+is_value = (stm) ->
+  import compile, transform from moonscript
+  compile.Block\is_value(stm) or transform.Value\can_transform stm
+
+comprehension_has_value = (comp) ->
+  is_value comp[2]
 
 -- type of node as string
 ntype = (node) ->

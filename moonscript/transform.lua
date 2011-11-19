@@ -5,10 +5,6 @@ local data = require("moonscript.data")
 local reversed = util.reversed
 local ntype, build, smart_node, is_slice = types.ntype, types.build, types.smart_node, types.is_slice
 local insert = table.insert
-local is_value
-is_value = function(stm)
-  return moonscript.compile.Block:is_value(stm) or Value:can_transform(stm)
-end
 NameProxy = (function()
   local _parent_0 = nil
   local _base_0 = {
@@ -241,7 +237,7 @@ Statement = Transformer({
     if #values == 1 and types.cascading[ntype(values[1])] then
       values[1] = self.transform.statement(values[1], function(stm)
         local t = ntype(stm)
-        if is_value(stm) then
+        if types.is_value(stm) then
           return {
             "assign",
             names,
@@ -843,15 +839,19 @@ implicitly_return = function(scope)
   local fn
   fn = function(stm)
     local t = ntype(stm)
-    if types.manual_return[t] or not is_value(stm) then
+    if types.manual_return[t] or not types.is_value(stm) then
       return stm
     elseif types.cascading[t] then
       return scope.transform.statement(stm, fn)
     else
-      return {
-        "return",
-        stm
-      }
+      if t == "comprehension" and not types.comprehension_has_value(stm) then
+        return stm
+      else
+        return {
+          "return",
+          stm
+        }
+      end
     end
   end
   return fn
