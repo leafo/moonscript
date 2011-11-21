@@ -66,6 +66,8 @@ local self_var = token("self_ref", "@" * l.word + "self")
 
 local proper_ident = token("proper_ident", R("AZ") * l.word)
 
+local tbl_key = token("tbl_key", l.word * ":" + ":" * l.word )
+
 _rules = {
   { 'whitespace', ws },
   { 'error', err },
@@ -73,7 +75,7 @@ _rules = {
   { 'special', special },
   { 'keyword', keyword },
   { 'builtin', builtin },
-  { 'identifier', proper_ident + identifier },
+  { 'identifier', proper_ident + tbl_key + identifier },
   { 'comment', comment },
   { 'number', number },
   { 'string', string },
@@ -92,6 +94,7 @@ _tokenstyles = {
   { 'fndef', style_fndef },
   { 'symbol', style_fndef },
   { 'special', style_special },
+  { 'tbl_key', { fore = l.colors.red } },
   { l.OPERATOR, { fore = l.colors.red, bold = true } },
   { l.FUNCTION, { fore = l.colors.orange } },
 }
