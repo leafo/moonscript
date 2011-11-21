@@ -26,10 +26,10 @@ style_comment     = style { fore = colors.grey,                     }
 style_constant    = style { fore = colors.teal,    bold      = true }
 style_definition  = style { fore = colors.red,     bold      = true }
 style_error       = style { fore = colors.white, back = colors.bright_red, bold = true}
-style_function    = style { fore = colors.white,   bold      = true }
+style_function    = style { fore = colors.orange,   bold      = true }
 style_keyword     = style { fore = colors.purple,  bold      = true }
 style_number      = style { fore = colors.blue                      }
-style_operator    = style { fore = colors.white,   bold      = true }
+style_operator    = style { fore = colors.red,   bold      = true }
 style_string      = style { fore = colors.yellow,  bold      = true }
 style_preproc     = style { fore = colors.light_blue                }
 style_tag         = style { fore = colors.teal,    bold      = true }

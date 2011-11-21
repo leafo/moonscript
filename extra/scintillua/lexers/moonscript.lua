@@ -44,12 +44,36 @@ local keyword = token(l.KEYWORD, word_match {
 local special = token("special", word_match { "true", "false", "nil" }) 
 
 -- Functions.
-local builtin = token(l.FUNCTION, word_match {
-  'assert', 'collectgarbage', 'dofile', 'error', 'getfenv', 'getmetatable',
-  'ipairs', 'load', 'loadfile', 'loadstring', 'module', 'next', 'pairs',
-  'pcall', 'print', 'rawequal', 'rawget', 'rawset', 'require', 'setfenv',
-  'setmetatable', 'tonumber', 'tostring', 'type', 'unpack', 'xpcall'
-})
+local builtin = token(l.FUNCTION, word_match({
+	"_G","_VERSION","assert","collectgarbage","dofile","error","getfenv","getmetatable","ipairs","load",
+	"loadfile","loadstring","module","next","pairs","pcall","print","rawequal","rawget","rawset","require",
+	"select","setfenv","setmetatable","tonumber","tostring","type","unpack","xpcall",
+
+	"coroutine.create","coroutine.resume","coroutine.running","coroutine.status","coroutine.wrap","coroutine.yield",
+
+	"debug.debug","debug.getfenv","debug.gethook","debug.getinfo","debug.getlocal","debug.getmetatable",
+	"debug.getregistry","debug.getupvalue","debug.setfenv","debug.sethook","debug.setlocal","debug.setmetatable",
+	"debug.setupvalue","debug.traceback",
+
+	"io.close","io.flush","io.input","io.lines","io.open","io.output","io.popen","io.read","io.stderr","io.stdin",
+	"io.stdout","io.tmpfile","io.type","io.write",
+
+	"math.abs","math.acos","math.asin","math.atan","math.atan2","math.ceil","math.cos","math.cosh","math.deg",
+	"math.exp","math.floor","math.fmod","math.frexp","math.huge","math.ldexp","math.log","math.log10","math.max",
+	"math.min","math.modf","math.pi","math.pow","math.rad","math.random","math.randomseed","math.sin","math.sinh",
+	"math.sqrt","math.tan","math.tanh",
+
+	"os.clock","os.date","os.difftime","os.execute","os.exit","os.getenv","os.remove","os.rename","os.setlocale",
+	"os.time","os.tmpname",
+
+	"package.cpath","package.loaded","package.loaders","package.loadlib","package.path","package.preload",
+	"package.seeall",
+
+	"string.byte","string.char","string.dump","string.find","string.format","string.gmatch","string.gsub",
+	"string.len","string.lower","string.match","string.rep","string.reverse","string.sub","string.upper",
+
+	"table.concat","table.insert","table.maxn","table.remove","table.sort"
+}, "%."))
 
 -- Identifiers.
 local identifier = token(l.IDENTIFIER, l.word)
@@ -95,6 +119,4 @@ _tokenstyles = {
   { 'symbol', style_fndef },
   { 'special', style_special },
   { 'tbl_key', { fore = l.colors.red } },
-  { l.OPERATOR, { fore = l.colors.red, bold = true } },
-  { l.FUNCTION, { fore = l.colors.orange } },
 }
