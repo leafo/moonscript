@@ -27,13 +27,7 @@ local comment = token(l.COMMENT, block_comment + line_comment)
 -- Strings.
 local sq_str = l.delimited_range("'", '\\', true)
 local dq_str = l.delimited_range('"', '\\', true)
-local regex_str = l.delimited_range('/', '\\', nil, nil, '\n') * S('igm')^0
-local string = token(l.STRING, sq_str + dq_str) + P(function(input, index)
-  if index == 1 then return index end
-  local i = index
-  while input:sub(i - 1, i - 1):match('[ \t\r\n\f]') do i = i - 1 end
-  return input:sub(i - 1, i - 1):match('[+%-*%%^!=&|?:;,()%[%]{}]') and index
-end) * token('regex', regex_str) + token('longstring', longstring)
+local string = token(l.STRING, sq_str + dq_str + longstring)
 
 -- Numbers.
 local number = token(l.NUMBER, l.float + l.integer)
@@ -44,11 +38,13 @@ local keyword = token(l.KEYWORD, word_match {
 	'if', 'else', 'elseif', 'then', 'export',
 	'import', 'from', 'with', 'in', 'and',
 	'or', 'not', 'class', 'extends', 'super', 'do',
-	'true', 'false', 'nil', 'using', 'switch', 'when',
+	'using', 'switch', 'when',
 })
 
+local special = token("special", word_match { "true", "false", "nil" }) 
+
 -- Functions.
-local func = token(l.FUNCTION, word_match {
+local builtin = token(l.FUNCTION, word_match {
   'assert', 'collectgarbage', 'dofile', 'error', 'getfenv', 'getmetatable',
   'ipairs', 'load', 'loadfile', 'loadstring', 'module', 'next', 'pairs',
   'pcall', 'print', 'rawequal', 'rawget', 'rawset', 'require', 'setfenv',
@@ -58,34 +54,44 @@ local func = token(l.FUNCTION, word_match {
 -- Identifiers.
 local identifier = token(l.IDENTIFIER, l.word)
 
+local fndef = token("fndef", P"->" + P"=>")
+local err = token(l.ERROR, word_match { "function", "end" })
+
 -- Operators.
-local operator = token(l.OPERATOR, '~=' + S('+-*!\\/%^#=<>;:,.{}[]()'))
+local symbol = token("symbol", S("(){}[]"))
+local operator = token(l.OPERATOR, '~=' + S('+-*!\\/%^#=<>;:,.'))
 
 -- self ref
-local self_var = token('self_ref', "@" * l.word + "self")
+local self_var = token("self_ref", "@" * l.word + "self")
 
-local proper_ident = token('proper_ident', R("AZ") * l.word)
+local proper_ident = token("proper_ident", R("AZ") * l.word)
 
 _rules = {
   { 'whitespace', ws },
+  { 'error', err },
   { 'self', self_var },
+  { 'special', special },
   { 'keyword', keyword },
-  { 'function', func },
+  { 'builtin', builtin },
   { 'identifier', proper_ident + identifier },
   { 'comment', comment },
   { 'number', number },
   { 'string', string },
+  { 'fndef', fndef },
+  { 'symbol', symbol },
   { 'operator', operator },
   { 'any_char', l.any_char },
 }
 
-local pink = l.color("ED", "4E", "78")
+local style_special = { fore = l.colors.light_blue }
+local style_fndef = { fore = l.colors.green }
 
 _tokenstyles = {
-  { 'regex', l.style_string..{ back = l.color('44', '44', '44')} },
-  { 'longstring', l.style_string },
-  { 'self_ref', { fore = l.colors.purple } },
-  { 'proper_ident', { fore = pink, bold = true } },
+  { 'self_ref', style_special },
+  { 'proper_ident', l.style_class },
+  { 'fndef', style_fndef },
+  { 'symbol', style_fndef },
+  { 'special', style_special },
   { l.OPERATOR, { fore = l.colors.red, bold = true } },
   { l.FUNCTION, { fore = l.colors.orange } },
 }
