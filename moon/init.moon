@@ -10,6 +10,9 @@ export *
 
 dump = util.dump
 
+p = (...) ->
+  print dump ...
+
 debug = {
   upvalue: (fn, k, v) ->
     upvalues = {}

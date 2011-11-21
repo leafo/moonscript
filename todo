@@ -1,12 +1,12 @@
 # TODO
 
+-- seems like running in moon messes up require order
+
 - don't reuse _, put a local on it, so we don't keep around trash
 
 -- swithc X with Func
 
 - or= and=
-
-- move stuff out of format that should be in types
 
 - a do block for making a quick anon func and calling it
 
@@ -14,9 +14,6 @@
 - ugly error if attempting to assign to rvalue like #hello
 
 - dump node in mark, see why values are being parsed multiple times
-
-if hello else world
- ->  if hello then hello else world
 
 - varargs that get put in a nested generated function aren't valid anymore:
 
@@ -31,18 +28,13 @@ if hello else world
 * elseif with value that inserts lines
   - need to decompose elif into if inside else
 
-* export could also be used like so:
-
-	export a = -> "hello"
-
-or
+* export later?
 
 	x = 232
 	export x
 
 
 * allow return anywhere in block
-* upercase constants and capital letter variables should automatically be exported (in the global scope?)
 
 * any/every keywords for comprehensions? (what about iterators)
 
@@ -51,10 +43,5 @@ not working right:
     double_args = (...) ->
       [x * 2 for x in *{...}]
 
-
-still some issues with whitespace at end of line
-
 * let array items in table be defined without {} when indented
-* key,value table comprehensions with { }
-
 

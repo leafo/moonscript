@@ -6,6 +6,9 @@ local lua = {
   debug = debug
 }
 dump = util.dump
+p = function(...)
+  return print(dump(...))
+end
 debug = {
   upvalue = function(fn, k, v)
     local upvalues = { }
