@@ -241,6 +241,9 @@ function get_sleep_func()
 	end) then
 		sleep = moonscript._sleep
 	end
+	if not sleep then
+		error("Missing sleep function; install LuaSocket")
+	end
 	return sleep
 end
 
@@ -254,12 +257,13 @@ end
 
 -- returns an iterator that returns files that have been updated
 function create_watcher(files)
-	local msg = "Starting watch loop, Ctrl-C to exit"
+	local msg = "Starting watch loop (Ctrl-C to exit)"
 
 	local inotify
 	pcall(function()
 		inotify = require "inotify"
 	end)
+	inotify = nil
 
 	if inotify then
 		local dirs = {}
@@ -324,7 +328,11 @@ if opts.w then
 	-- catches interrupt error for ctl-c
 	local protected = function()
 		local status, file = pcall(watcher)
-		if status then return file end
+		if status then
+			return file
+		elseif file ~= "interrupted!" then
+			error(file)
+		end
 	end
 
 	for fname in protected do
