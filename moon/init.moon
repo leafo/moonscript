@@ -118,3 +118,13 @@ mixin_table = (tbl, keys) =>
     for key, val in pairs tbl
       self[key] = val
 
+fold = (items, fn)->
+  len = #items
+  if len > 1
+    accum = fn items[1], items[2]
+    for i=3,len
+      accum = fn acum, items[i]
+    accum
+  else
+    items[1]
+
