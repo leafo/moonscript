@@ -13,7 +13,7 @@ dump = util.dump
 p = (...) ->
   print dump ...
 
-debug = {
+debug = setmetatable {
   upvalue: (fn, k, v) ->
     upvalues = {}
     i = 1
@@ -31,8 +31,7 @@ debug = {
       value
     else
       lua.debug.setupvalue fn, upvalues[k], v
-}
-
+}, __index: lua.debug
 
 -- run a function with scope injected before its function environment
 run_with_scope = (fn, scope, ...) ->
