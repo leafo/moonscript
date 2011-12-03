@@ -639,6 +639,10 @@ A few examples of using `super` in different ways:
         -- super as a value is equal to the parent class:
         assert super == ParentClass
 
+`super` can also be used on left side of a [Function Stub](#function_stubs).
+The only major difference is that instead of the resulting function being bound
+to the value of `super`, it is bound to `self`.
+
 ### Types
 
 Every instance of a class carries its type with it. This is stored in the
