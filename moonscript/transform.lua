@@ -656,40 +656,51 @@ Statement = Transformer({
       value = _with_0.block_exp({
         Run(function(self)
           return self:set("super", function(block, chain)
-            local calling_name = block:get("current_block")
-            local slice = (function()
-              local _accum_0 = { }
-              local _len_0 = 0
-              local _list_0 = chain
-              for _index_0 = 3, #_list_0 do
-                local item = _list_0[_index_0]
-                _len_0 = _len_0 + 1
-                _accum_0[_len_0] = item
-              end
-              return _accum_0
-            end)()
-            slice[1] = {
-              "call",
-              {
-                "self",
-                unpack(slice[1][2])
+            if chain then
+              local slice = (function()
+                local _accum_0 = { }
+                local _len_0 = 0
+                local _list_0 = chain
+                for _index_0 = 3, #_list_0 do
+                  local item = _list_0[_index_0]
+                  _len_0 = _len_0 + 1
+                  _accum_0[_len_0] = item
+                end
+                return _accum_0
+              end)()
+              local new_chain = {
+                "chain",
+                parent_cls_name
               }
-            }
-            local act
-            if ntype(calling_name) ~= "value" then
-              act = "index"
+              if slice[1][1] == "call" then
+                local calling_name = block:get("current_block")
+                slice[1] = {
+                  "call",
+                  {
+                    "self",
+                    unpack(slice[1][2])
+                  }
+                }
+                local act
+                if ntype(calling_name) ~= "value" then
+                  act = "index"
+                else
+                  act = "dot"
+                end
+                insert(new_chain, {
+                  act,
+                  calling_name
+                })
+              end
+              local _list_0 = slice
+              for _index_0 = 1, #_list_0 do
+                local item = _list_0[_index_0]
+                insert(new_chain, item)
+              end
+              return new_chain
             else
-              act = "dot"
+              return parent_cls_name
             end
-            return {
-              "chain",
-              parent_cls_name,
-              {
-                act,
-                calling_name
-              },
-              unpack(slice)
-            }
           end)
         end),
         _with_0.assign_one(parent_cls_name, parent_val == "" and "nil" or parent_val),

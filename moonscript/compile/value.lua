@@ -309,6 +309,9 @@ value_compile = {
     return "self:" .. self:value(node[2])
   end,
   raw_value = function(self, value)
+    if value == "super" then
+      return self:value(self:get("super")(self))
+    end
     if value == "..." then
       self.has_varargs = true
     end

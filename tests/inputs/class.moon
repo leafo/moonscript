@@ -44,3 +44,10 @@ class Okay
   something: 20323
   -- yeaha
 
+
+class Biggie extends Okay
+  something: =>
+    super 1,2,3,4
+    super.something another_self, 1,2,3,4
+    assert super == Okay
+

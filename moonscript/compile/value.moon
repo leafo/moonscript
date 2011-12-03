@@ -181,6 +181,10 @@ value_compile =
 
   -- catch all pure string values
   raw_value: (value) =>
+    if value == "super"
+      return @value @get"super" self
+
     if value == "..."
       @has_varargs = true
+
     tostring value

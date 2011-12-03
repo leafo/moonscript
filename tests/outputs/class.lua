@@ -169,3 +169,34 @@ Okay = (function()
   _base_0.__class = _class_0
   return _class_0
 end)()
+local Biggie
+Biggie = (function()
+  local _parent_0 = Okay
+  local _base_0 = {
+    something = function(self)
+      _parent_0.something(self, 1, 2, 3, 4)
+      _parent_0.something(another_self, 1, 2, 3, 4)
+      return assert(_parent_0 == Okay)
+    end
+  }
+  _base_0.__index = _base_0
+  if _parent_0 then
+    setmetatable(_base_0, getmetatable(_parent_0).__index)
+  end
+  local _class_0 = setmetatable({
+    __init = function(self, ...)
+      if _parent_0 then
+        return _parent_0.__init(self, ...)
+      end
+    end
+  }, {
+    __index = _base_0,
+    __call = function(cls, ...)
+      local _self_0 = setmetatable({}, _base_0)
+      cls.__init(_self_0, ...)
+      return _self_0
+    end
+  })
+  _base_0.__class = _class_0
+  return _class_0
+end)()

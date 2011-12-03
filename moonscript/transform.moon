@@ -368,13 +368,22 @@ Statement = Transformer {
       value = .block_exp {
         Run =>
           @set "super", (block, chain) ->
-            calling_name = block\get"current_block"
-            slice = [item for item in *chain[3,]]
-            -- inject self
-            slice[1] = {"call", {"self", unpack slice[1][2]}}
+            if chain
+              slice = [item for item in *chain[3,]]
+              new_chain = {"chain", parent_cls_name}
 
-            act = if ntype(calling_name) != "value" then "index" else "dot"
-            {"chain", parent_cls_name, {act, calling_name}, unpack slice}
+              -- calling super, inject calling name and self into chain
+              if slice[1][1] == "call"
+                calling_name = block\get"current_block"
+                slice[1] = {"call", {"self", unpack slice[1][2]}}
+                act = if ntype(calling_name) != "value" then "index" else "dot"
+                insert new_chain, {act, calling_name}
+
+              insert new_chain, item for item in *slice
+
+              new_chain
+            else
+              parent_cls_name
 
         .assign_one parent_cls_name, parent_val == "" and "nil" or parent_val
         .assign_one base_name, tbl
