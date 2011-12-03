@@ -91,10 +91,7 @@ extend = (...) ->
 
 -- shallow copy
 copy = =>
-  t = {}
-  for key, val in pairs self
-    t[key] = val
-  t
+  {key,val for key,val in pairs self}
 
 -- mixin class properties into self, call new
 mixin = (cls, ...) =>
