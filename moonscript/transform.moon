@@ -372,12 +372,20 @@ Statement = Transformer {
               slice = [item for item in *chain[3,]]
               new_chain = {"chain", parent_cls_name}
 
-              -- calling super, inject calling name and self into chain
-              if slice[1][1] == "call"
-                calling_name = block\get"current_block"
-                slice[1] = {"call", {"self", unpack slice[1][2]}}
-                act = if ntype(calling_name) != "value" then "index" else "dot"
-                insert new_chain, {act, calling_name}
+              head = slice[1]
+              switch head[1]
+                -- calling super, inject calling name and self into chain
+                when "call"
+                  calling_name = block\get"current_block"
+                  slice[1] = {"call", {"self", unpack head[2]}}
+                  act = if ntype(calling_name) != "value" then "index" else "dot"
+                  insert new_chain, {act, calling_name}
+
+                -- colon call on super, replace class with self as first arg
+                when "colon"
+                  call = head[3]
+                  insert new_chain, {"dot", head[2]}
+                  slice[1] = { "call", { "self", unpack call[2] } }
 
               insert new_chain, item for item in *slice
 

@@ -51,3 +51,8 @@ class Biggie extends Okay
     super.something another_self, 1,2,3,4
     assert super == Okay
 
+
+class Yeah
+  okay: =>
+    super\something 1,2,3,4
+

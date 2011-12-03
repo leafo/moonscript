@@ -672,13 +672,15 @@ Statement = Transformer({
                 "chain",
                 parent_cls_name
               }
-              if slice[1][1] == "call" then
+              local head = slice[1]
+              local _exp_0 = head[1]
+              if "call" == _exp_0 then
                 local calling_name = block:get("current_block")
                 slice[1] = {
                   "call",
                   {
                     "self",
-                    unpack(slice[1][2])
+                    unpack(head[2])
                   }
                 }
                 local act
@@ -691,6 +693,19 @@ Statement = Transformer({
                   act,
                   calling_name
                 })
+              elseif "colon" == _exp_0 then
+                local call = head[3]
+                insert(new_chain, {
+                  "dot",
+                  head[2]
+                })
+                slice[1] = {
+                  "call",
+                  {
+                    "self",
+                    unpack(call[2])
+                  }
+                }
               end
               local _list_0 = slice
               for _index_0 = 1, #_list_0 do
