@@ -5,6 +5,33 @@ local data = require("moonscript.data")
 local reversed = util.reversed
 local ntype, build, smart_node, is_slice = types.ntype, types.build, types.smart_node, types.is_slice
 local insert = table.insert
+LocalName = (function()
+  local _parent_0 = nil
+  local _base_0 = {
+    get_name = function(self)
+      return self.name
+    end
+  }
+  _base_0.__index = _base_0
+  if _parent_0 then
+    setmetatable(_base_0, getmetatable(_parent_0).__index)
+  end
+  local _class_0 = setmetatable({
+    __init = function(self, name)
+      self.name = name
+      self[1] = "temp_name"
+    end
+  }, {
+    __index = _base_0,
+    __call = function(cls, ...)
+      local _self_0 = setmetatable({}, _base_0)
+      cls.__init(_self_0, ...)
+      return _self_0
+    end
+  })
+  _base_0.__class = _class_0
+  return _class_0
+end)()
 NameProxy = (function()
   local _parent_0 = nil
   local _base_0 = {
@@ -771,6 +798,16 @@ Statement = Transformer({
         }),
         _with_0.assign_one(cls_name, cls),
         _with_0.assign_one(base_name:chain("__class"), cls_name),
+        _with_0.group((function()
+          if #statements > 0 then
+            return {
+              _with_0.assign_one(LocalName("self"), cls_name),
+              _with_0.group(statements)
+            }
+          else
+            return { }
+          end
+        end)()),
         cls_name
       })
       value = _with_0.group({

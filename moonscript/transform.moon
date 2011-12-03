@@ -9,7 +9,12 @@ import reversed from util
 import ntype, build, smart_node, is_slice from types
 import insert from table
 
-export Statement, Value, NameProxy, Run
+export Statement, Value, NameProxy, LocalName, Run
+
+-- always declares as local
+class LocalName
+  new: (@name) => self[1] = "temp_name"
+  get_name: => @name
 
 class NameProxy
   new: (@prefix) =>
@@ -427,6 +432,11 @@ Statement = Transformer {
 
         .assign_one cls_name, cls
         .assign_one base_name\chain"__class", cls_name
+
+        .group if #statements > 0 {
+          .assign_one LocalName"self", cls_name
+          .group statements
+        } else {}
 
         cls_name
       }

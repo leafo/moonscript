@@ -9,7 +9,7 @@ require "moonscript.compile.value"
 
 transform = require "moonscript.transform"
 
-import NameProxy from transform
+import NameProxy, LocalName from transform
 import Set from require "moonscript.data"
 import ntype from require "moonscript.types"
 
@@ -88,12 +88,15 @@ class Block
 
   declare: (names) =>
     undeclared = for name in *names
-      t = util.moon.type(name)
-      real_name = if t == NameProxy
-        name\get_name self
-      elseif t == "string"
-        name
-      real_name if real_name and not @has_name real_name
+      is_local = false
+      real_name = switch util.moon.type name
+        when LocalName
+          is_local = true
+          name\get_name self
+        when NameProxy then name\get_name self
+        when "string" then name
+
+      real_name if is_local or real_name and not @has_name real_name
 
     @put_name name for name in *undeclared
     undeclared

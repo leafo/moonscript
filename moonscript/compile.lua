@@ -5,7 +5,7 @@ require("moonscript.compile.format")
 require("moonscript.compile.statement")
 require("moonscript.compile.value")
 local transform = require("moonscript.transform")
-local NameProxy = transform.NameProxy
+local NameProxy, LocalName = transform.NameProxy, transform.LocalName
 local Set
 do
   local _table_0 = require("moonscript.data")
@@ -122,15 +122,19 @@ Block = (function()
         local _list_0 = names
         for _index_0 = 1, #_list_0 do
           local name = _list_0[_index_0]
-          local t = util.moon.type(name)
+          local is_local = false
           local real_name
-          if t == NameProxy then
+          local _exp_0 = util.moon.type(name)
+          if LocalName == _exp_0 then
+            is_local = true
             real_name = name:get_name(self)
-          elseif t == "string" then
+          elseif NameProxy == _exp_0 then
+            real_name = name:get_name(self)
+          elseif "string" == _exp_0 then
             real_name = name
           end
           local _value_0
-          if real_name and not self:has_name(real_name) then
+          if is_local or real_name and not self:has_name(real_name) then
             _value_0 = real_name
           end
           if _value_0 ~= nil then
