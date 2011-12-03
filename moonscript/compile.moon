@@ -55,6 +55,8 @@ class Block
   export_all: false
   export_proper: false
 
+  __tostring: => "Block<> <- " .. tostring @parent
+
   new: (@parent, @header, @footer) =>
     @current_line = 1
 

@@ -56,3 +56,16 @@ class Yeah
   okay: =>
     super\something 1,2,3,4
 
+
+class What
+  something: => print "val:", @val
+
+class Hello extends What
+  val: 2323
+  something: => super\something
+
+with Hello!
+  x = \something!
+  print x
+  x!
+

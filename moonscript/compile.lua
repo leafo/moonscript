@@ -96,6 +96,9 @@ Block = (function()
     footer = "end",
     export_all = false,
     export_proper = false,
+    __tostring = function(self)
+      return "Block<> <- " .. tostring(self.parent)
+    end,
     bubble = function(self, other)
       if other == nil then
         other = self.parent

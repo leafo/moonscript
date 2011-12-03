@@ -229,3 +229,73 @@ Yeah = (function()
   _base_0.__class = _class_0
   return _class_0
 end)()
+local What
+What = (function()
+  local _parent_0 = nil
+  local _base_0 = {
+    something = function(self)
+      return print("val:", self.val)
+    end
+  }
+  _base_0.__index = _base_0
+  if _parent_0 then
+    setmetatable(_base_0, getmetatable(_parent_0).__index)
+  end
+  local _class_0 = setmetatable({
+    __init = function(self, ...)
+      if _parent_0 then
+        return _parent_0.__init(self, ...)
+      end
+    end
+  }, {
+    __index = _base_0,
+    __call = function(cls, ...)
+      local _self_0 = setmetatable({}, _base_0)
+      cls.__init(_self_0, ...)
+      return _self_0
+    end
+  })
+  _base_0.__class = _class_0
+  return _class_0
+end)()
+Hello = (function()
+  local _parent_0 = What
+  local _base_0 = {
+    val = 2323,
+    something = function(self)
+      return (function()
+        local _base_1 = _parent_0
+        local _fn_0 = _base_1.something
+        return function(...)
+          return _fn_0(self, ...)
+        end
+      end)()
+    end
+  }
+  _base_0.__index = _base_0
+  if _parent_0 then
+    setmetatable(_base_0, getmetatable(_parent_0).__index)
+  end
+  local _class_0 = setmetatable({
+    __init = function(self, ...)
+      if _parent_0 then
+        return _parent_0.__init(self, ...)
+      end
+    end
+  }, {
+    __index = _base_0,
+    __call = function(cls, ...)
+      local _self_0 = setmetatable({}, _base_0)
+      cls.__init(_self_0, ...)
+      return _self_0
+    end
+  })
+  _base_0.__class = _class_0
+  return _class_0
+end)()
+do
+  local _with_0 = Hello()
+  x = _with_0:something()
+  print(x)
+  x()
+end

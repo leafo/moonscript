@@ -673,6 +673,9 @@ Statement = Transformer({
                 parent_cls_name
               }
               local head = slice[1]
+              if head == nil then
+                return parent_cls_name
+              end
               local _exp_0 = head[1]
               if "call" == _exp_0 then
                 local calling_name = block:get("current_block")
@@ -940,6 +943,7 @@ Value = Transformer({
       table.remove(node, #node)
       local base_name = NameProxy("base")
       local fn_name = NameProxy("fn")
+      local is_super = node[2] == "super"
       return self.transform.value(build.block_exp({
         build.assign({
           names = {
@@ -975,7 +979,7 @@ Value = Transformer({
               {
                 "call",
                 {
-                  base_name,
+                  is_super and "self" or base_name,
                   "..."
                 }
               }

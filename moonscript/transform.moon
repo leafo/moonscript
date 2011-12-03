@@ -373,6 +373,10 @@ Statement = Transformer {
               new_chain = {"chain", parent_cls_name}
 
               head = slice[1]
+
+              if head == nil
+                return parent_cls_name
+
               switch head[1]
                 -- calling super, inject calling name and self into chain
                 when "call"
@@ -539,6 +543,7 @@ Value = Transformer {
       base_name = NameProxy "base"
       fn_name = NameProxy "fn"
 
+      is_super = node[2] == "super"
       @transform.value build.block_exp {
         build.assign {
           names: {base_name}
@@ -556,7 +561,7 @@ Value = Transformer {
           args: {{"..."}}
           body: {
             build.chain {
-              base: fn_name, {"call", {base_name, "..."}}
+              base: fn_name, {"call", {is_super and "self" or base_name, "..."}}
             }
           }
         }
