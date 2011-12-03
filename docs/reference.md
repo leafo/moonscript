@@ -606,10 +606,38 @@ properties and methods from another class.
         super name
 
 Here we extend our Inventory class, and limit the amount of items it can carry.
-The `super` keyword can be called as a function to call the function of the
-same name in the super class. It can also be accessed like an object in order
-to retrieve values in the parent class that might have been shadowed by the
-child class.
+
+### Super
+
+`super` is a special keyword that can be used in two different ways: It can be
+treated as an object, or it can be called like a function. It only has special
+functionality when inside a class.
+
+When called as a function, it will call the function of the same name in the
+parent class. The current `self` will automatically be passed as the first
+argument. (As seen in the [inheritance](#inheritance) example above)
+
+When `super` is used as a normal value, it is a reference to the parent class
+object.
+
+It can be accessed like any of object in order to retrieve values in the
+parent class that might have been shadowed by the child class.
+
+When the `\` calling operator is used with `super`, `self` is inserted as the
+first argument instead of the value of `super` itself. When using `.` to
+retrieve a function, the raw function is returned.
+
+A few examples of using `super` in different ways:
+
+    class MyClass extends ParentClass
+      a_method: =>
+        -- the following have the same effect:
+        super "hello", "world"
+        super\a_method "hello", "world"
+        super.a_method self, "hello", "world"
+
+        -- super as a value is equal to the parent class:
+        assert super == ParentClass
 
 ### Types
 
