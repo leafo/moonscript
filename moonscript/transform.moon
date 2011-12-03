@@ -302,17 +302,27 @@ Statement = Transformer {
     }
 
   class: (node) =>
-    _, name, parent_val, tbl = unpack node
+    _, name, parent_val, body = unpack node
 
+    -- split apart properties and statements
+    statements = {}
+    properties = {}
+    for item in *body
+      switch item[1]
+        when "stm"
+          insert statements, item[2]
+        when "props"
+          for tuple in *item[2,]
+            insert properties, tuple
+
+    -- find constructor
     constructor = nil
-    properties = for entry in *tbl[2]
-      if entry[1] == constructor_name
-        constructor = entry[2]
+    properties = for tuple in *properties
+      if tuple[1] == constructor_name
+        constructor = tuple[2]
         nil
       else
-        entry
-
-    tbl[2] = properties
+        tuple
 
     parent_cls_name = NameProxy "parent"
     base_name = NameProxy "base"
@@ -398,7 +408,7 @@ Statement = Transformer {
               parent_cls_name
 
         .assign_one parent_cls_name, parent_val == "" and "nil" or parent_val
-        .assign_one base_name, tbl
+        .assign_one base_name, {"table", properties}
         .assign_one base_name\chain"__index", base_name
 
         build["if"] {

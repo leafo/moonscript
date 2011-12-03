@@ -536,20 +536,36 @@ Statement = Transformer({
     })
   end,
   class = function(self, node)
-    local _, name, parent_val, tbl = unpack(node)
+    local _, name, parent_val, body = unpack(node)
+    local statements = { }
+    local properties = { }
+    local _list_0 = body
+    for _index_0 = 1, #_list_0 do
+      local item = _list_0[_index_0]
+      local _exp_0 = item[1]
+      if "stm" == _exp_0 then
+        insert(statements, item[2])
+      elseif "props" == _exp_0 then
+        local _list_1 = item
+        for _index_0 = 2, #_list_1 do
+          local tuple = _list_1[_index_0]
+          insert(properties, tuple)
+        end
+      end
+    end
     local constructor = nil
-    local properties = (function()
+    properties = (function()
       local _accum_0 = { }
       local _len_0 = 0
-      local _list_0 = tbl[2]
-      for _index_0 = 1, #_list_0 do
-        local entry = _list_0[_index_0]
+      local _list_1 = properties
+      for _index_0 = 1, #_list_1 do
+        local tuple = _list_1[_index_0]
         local _value_0
-        if entry[1] == constructor_name then
-          constructor = entry[2]
+        if tuple[1] == constructor_name then
+          constructor = tuple[2]
           _value_0 = nil
         else
-          _value_0 = entry
+          _value_0 = tuple
         end
         if _value_0 ~= nil then
           _len_0 = _len_0 + 1
@@ -558,7 +574,6 @@ Statement = Transformer({
       end
       return _accum_0
     end)()
-    tbl[2] = properties
     local parent_cls_name = NameProxy("parent")
     local base_name = NameProxy("base")
     local self_name = NameProxy("self")
@@ -660,9 +675,9 @@ Statement = Transformer({
               local slice = (function()
                 local _accum_0 = { }
                 local _len_0 = 0
-                local _list_0 = chain
-                for _index_0 = 3, #_list_0 do
-                  local item = _list_0[_index_0]
+                local _list_1 = chain
+                for _index_0 = 3, #_list_1 do
+                  local item = _list_1[_index_0]
                   _len_0 = _len_0 + 1
                   _accum_0[_len_0] = item
                 end
@@ -710,9 +725,9 @@ Statement = Transformer({
                   }
                 }
               end
-              local _list_0 = slice
-              for _index_0 = 1, #_list_0 do
-                local item = _list_0[_index_0]
+              local _list_1 = slice
+              for _index_0 = 1, #_list_1 do
+                local item = _list_1[_index_0]
                 insert(new_chain, item)
               end
               return new_chain
@@ -722,7 +737,10 @@ Statement = Transformer({
           end)
         end),
         _with_0.assign_one(parent_cls_name, parent_val == "" and "nil" or parent_val),
-        _with_0.assign_one(base_name, tbl),
+        _with_0.assign_one(base_name, {
+          "table",
+          properties
+        }),
         _with_0.assign_one(base_name:chain("__index"), base_name),
         build["if"]({
           cond = parent_cls_name,

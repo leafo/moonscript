@@ -422,7 +422,15 @@ local build_grammar = wrap_env(function()
 		TableBlockInner = Ct(KeyValueLine * (SpaceBreak^1 * KeyValueLine)^0),
 		TableBlock = SpaceBreak^1 * Advance * TableBlockInner * PopIndent / mark"table",
 
-		ClassDecl = key"class" * Name * (key"extends" * Exp + C"")^-1 * TableBlock / mark"class",
+		ClassDecl = key"class" * Name * (key"extends" * Exp + C"")^-1 * ClassBlock / mark"class",
+
+		ClassBlock = SpaceBreak^1 * Advance *
+			Ct(ClassLine * (SpaceBreak^1 * ClassLine)^0) *  PopIndent,
+		ClassLine = CheckIndent * ((
+				KeyValueList / mark"props" +
+				Exp / mark"stm"
+			) * sym","^-1),
+
 		Export = key"export" * (
 			Cc"class" * ClassDecl +
 			op"*" + op"^" +
