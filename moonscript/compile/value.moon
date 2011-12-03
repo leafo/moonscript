@@ -66,7 +66,7 @@ value_compile =
       elseif t == "index"
         "[", @value(arg), "]"
       elseif t == "dot"
-        ".", @value arg
+        ".", tostring arg
       elseif t == "colon"
         ":", arg, chain_item(node[3])
       elseif t == "colon_stub"

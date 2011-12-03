@@ -69,3 +69,15 @@ with Hello!
   print x
   x!
 
+class CoolSuper
+  hi: =>
+    super(1,2,3,4) 1,2,3,4
+    super.something 1,2,3,4
+    super.something(1,2,3,4).world
+    super\yeah"world".okay hi, hi, hi
+    something.super
+    super.super.super.super
+    nil
+
+
+

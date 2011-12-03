@@ -109,7 +109,7 @@ value_compile = {
       elseif t == "index" then
         return "[", self:value(arg), "]"
       elseif t == "dot" then
-        return ".", self:value(arg)
+        return ".", tostring(arg)
       elseif t == "colon" then
         return ":", arg, chain_item(node[3])
       elseif t == "colon_stub" then
