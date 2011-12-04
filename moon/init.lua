@@ -3,13 +3,27 @@ if not moon or not moon.inject then
 end
 local util = require("moonscript.util")
 local lua = {
-  debug = debug
+  debug = debug,
+  type = type
 }
 dump = util.dump
 p = function(...)
   return print(dump(...))
 end
-debug = {
+is_object = function(value)
+  return lua.type(value) == "table" and value.__class
+end
+type = function(value)
+  local base_type = lua.type(value)
+  if base_type == "table" then
+    local cls = value.__class
+    if cls then
+      return cls
+    end
+  end
+  return base_type
+end
+debug = setmetatable({
   upvalue = function(fn, k, v)
     local upvalues = { }
     local i = 1
@@ -31,7 +45,9 @@ debug = {
       return lua.debug.setupvalue(fn, upvalues[k], v)
     end
   end
-}
+}, {
+  __index = lua.debug
+})
 run_with_scope = function(fn, scope, ...)
   local old_env = getfenv(fn)
   local env = setmetatable({ }, {
@@ -51,7 +67,7 @@ bind_methods = function(obj)
   return setmetatable({ }, {
     __index = function(self, name)
       local val = obj[name]
-      if val and type(val) == "function" then
+      if val and lua.type(val) == "function" then
         local bound
         bound = function(...)
           return val(obj, ...)
@@ -94,11 +110,13 @@ extend = function(...)
   return tbls[1]
 end
 copy = function(self)
-  local t = { }
-  for key, val in pairs(self) do
-    t[key] = val
-  end
-  return t
+  return (function()
+    local _tbl_0 = { }
+    for key, val in pairs(self) do
+      _tbl_0[key] = val
+    end
+    return _tbl_0
+  end)()
 end
 mixin = function(self, cls, ...)
   local meta = getmetatable(cls)
@@ -129,5 +147,17 @@ mixin_table = function(self, tbl, keys)
     for key, val in pairs(tbl) do
       self[key] = val
     end
+  end
+end
+fold = function(items, fn)
+  local len = #items
+  if len > 1 then
+    local accum = fn(items[1], items[2])
+    for i = 3, len do
+      accum = fn(acum, items[i])
+    end
+    return accum
+  else
+    return items[1]
   end
 end

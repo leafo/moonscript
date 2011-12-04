@@ -4,7 +4,7 @@ if not moon or not moon.inject
 
 util = require "moonscript.util"
 
-lua = { :debug }
+lua = { :debug, :type }
 
 export *
 
@@ -12,6 +12,16 @@ dump = util.dump
 
 p = (...) ->
   print dump ...
+
+is_object =  (value) -> -- is a moonscript object
+  lua.type(value) == "table" and value.__class
+
+type = (value) -> -- class aware type
+  base_type = lua.type value
+  if base_type == "table"
+    cls = value.__class
+    return cls if cls
+  base_type
 
 debug = setmetatable {
   upvalue: (fn, k, v) ->
@@ -52,7 +62,7 @@ bind_methods = (obj) ->
   setmetatable {}, {
     __index: (name) =>
       val = obj[name]
-      if val and type(val) == "function"
+      if val and lua.type(val) == "function"
         bound = (...) -> val obj, ...
         self[name] = bound
         bound
