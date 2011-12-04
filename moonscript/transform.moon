@@ -353,10 +353,30 @@ Statement = Transformer {
 
     cls = build.table {
       {"__init", constructor}
+      {"__base", base_name}
+      {"__name", {"string", '"', name}} -- "quote the string"
+      {"__parent", parent_cls_name}
     }
 
+    -- look up a name in the class object
+    class_lookup = build["if"] {
+      cond: {"exp", "val", "==", "nil", "and", parent_cls_name}
+      then: {
+        parent_cls_name\index"name"
+      }
+    }
+    insert class_lookup, {"else", {"val"}}
+
     cls_mt = build.table {
-      {"__index", base_name}
+      {"__index", build.fndef {
+        args: {{"cls"}, {"name"}}
+        body: {
+          build.assign_one LocalName"val", build.chain {
+            base: "rawget", {"call", {base_name, "name"}}
+          }
+          class_lookup
+        }
+      }}
       {"__call", build.fndef {
         args: {{"cls"}, {"..."}}
         body: {
@@ -421,11 +441,10 @@ Statement = Transformer {
           then: {
             .chain {
               base: "setmetatable"
-              {"call", {base_name, .chain {
-                base: "getmetatable"
-                {"call", {parent_cls_name}}
-                {"dot", "__index"}
-              }}}
+              {"call", {
+                base_name,
+                .chain { base: parent_cls_name,  {"dot", "__base"}}
+              }}
             }
           }
         }

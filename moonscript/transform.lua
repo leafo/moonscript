@@ -638,12 +638,69 @@ Statement = Transformer({
       {
         "__init",
         constructor
+      },
+      {
+        "__base",
+        base_name
+      },
+      {
+        "__name",
+        {
+          "string",
+          '"',
+          name
+        }
+      },
+      {
+        "__parent",
+        parent_cls_name
+      }
+    })
+    local class_lookup = build["if"]({
+      cond = {
+        "exp",
+        "val",
+        "==",
+        "nil",
+        "and",
+        parent_cls_name
+      },
+      ["then"] = {
+        parent_cls_name:index("name")
+      }
+    })
+    insert(class_lookup, {
+      "else",
+      {
+        "val"
       }
     })
     local cls_mt = build.table({
       {
         "__index",
-        base_name
+        build.fndef({
+          args = {
+            {
+              "cls"
+            },
+            {
+              "name"
+            }
+          },
+          body = {
+            build.assign_one(LocalName("val"), build.chain({
+              base = "rawget",
+              {
+                "call",
+                {
+                  base_name,
+                  "name"
+                }
+              }
+            })),
+            class_lookup
+          }
+        })
       },
       {
         "__call",
@@ -779,16 +836,10 @@ Statement = Transformer({
                 {
                   base_name,
                   _with_0.chain({
-                    base = "getmetatable",
-                    {
-                      "call",
-                      {
-                        parent_cls_name
-                      }
-                    },
+                    base = parent_cls_name,
                     {
                       "dot",
-                      "__index"
+                      "__base"
                     }
                   })
                 }

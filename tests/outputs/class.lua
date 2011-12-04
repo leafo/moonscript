@@ -11,15 +11,25 @@ Hello = (function()
   }
   _base_0.__index = _base_0
   if _parent_0 then
-    setmetatable(_base_0, getmetatable(_parent_0).__index)
+    setmetatable(_base_0, _parent_0.__base)
   end
   local _class_0 = setmetatable({
     __init = function(self, test, world)
       self.test, self.world = test, world
       return print("creating object..")
-    end
+    end,
+    __base = _base_0,
+    __name = "Hello",
+    __parent = _parent_0
   }, {
-    __index = _base_0,
+    __index = function(cls, name)
+      local val = rawget(_base_0, name)
+      if val == nil and _parent_0 then
+        return _parent_0[name]
+      else
+        return val
+      end
+    end,
     __call = function(cls, ...)
       local _self_0 = setmetatable({}, _base_0)
       cls.__init(_self_0, ...)
@@ -42,16 +52,26 @@ Simple = (function()
   }
   _base_0.__index = _base_0
   if _parent_0 then
-    setmetatable(_base_0, getmetatable(_parent_0).__index)
+    setmetatable(_base_0, _parent_0.__base)
   end
   local _class_0 = setmetatable({
     __init = function(self, ...)
       if _parent_0 then
         return _parent_0.__init(self, ...)
       end
-    end
+    end,
+    __base = _base_0,
+    __name = "Simple",
+    __parent = _parent_0
   }, {
-    __index = _base_0,
+    __index = function(cls, name)
+      local val = rawget(_base_0, name)
+      if val == nil and _parent_0 then
+        return _parent_0[name]
+      else
+        return val
+      end
+    end,
     __call = function(cls, ...)
       local _self_0 = setmetatable({}, _base_0)
       cls.__init(_self_0, ...)
@@ -67,14 +87,24 @@ Yikes = (function()
   local _base_0 = { }
   _base_0.__index = _base_0
   if _parent_0 then
-    setmetatable(_base_0, getmetatable(_parent_0).__index)
+    setmetatable(_base_0, _parent_0.__base)
   end
   local _class_0 = setmetatable({
     __init = function(self)
       return print("created hello")
-    end
+    end,
+    __base = _base_0,
+    __name = "Yikes",
+    __parent = _parent_0
   }, {
-    __index = _base_0,
+    __index = function(cls, name)
+      local val = rawget(_base_0, name)
+      if val == nil and _parent_0 then
+        return _parent_0[name]
+      else
+        return val
+      end
+    end,
     __call = function(cls, ...)
       local _self_0 = setmetatable({}, _base_0)
       cls.__init(_self_0, ...)
@@ -96,14 +126,24 @@ Hi = (function()
   }
   _base_0.__index = _base_0
   if _parent_0 then
-    setmetatable(_base_0, getmetatable(_parent_0).__index)
+    setmetatable(_base_0, _parent_0.__base)
   end
   local _class_0 = setmetatable({
     __init = function(self, arg)
       return print("init arg", arg)
-    end
+    end,
+    __base = _base_0,
+    __name = "Hi",
+    __parent = _parent_0
   }, {
-    __index = _base_0,
+    __index = function(cls, name)
+      local val = rawget(_base_0, name)
+      if val == nil and _parent_0 then
+        return _parent_0[name]
+      else
+        return val
+      end
+    end,
     __call = function(cls, ...)
       local _self_0 = setmetatable({}, _base_0)
       cls.__init(_self_0, ...)
@@ -122,14 +162,24 @@ Simple = (function()
   }
   _base_0.__index = _base_0
   if _parent_0 then
-    setmetatable(_base_0, getmetatable(_parent_0).__index)
+    setmetatable(_base_0, _parent_0.__base)
   end
   local _class_0 = setmetatable({
     __init = function(self)
       return _parent_0.__init(self, "man")
-    end
+    end,
+    __base = _base_0,
+    __name = "Simple",
+    __parent = _parent_0
   }, {
-    __index = _base_0,
+    __index = function(cls, name)
+      local val = rawget(_base_0, name)
+      if val == nil and _parent_0 then
+        return _parent_0[name]
+      else
+        return val
+      end
+    end,
     __call = function(cls, ...)
       local _self_0 = setmetatable({}, _base_0)
       cls.__init(_self_0, ...)
@@ -150,16 +200,26 @@ Okay = (function()
   }
   _base_0.__index = _base_0
   if _parent_0 then
-    setmetatable(_base_0, getmetatable(_parent_0).__index)
+    setmetatable(_base_0, _parent_0.__base)
   end
   local _class_0 = setmetatable({
     __init = function(self, ...)
       if _parent_0 then
         return _parent_0.__init(self, ...)
       end
-    end
+    end,
+    __base = _base_0,
+    __name = "Okay",
+    __parent = _parent_0
   }, {
-    __index = _base_0,
+    __index = function(cls, name)
+      local val = rawget(_base_0, name)
+      if val == nil and _parent_0 then
+        return _parent_0[name]
+      else
+        return val
+      end
+    end,
     __call = function(cls, ...)
       local _self_0 = setmetatable({}, _base_0)
       cls.__init(_self_0, ...)
@@ -181,16 +241,26 @@ Biggie = (function()
   }
   _base_0.__index = _base_0
   if _parent_0 then
-    setmetatable(_base_0, getmetatable(_parent_0).__index)
+    setmetatable(_base_0, _parent_0.__base)
   end
   local _class_0 = setmetatable({
     __init = function(self, ...)
       if _parent_0 then
         return _parent_0.__init(self, ...)
       end
-    end
+    end,
+    __base = _base_0,
+    __name = "Biggie",
+    __parent = _parent_0
   }, {
-    __index = _base_0,
+    __index = function(cls, name)
+      local val = rawget(_base_0, name)
+      if val == nil and _parent_0 then
+        return _parent_0[name]
+      else
+        return val
+      end
+    end,
     __call = function(cls, ...)
       local _self_0 = setmetatable({}, _base_0)
       cls.__init(_self_0, ...)
@@ -210,16 +280,26 @@ Yeah = (function()
   }
   _base_0.__index = _base_0
   if _parent_0 then
-    setmetatable(_base_0, getmetatable(_parent_0).__index)
+    setmetatable(_base_0, _parent_0.__base)
   end
   local _class_0 = setmetatable({
     __init = function(self, ...)
       if _parent_0 then
         return _parent_0.__init(self, ...)
       end
-    end
+    end,
+    __base = _base_0,
+    __name = "Yeah",
+    __parent = _parent_0
   }, {
-    __index = _base_0,
+    __index = function(cls, name)
+      local val = rawget(_base_0, name)
+      if val == nil and _parent_0 then
+        return _parent_0[name]
+      else
+        return val
+      end
+    end,
     __call = function(cls, ...)
       local _self_0 = setmetatable({}, _base_0)
       cls.__init(_self_0, ...)
@@ -239,16 +319,26 @@ What = (function()
   }
   _base_0.__index = _base_0
   if _parent_0 then
-    setmetatable(_base_0, getmetatable(_parent_0).__index)
+    setmetatable(_base_0, _parent_0.__base)
   end
   local _class_0 = setmetatable({
     __init = function(self, ...)
       if _parent_0 then
         return _parent_0.__init(self, ...)
       end
-    end
+    end,
+    __base = _base_0,
+    __name = "What",
+    __parent = _parent_0
   }, {
-    __index = _base_0,
+    __index = function(cls, name)
+      local val = rawget(_base_0, name)
+      if val == nil and _parent_0 then
+        return _parent_0[name]
+      else
+        return val
+      end
+    end,
     __call = function(cls, ...)
       local _self_0 = setmetatable({}, _base_0)
       cls.__init(_self_0, ...)
@@ -274,16 +364,26 @@ Hello = (function()
   }
   _base_0.__index = _base_0
   if _parent_0 then
-    setmetatable(_base_0, getmetatable(_parent_0).__index)
+    setmetatable(_base_0, _parent_0.__base)
   end
   local _class_0 = setmetatable({
     __init = function(self, ...)
       if _parent_0 then
         return _parent_0.__init(self, ...)
       end
-    end
+    end,
+    __base = _base_0,
+    __name = "Hello",
+    __parent = _parent_0
   }, {
-    __index = _base_0,
+    __index = function(cls, name)
+      local val = rawget(_base_0, name)
+      if val == nil and _parent_0 then
+        return _parent_0[name]
+      else
+        return val
+      end
+    end,
     __call = function(cls, ...)
       local _self_0 = setmetatable({}, _base_0)
       cls.__init(_self_0, ...)
@@ -315,16 +415,26 @@ CoolSuper = (function()
   }
   _base_0.__index = _base_0
   if _parent_0 then
-    setmetatable(_base_0, getmetatable(_parent_0).__index)
+    setmetatable(_base_0, _parent_0.__base)
   end
   local _class_0 = setmetatable({
     __init = function(self, ...)
       if _parent_0 then
         return _parent_0.__init(self, ...)
       end
-    end
+    end,
+    __base = _base_0,
+    __name = "CoolSuper",
+    __parent = _parent_0
   }, {
-    __index = _base_0,
+    __index = function(cls, name)
+      local val = rawget(_base_0, name)
+      if val == nil and _parent_0 then
+        return _parent_0[name]
+      else
+        return val
+      end
+    end,
     __call = function(cls, ...)
       local _self_0 = setmetatable({}, _base_0)
       cls.__init(_self_0, ...)
