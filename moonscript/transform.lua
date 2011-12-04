@@ -14,15 +14,25 @@ LocalName = (function()
   }
   _base_0.__index = _base_0
   if _parent_0 then
-    setmetatable(_base_0, getmetatable(_parent_0).__index)
+    setmetatable(_base_0, _parent_0.__base)
   end
   local _class_0 = setmetatable({
     __init = function(self, name)
       self.name = name
       self[1] = "temp_name"
-    end
+    end,
+    __base = _base_0,
+    __name = "LocalName",
+    __parent = _parent_0
   }, {
-    __index = _base_0,
+    __index = function(cls, name)
+      local val = rawget(_base_0, name)
+      if val == nil and _parent_0 then
+        return _parent_0[name]
+      else
+        return val
+      end
+    end,
     __call = function(cls, ...)
       local _self_0 = setmetatable({}, _base_0)
       cls.__init(_self_0, ...)
@@ -91,15 +101,25 @@ NameProxy = (function()
   }
   _base_0.__index = _base_0
   if _parent_0 then
-    setmetatable(_base_0, getmetatable(_parent_0).__index)
+    setmetatable(_base_0, _parent_0.__base)
   end
   local _class_0 = setmetatable({
     __init = function(self, prefix)
       self.prefix = prefix
       self[1] = "temp_name"
-    end
+    end,
+    __base = _base_0,
+    __name = "NameProxy",
+    __parent = _parent_0
   }, {
-    __index = _base_0,
+    __index = function(cls, name)
+      local val = rawget(_base_0, name)
+      if val == nil and _parent_0 then
+        return _parent_0[name]
+      else
+        return val
+      end
+    end,
     __call = function(cls, ...)
       local _self_0 = setmetatable({}, _base_0)
       cls.__init(_self_0, ...)
@@ -118,15 +138,25 @@ Run = (function()
   }
   _base_0.__index = _base_0
   if _parent_0 then
-    setmetatable(_base_0, getmetatable(_parent_0).__index)
+    setmetatable(_base_0, _parent_0.__base)
   end
   local _class_0 = setmetatable({
     __init = function(self, fn)
       self.fn = fn
       self[1] = "run"
-    end
+    end,
+    __base = _base_0,
+    __name = "Run",
+    __parent = _parent_0
   }, {
-    __index = _base_0,
+    __index = function(cls, name)
+      local val = rawget(_base_0, name)
+      if val == nil and _parent_0 then
+        return _parent_0[name]
+      else
+        return val
+      end
+    end,
     __call = function(cls, ...)
       local _self_0 = setmetatable({}, _base_0)
       cls.__init(_self_0, ...)
@@ -211,15 +241,25 @@ Transformer = (function()
   }
   _base_0.__index = _base_0
   if _parent_0 then
-    setmetatable(_base_0, getmetatable(_parent_0).__index)
+    setmetatable(_base_0, _parent_0.__base)
   end
   local _class_0 = setmetatable({
     __init = function(self, transformers, scope)
       self.transformers, self.scope = transformers, scope
       self.seen_nodes = { }
-    end
+    end,
+    __base = _base_0,
+    __name = "Transformer",
+    __parent = _parent_0
   }, {
-    __index = _base_0,
+    __index = function(cls, name)
+      local val = rawget(_base_0, name)
+      if val == nil and _parent_0 then
+        return _parent_0[name]
+      else
+        return val
+      end
+    end,
     __call = function(cls, ...)
       local _self_0 = setmetatable({}, _base_0)
       cls.__init(_self_0, ...)
@@ -946,16 +986,26 @@ Accumulator = (function()
   }
   _base_0.__index = _base_0
   if _parent_0 then
-    setmetatable(_base_0, getmetatable(_parent_0).__index)
+    setmetatable(_base_0, _parent_0.__base)
   end
   local _class_0 = setmetatable({
     __init = function(self)
       self.accum_name = NameProxy("accum")
       self.value_name = NameProxy("value")
       self.len_name = NameProxy("len")
-    end
+    end,
+    __base = _base_0,
+    __name = "Accumulator",
+    __parent = _parent_0
   }, {
-    __index = _base_0,
+    __index = function(cls, name)
+      local val = rawget(_base_0, name)
+      if val == nil and _parent_0 then
+        return _parent_0[name]
+      else
+        return val
+      end
+    end,
     __call = function(cls, ...)
       local _self_0 = setmetatable({}, _base_0)
       cls.__init(_self_0, ...)
