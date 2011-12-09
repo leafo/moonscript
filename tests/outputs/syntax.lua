@@ -192,3 +192,28 @@ x = notsomething
 y = ifsomething
 local z = x and b
 z = x(andb)
+while 10 > something({
+  something = "world"
+}) do
+  print("yeah")
+end
+x = {
+  okay = sure
+}
+yeah({
+  okay = man,
+  sure = sir
+})
+hello("no comma", {
+  yeah = dada,
+  another = world
+})
+hello("comma", {
+  something = hello_world,
+  frick = you
+})
+another(hello, one, two, three, four, {
+  yeah = man
+}, {
+  okay = yeah
+})

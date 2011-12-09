@@ -192,4 +192,32 @@ y = ifsomething
 z = x and b
 z = x andb
 
+
+-- undelimited tables
+
+while 10 > something
+  something: "world"
+    print "yeah"
+
+x =
+  okay: sure
+
+yeah
+  okay: man
+  sure: sir
+
+hello "no comma"
+ yeah: dada
+ another: world
+
+hello "comma",
+ something: hello_world
+ frick: you
+
+-- creates two tables
+another hello, one,
+  two, three, four, yeah: man
+  okay: yeah
+
+
 -- cooool

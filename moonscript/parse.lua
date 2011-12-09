@@ -59,6 +59,10 @@ local Shebang = P"#!" * P(1 - Stop)^0
 -- can't have P(false) because it causes preceding patterns not to run
 local Cut = P(function() return false end)
 
+local function ensure(patt, finally)
+	return patt * finally + finally * Cut
+end
+
 -- auto declare Proper variables with lpeg.V
 local function wrap_env(fn)
 	local env = getfenv(fn)
@@ -224,7 +228,8 @@ local build_grammar = wrap_env(function()
 	end
 
 	local function advance_indent(str, pos, indent)
-		if indent > _indent:top() then
+		local top = _indent:top()
+		if top ~= -1 and indent > _indent:top() then
 			_indent:push(indent)
 			return true
 		end
@@ -283,6 +288,7 @@ local build_grammar = wrap_env(function()
 
 		Advance = #Cmt(Indent, advance_indent), -- Advances the indent, gives back whitespace for CheckIndent
 		PushIndent = Cmt(Indent, push_indent),
+		PreventIndent = Cmt(Cc(-1), push_indent),
 		PopIndent = Cmt("", pop_indent),
 		InBlock = Advance * Block * PopIndent,
 
@@ -420,9 +426,9 @@ local build_grammar = wrap_env(function()
 
 		-- the unbounded table
 		TableBlockInner = Ct(KeyValueLine * (SpaceBreak^1 * KeyValueLine)^0),
-		TableBlock = SpaceBreak^1 * Advance * TableBlockInner * PopIndent / mark"table",
+		TableBlock = SpaceBreak^1 * Advance * ensure(TableBlockInner, PopIndent) / mark"table",
 
-		ClassDecl = key"class" * Name * (key"extends" * Exp + C"")^-1 * ClassBlock / mark"class",
+		ClassDecl = key"class" * Name * (key"extends" * PreventIndent * ensure(Exp, PopIndent) + C"")^-1 * ClassBlock / mark"class",
 
 		ClassBlock = SpaceBreak^1 * Advance *
 			Ct(ClassLine * (SpaceBreak^1 * ClassLine)^0) *  PopIndent,
@@ -455,7 +461,7 @@ local build_grammar = wrap_env(function()
 		ExpList = Exp * (sym"," * Exp)^0,
 		ExpListLow = Exp * ((sym"," + sym";") * Exp)^0,
 
-		InvokeArgs = ExpList * (sym"," * SpaceBreak * Advance * ArgBlock)^-1,
+		InvokeArgs = ExpList * (sym"," * (TableBlock + SpaceBreak * Advance * ArgBlock * TableBlock^-1) + TableBlock)^-1 + TableBlock,
 		ArgBlock = ArgLine * (sym"," * SpaceBreak * ArgLine)^0 * PopIndent,
 		ArgLine = CheckIndent * ExpList
 	}
