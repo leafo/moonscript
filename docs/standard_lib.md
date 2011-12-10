@@ -42,7 +42,7 @@ of a table.
 ### `run_with_scope(fn, scope, [args...])`
 
 Mutates the environment of function `fn` and runs the function with any extra
-args in `args...`. Returns the result of the function.
+arguments in `args...`. Returns the result of the function.
 
 The environment of the function is set to a new table whose metatable will use
 `scope` to look up values. `scope` must be a table. If `scope` does not have an
@@ -71,20 +71,123 @@ environment has been shadowed by the local variable `say_hi`.
 Sets the `__index` of table `tbl` to use the function `fn` to generate table
 values when a missing key is looked up.
 
-### `extend`
-### `copy`
+### `extend(arg1, arg2, [rest...])`
+
+Chains together a series of tables by their metatable's `__index` property.
+Overwrites the metatable of all objects exept for the last with a new table
+whose `__index` is set to the next table.
+
+Returns the first argument.
+
+    a = { hello: "world" }
+    b = { okay: "sure" }
+
+    extend a, b
+
+    print a.okay
+
+### `copy(tbl)`
+
+Creates a shallow copy of a table, equivalent to:
+
+    copy = (arg) -> {k,v for k,v in pairs self}
 
 ## Class/Object Functions
 
-### `bind_methods`
-### `mixin`
-### `mixin_object`
-### `mixin_table`
+### `is_object(value)`
+
+Returns true if `value` is an instance of a MoonScript class, false otherwise.
+
+### `type(value)`
+
+If `value` is an instance of a MoonScript class, then return it's class object.
+Otherwise, return the result of calling Lua's type method.
+
+    class MyClass
+      nil
+
+    x = MyClass!
+    assert type(x) == MyClass
+
+### `bind_methods(obj)`
+
+Takes an instance of an object, returns a proxy to the object whose methods can
+be called without providing self as the first argument.
+
+    obj = SomeClass!
+
+    bound_obj = bind_methods obj
+
+    -- following have the same effect
+    obj\hello!
+    bound_obj.hello!
+
+It lazily creates and stores in the proxy table the bound methods when they
+are first called.
+
+### `mixin(obj, class, [args...])`
+
+Copies the methods of a class `cls` into the table `obj`, then calls the
+constructor of the class with the `obj` as the receiver.
+
+In this example we add the functionality of `First` to an instance of `Second`
+without ever instancing `First`.
+
+    class First
+      new: (@var) =>
+      show_var: => print "var is:", @var
+
+    class Second
+      new: =>
+        mixin self, First, "hi"
+
+    a = Second!
+    a\show_var!
+
+Be weary of name collisions when mixing in other classes, names will be
+overwritten.
+
+### `mixin_object(obj, other_obj, method_names)`
+
+Inserts into `obj` methods from `other_obj` whose names are listen in
+`method_names`. The inserted methods are bound methods that will run with
+`other_obj` as the receiver.
+
+    class List 
+      add: (item) => -- ...
+      remove: (item) => -- ...
+
+    class Encapsulation
+      new: =>
+        @list = List!
+        mixin_object self, @list, {"add", "remove"}
+
+    e = Encapsulation!
+    e.add "something"
+
+### `mixin_table(a, b, [names])`
+
+Copies the elements of table `b` into table `a`. If names is provided, then
+only those names are copied.
 
 ## Misc Functions
 
-### `fold`
+### `fold(items, fn)`
+
+Calls function `fn` repeatedly with the accumulated value and the current value
+by iterating over `items`. The accumulated value is the result of the last call
+to `fn`, or, in the base case, the first value. The current value is the value
+being iterated over starting with the second item.
+
+`items` is a normal array table.
+
+For example, to sum all numbers in a list:
+
+    numbers = {4,3,5,6,7,2,3}
+    sum = fold numbers, (a,b) -> a + b
 
 ## Debug Functions
 
-### `debug.upvalue`
+### `debug.upvalue(fn, key[, value])`
+
+Gets or sets the value of an upvalue for a function by name.
