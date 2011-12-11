@@ -738,7 +738,7 @@ object.
 It can be accessed like any of object in order to retrieve values in the
 parent class that might have been shadowed by the child class.
 
-When the `\` calling operator is used with `super`, `self` is inserted as the
+When the <code>\\</code> calling operator is used with `super`, `self` is inserted as the
 first argument instead of the value of `super` itself. When using `.` to
 retrieve a function, the raw function is returned.
 
