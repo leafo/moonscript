@@ -1,6 +1,7 @@
     target: reference/standard_lib
     template: reference
     title: MoonScript v0.2.0 - Standard Library
+    short_name: stdlib
 --
 
 The MoonScript installation comes with a small kernel of functions that can be
@@ -9,15 +10,19 @@ used to perform various common things.
 The entire library is currently contained in a single object. We can bring this
 `moon` object into scope by requiring `"moon"`.
 
+    ```moon
     require "moon"
     -- `moon.p` is the debug printer
     moon.p { hello: "world" }
+    ```
 
 If you prefer to just inject all of the functions into the current scope, you
 can require `"moon.all"` instead. The following has the same effect as above:
 
+    ```moon
     require "moon.all"
     p { hello: "world" }
+    ```
 
 All of the functions are compatible with Lua in addition to MoonScript, but
 some of them only make sense in the context of MoonScript.
@@ -33,7 +38,7 @@ All of the examples assume that the standard library has been included with
 
 ### `p(arg)`
 
-Prints a formatted version of an object. Excellent for introspecting the contents
+Prints a formatted version of an object. Excellent for inspecting the contents
 of a table.
 
 
@@ -48,6 +53,7 @@ The environment of the function is set to a new table whose metatable will use
 `scope` to look up values. `scope` must be a table. If `scope` does not have an
 entry for a value, it will fall back on the original environment.
 
+    ```moon
     my_env = {
       secret_function: -> print "shhh this is secret"
       say_hi: -> print "hi there!"
@@ -60,6 +66,7 @@ entry for a value, it will fall back on the original environment.
       say_hi!
 
     run_with_scope fn, my_env
+    ```
 
 
 Note that any closure values will always take precedence against global name
@@ -79,18 +86,22 @@ whose `__index` is set to the next table.
 
 Returns the first argument.
 
+    ```moon
     a = { hello: "world" }
     b = { okay: "sure" }
 
     extend a, b
 
     print a.okay
+    ```
 
 ### `copy(tbl)`
 
 Creates a shallow copy of a table, equivalent to:
 
+    ```moon
     copy = (arg) -> {k,v for k,v in pairs self}
+    ```
 
 ## Class/Object Functions
 
@@ -103,17 +114,20 @@ Returns true if `value` is an instance of a MoonScript class, false otherwise.
 If `value` is an instance of a MoonScript class, then return it's class object.
 Otherwise, return the result of calling Lua's type method.
 
+    ```moon
     class MyClass
       nil
 
     x = MyClass!
     assert type(x) == MyClass
+    ```
 
 ### `bind_methods(obj)`
 
 Takes an instance of an object, returns a proxy to the object whose methods can
 be called without providing self as the first argument.
 
+    ```moon
     obj = SomeClass!
 
     bound_obj = bind_methods obj
@@ -121,6 +135,7 @@ be called without providing self as the first argument.
     -- following have the same effect
     obj\hello!
     bound_obj.hello!
+    ```
 
 It lazily creates and stores in the proxy table the bound methods when they
 are first called.
@@ -133,6 +148,7 @@ constructor of the class with the `obj` as the receiver.
 In this example we add the functionality of `First` to an instance of `Second`
 without ever instancing `First`.
 
+    ```moon
     class First
       new: (@var) =>
       show_var: => print "var is:", @var
@@ -143,6 +159,7 @@ without ever instancing `First`.
 
     a = Second!
     a\show_var!
+    ```
 
 Be weary of name collisions when mixing in other classes, names will be
 overwritten.
@@ -153,9 +170,10 @@ Inserts into `obj` methods from `other_obj` whose names are listen in
 `method_names`. The inserted methods are bound methods that will run with
 `other_obj` as the receiver.
 
+    ```moon
     class List 
-      add: (item) => -- ...
-      remove: (item) => -- ...
+      add: (item) => print "adding to", self
+      remove: (item) => print "removing from", self
 
     class Encapsulation
       new: =>
@@ -164,6 +182,7 @@ Inserts into `obj` methods from `other_obj` whose names are listen in
 
     e = Encapsulation!
     e.add "something"
+    ```
 
 ### `mixin_table(a, b, [names])`
 
@@ -183,8 +202,10 @@ being iterated over starting with the second item.
 
 For example, to sum all numbers in a list:
 
+    ```moon
     numbers = {4,3,5,6,7,2,3}
     sum = fold numbers, (a,b) -> a + b
+    ```
 
 ## Debug Functions
 
