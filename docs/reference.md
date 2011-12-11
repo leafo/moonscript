@@ -16,27 +16,32 @@ already defined will be declared as local to the scope of that declaration. If
 you wish to create a global variable it must be done using the `export`
 keyword.
 
+    ```moon
     hello = "world"
     a,b,c = 1, 2, 3
-
+    ```
 
 ## Update Assignment
 
 `+=`, `-=`, `/=`, `*=`, `%=`, `..=` operators have been added for updating a value by
 a certain amount. They are aliases for their expanded equivalents.
 
+    ```moon
     x = 0
     x += 10
 
     s = "hello "
     s ..= "world"
+    ```
 
 ## Comments 
 
 Like Lua, comments start with `--` and continue to the end of the line.
 Comments are not written to the output.
 
+    ```moon
     -- I am a comment
+    ```
 
 ## Literals & Operators
 
@@ -51,61 +56,79 @@ MoonScript also supports all the same binary and unary operators. Additionally
 All functions are created using a function expression. A simple function is
 denoted using the arrow: `->`
 
+    ```moon
     my_function = ->
     my_function() -- call the empty function
+    ```
 
 
 The body of the function can either be one statement placed directly after the
 arrow, or it can be a series of statements indented on the following lines:
 
+    ```moon
     func_a = -> print "hello world"
 
     func_b = ->
       value = 100
       print "The value:", value
+    ```
 
 If a function has no arguments, it can be called using the `!` operator,
 instead of empty parentheses. The `!` invocation is the preferred way to call
 functions with no arguments.
 
+    ```moon
     func_a!
     func_b()
+    ```
 
 Functions with arguments can be created by preceding the arrow with a list of
 argument names in parentheses:
 
+    ```moon
     sum = (x, y) -> print "sum", x + y
+    ```
 
 Functions can be called by listing the values of the arguments after the name
 of the variable where the function is stored. When chaining together function
 calls, the arguments are applied to the closest function to the left.
 
+    ```moon
     sum 10, 20
     print sum 10, 20
 
     a b c "a", "b", "c"
+    ```
 
 In order to avoid ambiguity in when calling functions, parentheses can also be
 used to surround the arguments. This is required here in order to make sure the
 right arguments get sent to the right functions.
 
+    ```moon
     print "x:", sum(10, 20), "y:", sum(30, 40)
+    ```
 
 Functions will coerce the last statement in their body into a return statement,
 this is called implicit return:
 
+    ```moon
     sum = (x, y) -> x + y
     print "The sum is ", sum 10, 20
+    ```
 
 And if you need to explicitly return, you can use the `return` keyword:
 
+    ```moon
     sum = (x, y) -> return x + y
+    ```
 
 Just like in Lua, functions can return multiple values. The last statement must
 be a list of values separated by commas:
     
+    ```moon
     mystery = (x, y) -> x + y, x - y
     a,b = mystery 10, 20
+    ```
 
 ### Fat Arrows
 
@@ -113,7 +136,9 @@ Because it is an idiom in Lua to send an object as the first argument when
 calling a method, a special syntax is provided for creating functions which
 automatically includes a `self` argument.
 
+    ```moon
     func = (num) => self.value + num
+    ```
 
 ### Argument Defaults
 
@@ -121,16 +146,20 @@ It is possible to provide default values for the arguments of a function. An
 argument is determined to be empty if it's value is `nil`. Any `nil` arguments
 that have a default value will be replace before the body of the function is run.
 
+    ```moon
     my_function = (name="something", height=100) ->
       print "Hello I am", name
       print "My height is", height
+    ```
 
 An argument default value expression is evaluated in the body of the function
 in the order of the argument declarations. For this reason default values have
 access to previously declared arguments.
 
+    ```moon
     some_args = (x=100, y=x+1000) ->
       print x + y
+    ```
 
 ### Considerations
 
@@ -143,9 +172,11 @@ subtraction operator. In order to force subtraction a space must be placed
 after the `-` operator. In order to force a negation, no space must follow
 the `-`. Consider the examples below.
 
+    ```moon
     a = x - 10
     b = x-10
     c = x -y
+    ```
 
 The precedence of the first argument of a function call can also be controlled
 using whitespace if the argument is a literal string.In Lua, it is common to
@@ -159,8 +190,10 @@ Where there is a space following a variable and a string literal, the function
 call acts as show above. The string literal belongs to any following
 expressions (if they exist), which serves as the argument list.
 
+    ```moon
     x = func"hello" + 100
     y = func "hello" + 100
+    ```
 
 ### Multi-line arguments
 
@@ -174,6 +207,7 @@ must end in a comma. And the following line must be indented more than the
 current indentation. Once indented, all other argument lines must be at the
 same level of indentation to be part of the argument list
 
+    ```moon
     my_func 5,4,3,
       8,9,10
 
@@ -181,38 +215,45 @@ same level of indentation to be part of the argument list
       3,4,
       5,6,
       7,8
+    ```
 
 This type of invocation can be nested. The level of indentation is used to
 determine to which function the arguments belong to.
 
-
+    ```moon
     my_func 5,6,7,
       6, another_func 6,7,8,
         9,1,2,
       5,4
+    ```
 
 Because [tables](#table_literals) also use the comma as a delimiter, this
 indentation syntax is helpful for letting values be part of the argument list
 instead of being part of the table.
 
+    ```moon
     x = {
       1,2,3,4, a_func 4,5,
         5,6,
       8,9,10
     }
+    ```
 
 Although uncommon, notice how we can give a deeper indentation for function
 arguments if we know we will be using a lower indentation futher on.
 
+    ```moon
     y = { my_func 1,2,3,
        4,5,
       5,6,7
     }
+    ```
 
 The same thing can be done with other block level statements like
 [conditionals](#conditionals). We can use indentation level to determine what
 statement a value belongs to:
 
+    ```moon
     if func 1,2,3,
       "hello",
       "world"
@@ -224,62 +265,76 @@ statement a value belongs to:
         "world"
       print "hello"
       print "I am inside if"
-
+    ```
 
 ## Table Literals
 
 Like in Lua, tables are delimited in curly braces.
 
+    ```moon
     some_values = { 1, 2, 3, 4 }
+    ```
 
 Unlike Lua, assigning a value to a key in a table is done with `:` (instead of
 `=`).
 
+    ```moon
     some_values = {
       name: "Bill",
       age: 200,
       ["favorite food"]: "rice"
     }
+    ```
 
 The curly braces can be left off if a single table of key value pairs is being
 assigned.
 
+    ```moon
     profile = 
       height: "4 feet",
       shoe_size: 13,
       favorite_foods: {"ice cream", "donuts"}
+    ```
 
 Newlines can be used to delimit values instead of a comma (or both):
 
+    ```moon
     values = {
       1,2,3,4
       5,6,7,8
       name: "superman"
       occupation: "crime fighting"
     }
+    ```
 
 When creating a single line table literal, the curly braces can also be left
 off:
 
+    ```moon
     my_function dance: "Tango", partner: "none"
 
     y = type: "dog", legs: 4, tails: 1
+    ```
 
 The keys of a table literal can be language keywords without being escaped:
 
+    ```moon
     tbl = {
       do: "something"
       end: "hunger"
     }
+    ```
 
 If you are constructing a table out of variables and wish the keys to be the
 same as the variable names, then the `:` prefix operator can be used:
 
+    ```moon
     hair = "golden"
     height = 200
     person = { :hair, :height, shoe_size: 40 }
 
     print_table :hair, :height
+    ```
 
 ## Comprehensions
 
@@ -295,28 +350,36 @@ value on each iteration.
 The following creates a copy of the `items` table but with all the values
 doubled.
 
+    ```moon
     items = { 1, 2, 3, 4 }
     doubled = [item * 2 for i, item in ipairs items]
+    ```
 
 The items included in the new table can be restricted with a `when` clause:
 
+    ```moon
     iter = ipairs items
     slice = [item for i, item in iter when i > 1 and i < 3]
+    ```
 
 Because it is common to iterate over the values of a numerically indexed table,
 an `*` operator is introduced. The doubled example can be rewritten as:
 
+    ```moon
     doubled = [item * 2 for item in *items]
+    ```
 
 The `for` and `when` clauses can be chained as much as desired. The only
 requirement is that a comprehension has at least one `for` clause.
 
 Using multiple `for` clauses is the same as using nested loops:
 
+    ```moon
     x_coords = {4, 5, 6, 7}
     y_coords = {9, 2, 3}
 
     points = [{x,y} for x in *x_coords for y in *y_coords]
+    ```
 
 ### Table Comprehensions
 
@@ -325,6 +388,7 @@ The syntax for table comprehensions is very similar, differing by using `{` and
 
 This example copies the key-value table `thing`:
 
+    ```moon
     thing = {
       color: "red"
       name: "fast"
@@ -332,18 +396,23 @@ This example copies the key-value table `thing`:
     }
 
     thing_copy = {k,v for k,v in pairs thing}
+    ```
 
 Table comprehensions, like list comprehensions, also support multiple `for` and
-`when` clauses`. In this example we use a `where` clause to prevent the value
+`when` clauses. In this example we use a `where` clause to prevent the value
 associated with the `color` key from being copied.
 
+    ```moon
     no_color = {k,v for k,v in pairs thing when k != "color"}
+    ```
 
 The `*` operator is also supported. Here we create a square root look up table
 for a few numbers.
 
+    ```moon
     numbers = {1,2,3,4}
     sqrts = {i, math.sqrt i for i in *numbers}
+    ```
 
 ### Slicing
 
@@ -354,24 +423,31 @@ a step size in a `for` loop.
 Here we can set the minimum and maximum bounds, taking all items with indexes
 between 1 and 5 inclusive:
     
+    ```moon
     slice = [item for item in *items[1:5]]
+    ```
 
 Any of the slice arguments can be left off to use a sensible default. In this
 example, if the max index is left off it defaults to the length of the table.
 This will take everything but the first element:
 
+    ```moon
     slice = [item for item in *items[2:]]
+    ```
 
 If the minimum bound is left out, it defaults to 1. Here we only provide a step
 size and leave the other bounds blank. This takes all odd indexed items: (1, 3,
 5, ...)
 
+    ```moon
     slice = [item for items in *items[::2]]
+    ```
 
 ## For Loop
 
 There are two for loop forms, just like in Lua. A numeric one and a generic one:
 
+    ```moon
     for i = 10, 20
       print i
 
@@ -380,18 +456,23 @@ There are two for loop forms, just like in Lua. A numeric one and a generic one:
 
     for key, value in pairs object
       print key, value
+    ```
     
 The slicing and `*` operators can be used, just like with table comprehensions:
 
+    ```moon
     for item in *items[2:4]
       print item
+    ```
 
 A shorter syntax is also available for all variations when the body is only a
 single line:
 
+    ```moon
     for item in *items do print item
 
     for j = 1,10,3 do print j
+    ```
 
 A for loop can also be used an expression. The last statement in the body of
 the for loop is coerced into an expression and appended to an accumulating
@@ -399,28 +480,34 @@ table if the value of that expression is not nil.
 
 Doubling every even number:
 
+    ```moon
     doubled_evens = for i=1,20
       if i % 2 == 0
         i * 2
       else
         i
+    ```
 
 Filtering out odd numbers:
     
+    ```moon
     my_numbers = {1,2,3,4,5,6}
     odds = for x in *my_numbers
       if x % 2 == 1 then x
+    ```
 
 For loops at the end of a function body are not accumulated into a table for a
 return value (Instead the function will return `nil`).  Either an explicit
 `return` statement can be used, or the loop can be converted into a list
 comprehension.
 
+    ```moon
     func_a = -> for i=1,10 do i
     func_b = -> return for i=1,10 do i
 
     print func_a! -- prints nil
     print func_b! -- prints table object
+    ```
 
 This is done to avoid the needless creation of tables for functions that don't
 need to return the results of the loop.
@@ -429,12 +516,14 @@ need to return the results of the loop.
 
 The while loop also comes in two variations:
 
+    ```moon
     i = 10
     while i > 0
       print i
       i -= 1
 
     while running == true do my_function!
+    ```
 
 Like for loops, the while loop can also be used an expression. Additionally,
 for a function to return the accumulated value of a while loop, the statement
@@ -442,25 +531,31 @@ must be explicitly returned.
 
 ## Conditionals
 
+    ```moon
     have_coins = false
     if have_coins
       print "Got coins"
     else
       print "No coins"
+    ```
 
 A short syntax for single statements can also be used:
 
+    ```moon
     have_coins = false
     if have_coins then print "Got coins" else print "No coins"
-
+    ```
 
 Because if statements can be used as expressions, this can able be written as:
 
+    ```moon
     have_coins = false
     print if have_coins then "Got coins" else "No coins"
+    ```
 
 Conditionals can also be used in return statements and assignments:
 
+    ```moon
     is_tall = (name) ->
       if name == "Rob"
         true
@@ -473,18 +568,22 @@ Conditionals can also be used in return statements and assignments:
       "I am not so tall"
 
     print message -- prints: I am very tall
-
+    ```
 
 ## Line Decorators
 
 For convenience, the for loop and if statement can be applied to single
 statements at the end of the line:
 
+    ```moon
     print "hello world" if name == "Rob"
+    ```
 
 And with basic loops:
 
+    ```moon
     print "item: ", item for item in *items
+    ```
 
 ## Switch
 
@@ -493,6 +592,7 @@ check against the same value. Note that the value is only evaluated once. Like
 if statements, switches can have an else block to handle no matches. Comparison
 is done with the `==` operator.
 
+    ```moon
     name = "Dan"
     switch name
       case "Robert"
@@ -501,10 +601,12 @@ is done with the `==` operator.
         print "Your name, it's Dan"
       else
         print "I don't know about your name"
+    ```
 
 Switches can be used as expressions as well, here we can assign the result of
 the switch to a variable:
 
+    ```moon
     b = 1
     next_number = switch b
       case 1
@@ -513,14 +615,17 @@ the switch to a variable:
         3
       else
         error "can't count that high!"
+    ```
 
 We can use the `then` keyword to write a switch case's block on a single line.
 No extra keyword is needed to write the else block on a single line.
 
+    ```moon
     msg = switch math.random(1, 5)
       case 1 then "you are lucky"
       case 2 then "you are almost lucky"
       else "not so lucky"
+    ```
 
 It is worth noting the order of the case comparison expression. The case's
 expression is on the left hand side. This can be useful if the case's
@@ -535,6 +640,7 @@ code if you wish to know the implementation details.
 
 A simple class:
 
+    ```moon
     class Inventory
       new: =>
         @items = {}
@@ -544,6 +650,7 @@ A simple class:
           @items[name] += 1
         else
           @items[name] = 1
+    ```
 
 A class is declared with a `class` statement followed by a table-like
 declaration where all of the methods and properties are listed.
@@ -560,9 +667,11 @@ The `@` prefix on a variable name is shorthand for `self.`. `@items` becomes
 Creating an instance of the class is done by calling the name of the class as a
 function.
 
+    ```moon
     inv = Inventory!
     inv\add_item "t-shirt"
     inv\add_item "pants"
+    ```
 
 Because the instance of the class needs to be sent to the methods when they are
 called, the '\' operator is used.
@@ -573,6 +682,7 @@ functions, but for other types of objects, undesired results may occur.
 Consider the example below, the `clothes` property is shared amongst all
 instances, so modifications to it in one instance will show up in another:
 
+    ```moon
     class Person
       clothes: {}
       give_item: (name) =>
@@ -586,24 +696,29 @@ instances, so modifications to it in one instance will show up in another:
 
     -- will print both pants and shirt
     print item for item in *a.clothes
+    ```
 
 The proper way to avoid this problem is to create the mutable state of the
 object in the constructor:
 
+    ```moon
     class Person
       new: =>
         @clothes = {}
+    ```
 
 ### Inheritance
 
 The `extends` keyword can be used in a class declaration to inherit the
 properties and methods from another class.
 
+    ```moon
     class BackPack extends Inventory
       size: 10
       add_item: (name) =>
         if #@items > size then error "backpack is full"
         super name
+    ```
 
 Here we extend our Inventory class, and limit the amount of items it can carry.
 
@@ -629,6 +744,7 @@ retrieve a function, the raw function is returned.
 
 A few examples of using `super` in different ways:
 
+    ```moon
     class MyClass extends ParentClass
       a_method: =>
         -- the following have the same effect:
@@ -638,23 +754,24 @@ A few examples of using `super` in different ways:
 
         -- super as a value is equal to the parent class:
         assert super == ParentClass
+    ```
 
 `super` can also be used on left side of a [Function Stub](#function_stubs).
 The only major difference is that instead of the resulting function being bound
 to the value of `super`, it is bound to `self`.
 
 ### Types
-
 Every instance of a class carries its type with it. This is stored in the
 special `__class` property. This property holds the class object. The class
 object is what we call to build a new instance. We can also index the class
 object to retrieve class methods and properties.
 
+    ```moon
     b = BackPack!
     assert b.__class == BackPack
 
     print BackPack.size -- prints 10
-
+    ```
 
 ## Export Statement
 
@@ -664,13 +781,16 @@ be declared as local, special syntax is required to declare a variable globally.
 The export keyword makes it so any following assignments to the specified names
 will not be assigned locally.
 
+    ```moon
     export var_name, var_name2
     var_name, var_name3 = "hello", "world"
+    ```
 
 
 This is especially useful when declaring what will be externally visible in a
 module:
 
+    ```moon
     -- my_module.moon
     module "my_module", package.seeall
     export print_result
@@ -686,11 +806,14 @@ module:
     my_module.print_result 4, 5 -- prints the result
 
     print my_module.length 6, 7 -- errors, `length` not visible
+    ```
 
 Assignment can be combined with the export keyword to assign to global
 variables directly:
 
+    ```moon
     export some_number, message_str = 100, "hello world"
+    ```
 
 Additionally, a class declaration can be prefixed with the export keyword in
 order to export it.
@@ -708,16 +831,21 @@ capital letter.
 Often you want to bring some values from a table into the current scope as
 local variables by their name. The import statement lets us accomplish this:
 
+    ```moon
     import insert from table
+    ```
 
 The multiple names can be given, each separated by a comma:
 
+    ```moon
     import C, Ct, Cmt from lpeg
+    ```
 
 Sometimes a function requires that the table be sent in as the first argument
 (when using the <code>\\</code> syntax). As a shortcut, we can prefix the name
 with a <code>\\</code> to bind it to that table:
 
+    ```moon
     -- some object
     my_module =
         state: 100
@@ -727,6 +855,7 @@ with a <code>\\</code> to bind it to that table:
     import \add from my_module
 
     print add(22) -- equivalent to calling my_module\get 22
+    ```
 
 ## With Statement
 
@@ -744,26 +873,32 @@ those operations applied to the object we are using `with` on.
 
 For example, we work with a newly created object:
 
+    ```moon
     with Person!
       .name = "Oswald"
       \add_relative my_dad
       \save!
       print .name
+    ```
 
 The `with` statement can also be used as an expression which returns the value
 it has been giving access to.
 
+    ```moon
     file = with File "favorite_foods.txt"
       \set_encoding "utf8"
+    ```
 
 Or...
 
+    ```moon
     create_person = (name,  relatives) ->
       with Person!
         .name = name
         \add_relative relative for relative in *relatives
 
     me = create_person "Leaf", {dad, mother, sister}
+    ```
 
 ## Function Stubs
 
@@ -779,6 +914,7 @@ function in the correct context of the object.
 Its syntax is the same as calling an instance method with the <code>\\</code> operator but
 with no argument list provided.
 
+    ```moon
     my_object = {
       value: 1000
       write: => print "the value:", @value
@@ -795,6 +931,7 @@ with no argument list provided.
     -- function stub syntax
     -- lets us bundle the object into a new function
     run_callback my_object\write
+    ```
 
 ## The Using Clause; Controlling Destructive Assignment
 
@@ -802,6 +939,7 @@ While lexical scoping can be a great help in reducing the complexity of the
 code we write, things can get unwieldy as the code size increases. Consider
 the following snippet:
 
+    ```moon
     i = 100
 
     -- many lines of code...
@@ -815,6 +953,7 @@ the following snippet:
     my_func()
 
     print i -- will print 0
+    ```
 
 
 In `my_func`, we've overwritten the value of `i` mistakenly. In this example it
@@ -828,6 +967,7 @@ The `using` keyword lets us do that. `using nil` makes sure that no closed
 variables are overwritten in assignment. The `using` clause is placed after the
 argument list in a function, or in place of it if there are no arguments.
 
+    ```moon
     i = 100
 
     my_func = (using nil) ->
@@ -835,11 +975,13 @@ argument list in a function, or in place of it if there are no arguments.
 
     my_func()
     print i -- prints 100, i is unaffected
+    ```
 
 
 Multiple names can be separated by commas. Closure values can still be
 accessed, they just cant be modified:
 
+    ```moon
     tmp = 1213
     i, k = 100, 50
 
@@ -850,7 +992,7 @@ accessed, they just cant be modified:
 
     my_func(22)
     print i,k -- these have been updated
-
+    ```
 
 # MoonScript API
 
@@ -859,7 +1001,9 @@ accessed, they just cant be modified:
 Upon installing MoonScript, a `moonscript` module is made available. The best
 use of this module is making your Lua's require function MoonScript aware.
 
+    ```moon
     require "moonscript"
+    ```
 
 After `moonscript` is required, Lua's package loader is updated to search for
 `.moon` files on any subsequent calls to `require`. The search path for `.moon`
@@ -889,8 +1033,10 @@ can make debugging particularly difficult.
 
 Consider the following file with a bug:
 
+    ```moon
     add_numbers = (x,y) -> x + z
     print add_numbers 10,0
+    ```
 
 The following error is generated:
 
@@ -914,6 +1060,7 @@ Lua code from MoonScript code.
 Here is a quick example of how you would compile a MoonScript string to a Lua
 String:
 
+    ```moon
     require "moonscript.parse"
     require "moonscript.compile"
 
@@ -931,7 +1078,7 @@ String:
 
     -- our code is ready
     print lua_code
-
+    ```
 
 # Command Line Use
 
@@ -946,7 +1093,9 @@ Two tools are installed with MoonScript, `moon` and `moonc`.
 without needing a separate compile step. All MoonsScript files are compiled in
 memory as they are run.
 
-    ~> moon my_script.moon
+    ```bash
+    $ moon my_script.moon
+    ```
 
 Any MoonScript files that are required will also be compiled and run
 automatically.
@@ -965,7 +1114,9 @@ flag.
 It takes a list of files, compiles them all, and creates the associated `.lua`
 files in the same directories.
 
-    ~> moonc my_script1.moon my_script2.moon ...
+    ```bash
+    $ moonc my_script1.moon my_script2.moon ...
+    ```
 
 You can control where the compiled files are put using the `-t` flag, followed
 by a directory.
@@ -983,24 +1134,24 @@ A full list of flags can be seen by passing the `-h` or `--help` flag.
 
 # License (MIT)
 
-Copyright (C) 2011 by Leaf Corcoran
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
+    Copyright (C) 2011 by Leaf Corcoran
+    
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+    
+    The above copyright notice and this permission notice shall be included in
+    all copies or substantial portions of the Software.
+    
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+    THE SOFTWARE.
 
 
