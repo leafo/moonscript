@@ -424,7 +424,7 @@ Here we can set the minimum and maximum bounds, taking all items with indexes
 between 1 and 5 inclusive:
     
     ```moon
-    slice = [item for item in *items[1:5]]
+    slice = [item for item in *items[1,5]]
     ```
 
 Any of the slice arguments can be left off to use a sensible default. In this
@@ -432,7 +432,7 @@ example, if the max index is left off it defaults to the length of the table.
 This will take everything but the first element:
 
     ```moon
-    slice = [item for item in *items[2:]]
+    slice = [item for item in *items[2,]]
     ```
 
 If the minimum bound is left out, it defaults to 1. Here we only provide a step
@@ -440,7 +440,7 @@ size and leave the other bounds blank. This takes all odd indexed items: (1, 3,
 5, ...)
 
     ```moon
-    slice = [item for items in *items[::2]]
+    slice = [item for items in *items[,,2]]
     ```
 
 ## For Loop
@@ -461,7 +461,7 @@ There are two for loop forms, just like in Lua. A numeric one and a generic one:
 The slicing and `*` operators can be used, just like with table comprehensions:
 
     ```moon
-    for item in *items[2:4]
+    for item in *items[2,4]
       print item
     ```
 
@@ -595,9 +595,9 @@ is done with the `==` operator.
     ```moon
     name = "Dan"
     switch name
-      case "Robert"
+      when "Robert"
         print "You are robert"
-      case "Dan"
+      when "Dan"
         print "Your name, it's Dan"
       else
         print "I don't know about your name"
@@ -609,21 +609,21 @@ the switch to a variable:
     ```moon
     b = 1
     next_number = switch b
-      case 1
+      when 1
         2
-      case 2
+      when 2
         3
       else
         error "can't count that high!"
     ```
 
-We can use the `then` keyword to write a switch case's block on a single line.
+We can use the `then` keyword to write a switch's `when` block on a single line.
 No extra keyword is needed to write the else block on a single line.
 
     ```moon
     msg = switch math.random(1, 5)
-      case 1 then "you are lucky"
-      case 2 then "you are almost lucky"
+      when 1 then "you are lucky"
+      when 2 then "you are almost lucky"
       else "not so lucky"
     ```
 
