@@ -22,7 +22,7 @@ moonscript.o: moonscript.c moonscript.h
 headers: moonscript.h moonc.h moon.h alt_getopt.h
 
 moonscript.h:
-	cd moonscript/;splat.moon moonscript > ../moonscript.lua
+	cd moonscript/; bin/splat.moon -l moonscript moonscript moon > ../moonscript.lua
 	xxd -i moonscript.lua > $@
 	rm moonscript.lua
 
@@ -30,12 +30,12 @@ alt_getopt.h: alt_getopt.lua
 	xxd -i $< > $@
 
 moon.h:
-	awk 'FNR>1' moonscript/moon > moon.lua
+	awk 'FNR>1' moonscript/bin/moon > moon.lua
 	xxd -i moon.lua > $@
 	rm moon.lua
 
 moonc.h:
-	awk 'FNR>1' moonscript/moonc > moonc.lua
+	awk 'FNR>1' moonscript/bin/moonc > moonc.lua
 	xxd -i moonc.lua > $@
 	rm moonc.lua
 
@@ -68,7 +68,7 @@ moonscript.so: moonscript.o lpeg.o
 # misc
 love_header: moonscript.lua.h
 moonscript.lua.h::
-	cd moonscript/;splat.moon moonscript > ../moonscript.lua
+	cd moonscript/; bin/splat.moon -l moonscript moonscript moon > ../moonscript.lua
 	echo namespace love { > $@
 	xxd -i moonscript.lua >> $@
 	echo } >> $@
