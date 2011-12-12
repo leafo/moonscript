@@ -8,10 +8,10 @@ import insert, concat from table
 import dump from require "moonscript.util"
 
 if not arg[1]
-  print "usage: splat directory"
+  print "usage: splat directory [directories...]"
   os.exit!
 
-dir = arg[1]
+dirs = [a for a in *arg[,]]
 
 normalize = (path) ->
   path\match("(.-)/*$").."/"
@@ -29,10 +29,6 @@ scan_directory = (root, patt, collected={}) ->
           insert collected, full_path
 
   collected
-
-files = scan_directory dir, "%.lua$"
-
-modules = {}
 
 path_to_module_name = (path) ->
   (path\match("(.-)%.lua")\gsub("/", "."))
@@ -56,25 +52,24 @@ write_module = (name, text) ->
   print "end"
 
 modules = {}
-chunks = for path in *files
-  module_name = path_to_module_name path
-  content = io.open(path)\read"*a"
-  modules[module_name] = true
-  {module_name, content}
+for dir in *dirs
+  files = scan_directory dir, "%.lua$"
+  chunks = for path in *files
+    module_name = path_to_module_name path
+    content = io.open(path)\read"*a"
+    modules[module_name] = true
+    {module_name, content}
 
-for chunk in *chunks
-  name, content = unpack chunk
-  base, init = name\match"(.-)%.init"
-  if base and not modules[base] then
-    modules[base] = true
-    name = base
-  write_module name, content
+  for chunk in *chunks
+    name, content = unpack chunk
+    base = name\match"(.-)%.init"
+    if base and not modules[base] then
+      modules[base] = true
+      name = base
+    write_module name, content
 
-default_name = if arg[2]
-  arg[2]
-else
-  dir\gsub("/", ".")\gsub("%.$", "")
-
-if modules[default_name]
-  print ([[return package.preload["%s"]()]])\format default_name
+for dir in *dirs
+  module_name = dir\gsub("/", ".")\gsub("%.$", "")
+  if modules[module_name]
+    print ([[package.preload["%s"]()]])\format module_name
 
