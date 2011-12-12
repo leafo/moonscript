@@ -3,15 +3,20 @@
 -- concatenate a collection of lua modules into one
 
 require "lfs"
+require "alt_getopt"
 
 import insert, concat from table
-import dump from require "moonscript.util"
+import dump, split from require "moonscript.util"
 
-if not arg[1]
-  print "usage: splat directory [directories...]"
+opts, ind = alt_getopt.get_opts arg, "l:", {
+  load: "l"
+}
+
+if not arg[ind]
+  print "usage: splat [-l module_names] directory [directories...]"
   os.exit!
 
-dirs = [a for a in *arg[,]]
+dirs = [a for a in *arg[ind,]]
 
 normalize = (path) ->
   path\match("(.-)/*$").."/"
@@ -68,8 +73,8 @@ for dir in *dirs
       name = base
     write_module name, content
 
-for dir in *dirs
-  module_name = dir\gsub("/", ".")\gsub("%.$", "")
-  if modules[module_name]
-    print ([[package.preload["%s"]()]])\format module_name
+if opts.l
+  for module_name in *split opts.l, ","
+    if modules[module_name]
+      print ([[package.preload["%s"]()]])\format module_name
 
