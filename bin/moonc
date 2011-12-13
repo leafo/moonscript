@@ -263,7 +263,6 @@ function create_watcher(files)
 	pcall(function()
 		inotify = require "inotify"
 	end)
-	inotify = nil
 
 	if inotify then
 		local dirs = {}
