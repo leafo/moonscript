@@ -1,5 +1,10 @@
 # TODO
 
+-- error when assining a loop whose body doesn't end in expression
+
+x = for x in y
+  y = 100
+
 -- seems like running in moon messes up require order
 
 - don't reuse _, put a local on it, so we don't keep around trash

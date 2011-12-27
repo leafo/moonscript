@@ -400,7 +400,7 @@ This example copies the key-value table `thing`:
     ```
 
 Table comprehensions, like list comprehensions, also support multiple `for` and
-`when` clauses. In this example we use a `where` clause to prevent the value
+`when` clauses. In this example we use a `when` clause to prevent the value
 associated with the `color` key from being copied.
 
     ```moon
