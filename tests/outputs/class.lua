@@ -453,3 +453,46 @@ local xx
 xx = function(hello, world, cool)
   self.hello, self.__class.world = hello, world
 end
+local ClassMan
+ClassMan = (function()
+  local _parent_0 = nil
+  local _base_0 = {
+    blue = function(self) end,
+    green = function(self) end
+  }
+  _base_0.__index = _base_0
+  if _parent_0 then
+    setmetatable(_base_0, _parent_0.__base)
+  end
+  local _class_0 = setmetatable({
+    __init = function(self, ...)
+      if _parent_0 then
+        return _parent_0.__init(self, ...)
+      end
+    end,
+    __base = _base_0,
+    __name = "ClassMan",
+    __parent = _parent_0
+  }, {
+    __index = function(cls, name)
+      local val = rawget(_base_0, name)
+      if val == nil and _parent_0 then
+        return _parent_0[name]
+      else
+        return val
+      end
+    end,
+    __call = function(cls, ...)
+      local _self_0 = setmetatable({}, _base_0)
+      cls.__init(_self_0, ...)
+      return _self_0
+    end
+  })
+  _base_0.__class = _class_0
+  local self = _class_0
+  self.yeah = 343
+  self.hello = 3434
+  self.world = 23423
+  self.red = function(self) end
+  return _class_0
+end)()

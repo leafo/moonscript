@@ -616,7 +616,11 @@ Statement = Transformer({
         local _list_1 = item
         for _index_0 = 2, #_list_1 do
           local tuple = _list_1[_index_0]
-          insert(properties, tuple)
+          if ntype(tuple[1]) == "self" then
+            insert(statements, build.assign_one(unpack(tuple)))
+          else
+            insert(properties, tuple)
+          end
         end
       end
     end

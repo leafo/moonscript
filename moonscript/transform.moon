@@ -318,7 +318,10 @@ Statement = Transformer {
           insert statements, item[2]
         when "props"
           for tuple in *item[2,]
-            insert properties, tuple
+            if ntype(tuple[1]) == "self"
+              insert statements, build.assign_one unpack tuple
+            else
+              insert properties, tuple
 
     -- find constructor
     constructor = nil

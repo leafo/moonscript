@@ -91,3 +91,13 @@ x = @@hello
 
 xx = (@hello, @@world, cool) ->
 
+
+-- class properties
+class ClassMan
+  @yeah: 343
+  blue: =>
+  @hello: 3434, @world: 23423
+  green: =>
+  @red: =>
+
+

@@ -260,8 +260,6 @@ local build_grammar = wrap_env(function()
 		return patt
 	end
 
-	local SimpleName = Name -- for table key
-
 	-- make sure name is not a keyword
 	local Name = Cmt(Name, function(str, pos, name)
 		if keywords[name] then return false end
@@ -269,6 +267,7 @@ local build_grammar = wrap_env(function()
 	end) / trim
 
 	local SelfName = Space * "@" * ("@" * _Name / mark"self_class" + _Name / mark"self")
+	local KeyName = SelfName + Space * _Name
 
 	local Name = SelfName + Name + Space * "..." / trim
 
@@ -444,7 +443,7 @@ local build_grammar = wrap_env(function()
 			op"*" + op"^" +
 			Ct(NameList) * (sym"=" * Ct(ExpListLow))^-1) / mark"export",
 
-		KeyValue = (sym":" * Name) / self_assign + Ct((SimpleName + sym"[" * Exp * sym"]") * symx":" * (Exp + TableBlock)),
+		KeyValue = (sym":" * Name) / self_assign + Ct((KeyName + sym"[" * Exp * sym"]") * symx":" * (Exp + TableBlock)),
 		KeyValueList = KeyValue * (sym"," * KeyValue)^0,
 		KeyValueLine = CheckIndent * KeyValueList * sym","^-1,
 
