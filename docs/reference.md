@@ -675,7 +675,7 @@ function.
     ```
 
 Because the instance of the class needs to be sent to the methods when they are
-called, the '\' operator is used.
+called, the <code>\\</code> operator is used.
 
 All properties of a class are shared among the instances. This is fine for
 functions, but for other types of objects, undesired results may occur.
@@ -762,6 +762,7 @@ The only major difference is that instead of the resulting function being bound
 to the value of `super`, it is bound to `self`.
 
 ### Types
+
 Every instance of a class carries its type with it. This is stored in the
 special `__class` property. This property holds the class object. The class
 object is what we call to build a new instance. We can also index the class
@@ -773,14 +774,63 @@ object to retrieve class methods and properties.
 
     print BackPack.size -- prints 10
     ```
+### Class Objects
 
-Where as `@` can be put in front of a name to access it within self, `@@` can
-be used to access a value that is stored in the `__class` of `self`. Thus,
-`@@hello` is shorthand for `self.__class.hello`.
+The class object is what we create when we use a `class` statement. The class
+object is stored in a variable of the same name of the class.
+
+The class object can be called like a function in order to create new
+instances. That's how we created instances of classes in the examples above.
+
+A class is made up of two tables. The class table itself, and the *base* table. The
+*base* is used as the metatable for all the instances. All properties listed in
+the class declaration are placed in the *base*.
+
+The class object's metatable reads properties from the base if they don't exist
+in the class object. This means we can access functions and properties directly
+from the class.
+
+It is important to note that assigning to the class object does not assign into
+the *base*, so it's not a valid way to add new methods to instances. Instead
+the *base* must explicitly be changed. See the `__base` field below.
+
+The class object has a couple special properties:
+
+The name of the class as when it was declared is stored as a string in the
+`__name` field of the class object.
+
+    print BackPack.__name -- prints Backpack
+
+The *base* object is stored in `__base`. We can modify this table to add
+functionality to instances that have already been created and ones that are yet
+to be created.
+
+If the class extends from anything, the parent class object is stored in
+`__parent`.
+
+### Class Variables
+
+We can create variables directly in the class object instead of in the *base*
+by using `@` in the front of the property name in a class declaration.
+
+    ```moon
+    class Things
+      @some_func: => print "Hello from", @__name
+
+    Things\some_func!
+
+    -- class variables not visible in instances
+    assert Things().some_func == nil
+
+    ```
+
+In expressions, we can use `@@` to access a value that is stored in the
+`__class` of `self`.  Thus, `@@hello` is shorthand for `self.__class.hello`.
 
     ```moon
     class Counter
-      count: 0
+      @count: 0
+
       new: =>
         @@count += 1
 
@@ -796,6 +846,21 @@ the class in as the first argument using Lua's colon syntax.
     ```moon
     @@hello 1,2,3,4
     ```
+### Class Declaration Statements
+
+In the body of a class declaration, we can have normal expressions in addition
+to key/value pairs. In this context, `self` is equal to the class object.
+
+Here is an alternative way to create a class variable compared to what's
+described above:
+
+    ```moon
+    class Things
+      @class_var = "hello world"
+    ```
+
+These expressions are executed after all the properties have been added to the
+*base*.
 
 ## Export Statement
 
