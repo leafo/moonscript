@@ -7,3 +7,6 @@ global:
 
 compile:
 	bin/moonc moon/ moonscript/
+
+watch:
+	moonc -w moon/ moonscript/

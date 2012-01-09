@@ -268,7 +268,9 @@ local build_grammar = wrap_env(function()
 		return true
 	end) / trim
 
-	local Name = sym"@" * Name / mark"self" + Name + Space * "..." / trim
+	local SelfName = Space * "@" * ("@" * _Name / mark"self_class" + _Name / mark"self")
+
+	local Name = SelfName + Name + Space * "..." / trim
 
 	local g = lpeg.P{
 		File,

@@ -80,4 +80,14 @@ class CoolSuper
     nil
 
 
+-- selfing
+x = @hello
+x = @@hello
+
+@hello "world"
+@@hello "world"
+
+@@one @@two(4,5) @three, @four
+
+xx = (@hello, @@world, cool) ->
 

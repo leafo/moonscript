@@ -118,8 +118,9 @@ value_compile = {
         return error("Unknown chain action: " .. t)
       end
     end
-    if ntype(callee) == "self" and node[3] and ntype(node[3]) == "call" then
-      callee[1] = "self_colon"
+    local t = ntype(callee)
+    if (t == "self" or t == "self_class") and node[3] and ntype(node[3]) == "call" then
+      callee[1] = t .. "_colon"
     end
     local callee_value = self:value(callee)
     if ntype(callee) == "exp" then
@@ -151,7 +152,7 @@ value_compile = {
         if type(name) == "string" then
           name = name
         else
-          if name[1] == "self" then
+          if name[1] == "self" or name[1] == "self_class" then
             insert(self_args, name)
           end
           name = name[2]
@@ -305,8 +306,14 @@ value_compile = {
   self = function(self, node)
     return "self." .. self:value(node[2])
   end,
+  self_class = function(self, node)
+    return "self.__class." .. self:value(node[2])
+  end,
   self_colon = function(self, node)
     return "self:" .. self:value(node[2])
+  end,
+  self_class_colon = function(self, node)
+    return "self.__class:" .. self:value(node[2])
   end,
   raw_value = function(self, value)
     local sup = self:get("super")

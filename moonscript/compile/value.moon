@@ -74,8 +74,9 @@ value_compile =
       else
         error "Unknown chain action: "..t
 
-    if ntype(callee) == "self" and node[3] and ntype(node[3]) == "call"
-      callee[1] = "self_colon"
+    t = ntype(callee)
+    if (t == "self" or t == "self_class") and node[3] and ntype(node[3]) == "call"
+      callee[1] = t.."_colon"
 
     callee_value = @value callee
     callee_value = @line "(", callee_value, ")" if ntype(callee) == "exp"
@@ -95,7 +96,7 @@ value_compile =
       name = if type(name) == "string"
         name
       else
-        if name[1] == "self"
+        if name[1] == "self" or name[1] == "self_class"
           insert self_args, name
         name[2]
       insert default_args, arg if default_value
@@ -176,8 +177,14 @@ value_compile =
   self: (node) =>
     "self."..@value node[2]
 
+  self_class: (node) =>
+    "self.__class."..@value node[2]
+
   self_colon: (node) =>
     "self:"..@value node[2]
+
+  self_class_colon: (node) =>
+    "self.__class:"..@value node[2]
 
   -- catch all pure string values
   raw_value: (value) =>

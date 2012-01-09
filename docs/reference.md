@@ -774,6 +774,29 @@ object to retrieve class methods and properties.
     print BackPack.size -- prints 10
     ```
 
+Where as `@` can be put in front of a name to access it within self, `@@` can
+be used to access a value that is stored in the `__class` of `self`. Thus,
+`@@hello` is shorthand for `self.__class.hello`.
+
+    ```moon
+    class Counter
+      count: 0
+      new: =>
+        @@count += 1
+
+    Counter!
+    Counter!
+
+    print Counter.count -- prints 2
+    ```
+
+The calling semantics of `@@` are similar to `@`. Calling a `@@` name will pass
+the class in as the first argument using Lua's colon syntax.
+
+    ```moon
+    @@hello 1,2,3,4
+    ```
+
 ## Export Statement
 
 Because, by default, all assignments to variables that are not lexically visible will
