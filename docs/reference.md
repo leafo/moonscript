@@ -799,7 +799,9 @@ The class object has a couple special properties:
 The name of the class as when it was declared is stored as a string in the
 `__name` field of the class object.
 
+    ```moon
     print BackPack.__name -- prints Backpack
+    ```
 
 The *base* object is stored in `__base`. We can modify this table to add
 functionality to instances that have already been created and ones that are yet
