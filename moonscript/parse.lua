@@ -279,7 +279,7 @@ local build_grammar = wrap_env(function()
 		Line = (CheckIndent * Statement + Space * #Stop),
 
 		Statement = (Import + While + With + For + ForEach + Switch + Return
-			+ ClassDecl + Export + BreakLoop + Ct(ExpList) / flatten_or_mark"explist" * Space) * ((
+			+ ClassDecl + Export + BreakLoop + Assign + Update + Ct(ExpList) / flatten_or_mark"explist" * Space) * ((
 				-- statement decorators
 				key"if" * Exp * (key"else" * Exp)^-1 * Space / mark"if" +
 				CompInner / mark"comprehension"
@@ -356,7 +356,7 @@ local build_grammar = wrap_env(function()
 			TblComprehension +
 			TableLit +
 			Comprehension +
-			Assign + Update + FunLit + String +
+			FunLit + String +
 			Num,
 
 		ChainValue = -- a function call or an object access
