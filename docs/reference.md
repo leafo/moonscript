@@ -864,6 +864,23 @@ described above:
 These expressions are executed after all the properties have been added to the
 *base*.
 
+
+### `@` and `@@` Values
+
+When `@` and `@@` are prefixed in front of a name they represent, respectively,
+that name accessed in `self` and `self.__class`.
+
+If they are used all by themselves, they are aliases for `self` and
+`self.__class`.
+
+    assert @ == self
+    assert @@ == self.__class
+
+For example, a quick way to create a new instance of the same class from an
+instance method using `@@`:
+
+    some_instance_method = (...) => @@ ...
+
 ## Export Statement
 
 Because, by default, all assignments to variables that are not lexically visible will

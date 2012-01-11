@@ -266,7 +266,10 @@ local build_grammar = wrap_env(function()
 		return true
 	end) / trim
 
-	local SelfName = Space * "@" * ("@" * _Name / mark"self_class" + _Name / mark"self")
+	local SelfName = Space * "@" * (
+		"@" * (_Name / mark"self_class" + Cc"self.__class") +
+		_Name / mark"self" + Cc"self")
+
 	local KeyName = SelfName + Space * _Name
 
 	local Name = SelfName + Name + Space * "..." / trim

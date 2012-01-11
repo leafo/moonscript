@@ -101,3 +101,17 @@ class ClassMan
   @red: =>
 
 
+x = @
+y = @@
+
+@ something
+
+@@ something
+
+@ = @ + @ / @
+
+@ = 343
+@.hello 2,3,4
+
+hello[@].world
+
