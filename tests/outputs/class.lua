@@ -496,3 +496,11 @@ ClassMan = (function()
   self.red = function(self) end
   return _class_0
 end)()
+x = self
+local y = self.__class
+self(something)
+self.__class(something)
+local self = self + self / self
+self = 343
+self.hello(2, 3, 4)
+local _ = hello[self].world
