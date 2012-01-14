@@ -101,6 +101,12 @@ end)()
 if cool then
   print("hello")
 end
+if not (cool) then
+  print("hello")
+end
+if not (1212 and 3434) then
+  print("hello")
+end
 print("nutjob")
 if hello then
   _ = 343

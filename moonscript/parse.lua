@@ -179,7 +179,7 @@ local function flatten_func(callee, args)
 	return {"chain", callee, args}
 end
 
--- wraps a statement that has a line decorator
+-- transforms a statement that has a line decorator
 local function wrap_decorator(stm, dec)
 	if not dec then return stm end
 
@@ -189,6 +189,12 @@ local function wrap_decorator(stm, dec)
 		local _, cond, fail = unpack(dec)
 		if fail then fail = {"else", {fail}} end
 		stm = {"if", cond, {stm}, fail}
+	elseif dec[1] == "unless" then
+		stm = {
+			"if",
+			{"not", {"parens", dec[2]}},
+			{stm}
+		}
 	elseif dec[1] == "comprehension" then
 		local _, clauses = unpack(dec)
 		stm = {"comprehension", stm, clauses}
@@ -288,6 +294,7 @@ local build_grammar = wrap_env(function()
 			) * Space * ((
 				-- statement decorators
 				key"if" * Exp * (key"else" * Exp)^-1 * Space / mark"if" +
+				key"unless" * Exp / mark"unless" +
 				CompInner / mark"comprehension"
 			) * Space)^-1 / wrap_decorator,
 
