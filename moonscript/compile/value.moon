@@ -22,8 +22,10 @@ value_compile =
   -- list of values separated by binary operators
   exp: (node) =>
     _comp = (i, value) ->
-      if i % 2 == 1 and value == "!="
-        value = "~="
+      if i % 2 == 1
+        value = "~=" if value == "!="
+        value = "==" if value == "is"
+        value = "~=" if value == "isnt"
       @value value
 
     with @line!

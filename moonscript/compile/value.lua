@@ -39,8 +39,16 @@ value_compile = {
   exp = function(self, node)
     local _comp
     _comp = function(i, value)
-      if i % 2 == 1 and value == "!=" then
-        value = "~="
+      if i % 2 == 1 then
+        if value == "!=" then
+          value = "~="
+        end
+        if value == "is" then
+          value = "=="
+        end
+        if value == "isnt" then
+          value = "~="
+        end
       end
       return self:value(value)
     end
