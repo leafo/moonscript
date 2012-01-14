@@ -450,7 +450,6 @@ Block = (function()
   _base_0.__class = _class_0
   return _class_0
 end)()
-local RootBlock
 RootBlock = (function()
   local _parent_0 = Block
   local _base_0 = {
@@ -515,8 +514,11 @@ value = function(value)
   end
   return out
 end
-tree = function(tree)
-  local scope = RootBlock()
+tree = function(tree, scope)
+  if scope == nil then
+    scope = RootBlock()
+  end
+  assert(tree, "missing tree")
   local runner = coroutine.create(function()
     local _list_0 = tree
     for _index_0 = 1, #_list_0 do

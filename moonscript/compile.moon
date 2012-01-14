@@ -17,7 +17,7 @@ import concat, insert from table
 import pos_to_line, get_closest_line, trim from util
 
 export tree, value, format_error
-export Block
+export Block, RootBlock
 
 -- buffer for building up a line
 class Line
@@ -300,8 +300,8 @@ value = (value) ->
     out = \render!
   out
 
-tree = (tree) ->
-  scope = RootBlock!
+tree = (tree, scope=RootBlock!) ->
+  assert tree, "missing tree"
 
   runner = coroutine.create ->
     scope\stm line for line in *tree
