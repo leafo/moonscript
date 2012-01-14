@@ -1025,12 +1025,18 @@ default_accumulator = function(self, node)
 end
 local implicitly_return
 implicitly_return = function(scope)
+  local is_top = true
   local fn
   fn = function(stm)
     local t = ntype(stm)
     if types.manual_return[t] or not types.is_value(stm) then
-      return stm
+      if is_top and t == "return" and stm[2] == "" then
+        return nil
+      else
+        return stm
+      end
     elseif types.cascading[t] then
+      is_top = false
       return scope.transform.statement(stm, fn)
     else
       if t == "comprehension" and not types.comprehension_has_value(stm) then
