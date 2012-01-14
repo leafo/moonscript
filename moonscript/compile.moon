@@ -186,7 +186,8 @@ class Block
   _insert_breaks: =>
     for i = 1, #@_lines - 1
       left, right = @_lines[i], @_lines[i+1]
-      if left\sub(-1) == ")" and right\sub(1,1) == "("
+      lc = left\sub(-1)
+      if (lc == ")" or lc == "]") and right\sub(1,1) == "("
         @_lines[i] = @_lines[i]..";"
 
   render: =>

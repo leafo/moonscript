@@ -274,7 +274,8 @@ Block = (function()
     _insert_breaks = function(self)
       for i = 1, #self._lines - 1 do
         local left, right = self._lines[i], self._lines[i + 1]
-        if left:sub(-1) == ")" and right:sub(1, 1) == "(" then
+        local lc = left:sub(-1)
+        if (lc == ")" or lc == "]") and right:sub(1, 1) == "(" then
           self._lines[i] = self._lines[i] .. ";"
         end
       end
