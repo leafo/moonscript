@@ -281,8 +281,11 @@ local build_grammar = wrap_env(function()
 		CheckIndent = Cmt(Indent, check_indent), -- validates line is in correct indent
 		Line = (CheckIndent * Statement + Space * #Stop),
 
-		Statement = (Import + While + With + For + ForEach + Switch + Return
-			+ ClassDecl + Export + BreakLoop + Assign + Update + Ct(ExpList) / flatten_or_mark"explist" * Space) * ((
+		Statement = (
+				Import + While + With + For + ForEach + Switch + Return + ClassDecl +
+				Export + BreakLoop + Assign + Update +
+				Ct(ExpList) / flatten_or_mark"explist"
+			) * Space * ((
 				-- statement decorators
 				key"if" * Exp * (key"else" * Exp)^-1 * Space / mark"if" +
 				CompInner / mark"comprehension"
