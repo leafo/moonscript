@@ -35,7 +35,7 @@ value_compile =
     @stm node
     @name name
 
-  -- list of expressions separated by paretheses
+  -- list of expressions separated by commas
   explist: (node) =>
     with @line!
       \append_list [@value v for v in *node[2,]], ", "

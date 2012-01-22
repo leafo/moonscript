@@ -859,6 +859,7 @@ described above:
     ```moon
     class Things
       @class_var = "hello world"
+
     ```
 
 These expressions are executed after all the properties have been added to the
@@ -956,13 +957,13 @@ with a <code>\\</code> to bind it to that table:
     ```moon
     -- some object
     my_module =
-        state: 100
-        add: (value) =>
-            self.state + value
+      state: 100
+      add: (value) =>
+        self.state + value
 
     import \add from my_module
 
-    print add(22) -- equivalent to calling my_module\get 22
+    print add 22 -- equivalent to calling my_module\get 22
     ```
 
 ## With Statement
@@ -1053,12 +1054,12 @@ the following snippet:
     -- many lines of code...
 
     my_func = ->
-        i = 10
-        while i > 0
-            print i
-            i -= 1
+      i = 10
+      while i > 0
+        print i
+        i -= 1
 
-    my_func()
+    my_func!
 
     print i -- will print 0
     ```
@@ -1079,9 +1080,9 @@ argument list in a function, or in place of it if there are no arguments.
     i = 100
 
     my_func = (using nil) ->
-        i = "hello" -- a new local variable is created here
+      i = "hello" -- a new local variable is created here
 
-    my_func()
+    my_func!
     print i -- prints 100, i is unaffected
     ```
 
@@ -1094,9 +1095,9 @@ accessed, they just cant be modified:
     i, k = 100, 50
 
     my_func = (add using k,i) ->
-        tmp = tmp + add -- a new local tmp is created 
-        i += tmp
-        k += tmp
+      tmp = tmp + add -- a new local tmp is created 
+      i += tmp
+      k += tmp
 
     my_func(22)
     print i,k -- these have been updated
