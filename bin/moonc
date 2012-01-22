@@ -13,6 +13,8 @@ local opts, ind = alt_getopt.get_opts(arg, "vhwt:pTb", {
 	print = "p", tree = "T", version = "v", help = "h"
 })
 
+local read_stdin = arg[1] == "--"
+
 local polling_rate = 1.0
 
 local help = [[Usage: %s [options] files...
@@ -24,6 +26,9 @@ local help = [[Usage: %s [options] files...
     -T          Write parse tree instead of code (to stdout)
     -b          Dump parse and compile time (doesn't write output)
     -v          Print version
+
+    --          Read from standard in, print to standard out
+                (Must be first and only argument)
 ]]
 
 if opts.v then
@@ -206,6 +211,20 @@ function get_files(fname, files)
 end
 
 if opts.h then print_help() end
+
+if read_stdin then
+	local text = io.stdin:read("*a")
+	local tree, err = parse.string(text)
+	if not tree then error(err) end
+	local code, err, pos = compile.tree(tree)
+
+	if not code then
+		error(compile.format_error(err, pos, text))
+	end
+
+	print(code)
+	os.exit()
+end
 
 local inputs = {}
 for i = ind, #arg do
