@@ -448,6 +448,7 @@ local build_grammar = wrap_env(function()
 			Ct(ClassLine * (SpaceBreak^1 * ClassLine)^0) *  PopIndent,
 		ClassLine = CheckIndent * ((
 				KeyValueList / mark"props" +
+				(Assign + Update) / mark"stm" +
 				Exp / mark"stm"
 			) * sym","^-1),
 

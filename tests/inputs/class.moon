@@ -115,3 +115,18 @@ y = @@
 
 hello[@].world
 
+
+class Whacko
+  @hello
+  if something
+    print "hello world"
+
+  hello = "world"
+  @another = "day"
+
+  print "yeah" if something -- this is briken
+
+
+print "hello"
+
+
