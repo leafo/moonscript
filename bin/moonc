@@ -294,9 +294,9 @@ function create_watcher(files)
 			print(("%s with inotify [%s]"):format(msg, plural(#dirs, "dir")))
 
 			local wd_table = {}
-			local handle = inotify:init()
+			local handle = inotify.init()
 			for _, dir in ipairs(dirs) do
-				local wd = handle:addwatch(dir, inotify.IN_MODIFY)
+				local wd = handle:addwatch(dir, inotify.IN_CLOSE_WRITE)
 				wd_table[wd] = dir
 			end
 
