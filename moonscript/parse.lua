@@ -347,7 +347,7 @@ local build_grammar = wrap_env(function()
 		Update = Assignable * ((sym"..=" + sym"+=" + sym"-=" + sym"*=" + sym"/=" + sym"%=")/trim) * Exp / mark"update",
 
 		-- we can ignore precedence for now
-		OtherOps = op"or" + op"and" + op"<=" + op">=" + op"~=" + op"!=" + op"==" + op".." + op"<" + op">",
+		OtherOps = op"or" + op"and" + op"<=" + op">=" + op"~=" + op"!=" + op"==" + op".." + op"<" + op">" + op"is" + op"isnt",
 
 		Assignable = Cmt(DotChain + Chain, check_assignable) + Name,
 		AssignableList = Assignable * (sym"," * Assignable)^0,

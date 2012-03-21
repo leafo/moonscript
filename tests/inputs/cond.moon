@@ -51,3 +51,8 @@ elseif "just us"
   print "will smith" else show 5555555
 
 
+if one is two
+  print "war is piece"
+
+if one isnt two
+  print "no big brother"

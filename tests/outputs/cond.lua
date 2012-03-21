@@ -85,3 +85,9 @@ elseif "just us" then
 else
   show(5555555)
 end
+if one == two then
+  print("war is piece")
+end
+if one ~= two then
+  print("no big brother")
+end
