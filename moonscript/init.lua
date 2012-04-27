@@ -49,6 +49,7 @@ moon_loader = function(name)
   end
   if file then
     local text = file:read("*a")
+    file:close()
     return loadstring(text, file_path)
   else
     return nil, "Could not find moon file"
@@ -82,6 +83,7 @@ loadfile = function(fname)
     return nil, err
   end
   local text = assert(file:read("*a"))
+  file:close()
   return loadstring(text, fname)
 end
 dofile = function(fname)
