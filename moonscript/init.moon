@@ -50,6 +50,7 @@ moon_loader = (name) ->
 
   if file
     text = file\read "*a"
+    file\close!
     loadstring text, file_path
   else
     nil, "Could not find moon file"
@@ -74,6 +75,7 @@ loadfile = (fname) ->
   file, err = io.open fname
   return nil, err if not file
   text = assert file\read "*a"
+  file\close!
   loadstring text, fname
 
 -- throws errros
