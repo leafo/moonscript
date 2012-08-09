@@ -12,8 +12,8 @@ This is the offical language reference manual, installation directions and the
 homepage are located at <http://moonscript.org>.
 
 <div class="github-buttons">
-<iframe src="http://markdotto.github.com/github-buttons/github-btn.html?user=leafo&repo=moonscript&type=watch&count=true" allowtransparency="true" frameborder="0" scrolling="0" width="110px" height="20px"></iframe>
-<iframe src="http://markdotto.github.com/github-buttons/github-btn.html?user=leafo&repo=moonscript&type=fork&count=true" allowtransparency="true" frameborder="0" scrolling="0" width="95px" height="20px"></iframe>
+<iframe src="http://ghbtns.com/github-btn.html?user=leafo&repo=moonscript&type=watch&count=true" allowtransparency="true" frameborder="0" scrolling="0" width="110px" height="20px"></iframe>
+<iframe src="http://ghbtns.com/github-btn.html?user=leafo&repo=moonscript&type=fork&count=true" allowtransparency="true" frameborder="0" scrolling="0" width="95px" height="20px"></iframe>
 </div>
 
 # The Language
