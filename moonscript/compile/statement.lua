@@ -162,7 +162,7 @@ line_compile = {
     end
   end,
   foreach = function(self, node)
-    local _, names, exp, block = unpack(node)
+    local _, names, exps, block = unpack(node)
     local loop
     do
       local _with_0 = self:line()
@@ -178,7 +178,19 @@ line_compile = {
         end
         return _accum_0
       end)(), ", ")
-      _with_0:append(" in ", self:value(exp), " do")
+      _with_0:append(" in ")
+      _with_0:append_list((function()
+        local _accum_0 = { }
+        local _len_0 = 0
+        local _list_0 = exps
+        for _index_0 = 1, #_list_0 do
+          local exp = _list_0[_index_0]
+          _len_0 = _len_0 + 1
+          _accum_0[_len_0] = self:value(exp)
+        end
+        return _accum_0
+      end)(), ",")
+      _with_0:append(" do")
       loop = _with_0
     end
     do

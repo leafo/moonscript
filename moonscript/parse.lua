@@ -333,7 +333,7 @@ local build_grammar = wrap_env(function()
 		For = key"for" * (Name * sym"=" * Ct(Exp * sym"," * Exp * (sym"," * Exp)^-1)) *
 			key"do"^-1 * Body / mark"for",
 
-		ForEach = key"for" * Ct(NameList) * key"in" * (sym"*" * Exp / mark"unpack" + Exp) * key"do"^-1 * Body / mark"foreach",
+		ForEach = key"for" * Ct(NameList) * key"in" * Ct(sym"*" * Exp / mark"unpack" + ExpList) * key"do"^-1 * Body / mark"foreach",
 
 		Comprehension = sym"[" * Exp * CompInner * sym"]" / mark"comprehension",
 

@@ -1,4 +1,7 @@
 
+test::
+	lua test.lua
+
 local:
 	luarocks make --local moonscript-dev-1.rockspec
 

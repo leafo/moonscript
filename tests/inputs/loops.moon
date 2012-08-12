@@ -24,6 +24,13 @@ for x in *something
 
 for k,v in pairs hello do print k,v
 
+for x in y, z
+  print x
+
+for x in y, z, k
+  print x
+
+
 x = ->
   for x in y
     y

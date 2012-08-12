@@ -115,7 +115,7 @@ construct_comprehension = (inner, clauses) ->
     t = clause[1]
     current_stms = if t == "for"
       _, names, iter = unpack clause
-      {"foreach", names, iter, current_stms}
+      {"foreach", names, {iter}, current_stms}
     elseif t == "when"
       _, cond = unpack clause
       {"if", cond, current_stms}
@@ -231,8 +231,10 @@ Statement = Transformer {
 
   foreach: (node) =>
     smart_node node
-    if ntype(node.iter) == "unpack"
-      list = node.iter[2]
+    source = unpack node.iter
+
+    if ntype(source) == "unpack"
+      list = source[2]
 
       index_name = NameProxy "index"
       list_name = NameProxy "list"

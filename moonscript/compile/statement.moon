@@ -94,14 +94,16 @@ line_compile =
       \stms block
 
   -- for x in y ...
-  -- {"foreach", {names...}, exp, body}
+  -- {"foreach", {names...}, {exp...}, body}
   foreach: (node) =>
-    _, names, exp, block = unpack node
+    _, names, exps, block = unpack node
 
     loop = with @line!
       \append "for "
       \append_list [@name name for name in *names], ", "
-      \append " in ", @value(exp), " do"
+      \append " in "
+      \append_list [@value exp for exp in *exps], ","
+      \append " do"
 
     with @block loop
       \stms block

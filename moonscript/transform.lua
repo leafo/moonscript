@@ -279,7 +279,9 @@ construct_comprehension = function(inner, clauses)
       current_stms = {
         "foreach",
         names,
-        iter,
+        {
+          iter
+        },
         current_stms
       }
     elseif t == "when" then
@@ -491,8 +493,9 @@ Statement = Transformer({
   end,
   foreach = function(self, node)
     smart_node(node)
-    if ntype(node.iter) == "unpack" then
-      local list = node.iter[2]
+    local source = unpack(node.iter)
+    if ntype(source) == "unpack" then
+      local list = source[2]
       local index_name = NameProxy("index")
       local list_name = NameProxy("list")
       local slice_var = nil

@@ -29,6 +29,12 @@ end
 for k, v in pairs(hello) do
   print(k, v)
 end
+for x in y,z do
+  print(x)
+end
+for x in y,z,k do
+  print(x)
+end
 local x
 x = function()
   for x in y do
