@@ -143,7 +143,7 @@ something:hello(what)
 something.hello:world(a, b)
 something.hello:world(1, 2, 3)(a, b)
 x = 1232
-x = x + 10 + 3
+x = x + (10 + 3)
 local j = j - "hello"
 y = y * 2
 y = y / 100
@@ -223,3 +223,7 @@ another(hello, one, two, three, four, {
 }, {
   okay = yeah
 })
+a = a + (3 - 5)
+a = a * (3 + 5)
+a = a * 3
+a = a / func("cool")

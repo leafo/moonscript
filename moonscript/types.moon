@@ -3,7 +3,7 @@ util = require "moonscript.util"
 data = require "moonscript.data"
 
 export ntype, smart_node, build, is_value
-export is_slice, manual_return, cascading
+export is_slice, manual_return, cascading, value_is_singular
 export comprehension_has_value
 
 import insert from table
@@ -27,6 +27,9 @@ ntype = (node) ->
     "value"
   else
     node[1]
+
+value_is_singular = (node) ->
+  type(node) != "table" or node[1] != "exp" or #node == 2
 
 is_slice = (node) ->
   ntype(node) == "chain" and ntype(node[#node]) == "slice"

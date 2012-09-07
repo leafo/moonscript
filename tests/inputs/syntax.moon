@@ -221,5 +221,10 @@ another hello, one,
   two, three, four, yeah: man
   okay: yeah
 
+-- 
+a += 3 - 5
+a *= 3 + 5
+a *= 3
+a /= func "cool"
 
 -- cooool

@@ -27,6 +27,9 @@ ntype = function(node)
     return node[1]
   end
 end
+value_is_singular = function(node)
+  return type(node) ~= "table" or node[1] ~= "exp" or #node == 2
+end
 is_slice = function(node)
   return ntype(node) == "chain" and ntype(node[#node]) == "slice"
 end

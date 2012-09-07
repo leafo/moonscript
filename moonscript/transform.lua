@@ -3,7 +3,7 @@ local types = require("moonscript.types")
 local util = require("moonscript.util")
 local data = require("moonscript.data")
 local reversed = util.reversed
-local ntype, build, smart_node, is_slice = types.ntype, types.build, types.smart_node, types.is_slice
+local ntype, build, smart_node, is_slice, value_is_singular = types.ntype, types.build, types.smart_node, types.is_slice, types.value_is_singular
 local insert = table.insert
 LocalName = (function()
   local _parent_0 = nil
@@ -360,6 +360,12 @@ Statement = Transformer({
     local op_final = op:match("^(.+)=$")
     if not op_final then
       error("Unknown op: " .. op)
+    end
+    if not (value_is_singular(exp)) then
+      exp = {
+        "parens",
+        exp
+      }
     end
     return build.assign_one(name, {
       "exp",

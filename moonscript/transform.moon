@@ -6,7 +6,7 @@ util = require "moonscript.util"
 data = require "moonscript.data"
 
 import reversed from util
-import ntype, build, smart_node, is_slice from types
+import ntype, build, smart_node, is_slice, value_is_singular from types
 import insert from table
 
 export Statement, Value, NameProxy, LocalName, Run
@@ -168,6 +168,7 @@ Statement = Transformer {
     _, name, op, exp = unpack node
     op_final = op\match "^(.+)=$"
     error "Unknown op: "..op if not op_final
+    exp = {"parens", exp} unless value_is_singular exp
     build.assign_one name, {"exp", name, op_final, exp}
 
   import: (node) =>
