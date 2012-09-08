@@ -16,6 +16,11 @@ local help = [=[Usage: %s [options] [script [args]]
     -v          Print version
 ]=]
 
+local function print_err(...)
+	msg = table.concat({...}, "\t")
+	io.stderr:write(msg .. "\n")
+end
+
 local function print_help(err)
 	if err then print("Error: "..err) end
 	print(help:format(arg[0]))
@@ -48,7 +53,12 @@ local passed, err = pcall(function()
 end)
 
 if not passed then
-	print(err)
+	print_err(err)
+	os.exit(1)
+end
+
+if not moonscript_chunk then
+	print_err("Can't find file: " .. script_fname)
 	os.exit(1)
 end
 
@@ -64,7 +74,7 @@ if not opts.d then
 	if err then
 		local traceback = util.trim(trace)
 		traceback = moonscript.errors.truncate_traceback(traceback)
-		print(moonscript.errors.rewrite_traceback(traceback, err))
+		print_err(moonscript.errors.rewrite_traceback(traceback, err))
 		os.exit(1)
 	end
 else
