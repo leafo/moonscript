@@ -219,7 +219,7 @@ end
 
 -- :name in table literal
 local function self_assign(name)
-	return {name, name}
+	return {{"key_literal", name}, name}
 end
 
 local err_msg = "Failed to parse:\n [%d] >>    %s (%d)"
@@ -276,7 +276,7 @@ local build_grammar = wrap_env(function()
 		"@" * (_Name / mark"self_class" + Cc"self.__class") +
 		_Name / mark"self" + Cc"self")
 
-	local KeyName = SelfName + Space * _Name
+	local KeyName = SelfName + Space * _Name / mark"key_literal"
 
 	local Name = SelfName + Name + Space * "..." / trim
 

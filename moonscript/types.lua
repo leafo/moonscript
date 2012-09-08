@@ -187,6 +187,16 @@ build = setmetatable({
     if tbl == nil then
       tbl = { }
     end
+    local _list_0 = tbl
+    for _index_0 = 1, #_list_0 do
+      local tuple = _list_0[_index_0]
+      if type(tuple[1]) == "string" then
+        tuple[1] = {
+          "key_literal",
+          tuple[1]
+        }
+      end
+    end
     return {
       "table",
       tbl

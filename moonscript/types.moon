@@ -105,7 +105,13 @@ build = setmetatable {
       names: {name}
       values: {value}
     }
+
   table: (tbl={}) ->
+    -- convert strings to key literals
+    for tuple in *tbl
+      if type(tuple[1]) == "string"
+        tuple[1] = {"key_literal", tuple[1]}
+
     {"table", tbl}
   block_exp: (body) ->
     {"block_exp", body}

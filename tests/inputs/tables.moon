@@ -90,3 +90,9 @@ y = {
 
 call_me "hello", :x, :y, :z
 
+t = {
+  a: 'a'
+  [b]: 'b'
+}
+
+

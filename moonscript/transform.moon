@@ -329,7 +329,8 @@ Statement = Transformer {
     -- find constructor
     constructor = nil
     properties = for tuple in *properties
-      if tuple[1] == constructor_name
+      key = tuple[1]
+      if key[1] == "key_literal" and key[2] == constructor_name
         constructor = tuple[2]
         nil
       else
@@ -423,8 +424,11 @@ Statement = Transformer {
                 when "call"
                   calling_name = block\get"current_block"
                   slice[1] = {"call", {"self", unpack head[2]}}
-                  act = if ntype(calling_name) != "value" then "index" else "dot"
-                  insert new_chain, {act, calling_name}
+
+                  if ntype(calling_name) == "key_literal"
+                    insert new_chain, {"dot", calling_name[2]}
+                  else
+                    insert new_chain, {"index", calling_name}
 
                 -- colon call on super, replace class with self as first arg
                 when "colon"

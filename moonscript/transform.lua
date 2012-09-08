@@ -640,8 +640,9 @@ Statement = Transformer({
       local _list_1 = properties
       for _index_0 = 1, #_list_1 do
         local tuple = _list_1[_index_0]
+        local key = tuple[1]
         local _value_0
-        if tuple[1] == constructor_name then
+        if key[1] == "key_literal" and key[2] == constructor_name then
           constructor = tuple[2]
           _value_0 = nil
         else
@@ -838,16 +839,17 @@ Statement = Transformer({
                     unpack(head[2])
                   }
                 }
-                local act
-                if ntype(calling_name) ~= "value" then
-                  act = "index"
+                if ntype(calling_name) == "key_literal" then
+                  insert(new_chain, {
+                    "dot",
+                    calling_name[2]
+                  })
                 else
-                  act = "dot"
+                  insert(new_chain, {
+                    "index",
+                    calling_name
+                  })
                 end
-                insert(new_chain, {
-                  act,
-                  calling_name
-                })
               elseif "colon" == _exp_0 then
                 local call = head[3]
                 insert(new_chain, {

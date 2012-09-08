@@ -257,18 +257,18 @@ value_compile = {
       format_line = function(tuple)
         if #tuple == 2 then
           local key, value = unpack(tuple)
-          if type(key) == "string" and data.lua_keywords[key] then
+          if ntype(key) == "key_literal" and data.lua_keywords[key[2]] then
             key = {
               "string",
               '"',
-              key
+              key[2]
             }
           end
           local assign
-          if type(key) ~= "string" then
-            assign = self:line("[", _with_0:value(key), "]")
+          if ntype(key) == "key_literal" then
+            assign = key[2]
           else
-            assign = key
+            assign = self:line("[", _with_0:value(key), "]")
           end
           _with_0:set("current_block", key)
           local out = self:line(assign, " = ", _with_0:value(value))

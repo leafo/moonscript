@@ -141,13 +141,14 @@ value_compile =
         if #tuple == 2
           key, value = unpack tuple
 
-          if type(key) == "string" and data.lua_keywords[key]
-            key = {"string", '"', key}
+          -- escape keys that are lua keywords
+          if ntype(key) == "key_literal" and data.lua_keywords[key[2]]
+            key = {"string", '"', key[2]}
 
-          assign = if type(key) != "string"
-            @line "[", \value(key), "]"
+          assign = if ntype(key) == "key_literal"
+            key[2]
           else
-            key
+            @line "[", \value(key), "]"
 
           \set "current_block", key
           out = @line assign, " = ", \value(value)

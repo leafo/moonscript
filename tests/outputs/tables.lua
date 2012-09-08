@@ -117,3 +117,7 @@ call_me("hello", {
   y = y,
   z = z
 })
+local t = {
+  a = 'a',
+  [b] = 'b'
+}
