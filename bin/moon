@@ -47,9 +47,9 @@ local new_arg = {
 	select(ind + 1, unpack(arg))
 }
 
-local moonscript_chunk
+local moonscript_chunk, lua_parse_error
 local passed, err = pcall(function()
-	moonscript_chunk = moonscript.loadfile(script_fname)
+	moonscript_chunk, lua_parse_error = moonscript.loadfile(script_fname)
 end)
 
 if not passed then
@@ -58,7 +58,11 @@ if not passed then
 end
 
 if not moonscript_chunk then
-	print_err("Can't find file: " .. script_fname)
+	if lua_parse_error then
+		print_err(lua_parse_error)
+	else
+		print_err("Can't find file: " .. script_fname)
+	end
 	os.exit(1)
 end
 
