@@ -1,6 +1,6 @@
 
 test::
-	lua test.lua
+	TIME=1 bin/moon test2.moon
 
 local:
 	luarocks make --local moonscript-dev-1.rockspec

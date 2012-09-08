@@ -1,0 +1,143 @@
+
+require "lfs"
+require "busted"
+
+require "moonscript.parse"
+require "moonscript.compile"
+require "moonscript.util"
+
+import parse, compile, util from moonscript
+
+pattern = ...
+
+options = {
+  in_dir: "tests/inputs",
+  out_dir: "tests/outputs",
+  input_pattern: "(.*)%.moon$",
+  output_ext: ".lua"
+
+  show_timings: os.getenv "TIME"
+
+  diff: {
+    tool: "git diff --no-index --color-words"
+    filter: (str) ->
+      -- strip the first four lines
+      table.concat [line for line in *util.split(str, "\n")[5,]], "\n"
+  }
+}
+
+timings = {}
+
+gettime = nil
+
+pcall ->
+  require "socket"
+  gettime = socket.gettime
+
+benchmark = (fn) ->
+  if gettime
+    start = gettime!
+    res = {fn!}
+    gettime! - start, unpack res
+  else
+    nil, fn!
+
+read_all = (fname) ->
+  f = io.open(fname, "r")
+  with f\read "*a"
+    f\close!
+
+diff_file = (a_fname, b_fname) ->
+  out = io.popen(options.diff.tool .. " ".. a_fname .. " " .. b_fname, "r")\read "*a"
+  if options.diff.filter
+    out = options.diff.filter out
+  out
+
+diff_str = (expected, got) ->
+  a_tmp = os.tmpname! .. ".expected"
+  b_tmp = os.tmpname! .. ".got"
+
+  with io.open(a_tmp, "w")
+    \write expected
+    \close!
+
+  with io.open(b_tmp, "w")
+    \write got
+    \close!
+
+  with diff_file a_tmp, b_tmp
+    os.remove a_tmp
+    os.remove b_tmp
+
+string_assert = (expected, got) ->
+  if expected != got
+    diff = diff_str expected, got
+    error "string equality assert failed:\n" .. diff
+
+input_fname = (base) ->
+  options.in_dir .. "/" .. base .. ".moon"
+
+output_fname = (base) ->
+  options.out_dir .. "/" .. base .. options.output_ext
+
+describe "input tests", ->
+  inputs = for file in lfs.dir options.in_dir
+    file\match options.input_pattern
+  
+  for name in *inputs
+    input = input_fname name
+    fn = if pattern and not input\match pattern
+      pending
+    else
+      it
+
+    fn input .. " #input", ->
+      file_str = read_all input_fname name
+
+      parse_time, tree, err = benchmark -> parse.string file_str
+      return err if err
+      compile_time, code, err, pos = benchmark -> compile.tree tree
+      return compile.format_error err, pos, file_str unless code
+
+      table.insert timings, {name, parse_time, compile_time}
+
+      if os.getenv "BUILD"
+        with io.open output_fname(name), "w"
+          \write code
+          \close!
+      else
+        expected_str = read_all output_fname name
+        return "Test not built: " .. input_fname(name) unless expected_str
+
+        string_assert expected_str, code
+
+      nil
+
+busted.options = {
+  output: require'busted.output.utf_terminal'!
+  suppress_pending: true
+}
+
+print busted!
+
+if options.show_timings
+  format_time = (sec) -> ("%.3fms")\format(sec*1000)
+  col_width = math.max unpack [#t[1] for t in *timings]
+
+  print "\nTimings:"
+  total_parse, total_compile = 0, 0
+  for tuple in *timings
+    name, parse_time, compile_time = unpack tuple
+    name = name .. (" ")\rep col_width - #name
+    total_parse += parse_time
+    total_compile += compile_time
+
+    print " * " .. name,
+      "p: " .. format_time(parse_time),
+      "c: " .. format_time(compile_time)
+
+  print "\nTotal:"
+  print "    parse:", format_time total_parse
+  print "  compile:", format_time total_compile
+
+
