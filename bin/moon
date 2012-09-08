@@ -4,6 +4,8 @@ require "alt_getopt"
 require "moonscript.errors"
 require "moonscript"
 
+local util = require "moonscript.util"
+
 -- moonloader and repl
 local opts, ind = alt_getopt.get_opts(arg, "cvhd", { version = "v", help = "h" })
 
@@ -28,7 +30,6 @@ if opts.v then
 	os.exit()
 end
 
-
 local script_fname = arg[ind]
 if not script_fname then
 	print_help("repl not yet supported")
@@ -41,25 +42,31 @@ local new_arg = {
 	select(ind + 1, unpack(arg))
 }
 
-local chunk
+local moonscript_chunk
 local passed, err = pcall(function()
-	chunk = moonscript.loadfile(script_fname)
+	moonscript_chunk = moonscript.loadfile(script_fname)
 end)
 
 if not passed then
 	print(err)
-	os.exit()
+	os.exit(1)
 end
 
-getfenv(chunk).arg = new_arg
+getfenv(moonscript_chunk).arg = new_arg
 
-local runner = coroutine.create(chunk)
-local success, err = coroutine.resume(runner, unpack(new_arg))
-if not success then
-	local trace = debug.traceback(runner)
-	if not opts.d then
-		print(moonscript.errors.rewrite_traceback(trace, err))
-	else
-		print(trace)
+if not opts.d then
+	local err, trace
+	xpcall(function() moonscript_chunk(unpack(new_arg)) end, function(_err)
+		err = _err
+		trace = debug.traceback("", 2)
+	end)
+
+	if err then
+		local traceback = util.trim(trace)
+		traceback = moonscript.errors.truncate_traceback(traceback)
+		print(moonscript.errors.rewrite_traceback(traceback, err))
+		os.exit(1)
 	end
+else
+	moonscript_chunk(unpack(new_arg))
 end

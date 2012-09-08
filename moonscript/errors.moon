@@ -8,7 +8,7 @@ require "lpeg"
 import concat, insert from table
 import split, pos_to_line from util
 
-export rewrite_traceback
+export rewrite_traceback, truncate_traceback
 
 -- find the line number of `pos` chars into fname
 lookup_line = (fname, pos, cache) ->
@@ -24,6 +24,23 @@ reverse_line_number = (fname, line_table, line_num, cache) ->
     if line_table[i]
       return lookup_line fname, line_table[i], cache
   "unknown"
+
+
+-- strip traceback lines up to chunk func
+-- replace reference to chunk_func with "main chunk"
+truncate_traceback = (traceback, chunk_func="moonscript_chunk") ->
+  traceback = split traceback, "\n"
+  stop = #traceback
+  while stop > 1
+    break if traceback[stop]\match chunk_func
+    stop -= 1
+
+  traceback = [t for t in *traceback[1,stop]]
+
+  rep = "function '" .. chunk_func .. "'"
+  traceback[#traceback] = traceback[#traceback]\gsub rep, "main chunk"
+
+  concat traceback, "\n"
 
 rewrite_traceback = (text, err) ->
   line_tables = moon.line_tables
