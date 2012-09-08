@@ -81,6 +81,25 @@ is_singular = (body) ->
   else
     true
 
+find_assigns = (body, out={}) ->
+  for thing in *body
+    switch thing[1]
+      when "group"
+        find_assigns thing[2], out
+      when "assign"
+        table.insert out, thing[2] -- extract names
+  out
+
+hoist_declarations = (body, rules) ->
+  assigns = {}
+
+  -- hoist the plain old assigns
+  for names in *find_assigns body
+    for name in *names
+      table.insert assigns, name if type(name) == "string"
+
+  table.insert body, 1, {"declare", assigns}
+
 constructor_name = "new"
 
 class Transformer
@@ -407,7 +426,7 @@ Statement = Transformer {
 
     value = nil
     with build
-      value = .block_exp {
+      out_body = {
         Run =>
           @set "super", (block, chain) ->
             if chain
@@ -470,11 +489,13 @@ Statement = Transformer {
         cls_name
       }
 
+      hoist_declarations out_body
+
       value = .group {
         .declare names: {name}
         .assign {
           names: {name}
-          values: {value}
+          values: {.block_exp out_body}
         }
       }
 

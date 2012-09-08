@@ -507,6 +507,7 @@ local _ = hello[self].world
 if something then
   local Whacko
   Whacko = (function()
+    local hello
     local _parent_0 = nil
     local _base_0 = { }
     _base_0.__index = _base_0
@@ -543,7 +544,7 @@ if something then
     if something then
       print("hello world")
     end
-    local hello = "world"
+    hello = "world"
     self.another = "day"
     print("yeah")
     return _class_0

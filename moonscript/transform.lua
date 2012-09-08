@@ -205,6 +205,42 @@ is_singular = function(body)
     return true
   end
 end
+local find_assigns
+find_assigns = function(body, out)
+  if out == nil then
+    out = { }
+  end
+  local _list_0 = body
+  for _index_0 = 1, #_list_0 do
+    local thing = _list_0[_index_0]
+    local _exp_0 = thing[1]
+    if "group" == _exp_0 then
+      find_assigns(thing[2], out)
+    elseif "assign" == _exp_0 then
+      table.insert(out, thing[2])
+    end
+  end
+  return out
+end
+local hoist_declarations
+hoist_declarations = function(body, rules)
+  local assigns = { }
+  local _list_0 = find_assigns(body)
+  for _index_0 = 1, #_list_0 do
+    local names = _list_0[_index_0]
+    local _list_1 = names
+    for _index_0 = 1, #_list_1 do
+      local name = _list_1[_index_0]
+      if type(name) == "string" then
+        table.insert(assigns, name)
+      end
+    end
+  end
+  return table.insert(body, 1, {
+    "declare",
+    assigns
+  })
+end
 local constructor_name = "new"
 local Transformer
 Transformer = (function()
@@ -806,7 +842,7 @@ Statement = Transformer({
     local value = nil
     do
       local _with_0 = build
-      value = _with_0.block_exp({
+      local out_body = {
         Run(function(self)
           return self:set("super", function(block, chain)
             if chain then
@@ -915,7 +951,8 @@ Statement = Transformer({
           end
         end)()),
         cls_name
-      })
+      }
+      hoist_declarations(out_body)
       value = _with_0.group({
         _with_0.declare({
           names = {
@@ -927,7 +964,7 @@ Statement = Transformer({
             name
           },
           values = {
-            value
+            _with_0.block_exp(out_body)
           }
         })
       })
