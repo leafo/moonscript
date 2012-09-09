@@ -345,6 +345,19 @@ same as the variable names, then the `:` prefix operator can be used:
     print_table :hair, :height
     ```
 
+If you want the key of a field in the table to to be result of an expression,
+then you can wrap it in `[` `]`, just like in Lua. You can also use a string
+literal directly as a key, leaving out the square brackets. This is useful if
+your key has any special chacters.
+
+    ```moon
+    t = {
+      [1 + 2]: "hello"
+      "hello world": true
+    }
+
+    ```
+
 ## Comprehensions
 
 Compiling provide a convenient syntax for constructing a new table by iterating
