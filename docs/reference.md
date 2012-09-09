@@ -731,6 +731,21 @@ properties and methods from another class.
 
 Here we extend our Inventory class, and limit the amount of items it can carry.
 
+Whenever a class inherits from another, it sends a message to the parent class
+by calling the method `__inherited` on the parent class if it exists.  The
+function recieves two arguments, the class that is being inherited and the
+child class.
+
+    ```moon
+    class Shelf
+      @__inherited: (child) =>
+        print @__name, "was inherited by", child.__name
+
+    -- will print: Shelf was inherited by Cupboard
+    class Cupboard extends Shelf
+      nil
+    ```
+
 ### Super
 
 `super` is a special keyword that can be used in two different ways: It can be

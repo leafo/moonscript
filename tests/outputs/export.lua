@@ -34,6 +34,9 @@ Something = (function()
     end
   })
   _base_0.__class = _class_0
+  if _parent_0 and _parent_0.__inherited then
+    _parent_0.__inherited(_parent_0, _class_0)
+  end
   return _class_0
 end)()
 local What

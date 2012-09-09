@@ -37,6 +37,9 @@ Hello = (function()
     end
   })
   _base_0.__class = _class_0
+  if _parent_0 and _parent_0.__inherited then
+    _parent_0.__inherited(_parent_0, _class_0)
+  end
   return _class_0
 end)()
 local x = Hello(1, 2)
@@ -79,6 +82,9 @@ Simple = (function()
     end
   })
   _base_0.__class = _class_0
+  if _parent_0 and _parent_0.__inherited then
+    _parent_0.__inherited(_parent_0, _class_0)
+  end
   return _class_0
 end)()
 local Yikes
@@ -112,6 +118,9 @@ Yikes = (function()
     end
   })
   _base_0.__class = _class_0
+  if _parent_0 and _parent_0.__inherited then
+    _parent_0.__inherited(_parent_0, _class_0)
+  end
   return _class_0
 end)()
 x = Yikes()
@@ -151,6 +160,9 @@ Hi = (function()
     end
   })
   _base_0.__class = _class_0
+  if _parent_0 and _parent_0.__inherited then
+    _parent_0.__inherited(_parent_0, _class_0)
+  end
   return _class_0
 end)()
 Simple = (function()
@@ -187,6 +199,9 @@ Simple = (function()
     end
   })
   _base_0.__class = _class_0
+  if _parent_0 and _parent_0.__inherited then
+    _parent_0.__inherited(_parent_0, _class_0)
+  end
   return _class_0
 end)()
 x = Simple()
@@ -227,6 +242,9 @@ Okay = (function()
     end
   })
   _base_0.__class = _class_0
+  if _parent_0 and _parent_0.__inherited then
+    _parent_0.__inherited(_parent_0, _class_0)
+  end
   return _class_0
 end)()
 local Biggie
@@ -268,6 +286,9 @@ Biggie = (function()
     end
   })
   _base_0.__class = _class_0
+  if _parent_0 and _parent_0.__inherited then
+    _parent_0.__inherited(_parent_0, _class_0)
+  end
   return _class_0
 end)()
 local Yeah
@@ -307,6 +328,9 @@ Yeah = (function()
     end
   })
   _base_0.__class = _class_0
+  if _parent_0 and _parent_0.__inherited then
+    _parent_0.__inherited(_parent_0, _class_0)
+  end
   return _class_0
 end)()
 local What
@@ -346,6 +370,9 @@ What = (function()
     end
   })
   _base_0.__class = _class_0
+  if _parent_0 and _parent_0.__inherited then
+    _parent_0.__inherited(_parent_0, _class_0)
+  end
   return _class_0
 end)()
 Hello = (function()
@@ -391,6 +418,9 @@ Hello = (function()
     end
   })
   _base_0.__class = _class_0
+  if _parent_0 and _parent_0.__inherited then
+    _parent_0.__inherited(_parent_0, _class_0)
+  end
   return _class_0
 end)()
 do
@@ -442,6 +472,9 @@ CoolSuper = (function()
     end
   })
   _base_0.__class = _class_0
+  if _parent_0 and _parent_0.__inherited then
+    _parent_0.__inherited(_parent_0, _class_0)
+  end
   return _class_0
 end)()
 x = self.hello
@@ -494,6 +527,9 @@ ClassMan = (function()
   self.hello = 3434
   self.world = 23423
   self.red = function(self) end
+  if _parent_0 and _parent_0.__inherited then
+    _parent_0.__inherited(_parent_0, _class_0)
+  end
   return _class_0
 end)()
 x = self
@@ -547,6 +583,9 @@ if something then
     hello = "world"
     self.another = "day"
     print("yeah")
+    if _parent_0 and _parent_0.__inherited then
+      _parent_0.__inherited(_parent_0, _class_0)
+    end
     return _class_0
   end)()
 end

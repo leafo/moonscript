@@ -950,6 +950,23 @@ Statement = Transformer({
             return { }
           end
         end)()),
+        build["if"]({
+          cond = {
+            "exp",
+            parent_cls_name,
+            "and",
+            parent_cls_name:chain("__inherited")
+          },
+          ["then"] = {
+            parent_cls_name:chain("__inherited", {
+              "call",
+              {
+                parent_cls_name,
+                cls_name
+              }
+            })
+          }
+        }),
         cls_name
       }
       hoist_declarations(out_body)
