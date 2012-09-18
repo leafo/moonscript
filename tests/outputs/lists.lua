@@ -197,8 +197,8 @@ local hello = (function()
   for _index_0 = 1, #_list_1 do
     x = _list_1[_index_0]
     local _list_2 = items
-    for _index_0 = 1, #_list_2 do
-      local y = _list_2[_index_0]
+    for _index_1 = 1, #_list_2 do
+      local y = _list_2[_index_1]
       _len_0 = _len_0 + 1
       _accum_0[_len_0] = x + y
     end

@@ -157,6 +157,9 @@ line_compile = {
     }), " do")
     do
       local _with_0 = self:block(loop)
+      _with_0:declare({
+        name
+      })
       _with_0:stms(block)
       return _with_0
     end
@@ -195,6 +198,7 @@ line_compile = {
     end
     do
       local _with_0 = self:block(loop)
+      _with_0:declare(names)
       _with_0:stms(block)
       return _with_0
     end

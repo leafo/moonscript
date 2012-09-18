@@ -91,6 +91,7 @@ line_compile =
     _, name, bounds, block = unpack node
     loop = @line "for ", @name(name), " = ", @value({"explist", unpack bounds}), " do"
     with @block loop
+      \declare {name}
       \stms block
 
   -- for x in y ...
@@ -106,6 +107,7 @@ line_compile =
       \append " do"
 
     with @block loop
+      \declare names
       \stms block
 
   export: (node) =>
