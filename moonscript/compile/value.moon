@@ -44,8 +44,12 @@ value_compile =
     @line "(", @value(node[2]), ")"
 
   string: (node) =>
-    _, delim, inner, delim_end = unpack node
-    delim..inner..(delim_end or delim)
+    _, delim, inner = unpack node
+    end_delim = delim\gsub "%[", "]"
+    if inner
+      delim..inner..end_delim
+    else
+      delim..end_delim
 
   chain: (node) =>
     callee = node[2]

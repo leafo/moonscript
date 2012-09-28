@@ -31,3 +31,27 @@ x = "\\"
 x = "a\\b"
 x = "\\\n"
 x = "\""
+
+-- 
+
+a = "hello #{hello} hello"
+b = "#{hello} hello"
+c = "hello #{hello}"
+d = ""
+
+y = "hello" .. "world"
+
+y = [[hello world]]
+
+--
+
+a = 'hello #{hello} hello'
+b = '#{hello} hello'
+c = 'hello #{hello}'
+d = ''
+
+y = 'hello' .. 'world'
+
+y = [[hello world]]
+
+

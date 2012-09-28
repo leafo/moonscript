@@ -40,6 +40,9 @@ LocalName = (function()
     end
   })
   _base_0.__class = _class_0
+  if _parent_0 and _parent_0.__inherited then
+    _parent_0.__inherited(_parent_0, _class_0)
+  end
   return _class_0
 end)()
 NameProxy = (function()
@@ -127,6 +130,9 @@ NameProxy = (function()
     end
   })
   _base_0.__class = _class_0
+  if _parent_0 and _parent_0.__inherited then
+    _parent_0.__inherited(_parent_0, _class_0)
+  end
   return _class_0
 end)()
 Run = (function()
@@ -164,6 +170,9 @@ Run = (function()
     end
   })
   _base_0.__class = _class_0
+  if _parent_0 and _parent_0.__inherited then
+    _parent_0.__inherited(_parent_0, _class_0)
+  end
   return _class_0
 end)()
 local apply_to_last
@@ -303,6 +312,9 @@ Transformer = (function()
     end
   })
   _base_0.__class = _class_0
+  if _parent_0 and _parent_0.__inherited then
+    _parent_0.__inherited(_parent_0, _class_0)
+  end
   return _class_0
 end)()
 local construct_comprehension
@@ -1082,6 +1094,9 @@ Accumulator = (function()
     end
   })
   _base_0.__class = _class_0
+  if _parent_0 and _parent_0.__inherited then
+    _parent_0.__inherited(_parent_0, _class_0)
+  end
   return _class_0
 end)()
 local default_accumulator
@@ -1120,6 +1135,44 @@ Value = Transformer({
   ["for"] = default_accumulator,
   ["while"] = default_accumulator,
   foreach = default_accumulator,
+  string = function(self, node)
+    if #node <= 3 then
+      return node
+    end
+    local delim = node[2]
+    local convert_part
+    convert_part = function(part)
+      if part == nil then
+        return 
+      end
+      if type(part) == "string" then
+        return {
+          "string",
+          delim,
+          part
+        }
+      else
+        return build.chain({
+          base = "tostring",
+          {
+            "call",
+            {
+              part[2]
+            }
+          }
+        })
+      end
+    end
+    local e = {
+      "exp",
+      convert_part(node[3])
+    }
+    for i = 4, #node do
+      insert(e, "..")
+      insert(e, convert_part(node[i]))
+    end
+    return e
+  end,
   comprehension = function(self, node)
     local a = Accumulator()
     node = self.transform.statement(node, function(exp)

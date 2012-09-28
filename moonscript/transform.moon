@@ -593,6 +593,24 @@ Value = Transformer {
   while: default_accumulator
   foreach: default_accumulator
 
+  string: (node) =>
+    return node if #node <= 3
+    delim = node[2]
+
+    convert_part = (part) ->
+      return if part == nil
+      if type(part) == "string"
+        {"string", delim, part}
+      else
+        build.chain { base: "tostring", {"call", {part[2]}} }
+
+    e = {"exp", convert_part node[3]}
+
+    for i=4,#node
+      insert e, ".."
+      insert e, convert_part node[i]
+    e
+
   comprehension: (node) =>
     a = Accumulator!
     node = @transform.statement node, (exp) ->

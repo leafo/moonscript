@@ -86,8 +86,13 @@ value_compile = {
     return self:line("(", self:value(node[2]), ")")
   end,
   string = function(self, node)
-    local _, delim, inner, delim_end = unpack(node)
-    return delim .. inner .. (delim_end or delim)
+    local _, delim, inner = unpack(node)
+    local end_delim = delim:gsub("%[", "]")
+    if inner then
+      return delim .. inner .. end_delim
+    else
+      return delim .. end_delim
+    end
   end,
   chain = function(self, node)
     local callee = node[2]

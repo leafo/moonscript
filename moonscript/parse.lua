@@ -148,10 +148,17 @@ local function symx(chars)
 	return chars
 end
 
-local function simple_string(delim, x)
-	return C(symx(delim)) * C((P('\\'..delim) +
-		"\\\\" +
-		(1 - S('\r\n'..delim)))^0) * sym(delim) / mark"string"
+local function simple_string(delim, allow_interpolation)
+	local inner = P('\\'..delim) + "\\\\" + (1 - S('\r\n'..delim))
+	if allow_interpolation then
+		inter = symx"#{" * V"Exp" * sym"}"
+		inner = (C((inner - inter)^1) + inter / mark"interpolate")^0
+	else
+		inner = C(inner^0)
+	end
+
+	return C(symx(delim)) *
+		inner * sym(delim) / mark"string"
 end
 
 local function wrap_func_arg(value)
@@ -384,11 +391,11 @@ local build_grammar = wrap_env(function()
 
 		String = Space * DoubleString + Space * SingleString + LuaString,
 		SingleString = simple_string("'"),
-		DoubleString = simple_string('"'),
+		DoubleString = simple_string('"', true),
 
 		LuaString = Cg(LuaStringOpen, "string_open") * Cb"string_open" * Break^-1 *
 			C((1 - Cmt(C(LuaStringClose) * Cb"string_open", check_lua_string))^0) *
-			C(LuaStringClose) / mark"string",
+			LuaStringClose / mark"string",
 
 		LuaStringOpen = sym"[" * P"="^0 * "[" / trim,
 		LuaStringClose = "]" * P"="^0 * "]",
