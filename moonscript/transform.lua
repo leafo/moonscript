@@ -1136,16 +1136,10 @@ Value = Transformer({
   ["while"] = default_accumulator,
   foreach = default_accumulator,
   string = function(self, node)
-    if #node <= 3 then
-      return node
-    end
     local delim = node[2]
     local convert_part
     convert_part = function(part)
-      if part == nil then
-        return 
-      end
-      if type(part) == "string" then
+      if type(part) == "string" or part == nil then
         return {
           "string",
           delim,
@@ -1162,6 +1156,15 @@ Value = Transformer({
           }
         })
       end
+    end
+    if #node <= 3 then
+      return (function()
+        if type(node[3]) == "string" then
+          return node
+        else
+          return convert_part(node[3])
+        end
+      end)()
     end
     local e = {
       "exp",

@@ -36,22 +36,16 @@ x = "\""
 
 a = "hello #{hello} hello"
 b = "#{hello} hello"
-c = "hello #{hello}"
-d = ""
+c = "hello #{5+1}"
+d = "#{hello world}"
+e = "#{1} #{2} #{3}"
 
-y = "hello" .. "world"
-
-y = [[hello world]]
+f = [[hello #{world} world]]
 
 --
 
 a = 'hello #{hello} hello'
 b = '#{hello} hello'
 c = 'hello #{hello}'
-d = ''
-
-y = 'hello' .. 'world'
-
-y = [[hello world]]
 
 

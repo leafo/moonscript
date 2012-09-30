@@ -46,10 +46,7 @@ value_compile =
   string: (node) =>
     _, delim, inner = unpack node
     end_delim = delim\gsub "%[", "]"
-    if inner
-      delim..inner..end_delim
-    else
-      delim..end_delim
+    delim..inner..end_delim
 
   chain: (node) =>
     callee = node[2]

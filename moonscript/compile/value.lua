@@ -88,11 +88,7 @@ value_compile = {
   string = function(self, node)
     local _, delim, inner = unpack(node)
     local end_delim = delim:gsub("%[", "]")
-    if inner then
-      return delim .. inner .. end_delim
-    else
-      return delim .. end_delim
-    end
+    return delim .. inner .. end_delim
   end,
   chain = function(self, node)
     local callee = node[2]
