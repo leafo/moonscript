@@ -4,6 +4,8 @@ local util = require"moonscript.util"
 
 require"lpeg"
 
+local debug_grammar = false
+
 local data = require"moonscript.data"
 local types = require"moonscript.types"
 
@@ -66,6 +68,39 @@ end
 -- auto declare Proper variables with lpeg.V
 local function wrap_env(fn)
 	local env = getfenv(fn)
+	local wrap_name = V
+
+	if debug_grammar then
+		local indent = 0
+		local indent_char = "  "
+
+		local function iprint(...)
+			local args = {...}
+			for i=1,#args do
+				args[i] = tostring(args[i])
+			end
+
+			io.stdout:write(indent_char:rep(indent) .. table.concat(args, ", ") .. "\n")
+		end
+
+		wrap_name = function(name)
+			local v = V(name)
+			v = Cmt("", function()
+				iprint("* " .. name)
+				indent = indent + 1
+				return true
+			end) * Cmt(v, function()
+				iprint(name, true)
+				indent = indent - 1
+				return true
+			end) + Cmt("", function()
+				iprint(name, false)
+				indent = indent - 1
+				return false
+			end)
+			return v
+		end
+	end
 
 	return setfenv(fn, setmetatable({}, {
 		__index = function(self, name)
@@ -73,7 +108,7 @@ local function wrap_env(fn)
 			if value ~= nil then return value end
 
 			if name:match"^[A-Z][A-Za-z0-9]*$" then
-				local v = V(name)
+				local v = wrap_name(name)
 				rawset(self, name, v)
 				return v
 			end
