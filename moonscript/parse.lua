@@ -295,7 +295,7 @@ local build_grammar = wrap_env(function()
 		Line = (CheckIndent * Statement + Space * #Stop),
 
 		Statement = (
-				Import + While + With + For + ForEach + Switch + Return + ClassDecl +
+				Import + While + With + For + ForEach + Switch + Return + ClassDecl + Local +
 				Export + BreakLoop + Assign + Update +
 				Ct(ExpList) / flatten_or_mark"explist"
 			) * Space * ((
@@ -312,6 +312,8 @@ local build_grammar = wrap_env(function()
 		PreventIndent = Cmt(Cc(-1), push_indent),
 		PopIndent = Cmt("", pop_indent),
 		InBlock = Advance * Block * PopIndent,
+
+		Local = key"local" * Ct(NameList) / mark"declare",
 
 		Import = key"import" *  Ct(ImportNameList) * key"from" * Exp / mark"import", 
 		ImportName = (sym"\\" * Ct(Cc"colon_stub" * Name) + Name),
