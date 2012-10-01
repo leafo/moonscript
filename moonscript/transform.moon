@@ -648,7 +648,12 @@ Value = Transformer {
   -- pull out colon chain
   chain: (node) =>
     stub = node[#node]
-    if type(stub) == "table" and stub[1] == "colon_stub"
+
+    if ntype(node[2]) == "string"
+      -- add parens if callee is raw string
+      node[2] = {"parens", node[2] }
+    elseif type(stub) == "table" and stub[1] == "colon_stub"
+      -- convert colon stub into code
       table.remove node, #node
 
       base_name = NameProxy "base"

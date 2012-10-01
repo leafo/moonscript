@@ -19,7 +19,7 @@ options = {
   show_timings: os.getenv "TIME"
 
   diff: {
-    tool: "git diff --no-index --color-words"
+    tool: "git diff --no-index --color" --color-words"
     filter: (str) ->
       -- strip the first four lines
       table.concat [line for line in *util.split(str, "\n")[5,]], "\n"

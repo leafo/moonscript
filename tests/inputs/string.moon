@@ -49,3 +49,17 @@ b = '#{hello} hello'
 c = 'hello #{hello}'
 
 
+--
+
+"hello"
+"hello"\format 1
+"hello"\format(1,2,3)
+"hello"\format(1,2,3) 1,2,3
+
+"hello"\world!
+"hello"\format!.hello 1,2,3
+"hello"\format 1,2,3
+
+something"hello"\world!
+something "hello"\world!
+

@@ -221,6 +221,11 @@ local function flatten_func(callee, args)
 	return {"chain", callee, args}
 end
 
+local function flatten_string_chain(str, chain, args)
+	if not chain then return str end
+	return flatten_func({"chain", str, unpack(chain)}, args)
+end
+
 -- transforms a statement that has a line decorator
 local function wrap_decorator(stm, dec)
 	if not dec then return stm end
@@ -413,10 +418,11 @@ local build_grammar = wrap_env(function()
 			TblComprehension +
 			TableLit +
 			Comprehension +
-			FunLit + String +
+			FunLit +
 			Num,
 
 		ChainValue = -- a function call or an object access
+			StringChain +
 			((Chain + DotChain + Callable) * Ct(InvokeArgs^-1)) / flatten_func,
 
 		Value = pos(
@@ -425,6 +431,9 @@ local build_grammar = wrap_env(function()
 			ChainValue),
 
 		SliceValue = SimpleValue + ChainValue,
+
+		StringChain = String *
+			(Ct((ColonCall + ColonSuffix) * ChainTail^-1) * Ct(InvokeArgs^-1))^-1 / flatten_string_chain,
 
 		String = Space * DoubleString + Space * SingleString + LuaString,
 		SingleString = simple_string("'"),
@@ -442,10 +451,10 @@ local build_grammar = wrap_env(function()
 
 		FnArgs = symx"(" * Ct(ExpList^-1) * sym")" + sym"!" * -P"=" * Ct"",
 
-		ChainTail = (ChainItem^1 * ColonSuffix^-1 + ColonSuffix),
+		ChainTail = ChainItem^1 * ColonSuffix^-1 + ColonSuffix,
 
-		-- a list of funcalls and indexs on a callable
-		Chain = Callable * (ChainItem^1 * ColonSuffix^-1 + ColonSuffix) / mark"chain",
+		-- a list of funcalls and indexes on a callable
+		Chain = Callable * ChainTail / mark"chain",
 
 		-- shorthand dot call for use in with statement
 		DotChain =

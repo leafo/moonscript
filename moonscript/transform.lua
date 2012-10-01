@@ -1226,7 +1226,12 @@ Value = Transformer({
   end,
   chain = function(self, node)
     local stub = node[#node]
-    if type(stub) == "table" and stub[1] == "colon_stub" then
+    if ntype(node[2]) == "string" then
+      node[2] = {
+        "parens",
+        node[2]
+      }
+    elseif type(stub) == "table" and stub[1] == "colon_stub" then
       table.remove(node, #node)
       local base_name = NameProxy("base")
       local fn_name = NameProxy("fn")
