@@ -104,7 +104,7 @@ local function wrap_env(fn)
 
 	return setfenv(fn, setmetatable({}, {
 		__index = function(self, name)
-			local value = env[name] 
+			local value = env[name]
 			if value ~= nil then return value end
 
 			if name:match"^[A-Z][A-Za-z0-9]*$" then
@@ -173,6 +173,22 @@ local function check_assignable(str, pos, value)
 		return true, value
 	end
 	return false
+end
+
+local flatten_explist = flatten_or_mark"explist"
+local function format_assign(lhs_exps, assign)
+	if not assign then
+		return flatten_explist(lhs_exps)
+	end
+
+	local t = ntype(assign)
+	if t == "assign" then
+		return {"assign", lhs_exps, unpack(assign, 2)}
+	elseif t == "update" then
+		return {"update", lhs_exps[1], unpack(assign, 2)}
+	end
+
+	error "unknown assign expression"
 end
 
 local function sym(chars)
@@ -335,9 +351,9 @@ local build_grammar = wrap_env(function()
 		Line = (CheckIndent * Statement + Space * #Stop),
 
 		Statement = (
-				Import + While + With + For + ForEach + Switch + Return + ClassDecl + Local +
-				Export + BreakLoop + Assign + Update +
-				Ct(ExpList) / flatten_or_mark"explist"
+				Import + While + With + For + ForEach + Switch + Return + ClassDecl +
+				Local + Export + BreakLoop +
+				Ct(ExpList) * (Update + Assign)^-1 / format_assign
 			) * Space * ((
 				-- statement decorators
 				key"if" * Exp * (key"else" * Exp)^-1 * Space / mark"if" +
@@ -355,7 +371,7 @@ local build_grammar = wrap_env(function()
 
 		Local = key"local" * Ct(NameList) / mark"declare",
 
-		Import = key"import" *  Ct(ImportNameList) * key"from" * Exp / mark"import", 
+		Import = key"import" *  Ct(ImportNameList) * key"from" * Exp / mark"import",
 		ImportName = (sym"\\" * Ct(Cc"colon_stub" * Name) + Name),
 		ImportNameList = ImportName * (sym"," * ImportName)^0,
 
@@ -392,8 +408,8 @@ local build_grammar = wrap_env(function()
 		CompFor = key"for" * Ct(NameList) * key"in" * (sym"*" * Exp / mark"unpack" + Exp) / mark"for",
 		CompClause = CompFor + key"when" * Exp / mark"when",
 
-		Assign = Ct(AssignableList) * sym"=" * (Ct(With + If + Switch) + Ct(TableBlock + ExpListLow)) / mark"assign",
-		Update = Assignable * ((sym"..=" + sym"+=" + sym"-=" + sym"*=" + sym"/=" + sym"%=")/trim) * Exp / mark"update",
+		Assign = sym"=" * (Ct(With + If + Switch) + Ct(TableBlock + ExpListLow)) / mark"assign",
+		Update = ((sym"..=" + sym"+=" + sym"-=" + sym"*=" + sym"/=" + sym"%=") / trim) * Exp / mark"update",
 
 		-- we can ignore precedence for now
 		OtherOps = op"or" + op"and" + op"<=" + op">=" + op"~=" + op"!=" + op"==" + op".." + op"<" + op">",
@@ -464,8 +480,8 @@ local build_grammar = wrap_env(function()
 				(_Name / mark"colon_stub")
 			)) / mark"chain",
 
-		ChainItem = 
-			Invoke + 
+		ChainItem =
+			Invoke +
 			Slice +
 			symx"[" * Exp/mark"index" * sym"]" +
 			symx"." * _Name/mark"dot" +
@@ -555,13 +571,13 @@ local build_grammar = wrap_env(function()
 			if not tree then
 				local line_no = pos_to_line(last_pos)
 				local line_str = get_line(line_no) or ""
-				
+
 				return nil, err_msg:format(line_no, trim(line_str), _indent:top())
 			end
 			return tree
 		end
 	}
-	
+
 end)
 
 -- parse a string
