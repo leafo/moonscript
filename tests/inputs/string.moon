@@ -26,6 +26,7 @@ hola = [===[
 
 mm = [[well trhere]]
 
+oo = ""
 
 x = "\\"
 x = "a\\b"

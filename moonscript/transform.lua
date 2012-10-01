@@ -1143,7 +1143,7 @@ Value = Transformer({
         return {
           "string",
           delim,
-          part
+          part or ""
         }
       else
         return build.chain({

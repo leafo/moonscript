@@ -598,7 +598,7 @@ Value = Transformer {
 
     convert_part = (part) ->
       if type(part) == "string" or part == nil
-        {"string", delim, part}
+        {"string", delim, part or ""}
       else
         build.chain { base: "tostring", {"call", {part[2]}} }
 
