@@ -50,3 +50,8 @@ not working right:
 
 * let array items in table be defined without {} when indented
 
+
+* allow dot access with names that are keywords: hello.then
+
+* convert tree transformer to be depth first instead of breadth first (lazy)
+

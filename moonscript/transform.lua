@@ -519,9 +519,27 @@ Statement = Transformer({
     end
     return construct_comprehension(action(exp), clauses)
   end,
-  ["if"] = function(self, node, ret)
+  ["do"] = function(self, node, ret)
     if ret then
-      smart_node(node)
+      node[2] = apply_to_last(node[2], ret)
+    end
+    return node
+  end,
+  ["if"] = function(self, node, ret)
+    smart_node(node)
+    if ntype(node.cond) == "assign" then
+      local _, assign, body = unpack(node)
+      local name = assign[2][1]
+      return build["do"]({
+        assign,
+        {
+          "if",
+          name,
+          unpack(node, 3)
+        }
+      })
+    end
+    if ret then
       node['then'] = apply_to_last(node['then'], ret)
       for i = 4, #node do
         local case = node[i]

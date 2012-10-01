@@ -85,3 +85,28 @@ elseif "just us" then
 else
   show(5555555)
 end
+do
+  local something = 10
+  if something then
+    print(something)
+  else
+    print("else")
+  end
+end
+local hello
+do
+  local something = 10
+  if something then
+    hello = print(something)
+  else
+    hello = print("else")
+  end
+end
+hello = 5 + (function()
+  do
+    local something = 10
+    if something then
+      return print(something)
+    end
+  end
+end)()

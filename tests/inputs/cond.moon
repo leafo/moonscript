@@ -50,4 +50,19 @@ if lets go
 elseif "just us"
   print "will smith" else show 5555555
 
+--
+
+if something = 10
+  print something
+else
+  print "else"
+
+hello = if something = 10
+  print something
+else
+  print "else"
+
+
+hello = 5 + if something = 10
+  print something
 

@@ -191,6 +191,15 @@ local function format_assign(lhs_exps, assign)
 	error "unknown assign expression"
 end
 
+-- the if statement only takes a single lhs, so we wrap in table to git to
+-- "assign" tuple format
+local function format_assign_for_if(lhs, assign)
+	if assign then
+		return format_assign({lhs}, assign)
+	end
+	return lhs
+end
+
 local function sym(chars)
 	return Space * chars
 end
@@ -389,7 +398,7 @@ local build_grammar = wrap_env(function()
 		SwitchCase = key"when" * Exp * key"then"^-1 * Body / mark"case",
 		SwitchElse = key"else" * Body / mark"else",
 
-		If = key"if" * Exp * key"then"^-1 * Body *
+		If = key"if" * (Exp * Assign^-1 / format_assign_for_if) * key"then"^-1 * Body *
 			((Break * CheckIndent)^-1 * EmptyLine^0 * key"elseif" * Exp * key"then"^-1 * Body / mark"elseif")^0 *
 			((Break * CheckIndent)^-1 * EmptyLine^0 * key"else" * Body / mark"else")^-1 / mark"if",
 

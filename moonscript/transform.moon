@@ -226,16 +226,31 @@ Statement = Transformer {
     action = action or (exp) -> {exp}
     construct_comprehension action(exp), clauses
 
-  -- handle cascading return decorator
+  do: (node, ret) =>
+    node[2] = apply_to_last node[2], ret if ret
+    node
+
   if: (node, ret) =>
+    smart_node node
+
+    -- extract assigns in cond
+    if ntype(node.cond) == "assign"
+      _, assign, body = unpack node
+      name = assign[2][1]
+      return build["do"] {
+        assign
+        {"if", name, unpack node, 3}
+      }
+
+    -- handle cascading return decorator
     if ret
-      smart_node node
       -- mutate all the bodies
       node['then'] = apply_to_last node['then'], ret
       for i = 4, #node
         case = node[i]
         body_idx = #node[i]
         case[body_idx] = apply_to_last case[body_idx], ret
+
     node
 
   with: (node, ret) =>
