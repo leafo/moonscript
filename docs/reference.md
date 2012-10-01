@@ -592,6 +592,17 @@ Conditionals can also be used in return statements and assignments:
     print message -- prints: I am very tall
     ```
 
+`if` and `elseif` blocks can take an assignment in place of a conditional
+expression. Upon evaluating the conditional, the assignment will take place and
+the value that was assigned to will be used as the conditional expression. The
+assigned variable is only in scope for the body of the conditional, meaning it
+is never available if the value is not truthy.
+
+    ```moon
+    if user = database\find_user "moon"
+      print user.name
+    ```
+
 ## Line Decorators
 
 For convenience, the for loop and if statement can be applied to single
