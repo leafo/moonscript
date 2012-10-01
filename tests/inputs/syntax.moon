@@ -227,4 +227,9 @@ a *= 3 + 5
 a *= 3
 a /= func "cool"
 
+---
+
+x.then = "hello"
+x.while.true = "hello"
+
 -- cooool

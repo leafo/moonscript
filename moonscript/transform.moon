@@ -680,6 +680,12 @@ Value = Transformer {
   chain: (node) =>
     stub = node[#node]
 
+    -- escape lua keywords used in dot accessors
+    for i=3,#node
+      part = node[i]
+      if ntype(part) == "dot" and data.lua_keywords[part[2]]
+        node[i] = { "index", {"string", '"', part[2]} }
+
     if ntype(node[2]) == "string"
       -- add parens if callee is raw string
       node[2] = {"parens", node[2] }

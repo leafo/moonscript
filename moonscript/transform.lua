@@ -1271,6 +1271,19 @@ Value = Transformer({
   end,
   chain = function(self, node)
     local stub = node[#node]
+    for i = 3, #node do
+      local part = node[i]
+      if ntype(part) == "dot" and data.lua_keywords[part[2]] then
+        node[i] = {
+          "index",
+          {
+            "string",
+            '"',
+            part[2]
+          }
+        }
+      end
+    end
     if ntype(node[2]) == "string" then
       node[2] = {
         "parens",

@@ -227,3 +227,5 @@ a = a + (3 - 5)
 a = a * (3 + 5)
 a = a * 3
 a = a / func("cool")
+x["then"] = "hello"
+x["while"]["true"] = "hello"
