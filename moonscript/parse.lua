@@ -89,10 +89,10 @@ local function wrap_env(fn)
 				iprint("* " .. name)
 				indent = indent + 1
 				return true
-			end) * Cmt(v, function()
+			end) * Cmt(v, function(str, pos, ...)
 				iprint(name, true)
 				indent = indent - 1
-				return true
+				return true, ...
 			end) + Cmt("", function()
 				iprint(name, false)
 				indent = indent - 1
