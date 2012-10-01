@@ -100,6 +100,20 @@ hoist_declarations = (body, rules) ->
 
   table.insert body, 1, {"declare", assigns}
 
+expand_elseif_assign = (ifstm) ->
+  for i = 4, #ifstm
+    case = ifstm[i]
+    if ntype(case) == "elseif" and ntype(case[2]) == "assign"
+      split = { unpack ifstm, 1, i - 1 }
+      insert split, {
+        "else", {
+          {"if", case[2], case[3], unpack ifstm, i + 1}
+        }
+      }
+      return split
+
+  ifstm
+
 constructor_name = "new"
 
 class Transformer
@@ -231,10 +245,9 @@ Statement = Transformer {
     node
 
   if: (node, ret) =>
-    smart_node node
 
-    -- extract assigns in cond
-    if ntype(node.cond) == "assign"
+    -- expand assign in cond
+    if ntype(node[2]) == "assign"
       _, assign, body = unpack node
       name = assign[2][1]
       return build["do"] {
@@ -242,8 +255,11 @@ Statement = Transformer {
         {"if", name, unpack node, 3}
       }
 
-    -- handle cascading return decorator
+    node = expand_elseif_assign node
+
+    -- apply cascading return decorator
     if ret
+      smart_node node
       -- mutate all the bodies
       node['then'] = apply_to_last node['then'], ret
       for i = 4, #node

@@ -398,8 +398,10 @@ local build_grammar = wrap_env(function()
 		SwitchCase = key"when" * Exp * key"then"^-1 * Body / mark"case",
 		SwitchElse = key"else" * Body / mark"else",
 
-		If = key"if" * (Exp * Assign^-1 / format_assign_for_if) * key"then"^-1 * Body *
-			((Break * CheckIndent)^-1 * EmptyLine^0 * key"elseif" * Exp * key"then"^-1 * Body / mark"elseif")^0 *
+		IfCond = Exp * Assign^-1 / format_assign_for_if,
+
+		If = key"if" * IfCond * key"then"^-1 * Body *
+			((Break * CheckIndent)^-1 * EmptyLine^0 * key"elseif" * IfCond * key"then"^-1 * Body / mark"elseif")^0 *
 			((Break * CheckIndent)^-1 * EmptyLine^0 * key"else" * Body / mark"else")^-1 / mark"if",
 
 		While = key"while" * Exp * key"do"^-1 * Body / mark"while",

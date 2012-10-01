@@ -66,3 +66,26 @@ else
 hello = 5 + if something = 10
   print something
 
+---
+
+z = false
+
+if false
+  one
+elseif x = true
+  two
+elseif z = true
+  three
+else
+  four
+
+
+out = if false
+  one
+elseif x = true
+  two
+elseif z = true
+  three
+else
+  four
+

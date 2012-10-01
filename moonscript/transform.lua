@@ -250,6 +250,30 @@ hoist_declarations = function(body, rules)
     assigns
   })
 end
+local expand_elseif_assign
+expand_elseif_assign = function(ifstm)
+  for i = 4, #ifstm do
+    local case = ifstm[i]
+    if ntype(case) == "elseif" and ntype(case[2]) == "assign" then
+      local split = {
+        unpack(ifstm, 1, i - 1)
+      }
+      insert(split, {
+        "else",
+        {
+          {
+            "if",
+            case[2],
+            case[3],
+            unpack(ifstm, i + 1)
+          }
+        }
+      })
+      return split
+    end
+  end
+  return ifstm
+end
 local constructor_name = "new"
 local Transformer
 Transformer = (function()
@@ -526,8 +550,7 @@ Statement = Transformer({
     return node
   end,
   ["if"] = function(self, node, ret)
-    smart_node(node)
-    if ntype(node.cond) == "assign" then
+    if ntype(node[2]) == "assign" then
       local _, assign, body = unpack(node)
       local name = assign[2][1]
       return build["do"]({
@@ -539,7 +562,9 @@ Statement = Transformer({
         }
       })
     end
+    node = expand_elseif_assign(node)
     if ret then
+      smart_node(node)
       node['then'] = apply_to_last(node['then'], ret)
       for i = 4, #node do
         local case = node[i]

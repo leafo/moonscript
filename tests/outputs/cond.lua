@@ -110,3 +110,43 @@ hello = 5 + (function()
     end
   end
 end)()
+local z = false
+if false then
+  local _ = one
+else
+  do
+    local x = true
+    if x then
+      local _ = two
+    else
+      do
+        z = true
+        if z then
+          local _ = three
+        else
+          local _ = four
+        end
+      end
+    end
+  end
+end
+local out
+if false then
+  out = one
+else
+  do
+    local x = true
+    if x then
+      out = two
+    else
+      do
+        z = true
+        if z then
+          out = three
+        else
+          out = four
+        end
+      end
+    end
+  end
+end
