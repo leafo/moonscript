@@ -119,13 +119,13 @@ local node_types = {
 local build_table
 build_table = function()
   local key_table = { }
-  for name, args in pairs(node_types) do
+  for node_name, args in pairs(node_types) do
     local index = { }
     for i, tuple in ipairs(args) do
-      local name = tuple[1]
-      index[name] = i + 1
+      local prop_name = tuple[1]
+      index[prop_name] = i + 1
     end
-    key_table[name] = index
+    key_table[node_name] = index
   end
   return key_table
 end

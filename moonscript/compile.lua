@@ -97,6 +97,9 @@ Line = (function()
     end
   })
   _base_0.__class = _class_0
+  if _parent_0 and _parent_0.__inherited then
+    _parent_0.__inherited(_parent_0, _class_0)
+  end
   return _class_0
 end)()
 Block = (function()
@@ -233,7 +236,7 @@ Block = (function()
     append_line_table = function(self, sub_table, offset)
       offset = offset + self.current_line
       for line, source in pairs(sub_table) do
-        local line = line + offset
+        line = line + offset
         if not self._posmap[line] then
           self._posmap[line] = source
         end
@@ -449,6 +452,9 @@ Block = (function()
     end
   })
   _base_0.__class = _class_0
+  if _parent_0 and _parent_0.__inherited then
+    _parent_0.__inherited(_parent_0, _class_0)
+  end
   return _class_0
 end)()
 RootBlock = (function()
@@ -494,6 +500,9 @@ RootBlock = (function()
     end
   })
   _base_0.__class = _class_0
+  if _parent_0 and _parent_0.__inherited then
+    _parent_0.__inherited(_parent_0, _class_0)
+  end
   return _class_0
 end)()
 format_error = function(msg, pos, file_str)

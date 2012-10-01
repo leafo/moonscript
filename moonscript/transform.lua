@@ -238,8 +238,8 @@ hoist_declarations = function(body, rules)
   for _index_0 = 1, #_list_0 do
     local names = _list_0[_index_0]
     local _list_1 = names
-    for _index_0 = 1, #_list_1 do
-      local name = _list_1[_index_0]
+    for _index_1 = 1, #_list_1 do
+      local name = _list_1[_index_1]
       if type(name) == "string" then
         table.insert(assigns, name)
       end
@@ -323,7 +323,8 @@ construct_comprehension = function(inner, clauses)
   for _, clause in reversed(clauses) do
     local t = clause[1]
     if t == "for" then
-      local _, names, iter = unpack(clause)
+      local names, iter
+      _, names, iter = unpack(clause)
       current_stms = {
         "foreach",
         names,
@@ -333,7 +334,8 @@ construct_comprehension = function(inner, clauses)
         current_stms
       }
     elseif t == "when" then
-      local _, cond = unpack(clause)
+      local cond
+      _, cond = unpack(clause)
       current_stms = {
         "if",
         cond,
@@ -671,8 +673,8 @@ Statement = Transformer({
         insert(statements, item[2])
       elseif "props" == _exp_0 then
         local _list_1 = item
-        for _index_0 = 2, #_list_1 do
-          local tuple = _list_1[_index_0]
+        for _index_1 = 2, #_list_1 do
+          local tuple = _list_1[_index_1]
           if ntype(tuple[1]) == "self" then
             insert(statements, build.assign_one(unpack(tuple)))
           else

@@ -71,12 +71,12 @@ node_types = {
 
 build_table =  ->
   key_table = {}
-  for name, args in pairs node_types
+  for node_name, args in pairs node_types
     index = {}
     for i, tuple in ipairs args
-      name = tuple[1]
-      index[name] = i + 1
-    key_table[name] = index
+      prop_name = tuple[1]
+      index[prop_name] = i + 1
+    key_table[node_name] = index
   key_table
 
 key_table = build_table!
