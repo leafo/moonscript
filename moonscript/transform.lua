@@ -1231,21 +1231,46 @@ Value = Transformer({
     return a:wrap(node)
   end,
   tblcomprehension = function(self, node)
-    local _, key_exp, value_exp, clauses = unpack(node)
+    local _, explist, clauses = unpack(node)
+    local key_exp, value_exp = unpack(explist)
     local accum = NameProxy("tbl")
-    local dest = build.chain({
-      base = accum,
-      {
-        "index",
-        key_exp
+    local inner
+    if value_exp then
+      local dest = build.chain({
+        base = accum,
+        {
+          "index",
+          key_exp
+        }
+      })
+      inner = {
+        build.assign_one(dest, value_exp)
       }
-    })
-    local inner = build.assign_one(dest, value_exp)
+    else
+      local key_name, val_name = NameProxy("key"), NameProxy("val")
+      local dest = build.chain({
+        base = accum,
+        {
+          "index",
+          key_name
+        }
+      })
+      inner = {
+        build.assign({
+          names = {
+            key_name,
+            val_name
+          },
+          values = {
+            key_exp
+          }
+        }),
+        build.assign_one(dest, val_name)
+      }
+    end
     return build.block_exp({
       build.assign_one(accum, build.table()),
-      construct_comprehension({
-        inner
-      }, clauses),
+      construct_comprehension(inner, clauses),
       accum
     })
   end,

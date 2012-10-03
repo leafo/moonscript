@@ -654,15 +654,27 @@ Value = Transformer {
     a\wrap node
 
   tblcomprehension: (node) =>
-    _, key_exp, value_exp, clauses = unpack node
+    _, explist, clauses = unpack node
+    key_exp, value_exp = unpack explist
 
     accum = NameProxy "tbl"
-    dest = build.chain { base: accum, {"index", key_exp} }
-    inner = build.assign_one dest, value_exp
+
+    inner = if value_exp
+      dest = build.chain { base: accum, {"index", key_exp} }
+      { build.assign_one dest, value_exp }
+    else
+      -- If we only have single expression then
+      -- unpack the result into key and value
+      key_name, val_name = NameProxy"key", NameProxy"val"
+      dest = build.chain { base: accum, {"index", key_name} }
+      {
+        build.assign names: {key_name, val_name}, values: {key_exp}
+        build.assign_one dest, val_name
+      }
 
     build.block_exp {
       build.assign_one accum, build.table!
-      construct_comprehension {inner}, clauses
+      construct_comprehension inner, clauses
       accum
     }
 

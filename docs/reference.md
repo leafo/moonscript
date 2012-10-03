@@ -436,6 +436,18 @@ for a few numbers.
     sqrts = {i, math.sqrt i for i in *numbers}
     ```
 
+The key-value tuple in a table comprehension can also come from a single
+expression, in which case the expression should return two values. The
+first is used as the key and the second is used as the value:
+
+In this example we convert an array of pairs to a table where the first item in
+the pair is the key and the second is the value.
+
+    ```moon
+    tuples = {{"hello", "world"}, {"foo", "bar"}}
+    tbl = {unpack tuple for tuple in *tuples}
+    ```
+
 ### Slicing
 
 A special syntax is provided to restrict the items that are iterated over when
@@ -480,7 +492,7 @@ There are two for loop forms, just like in Lua. A numeric one and a generic one:
       print key, value
     ```
     
-The slicing and `*` operators can be used, just like with table comprehensions:
+The slicing and `*` operators can be used, just like with comprehensions:
 
     ```moon
     for item in *items[2,4]

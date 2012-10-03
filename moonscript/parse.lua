@@ -413,7 +413,7 @@ local build_grammar = wrap_env(function()
 
 		Comprehension = sym"[" * Exp * CompInner * sym"]" / mark"comprehension",
 
-		TblComprehension = sym"{" * Exp * (sym"," * Exp)^-1 * CompInner * sym"}" / mark"tblcomprehension",
+		TblComprehension = sym"{" * Ct(Exp * (sym"," * Exp)^-1) * CompInner * sym"}" / mark"tblcomprehension",
 
 		CompInner = Ct(CompFor * CompClause^0),
 		CompFor = key"for" * Ct(NameList) * key"in" * (sym"*" * Exp / mark"unpack" + Exp) / mark"for",
