@@ -270,6 +270,10 @@ local function wrap_decorator(stm, dec)
 	elseif dec[1] == "comprehension" then
 		local _, clauses = unpack(dec)
 		stm = {"comprehension", stm, clauses}
+	elseif dec[1] == "for" then
+		local _, name, bounds = unpack(dec)
+		-- Not 100% on the bounds[x][2] part
+		stm = {"for", name, {bounds[1][2], bounds[2][2]}, {stm}}
 	end
 
 	return stm
@@ -367,6 +371,7 @@ local build_grammar = wrap_env(function()
 				-- statement decorators
 				key"if" * Exp * (key"else" * Exp)^-1 * Space / mark"if" +
 				key"unless" * Exp / mark"unless" +
+				key"for" * (Name * sym"=" * Ct(Exp * sym"," * Exp * (sym"," * Exp)^-1)) / mark"for" +
 				CompInner / mark"comprehension"
 			) * Space)^-1 / wrap_decorator,
 

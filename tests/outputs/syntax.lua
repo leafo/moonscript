@@ -107,6 +107,14 @@ end
 if not (1212 and 3434) then
   print("hello")
 end
+local _list_0 = x
+for _index_0 = 1, #_list_0 do
+  i = _list_0[_index_0]
+  print(i)
+end
+for i = 1, 10 do
+  print(i)
+end
 print("nutjob")
 if hello then
   _ = 343
@@ -150,9 +158,9 @@ y = y / 100
 local m = m % 2
 local hello = hello .. "world"
 x = 0
-local _list_0 = values
-for _index_0 = 1, #_list_0 do
-  local v = _list_0[_index_0]
+local _list_1 = values
+for _index_0 = 1, #_list_1 do
+  local v = _list_1[_index_0]
   _ = ((function()
     if ntype(v) == "fndef" then
       x = x + 1
