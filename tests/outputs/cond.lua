@@ -150,3 +150,81 @@ else
     end
   end
 end
+if not (true) then
+  print("cool!")
+end
+if not (true and false) then
+  print("cool!")
+end
+if not (false) then
+  print("cool!")
+end
+if not (false) then
+  print("cool!")
+else
+  print("no way!")
+end
+if not (nil) then
+  print("hello")
+else
+  print("world")
+end
+local x
+if not (true) then
+  x = print("cool!")
+end
+if not (true and false) then
+  x = print("cool!")
+end
+if not (false) then
+  x = print("cool!")
+end
+if not (false) then
+  x = print("cool!")
+else
+  x = print("no way!")
+end
+if not (nil) then
+  x = print("hello")
+else
+  x = print("world")
+end
+print((function()
+  if not (true) then
+    return print("cool!")
+  end
+end)())
+print((function()
+  if not (true and false) then
+    return print("cool!")
+  end
+end)())
+print((function()
+  if not (false) then
+    return print("cool!")
+  end
+end)())
+print((function()
+  if not (false) then
+    return print("cool!")
+  else
+    return print("no way!")
+  end
+end)())
+print((function()
+  if not (nil) then
+    return print("hello")
+  else
+    return print("world")
+  end
+end)())
+if not (value) then
+  print("hello")
+end
+if not (value) then
+  local dddd = {
+    1,
+    2,
+    3
+  }
+end

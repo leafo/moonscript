@@ -10,6 +10,7 @@ manual_return = data.Set({
 })
 cascading = data.Set({
   "if",
+  "unless",
   "with",
   "switch"
 })

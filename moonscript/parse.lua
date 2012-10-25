@@ -404,6 +404,9 @@ local build_grammar = wrap_env(function()
 			((Break * CheckIndent)^-1 * EmptyLine^0 * key"elseif" * IfCond * key"then"^-1 * Body / mark"elseif")^0 *
 			((Break * CheckIndent)^-1 * EmptyLine^0 * key"else" * Body / mark"else")^-1 / mark"if",
 
+		Unless = key"unless" * IfCond * key"then"^-1 * Body *
+			((Break * CheckIndent)^-1 * EmptyLine^0 * key"else" * Body / mark"else")^-1 / mark"unless",
+
 		While = key"while" * Exp * key"do"^-1 * Body / mark"while",
 
 		For = key"for" * (Name * sym"=" * Ct(Exp * sym"," * Exp * (sym"," * Exp)^-1)) *
@@ -435,7 +438,7 @@ local build_grammar = wrap_env(function()
 		-- Term = Ct(Value * (TermOp * Value)^0) / flatten_or_mark"exp",
 
 		SimpleValue =
-			If +
+			If + Unless +
 			Switch +
 			With +
 			ForEach + For + While +

@@ -89,3 +89,56 @@ elseif z = true
 else
   four
 
+---
+
+unless true
+  print "cool!"
+
+unless true and false
+  print "cool!"
+
+unless false then print "cool!"
+unless false then print "cool!" else print "no way!"
+
+unless nil
+  print "hello"
+else
+  print "world"
+
+--
+
+x = unless true
+  print "cool!"
+
+x = unless true and false
+  print "cool!"
+
+x = unless false then print "cool!"
+x = unless false then print "cool!" else print "no way!"
+
+x = unless nil
+  print "hello"
+else
+  print "world"
+
+print unless true
+  print "cool!"
+
+print unless true and false
+  print "cool!"
+
+print unless false then print "cool!"
+print unless false then print "cool!" else print "no way!"
+
+print unless nil
+  print "hello"
+else
+  print "world"
+
+--
+
+print "hello" unless value
+
+dddd = {1,2,3} unless value
+
+

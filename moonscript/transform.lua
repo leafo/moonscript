@@ -549,6 +549,19 @@ Statement = Transformer({
     end
     return node
   end,
+  unless = function(self, node)
+    return {
+      "if",
+      {
+        "not",
+        {
+          "parens",
+          node[2]
+        }
+      },
+      unpack(node, 3)
+    }
+  end,
   ["if"] = function(self, node, ret)
     if ntype(node[2]) == "assign" then
       local _, assign, body = unpack(node)
@@ -1280,6 +1293,11 @@ Value = Transformer({
     return node
   end,
   ["if"] = function(self, node)
+    return build.block_exp({
+      node
+    })
+  end,
+  unless = function(self, node)
     return build.block_exp({
       node
     })

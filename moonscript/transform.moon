@@ -244,8 +244,10 @@ Statement = Transformer {
     node[2] = apply_to_last node[2], ret if ret
     node
 
-  if: (node, ret) =>
+  unless: (node) =>
+    { "if", {"not", {"parens", node[2]}}, unpack node, 3 }
 
+  if: (node, ret) =>
     -- expand assign in cond
     if ntype(node[2]) == "assign"
       _, assign, body = unpack node
@@ -684,6 +686,7 @@ Value = Transformer {
     node
 
   if: (node) => build.block_exp { node }
+  unless: (node) =>build.block_exp { node }
   with: (node) => build.block_exp { node }
   switch: (node) =>
     build.block_exp { node }
