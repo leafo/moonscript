@@ -254,25 +254,7 @@ end
 -- transforms a statement that has a line decorator
 local function wrap_decorator(stm, dec)
 	if not dec then return stm end
-
-	local arg = {stm, dec}
-
-	if dec[1] == "if" then
-		local _, cond, fail = unpack(dec)
-		if fail then fail = {"else", {fail}} end
-		stm = {"if", cond, {stm}, fail}
-	elseif dec[1] == "unless" then
-		stm = {
-			"if",
-			{"not", {"parens", dec[2]}},
-			{stm}
-		}
-	elseif dec[1] == "comprehension" then
-		local _, clauses = unpack(dec)
-		stm = {"comprehension", stm, clauses}
-	end
-
-	return stm
+	return { "decorated", stm, dec }
 end
 
 -- wrap if statement if there is a conditional decorator

@@ -244,6 +244,21 @@ Statement = Transformer {
     node[2] = apply_to_last node[2], ret if ret
     node
 
+  decorated: (node) =>
+    stm, dec = unpack node, 2
+
+    switch dec[1]
+      when "if"
+        cond, fail = unpack dec, 2
+        fail = { "else", { fail } } if fail
+        { "if", cond, { stm }, fail }
+      when "unless"
+        { "unless", dec[2], { stm } }
+      when "comprehension"
+        { "comprehension", stm, dec[2] }
+      else
+        error "Unknown decorator " .. dec[1]
+
   unless: (node) =>
     { "if", {"not", {"parens", node[2]}}, unpack node, 3 }
 

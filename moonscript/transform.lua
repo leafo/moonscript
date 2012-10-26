@@ -549,6 +549,45 @@ Statement = Transformer({
     end
     return node
   end,
+  decorated = function(self, node)
+    local stm, dec = unpack(node, 2)
+    local _exp_0 = dec[1]
+    if "if" == _exp_0 then
+      local cond, fail = unpack(dec, 2)
+      if fail then
+        fail = {
+          "else",
+          {
+            fail
+          }
+        }
+      end
+      return {
+        "if",
+        cond,
+        {
+          stm
+        },
+        fail
+      }
+    elseif "unless" == _exp_0 then
+      return {
+        "unless",
+        dec[2],
+        {
+          stm
+        }
+      }
+    elseif "comprehension" == _exp_0 then
+      return {
+        "comprehension",
+        stm,
+        dec[2]
+      }
+    else
+      return error("Unknown decorator " .. dec[1])
+    end
+  end,
   unless = function(self, node)
     return {
       "if",
