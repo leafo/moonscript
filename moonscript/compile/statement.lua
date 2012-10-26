@@ -15,7 +15,7 @@ line_compile = {
     return self:add(text)
   end,
   declare = function(self, node)
-    local _, names = unpack(node)
+    local names = node[2]
     local undeclared = self:declare(names)
     if #undeclared > 0 then
       do
@@ -23,7 +23,7 @@ line_compile = {
         _with_0:append_list((function()
           local _accum_0 = { }
           local _len_0 = 0
-          local _list_0 = names
+          local _list_0 = undeclared
           for _index_0 = 1, #_list_0 do
             local name = _list_0[_index_0]
             _len_0 = _len_0 + 1
@@ -33,6 +33,25 @@ line_compile = {
         end)(), ", ")
         return _with_0
       end
+    end
+  end,
+  declare_with_shadows = function(self, node)
+    local names = node[2]
+    self:declare(names)
+    do
+      local _with_0 = self:line("local ")
+      _with_0:append_list((function()
+        local _accum_0 = { }
+        local _len_0 = 0
+        local _list_0 = names
+        for _index_0 = 1, #_list_0 do
+          local name = _list_0[_index_0]
+          _len_0 = _len_0 + 1
+          _accum_0[_len_0] = self:name(name)
+        end
+        return _accum_0
+      end)(), ", ")
+      return _with_0
     end
   end,
   assign = function(self, node)

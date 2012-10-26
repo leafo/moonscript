@@ -360,7 +360,7 @@ local build_grammar = wrap_env(function()
 		PopIndent = Cmt("", pop_indent),
 		InBlock = Advance * Block * PopIndent,
 
-		Local = key"local" * Ct(NameList) / mark"declare",
+		Local = key"local" * Ct(NameList) / mark"declare_with_shadows",
 
 		Import = key"import" *  Ct(ImportNameList) * key"from" * Exp / mark"import",
 		ImportName = (sym"\\" * Ct(Cc"colon_stub" * Name) + Name),

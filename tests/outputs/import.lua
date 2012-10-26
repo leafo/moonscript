@@ -1,5 +1,5 @@
 local hello = yeah.hello
-local hello, world
+local world
 do
   local _table_0 = table["cool"]
   hello, world = _table_0.hello, _table_0.world

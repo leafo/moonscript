@@ -17,11 +17,18 @@ line_compile =
     @add text
 
   declare: (node) =>
-    _, names = unpack node
+    names = node[2]
     undeclared = @declare names
     if #undeclared > 0
       with @line "local "
-        \append_list [@name name for name in *names], ", "
+        \append_list [@name name for name in *undeclared], ", "
+
+  -- this overrides the existing names with new locals, used for local keyword
+  declare_with_shadows: (node) =>
+    names = node[2]
+    @declare names
+    with @line "local "
+      \append_list [@name name for name in *names], ", "
 
   assign: (node) =>
     _, names, values = unpack node
