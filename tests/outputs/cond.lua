@@ -176,18 +176,19 @@ end
 if not (true and false) then
   x = print("cool!")
 end
+local y
 if not (false) then
-  x = print("cool!")
+  y = print("cool!")
 end
 if not (false) then
-  x = print("cool!")
+  y = print("cool!")
 else
-  x = print("no way!")
+  y = print("no way!")
 end
 if not (nil) then
-  x = print("hello")
+  z = print("hello")
 else
-  x = print("world")
+  z = print("world")
 end
 print((function()
   if not (true) then
@@ -221,10 +222,16 @@ end)())
 if not (value) then
   print("hello")
 end
+local dddd
 if not (value) then
-  local dddd = {
+  dddd = {
     1,
     2,
     3
   }
+end
+local a = 12
+local c, b
+if something then
+  a, c, b = "cool"
 end

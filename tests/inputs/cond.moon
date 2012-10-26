@@ -113,10 +113,10 @@ x = unless true
 x = unless true and false
   print "cool!"
 
-x = unless false then print "cool!"
-x = unless false then print "cool!" else print "no way!"
+y = unless false then print "cool!"
+y = unless false then print "cool!" else print "no way!"
 
-x = unless nil
+z = unless nil
   print "hello"
 else
   print "world"
@@ -140,5 +140,11 @@ else
 print "hello" unless value
 
 dddd = {1,2,3} unless value
+
+----------------
+
+a = 12
+a,c,b = "cool" if something
+
 
 

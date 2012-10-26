@@ -247,7 +247,7 @@ Statement = Transformer {
   decorated: (node) =>
     stm, dec = unpack node, 2
 
-    switch dec[1]
+    wrapped = switch dec[1]
       when "if"
         cond, fail = unpack dec, 2
         fail = { "else", { fail } } if fail
@@ -258,6 +258,14 @@ Statement = Transformer {
         { "comprehension", stm, dec[2] }
       else
         error "Unknown decorator " .. dec[1]
+
+    if ntype(stm) == "assign"
+      wrapped = build.group {
+        build.declare names: [name for name in *stm[2] when type(name) == "string"]
+        wrapped
+      }
+
+    wrapped
 
   unless: (node) =>
     { "if", {"not", {"parens", node[2]}}, unpack node, 3 }

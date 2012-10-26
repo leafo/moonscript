@@ -551,6 +551,7 @@ Statement = Transformer({
   end,
   decorated = function(self, node)
     local stm, dec = unpack(node, 2)
+    local wrapped
     local _exp_0 = dec[1]
     if "if" == _exp_0 then
       local cond, fail = unpack(dec, 2)
@@ -562,7 +563,7 @@ Statement = Transformer({
           }
         }
       end
-      return {
+      wrapped = {
         "if",
         cond,
         {
@@ -571,7 +572,7 @@ Statement = Transformer({
         fail
       }
     elseif "unless" == _exp_0 then
-      return {
+      wrapped = {
         "unless",
         dec[2],
         {
@@ -579,14 +580,35 @@ Statement = Transformer({
         }
       }
     elseif "comprehension" == _exp_0 then
-      return {
+      wrapped = {
         "comprehension",
         stm,
         dec[2]
       }
     else
-      return error("Unknown decorator " .. dec[1])
+      wrapped = error("Unknown decorator " .. dec[1])
     end
+    if ntype(stm) == "assign" then
+      wrapped = build.group({
+        build.declare({
+          names = (function()
+            local _accum_0 = { }
+            local _len_0 = 0
+            local _list_0 = stm[2]
+            for _index_0 = 1, #_list_0 do
+              local name = _list_0[_index_0]
+              if type(name) == "string" then
+                _len_0 = _len_0 + 1
+                _accum_0[_len_0] = name
+              end
+            end
+            return _accum_0
+          end)()
+        }),
+        wrapped
+      })
+    end
+    return wrapped
   end,
   unless = function(self, node)
     return {
