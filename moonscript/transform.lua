@@ -1228,6 +1228,10 @@ implicitly_return = function(scope)
   local fn
   fn = function(stm)
     local t = ntype(stm)
+    if t == "decorated" then
+      stm = scope.transform.statement(stm)
+      t = ntype(stm)
+    end
     if types.manual_return[t] or not types.is_value(stm) then
       if is_top and t == "return" and stm[2] == "" then
         return nil

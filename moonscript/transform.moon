@@ -627,6 +627,12 @@ implicitly_return = (scope) ->
   is_top = true
   fn = (stm) ->
     t = ntype stm
+
+    -- expand decorated
+    if t == "decorated"
+      stm = scope.transform.statement stm
+      t = ntype stm
+
     if types.manual_return[t] or not types.is_value stm
       -- remove blank return statement
       if is_top and t == "return" and stm[2] == ""

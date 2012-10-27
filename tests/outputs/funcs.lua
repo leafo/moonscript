@@ -108,3 +108,8 @@ k(function()
     return 
   end
 end)
+_ = function()
+  if something then
+    return real_name
+  end
+end
