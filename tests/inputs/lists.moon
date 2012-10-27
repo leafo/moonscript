@@ -71,3 +71,8 @@ print thing for thing in *test
 
 -> a = b for row in *rows
 
+-- testing implicit return
+-> x for x in *things
+-> [x for x in *things]
+
+

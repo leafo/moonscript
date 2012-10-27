@@ -279,3 +279,23 @@ _ = function()
     a = b
   end
 end
+_ = function()
+  local _list_9 = things
+  for _index_0 = 1, #_list_9 do
+    x = _list_9[_index_0]
+    _ = x
+  end
+end
+_ = function()
+  return (function()
+    local _accum_0 = { }
+    local _len_0 = 0
+    local _list_9 = things
+    for _index_0 = 1, #_list_9 do
+      x = _list_9[_index_0]
+      _len_0 = _len_0 + 1
+      _accum_0[_len_0] = x
+    end
+    return _accum_0
+  end)()
+end

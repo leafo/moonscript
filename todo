@@ -55,3 +55,10 @@ not working right:
 
 * convert tree transformer to be depth first instead of breadth first (lazy)
 
+
+-- for searching?
+x = for thing in *things
+	if is_important thing
+		break thing 
+
+

@@ -11,7 +11,9 @@ import insert from table
 -- implicit return does not work on these statements
 manual_return = data.Set{"foreach", "for", "while", "return"}
 
--- assigns and returns are bubbled into their bodies
+-- Assigns and returns are bubbled into their bodies.
+-- All cascading statement transform functions accept a second arugment that
+-- is the transformation to apply to the last statement in their body
 cascading = data.Set{ "if", "unless", "with", "switch" }
 
 is_value = (stm) ->

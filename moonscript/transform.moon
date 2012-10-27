@@ -160,22 +160,28 @@ construct_comprehension = (inner, clauses) ->
 
 Statement = Transformer {
   assign: (node) =>
-    _, names, values = unpack node
+    names, values = unpack node, 2
     -- bubble cascading assigns
-    if #values == 1 and types.cascading[ntype values[1]]
-      values[1] = @transform.statement values[1], (stm) ->
-        t = ntype stm
-        if types.is_value stm
-          {"assign", names, {stm}}
-        else
-          stm
+    transformed = if #values == 1
+      value = values[1]
+      t = ntype value
 
-      build.group {
-        {"declare", names}
-        values[1]
-      }
-    else
-      node
+      if t == "decorated"
+        value = @transform.statement value
+        t = ntype value
+
+      if types.cascading[t]
+        build.group {
+          {"declare", names}
+          @transform.statement value, (stm) ->
+            if types.is_value stm
+              {"assign", names, {stm}}
+            else
+              stm
+        }
+
+    transformed or node
+
 
   export: (node) =>
     -- assign values if they are included
@@ -654,6 +660,9 @@ Value = Transformer {
   for: default_accumulator
   while: default_accumulator
   foreach: default_accumulator
+
+  decorated: (node) =>
+    @transform.statement node
 
   string: (node) =>
     delim = node[2]

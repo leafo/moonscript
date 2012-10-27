@@ -376,32 +376,38 @@ construct_comprehension = function(inner, clauses)
 end
 Statement = Transformer({
   assign = function(self, node)
-    local _, names, values = unpack(node)
-    if #values == 1 and types.cascading[ntype(values[1])] then
-      values[1] = self.transform.statement(values[1], function(stm)
-        local t = ntype(stm)
-        if types.is_value(stm) then
-          return {
-            "assign",
-            names,
-            {
-              stm
-            }
-          }
-        else
-          return stm
-        end
-      end)
-      return build.group({
-        {
-          "declare",
-          names
-        },
-        values[1]
-      })
-    else
-      return node
+    local names, values = unpack(node, 2)
+    local transformed
+    if #values == 1 then
+      local value = values[1]
+      local t = ntype(value)
+      if t == "decorated" then
+        value = self.transform.statement(value)
+        t = ntype(value)
+      end
+      if types.cascading[t] then
+        transformed = build.group({
+          {
+            "declare",
+            names
+          },
+          self.transform.statement(value, function(stm)
+            if types.is_value(stm) then
+              return {
+                "assign",
+                names,
+                {
+                  stm
+                }
+              }
+            else
+              return stm
+            end
+          end)
+        })
+      end
     end
+    return transformed or node
   end,
   export = function(self, node)
     if #node > 2 then
@@ -1258,6 +1264,9 @@ Value = Transformer({
   ["for"] = default_accumulator,
   ["while"] = default_accumulator,
   foreach = default_accumulator,
+  decorated = function(self, node)
+    return self.transform.statement(node)
+  end,
   string = function(self, node)
     local delim = node[2]
     local convert_part
