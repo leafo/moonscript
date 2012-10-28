@@ -143,3 +143,111 @@ x = (function()
   end
   return _accum_0
 end)()
+while true do
+  local _continue_0 = false
+  repeat
+    if false then
+      _continue_0 = true
+      break
+    end
+    print("yes")
+    if true then
+      break
+    end
+    print("no")
+    _continue_0 = true
+  until true
+  if not _continue_0 then
+    break
+  end
+end
+for x = 1, 10 do
+  local _continue_0 = false
+  repeat
+    if x > 3 and x < 7 then
+      _continue_0 = true
+      break
+    end
+    print(x)
+    _continue_0 = true
+  until true
+  if not _continue_0 then
+    break
+  end
+end
+local list = (function()
+  local _accum_0 = { }
+  local _len_0 = 0
+  for x = 1, 10 do
+    local _continue_0 = false
+    repeat
+      if x > 3 and x < 7 then
+        _continue_0 = true
+        break
+      end
+      local _value_0 = x
+      if _value_0 ~= nil then
+        _len_0 = _len_0 + 1
+        _accum_0[_len_0] = _value_0
+      end
+      _continue_0 = true
+    until true
+    if not _continue_0 then
+      break
+    end
+  end
+  return _accum_0
+end)()
+local _list_1 = {
+  1,
+  2,
+  3,
+  4,
+  5,
+  6
+}
+for _index_0 = 1, #_list_1 do
+  local _continue_0 = false
+  repeat
+    local a = _list_1[_index_0]
+    if a == 1 then
+      _continue_0 = true
+      break
+    end
+    if a == 3 then
+      _continue_0 = true
+      break
+    end
+    print(a)
+    _continue_0 = true
+  until true
+  if not _continue_0 then
+    break
+  end
+end
+for x = 1, 10 do
+  local _continue_0 = false
+  repeat
+    if x % 2 == 0 then
+      _continue_0 = true
+      break
+    end
+    for y = 2, 12 do
+      local _continue_1 = false
+      repeat
+        if y % 3 == 0 then
+          _continue_1 = true
+          break
+        end
+        _continue_1 = true
+      until true
+      if not _continue_1 then
+        break
+      end
+    end
+    _continue_0 = true
+  until true
+  if not _continue_0 then
+    break
+  end
+end

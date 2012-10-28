@@ -74,4 +74,34 @@ i = 0
 x = while i < 10
   i += 1
 
+-- continue
+
+while true
+  continue if false
+  print "yes"
+  break if true
+  print "no"
+
+
+for x=1,10
+  continue if x > 3 and x < 7
+  print x
+
+
+list = for x=1,10
+  continue if x > 3 and x < 7
+  x
+
+
+for a in *{1,2,3,4,5,6}
+  continue if a == 1
+  continue if a == 3
+  print a
+
+
+
+for x=1,10
+  continue if x % 2 == 0
+  for y = 2,12
+    continue if y % 3 == 0
 
