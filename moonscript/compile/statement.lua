@@ -3,7 +3,6 @@ local util = require("moonscript.util")
 require("moonscript.compile.format")
 local dump = require("moonscript.dump")
 local transform = require("moonscript.transform")
-local NameProxy = transform.NameProxy
 local reversed = util.reversed
 local ntype
 do

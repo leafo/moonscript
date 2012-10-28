@@ -6,7 +6,6 @@ require "moonscript.compile.format"
 dump = require "moonscript.dump"
 transform = require "moonscript.transform"
 
-import NameProxy from transform
 import reversed from util
 import ntype from require "moonscript.types"
 import concat, insert from table

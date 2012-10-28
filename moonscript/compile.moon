@@ -344,9 +344,6 @@ class RootBlock extends Block
   __tostring: => "RootBlock<>"
 
   render: =>
-    -- @_insert_breaks!
-    -- concat @_lines, "\n"
-
     -- print util.dump @_lines
     buffer = flatten_lines @_lines
     buffer[#buffer] = nil if buffer[#buffer] == "\n"
