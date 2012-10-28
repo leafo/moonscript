@@ -70,6 +70,7 @@ class Block
     @_posmap = {}
     @_names = {}
     @_state = {}
+    @_listeners = {}
 
     with transform
       @transform = {
@@ -81,6 +82,7 @@ class Block
       @root = @parent.root
       @indent = @parent.indent + 1
       setmetatable @_state, { __index: @parent._state }
+      setmetatable @_listeners, { __index: @parent._listeners }
     else
       @indent = 0
 
@@ -97,6 +99,13 @@ class Block
 
   get: (name) =>
     @_state[name]
+
+  listen: (name, fn) =>
+    @_listeners[name] = fn
+
+  send: (name, ...) =>
+    if fn = @_listeners[name]
+      fn self, ...
 
   declare: (names) =>
     undeclared = for name in *names
@@ -116,9 +125,12 @@ class Block
   whitelist_names: (names) =>
     @_name_whitelist = Set names
 
-  put_name: (name) =>
+  put_name: (name, ...) =>
+    value = ...
+    value = true if select("#", ...) == 0
+
     name = name\get_name self if util.moon.type(name) == NameProxy
-    @_names[name] = true
+    @_names[name] = value
 
   has_name: (name, skip_exports) =>
     if not skip_exports
@@ -281,6 +293,11 @@ class Block
     error "deprecated stms call, use transformer" if ret
     @stm stm for stm in *stms
     nil
+
+  splice: (fn) =>
+    lines = {"lines", @_lines}
+    @_lines = {}
+    @stms fn lines
 
 class RootBlock extends Block
   new: (...) =>

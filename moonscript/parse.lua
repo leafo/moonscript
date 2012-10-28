@@ -368,7 +368,7 @@ local build_grammar = wrap_env(function()
 
 		NameList = Name * (sym"," * Name)^0,
 
-		BreakLoop = Ct(key"break"/trim),
+		BreakLoop = Ct(key"break"/trim) + Ct(key"continue"/trim),
 
 		Return = key"return" * (ExpListLow/mark"explist" + C"") / mark"return",
 

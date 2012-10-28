@@ -414,6 +414,18 @@ Statement = Transformer({
     end
     return transformed or node
   end,
+  continue = function(self, node)
+    local continue_name = self:send("continue")
+    if not (continue_name) then
+      error("continue must be inside of a loop")
+    end
+    return build.group({
+      build.assign_one(continue_name, "true"),
+      {
+        "break"
+      }
+    })
+  end,
   export = function(self, node)
     if #node > 2 then
       if node[2] == "class" then

@@ -2,6 +2,8 @@ module("moonscript.compile", package.seeall)
 local util = require("moonscript.util")
 require("moonscript.compile.format")
 local dump = require("moonscript.dump")
+local transform = require("moonscript.transform")
+local NameProxy = transform.NameProxy
 local reversed = util.reversed
 local ntype
 do
@@ -11,8 +13,14 @@ end
 local concat, insert = table.concat, table.insert
 line_compile = {
   raw = function(self, node)
-    local _, text = unpack(node)
-    return self:add(text)
+    return self:add(node[2])
+  end,
+  lines = function(self, node)
+    local _list_0 = node[2]
+    for _index_0 = 1, #_list_0 do
+      local line = _list_0[_index_0]
+      self:add(line)
+    end
   end,
   declare = function(self, node)
     local names = node[2]
@@ -142,6 +150,14 @@ line_compile = {
     end
     return root
   end,
+  ["repeat"] = function(self, node)
+    local cond, block = unpack(node, 2)
+    do
+      local _with_0 = self:block("repeat", self:line("until ", self:value(cond)))
+      _with_0:stms(block)
+      return _with_0
+    end
+  end,
   ["while"] = function(self, node)
     local _, cond, block = unpack(node)
     local out
@@ -215,12 +231,66 @@ line_compile = {
       _with_0:append(" do")
       loop = _with_0
     end
+    local continue_name = nil
+    local out
     do
       local _with_0 = self:block(loop)
+      _with_0:listen("continue", function()
+        if not (continue_name) then
+          continue_name = NameProxy("continue")
+          _with_0:put_name(continue_name)
+        end
+        return continue_name
+      end)
       _with_0:declare(names)
       _with_0:stms(block)
-      return _with_0
+      out = _with_0
     end
+    if continue_name then
+      out:put_name(continue_name, nil)
+      out:splice(function(lines)
+        return {
+          {
+            "assign",
+            {
+              continue_name
+            },
+            {
+              "false"
+            }
+          },
+          {
+            "repeat",
+            "true",
+            {
+              lines,
+              {
+                "assign",
+                {
+                  continue_name
+                },
+                {
+                  "true"
+                }
+              }
+            }
+          },
+          {
+            "if",
+            {
+              "not",
+              continue_name
+            },
+            {
+              {
+                "break"
+              }
+            }
+          }
+        }
+      end)
+    end
+    return out
   end,
   export = function(self, node)
     local _, names = unpack(node)

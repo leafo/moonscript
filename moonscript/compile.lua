@@ -134,6 +134,17 @@ Block = (function()
     get = function(self, name)
       return self._state[name]
     end,
+    listen = function(self, name, fn)
+      self._listeners[name] = fn
+    end,
+    send = function(self, name, ...)
+      do
+        local fn = self._listeners[name]
+        if fn then
+          return fn(self, ...)
+        end
+      end
+    end,
     declare = function(self, names)
       local undeclared = (function()
         local _accum_0 = { }
@@ -173,11 +184,15 @@ Block = (function()
     whitelist_names = function(self, names)
       self._name_whitelist = Set(names)
     end,
-    put_name = function(self, name)
+    put_name = function(self, name, ...)
+      value = ...
+      if select("#", ...) == 0 then
+        value = true
+      end
       if util.moon.type(name) == NameProxy then
         name = name:get_name(self)
       end
-      self._names[name] = true
+      self._names[name] = value
     end,
     has_name = function(self, name, skip_exports)
       if not skip_exports then
@@ -415,6 +430,14 @@ Block = (function()
         self:stm(stm)
       end
       return nil
+    end,
+    splice = function(self, fn)
+      local lines = {
+        "lines",
+        self._lines
+      }
+      self._lines = { }
+      return self:stms(fn(lines))
     end
   }
   _base_0.__index = _base_0
@@ -429,6 +452,7 @@ Block = (function()
       self._posmap = { }
       self._names = { }
       self._state = { }
+      self._listeners = { }
       do
         local _with_0 = transform
         self.transform = {
@@ -439,8 +463,11 @@ Block = (function()
       if self.parent then
         self.root = self.parent.root
         self.indent = self.parent.indent + 1
-        return setmetatable(self._state, {
+        setmetatable(self._state, {
           __index = self.parent._state
+        })
+        return setmetatable(self._listeners, {
+          __index = self.parent._listeners
         })
       else
         self.indent = 0

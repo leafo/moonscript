@@ -4,7 +4,9 @@ util = require "moonscript.util"
 
 require "moonscript.compile.format"
 dump = require "moonscript.dump"
+transform = require "moonscript.transform"
 
+import NameProxy from transform
 import reversed from util
 import ntype from require "moonscript.types"
 import concat, insert from table
@@ -12,9 +14,11 @@ import concat, insert from table
 export line_compile
 
 line_compile =
-  raw: (node) =>
-    _, text = unpack node
-    @add text
+  raw: (node) => @add node[2]
+
+  lines: (node) =>
+    for line in *node[2]
+      @add line
 
   declare: (node) =>
     names = node[2]
@@ -82,6 +86,11 @@ line_compile =
     add_clause cond for cond in *node[4,]
     root
 
+  repeat: (node) =>
+    cond, block = unpack node, 2
+    with @block "repeat", @line "until ", @value cond
+      \stms block
+
   while: (node) =>
     _, cond, block = unpack node
 
@@ -113,9 +122,32 @@ line_compile =
       \append_list [@value exp for exp in *exps], ","
       \append " do"
 
-    with @block loop
+    continue_name = nil
+    out = with @block loop
+      \listen "continue", ->
+        unless continue_name
+          continue_name = NameProxy"continue"
+          \put_name continue_name
+        continue_name
+
       \declare names
       \stms block
+
+    -- todo: figure out how to put this in the transformer
+    if continue_name
+      out\put_name continue_name, nil
+      out\splice (lines) -> {
+        {"assign", {continue_name}, {"false"}}
+        {"repeat", "true", {
+          lines
+          {"assign", {continue_name}, {"true"}}
+        }}
+        {"if", {"not", continue_name}, {
+          {"break"}
+        }}
+      }
+
+    out
 
   export: (node) =>
     _, names = unpack node
