@@ -21,12 +21,6 @@ mtype = util.moon.type
 export tree, value, format_error
 export Block, RootBlock
 
-insert_many = (tbl, ...) ->
-  i = #tbl + 1
-  for val in *{...}
-    tbl[i] = val
-    i += 1
-
 -- buffer for building up a line
 class Line
   _append_single: (item) =>
@@ -46,22 +40,21 @@ class Line
     nil
 
   -- todo: remove concats from here
-  render: =>
-    parts = {}
+  render: (buffer) =>
     current = {}
 
     add_current = ->
-      insert parts, table.concat current
+      insert buffer, concat current
 
     for chunk in *@
       switch mtype chunk
         when Block
-          for block_chunk in *{chunk\render!}
+          for block_chunk in *chunk\render{}
             if "string" == type block_chunk
               insert current, block_chunk
             else
               add_current!
-              insert parts, block_chunk
+              insert buffer, block_chunk
               current = {}
         else
           insert current, chunk
@@ -69,8 +62,7 @@ class Line
     if #current > 0
       add_current!
 
-    unpack parts
-
+    buffer
 
   __tostring: => "Line<#{@render!}>"
 
@@ -85,7 +77,7 @@ class Block
     h = if "string" == type @header
       @header
     else
-      @header\render!
+      unpack @header\render {}
 
     "Block<#{h}> <- " .. tostring @parent
 
@@ -222,38 +214,39 @@ class Block
       when "string"
         insert @_lines, line
       when Block
-        insert_many @_lines, line\render!
+        line\render @_lines
       when Line
-        insert_many @_lines, line\render!
+        line\render @_lines
       else
         error "Adding unknown item"
 
-  flatten = (line) ->
+  add_to_buffer = (buffer, line) ->
     switch mtype line
       when Line
-        line\render!
+        line\render buffer
       else
-        line
+        insert buffer, line
+    buffer
 
   -- todo: pass in buffer as argument
-  render: =>
-    out = { flatten @header }
+  render: (buffer) =>
+    add_to_buffer buffer, @header
 
-    lines = for line in *@_lines
-      flatten line
+    -- copy lines
+    lines = [l for l in *@_lines]
 
     if @next
-      insert out, lines
-      insert_many out, @next\render!
+      insert buffer, lines
+      @next\render buffer
     else
-      footer = flatten @footer
-      if #lines == 0 and #out == 1
-        out[1] ..= " " ..footer
+      -- join an empty block into a single line
+      if #lines == 0 and "string" == type buffer[#buffer]
+        buffer[#buffer] ..= " " .. (unpack add_to_buffer {}, @footer)
       else
-        insert out, lines
-        insert out, footer
+        insert buffer, lines
+        add_to_buffer buffer, @footer
 
-    unpack out
+    buffer
 
   block: (header, footer) =>
     Block self, header, footer

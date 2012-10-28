@@ -19,18 +19,6 @@ end
 local concat, insert = table.concat, table.insert
 local pos_to_line, get_closest_line, trim = util.pos_to_line, util.get_closest_line, util.trim
 local mtype = util.moon.type
-local insert_many
-insert_many = function(tbl, ...)
-  local i = #tbl + 1
-  local _list_0 = {
-    ...
-  }
-  for _index_0 = 1, #_list_0 do
-    local val = _list_0[_index_0]
-    tbl[i] = val
-    i = i + 1
-  end
-end
 local Line
 Line = (function()
   local _parent_0 = nil
@@ -65,28 +53,25 @@ Line = (function()
       end
       return nil
     end,
-    render = function(self)
-      local parts = { }
+    render = function(self, buffer)
       local current = { }
       local add_current
       add_current = function()
-        return insert(parts, table.concat(current))
+        return insert(buffer, concat(current))
       end
       local _list_0 = self
       for _index_0 = 1, #_list_0 do
         local chunk = _list_0[_index_0]
         local _exp_0 = mtype(chunk)
         if Block == _exp_0 then
-          local _list_1 = {
-            chunk:render()
-          }
+          local _list_1 = chunk:render({ })
           for _index_1 = 1, #_list_1 do
             local block_chunk = _list_1[_index_1]
             if "string" == type(block_chunk) then
               insert(current, block_chunk)
             else
               add_current()
-              insert(parts, block_chunk)
+              insert(buffer, block_chunk)
               current = { }
             end
           end
@@ -97,7 +82,7 @@ Line = (function()
       if #current > 0 then
         add_current()
       end
-      return unpack(parts)
+      return buffer
     end,
     __tostring = function(self)
       return "Line<" .. tostring(self:render()) .. ">"
@@ -138,7 +123,7 @@ Line = (function()
   return _class_0
 end)()
 Block = (function()
-  local flatten
+  local add_to_buffer
   local _parent_0 = nil
   local _base_0 = {
     header = "do",
@@ -150,7 +135,7 @@ Block = (function()
       if "string" == type(self.header) then
         h = self.header
       else
-        h = self.header:render()
+        h = unpack(self.header:render({ }))
       end
       return "Block<" .. tostring(h) .. "> <- " .. tostring(self.parent)
     end,
@@ -317,44 +302,38 @@ Block = (function()
       if "string" == _exp_0 then
         return insert(self._lines, line)
       elseif Block == _exp_0 then
-        return insert_many(self._lines, line:render())
+        return line:render(self._lines)
       elseif Line == _exp_0 then
-        return insert_many(self._lines, line:render())
+        return line:render(self._lines)
       else
         return error("Adding unknown item")
       end
     end,
-    render = function(self)
-      local out = {
-        flatten(self.header)
-      }
+    render = function(self, buffer)
+      add_to_buffer(buffer, self.header)
       local lines = (function()
         local _accum_0 = { }
         local _len_0 = 0
         local _list_0 = self._lines
         for _index_0 = 1, #_list_0 do
-          local line = _list_0[_index_0]
-          local _value_0 = flatten(line)
-          if _value_0 ~= nil then
-            _len_0 = _len_0 + 1
-            _accum_0[_len_0] = _value_0
-          end
+          local l = _list_0[_index_0]
+          _len_0 = _len_0 + 1
+          _accum_0[_len_0] = l
         end
         return _accum_0
       end)()
       if self.next then
-        insert(out, lines)
-        insert_many(out, self.next:render())
+        insert(buffer, lines)
+        self.next:render(buffer)
       else
-        local footer = flatten(self.footer)
-        if #lines == 0 and #out == 1 then
-          out[1] = out[1] .. (" " .. footer)
+        if #lines == 0 and "string" == type(buffer[#buffer]) then
+          buffer[#buffer] = buffer[#buffer] .. (" " .. (unpack(add_to_buffer({ }, self.footer))))
         else
-          insert(out, lines)
-          insert(out, footer)
+          insert(buffer, lines)
+          add_to_buffer(buffer, self.footer)
         end
       end
-      return unpack(out)
+      return buffer
     end,
     block = function(self, header, footer)
       return Block(self, header, footer)
@@ -511,13 +490,14 @@ Block = (function()
   })
   _base_0.__class = _class_0
   local self = _class_0
-  flatten = function(line)
+  add_to_buffer = function(buffer, line)
     local _exp_0 = mtype(line)
     if Line == _exp_0 then
-      return line:render()
+      line:render(buffer)
     else
-      return line
+      insert(buffer, line)
     end
+    return buffer
   end
   if _parent_0 and _parent_0.__inherited then
     _parent_0.__inherited(_parent_0, _class_0)
