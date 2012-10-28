@@ -51,11 +51,15 @@ node_types = {
   foreach: {
     {"names", t}
     {"iter"}
-    {"body", {}}
+    {"body", t}
   }
   for: {
     {"name"}
     {"bounds", t}
+    {"body", t}
+  }
+  while: {
+    {"cond", t}
     {"body", t}
   }
   assign: {

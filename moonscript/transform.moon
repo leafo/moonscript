@@ -116,6 +116,34 @@ expand_elseif_assign = (ifstm) ->
 
 constructor_name = "new"
 
+with_continue_listener = (body) ->
+  continue_name = nil
+  {
+    Run =>
+      @listen "continue", ->
+        unless continue_name
+          continue_name = NameProxy"continue"
+          @put_name continue_name
+        continue_name
+
+    build.group body
+
+    Run =>
+      return unless continue_name
+      @put_name continue_name, nil
+      @splice (lines) -> {
+        {"assign", {continue_name}, {"false"}}
+        {"repeat", "true", {
+          lines
+          {"assign", {continue_name}, {"true"}}
+        }}
+        {"if", {"not", continue_name}, {
+          {"break"}
+        }}
+      }
+  }
+
+
 class Transformer
   new: (@transformers) =>
     @seen_nodes = setmetatable {}, __mode: "k"
@@ -346,7 +374,7 @@ Statement = Transformer {
       else
         {1, {"length", list_name}}
 
-      build.group {
+      return build.group {
         build.assign_one list_name, list
         slice_var
         build["for"] {
@@ -358,6 +386,16 @@ Statement = Transformer {
           }
         }
       }
+
+    node.body = with_continue_listener node.body
+
+  while: (node) =>
+    smart_node node
+    node.body = with_continue_listener node.body
+
+  for: (node) =>
+    smart_node node
+    node.body = with_continue_listener node.body
 
   switch: (node, ret) =>
     _, exp, conds = unpack node

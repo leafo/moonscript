@@ -122,32 +122,9 @@ line_compile =
       \append_list [@value exp for exp in *exps], ","
       \append " do"
 
-    continue_name = nil
-    out = with @block loop
-      \listen "continue", ->
-        unless continue_name
-          continue_name = NameProxy"continue"
-          \put_name continue_name
-        continue_name
-
+    with @block loop
       \declare names
       \stms block
-
-    -- todo: figure out how to put this in the transformer
-    if continue_name
-      out\put_name continue_name, nil
-      out\splice (lines) -> {
-        {"assign", {continue_name}, {"false"}}
-        {"repeat", "true", {
-          lines
-          {"assign", {continue_name}, {"true"}}
-        }}
-        {"if", {"not", continue_name}, {
-          {"break"}
-        }}
-      }
-
-    out
 
   export: (node) =>
     _, names = unpack node

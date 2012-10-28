@@ -74,7 +74,7 @@ local node_types = {
     },
     {
       "body",
-      { }
+      t
     }
   },
   ["for"] = {
@@ -83,6 +83,16 @@ local node_types = {
     },
     {
       "bounds",
+      t
+    },
+    {
+      "body",
+      t
+    }
+  },
+  ["while"] = {
+    {
+      "cond",
       t
     },
     {

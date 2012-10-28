@@ -231,66 +231,12 @@ line_compile = {
       _with_0:append(" do")
       loop = _with_0
     end
-    local continue_name = nil
-    local out
     do
       local _with_0 = self:block(loop)
-      _with_0:listen("continue", function()
-        if not (continue_name) then
-          continue_name = NameProxy("continue")
-          _with_0:put_name(continue_name)
-        end
-        return continue_name
-      end)
       _with_0:declare(names)
       _with_0:stms(block)
-      out = _with_0
+      return _with_0
     end
-    if continue_name then
-      out:put_name(continue_name, nil)
-      out:splice(function(lines)
-        return {
-          {
-            "assign",
-            {
-              continue_name
-            },
-            {
-              "false"
-            }
-          },
-          {
-            "repeat",
-            "true",
-            {
-              lines,
-              {
-                "assign",
-                {
-                  continue_name
-                },
-                {
-                  "true"
-                }
-              }
-            }
-          },
-          {
-            "if",
-            {
-              "not",
-              continue_name
-            },
-            {
-              {
-                "break"
-              }
-            }
-          }
-        }
-      end)
-    end
-    return out
   end,
   export = function(self, node)
     local _, names = unpack(node)

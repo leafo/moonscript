@@ -275,6 +275,69 @@ expand_elseif_assign = function(ifstm)
   return ifstm
 end
 local constructor_name = "new"
+local with_continue_listener
+with_continue_listener = function(body)
+  local continue_name = nil
+  return {
+    Run(function(self)
+      return self:listen("continue", function()
+        if not (continue_name) then
+          continue_name = NameProxy("continue")
+          self:put_name(continue_name)
+        end
+        return continue_name
+      end)
+    end),
+    build.group(body),
+    Run(function(self)
+      if not (continue_name) then
+        return 
+      end
+      self:put_name(continue_name, nil)
+      return self:splice(function(lines)
+        return {
+          {
+            "assign",
+            {
+              continue_name
+            },
+            {
+              "false"
+            }
+          },
+          {
+            "repeat",
+            "true",
+            {
+              lines,
+              {
+                "assign",
+                {
+                  continue_name
+                },
+                {
+                  "true"
+                }
+              }
+            }
+          },
+          {
+            "if",
+            {
+              "not",
+              continue_name
+            },
+            {
+              {
+                "break"
+              }
+            }
+          }
+        }
+      end)
+    end)
+  }
+end
 local Transformer
 Transformer = (function()
   local _parent_0 = nil
@@ -753,6 +816,15 @@ Statement = Transformer({
         })
       })
     end
+    node.body = with_continue_listener(node.body)
+  end,
+  ["while"] = function(self, node)
+    smart_node(node)
+    node.body = with_continue_listener(node.body)
+  end,
+  ["for"] = function(self, node)
+    smart_node(node)
+    node.body = with_continue_listener(node.body)
   end,
   switch = function(self, node, ret)
     local _, exp, conds = unpack(node)
