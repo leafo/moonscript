@@ -8,33 +8,6 @@ do
   ntype = _table_0.ntype
 end
 local concat, insert = table.concat, table.insert
-local table_append
-table_append = function(name, len, value)
-  return {
-    {
-      "update",
-      len,
-      "+=",
-      1
-    },
-    {
-      "assign",
-      {
-        {
-          "chain",
-          name,
-          {
-            "index",
-            len
-          }
-        }
-      },
-      {
-        value
-      }
-    }
-  }
-end
 value_compile = {
   exp = function(self, node)
     local _comp

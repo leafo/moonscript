@@ -11,13 +11,6 @@ import concat, insert from table
 
 export value_compile
 
-table_append = (name, len, value) ->
-  {
-    {"update", len, "+=", 1}
-    {"assign", {
-      {"chain", name, {"index", len}} }, { value }}
-  }
-
 value_compile =
   -- list of values separated by binary operators
   exp: (node) =>
