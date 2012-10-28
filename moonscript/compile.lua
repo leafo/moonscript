@@ -154,13 +154,6 @@ Block = (function()
       end
       return "Block<" .. tostring(h) .. "> <- " .. tostring(self.parent)
     end,
-    bubble = function(self, other)
-      if other == nil then
-        other = self.parent
-      end
-      local has_varargs = self.has_varargs and not self:has_name("...")
-      other.has_varargs = other.has_varargs or has_varargs
-    end,
     line_table = function(self)
       return self._posmap
     end,
@@ -172,6 +165,9 @@ Block = (function()
     end,
     listen = function(self, name, fn)
       self._listeners[name] = fn
+    end,
+    unlisten = function(self, name)
+      self._listeners[name] = nil
     end,
     send = function(self, name, ...)
       do

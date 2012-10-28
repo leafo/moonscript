@@ -298,7 +298,7 @@ value_compile = {
       return self:value(sup(self))
     end
     if value == "..." then
-      self.has_varargs = true
+      self:send("varargs")
     end
     return tostring(value)
   end

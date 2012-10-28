@@ -192,6 +192,6 @@ value_compile =
       return @value sup self
 
     if value == "..."
-      @has_varargs = true
+      @send "varargs"
 
     tostring value

@@ -46,7 +46,7 @@ local j = (function()
 end)()
 local m
 m = function(...)
-  return (function()
+  return (function(...)
     local _accum_0 = { }
     local _len_0 = 0
     local _list_0 = {
@@ -60,7 +60,7 @@ m = function(...)
       end
     end
     return _accum_0
-  end)()
+  end)(...)
 end
 local x = (function(...)
   local _accum_0 = { }
@@ -114,7 +114,7 @@ local a = (function(...)
   end
   return _accum_0
 end)(...)
-local b = (function(...)
+local b = (function()
   local _accum_0 = { }
   local _len_0 = 0
   for i = 1, 10 do
@@ -128,4 +128,4 @@ local b = (function(...)
     end
   end
   return _accum_0
-end)(...)
+end)()

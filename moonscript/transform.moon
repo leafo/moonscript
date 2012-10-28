@@ -765,6 +765,11 @@ Value = Transformer {
   fndef: (node) =>
     smart_node node
     node.body = apply_to_last node.body, implicitly_return self
+    node.body = {
+      Run => @listen "varargs", -> -- capture event
+      unpack node.body
+    }
+
     node
 
   if: (node) => build.block_exp { node }
@@ -823,12 +828,16 @@ Value = Transformer {
     fn = nil
     arg_list = {}
 
-    insert body, Run =>
-      if @has_varargs
-        insert arg_list, "..."
-        insert fn.args, {"..."}
+    fn = smart_node build.fndef body: {
+      Run =>
+        @listen "varargs", ->
+          insert arg_list, "..."
+          insert fn.args, {"..."}
+          @unlisten "varargs"
 
-    fn = smart_node build.fndef body: body
+      unpack body
+    }
+
     build.chain { base: {"parens", fn}, {"call", arg_list} }
 }
 

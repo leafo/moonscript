@@ -112,11 +112,6 @@ class Block
     else
       @indent = 0
 
-  -- bubble properties into parent
-  bubble: (other=@parent) =>
-    has_varargs = @has_varargs and not @has_name "..."
-    other.has_varargs = other.has_varargs or has_varargs
-
   line_table: =>
     @_posmap
 
@@ -128,6 +123,9 @@ class Block
 
   listen: (name, fn) =>
     @_listeners[name] = fn
+
+  unlisten: (name) =>
+    @_listeners[name] = nil
 
   send: (name, ...) =>
     if fn = @_listeners[name]

@@ -43,11 +43,6 @@ x = for x in y
 
 * any/every keywords for comprehensions? (what about iterators)
 
-not working right:
-
-    double_args = (...) ->
-      [x * 2 for x in *{...}]
-
 * let array items in table be defined without {} when indented
 
 

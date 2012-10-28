@@ -1453,6 +1453,12 @@ Value = Transformer({
   fndef = function(self, node)
     smart_node(node)
     node.body = apply_to_last(node.body, implicitly_return(self))
+    node.body = {
+      Run(function(self)
+        return self:listen("varargs", function() end)
+      end),
+      unpack(node.body)
+    }
     return node
   end,
   ["if"] = function(self, node)
@@ -1549,16 +1555,19 @@ Value = Transformer({
     local _, body = unpack(node)
     local fn = nil
     local arg_list = { }
-    insert(body, Run(function(self)
-      if self.has_varargs then
-        insert(arg_list, "...")
-        return insert(fn.args, {
-          "..."
-        })
-      end
-    end))
     fn = smart_node(build.fndef({
-      body = body
+      body = {
+        Run(function(self)
+          return self:listen("varargs", function()
+            insert(arg_list, "...")
+            insert(fn.args, {
+              "..."
+            })
+            return self:unlisten("varargs")
+          end)
+        end),
+        unpack(body)
+      }
     }))
     return build.chain({
       base = {
