@@ -18,7 +18,7 @@ line_compile =
 
   lines: (node) =>
     for line in *node[2]
-      @add line
+      @add_raw line
 
   declare: (node) =>
     names = node[2]

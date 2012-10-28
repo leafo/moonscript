@@ -11,6 +11,8 @@ import concat, insert from table
 
 export value_compile
 
+table_delim = ","
+
 value_compile =
   -- list of values separated by binary operators
   exp: (node) =>
@@ -129,8 +131,6 @@ value_compile =
   table: (node) =>
     _, items = unpack node
     with @block "{", "}"
-      .delim = ","
-
       format_line = (tuple) ->
         if #tuple == 2
           key, value = unpack tuple
@@ -152,7 +152,11 @@ value_compile =
           @line \value tuple[1]
 
       if items
-        \add format_line line for line in *items
+        count = #items
+        for i, tuple in ipairs items
+          line = format_line tuple
+          line\append table_delim unless count == i
+          \add line
 
   minus: (node) =>
     @line "-", @value node[2]

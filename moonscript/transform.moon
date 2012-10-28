@@ -210,7 +210,7 @@ Statement = Transformer {
     transformed or node
 
   continue: (node) =>
-    continue_name = @send"continue"
+    continue_name = @send "continue"
     error "continue must be inside of a loop" unless continue_name
     build.group {
       build.assign_one continue_name, "true"

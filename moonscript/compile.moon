@@ -16,8 +16,16 @@ import ntype from require "moonscript.types"
 import concat, insert from table
 import pos_to_line, get_closest_line, trim from util
 
+mtype = util.moon.type
+
 export tree, value, format_error
 export Block, RootBlock
+
+insert_many = (tbl, ...) ->
+  i = #tbl + 1
+  for val in *{...}
+    tbl[i] = val
+    i += 1
 
 -- buffer for building up a line
 class Line
@@ -37,16 +45,34 @@ class Line
     @_append_single item for item in *{...}
     nil
 
+  -- todo: remove concats from here
   render: =>
-    buff = {}
-    for i = 1,#self
-      c = self[i]
-      insert buff, if util.moon.type(c) == Block
-        c\bubble!
-        c\render!
-      else
-        c
-    concat buff
+    parts = {}
+    current = {}
+
+    add_current = ->
+      insert parts, table.concat current
+
+    for chunk in *@
+      switch mtype chunk
+        when Block
+          for block_chunk in *{chunk\render!}
+            if "string" == type block_chunk
+              insert current, block_chunk
+            else
+              add_current!
+              insert parts, block_chunk
+              current = {}
+        else
+          insert current, chunk
+
+    if #current > 0
+      add_current!
+
+    unpack parts
+
+
+  __tostring: => "Line<#{@render!}>"
 
 class Block
   header: "do"
@@ -168,8 +194,8 @@ class Block
         @_posmap[@current_line] = @last_pos
 
   -- add raw text as new line
-  add_line_text: (text) =>
-    insert @_lines, text
+  add_raw: (item) =>
+    insert @_lines, item
 
   append_line_table: (sub_table, offset) =>
     offset = offset + @current_line
@@ -193,52 +219,43 @@ class Block
 
   -- add a line object
   add: (line) =>
-    t = util.moon.type line
-
-    if t == "string"
-      @add_line_text line
-    elseif t == Block
-      @add @line line
-    elseif t == Line
-      @add_line_tables line
-      @add_line_text line\render!
-      @current_line += 1
-    else
-      error "Adding unknown item"
-    nil
-
-  _insert_breaks: =>
-    for i = 1, #@_lines - 1
-      left, right = @_lines[i], @_lines[i+1]
-      lc = left\sub(-1)
-      if (lc == ")" or lc == "]") and right\sub(1,1) == "("
-        @_lines[i] = @_lines[i]..";"
-
-  render: =>
-    flatten = (line) ->
-      if type(line) == "string"
-        line
+    -- print "adding", line
+    switch util.moon.type line
+      when "string"
+        insert @_lines, line
+      when Block
+        insert_many @_lines, line\render!
+      when Line
+        insert_many @_lines, line\render!
       else
+        error "Adding unknown item"
+
+  flatten = (line) ->
+    switch mtype line
+      when Line
         line\render!
+      else
+        line
 
-    header = flatten @header
+  -- todo: pass in buffer as argument
+  render: =>
+    out = { flatten @header }
 
-    if #@_lines == 0
+    lines = for line in *@_lines
+      flatten line
+
+    if @next
+      insert out, lines
+      insert_many out, @next\render!
+    else
       footer = flatten @footer
-      return concat {header, footer}, " "
+      if #lines == 0 and #out == 1
+        out[1] ..= " " ..footer
+      else
+        insert out, lines
+        insert out, footer
 
-    indent = indent_char\rep @indent
-
-    -- inject semicolons for ambiguous lines
-    if not @delim then @_insert_breaks!
-
-    body = indent .. concat @_lines, (@delim or "") .. "\n" .. indent
-
-    concat {
-      header,
-      body,
-      indent_char\rep(@indent - 1) .. if @next then @next\render! else flatten @footer
-    }, "\n"
+    unpack out
 
   block: (header, footer) =>
     Block self, header, footer
@@ -299,6 +316,28 @@ class Block
     @_lines = {}
     @stms fn lines
 
+
+flatten_lines = (lines, indent=nil, buffer={}) ->
+  for i = 1, #lines
+    l = lines[i]
+    switch type l
+      when "string"
+        insert buffer, indent if indent
+        insert buffer, l
+
+        -- insert breaks between ambiguous statements
+        if "string" == type lines[i + 1]
+          lc = l\sub(-1)
+          if (lc == ")" or lc == "]") and lines[i + 1]\sub(1,1) == "("
+            insert buffer, ";"
+
+        insert buffer, "\n"
+        last = l
+      when "table"
+        flatten_lines l, indent and indent .. indent_char or indent_char, buffer
+
+  buffer
+
 class RootBlock extends Block
   new: (...) =>
     @root = self
@@ -307,8 +346,13 @@ class RootBlock extends Block
   __tostring: => "RootBlock<>"
 
   render: =>
-    @_insert_breaks!
-    concat @_lines, "\n"
+    -- @_insert_breaks!
+    -- concat @_lines, "\n"
+
+    -- print util.dump @_lines
+    buffer = flatten_lines @_lines
+    buffer[#buffer] = nil if buffer[#buffer] == "\n"
+    table.concat buffer
 
 format_error = (msg, pos, file_str) ->
   line = pos_to_line file_str, pos

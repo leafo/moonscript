@@ -19,7 +19,7 @@ line_compile = {
     local _list_0 = node[2]
     for _index_0 = 1, #_list_0 do
       local line = _list_0[_index_0]
-      self:add(line)
+      self:add_raw(line)
     end
   end,
   declare = function(self, node)

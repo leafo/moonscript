@@ -18,6 +18,19 @@ do
 end
 local concat, insert = table.concat, table.insert
 local pos_to_line, get_closest_line, trim = util.pos_to_line, util.get_closest_line, util.trim
+local mtype = util.moon.type
+local insert_many
+insert_many = function(tbl, ...)
+  local i = #tbl + 1
+  local _list_0 = {
+    ...
+  }
+  for _index_0 = 1, #_list_0 do
+    local val = _list_0[_index_0]
+    tbl[i] = val
+    i = i + 1
+  end
+end
 local Line
 Line = (function()
   local _parent_0 = nil
@@ -53,19 +66,41 @@ Line = (function()
       return nil
     end,
     render = function(self)
-      local buff = { }
-      for i = 1, #self do
-        local c = self[i]
-        insert(buff, (function()
-          if util.moon.type(c) == Block then
-            c:bubble()
-            return c:render()
-          else
-            return c
-          end
-        end)())
+      local parts = { }
+      local current = { }
+      local add_current
+      add_current = function()
+        return insert(parts, table.concat(current))
       end
-      return concat(buff)
+      local _list_0 = self
+      for _index_0 = 1, #_list_0 do
+        local chunk = _list_0[_index_0]
+        local _exp_0 = mtype(chunk)
+        if Block == _exp_0 then
+          local _list_1 = {
+            chunk:render()
+          }
+          for _index_1 = 1, #_list_1 do
+            local block_chunk = _list_1[_index_1]
+            if "string" == type(block_chunk) then
+              insert(current, block_chunk)
+            else
+              add_current()
+              insert(parts, block_chunk)
+              current = { }
+            end
+          end
+        else
+          insert(current, chunk)
+        end
+      end
+      if #current > 0 then
+        add_current()
+      end
+      return unpack(parts)
+    end,
+    __tostring = function(self)
+      return "Line<" .. tostring(self:render()) .. ">"
     end
   }
   _base_0.__index = _base_0
@@ -103,6 +138,7 @@ Line = (function()
   return _class_0
 end)()
 Block = (function()
+  local flatten
   local _parent_0 = nil
   local _base_0 = {
     header = "do",
@@ -251,8 +287,8 @@ Block = (function()
         end
       end
     end,
-    add_line_text = function(self, text)
-      return insert(self._lines, text)
+    add_raw = function(self, item)
+      return insert(self._lines, item)
     end,
     append_line_table = function(self, sub_table, offset)
       offset = offset + self.current_line
@@ -281,62 +317,48 @@ Block = (function()
       end
     end,
     add = function(self, line)
-      local t = util.moon.type(line)
-      if t == "string" then
-        self:add_line_text(line)
-      elseif t == Block then
-        self:add(self:line(line))
-      elseif t == Line then
-        self:add_line_tables(line)
-        self:add_line_text(line:render())
-        self.current_line = self.current_line + 1
+      local _exp_0 = util.moon.type(line)
+      if "string" == _exp_0 then
+        return insert(self._lines, line)
+      elseif Block == _exp_0 then
+        return insert_many(self._lines, line:render())
+      elseif Line == _exp_0 then
+        return insert_many(self._lines, line:render())
       else
-        error("Adding unknown item")
-      end
-      return nil
-    end,
-    _insert_breaks = function(self)
-      for i = 1, #self._lines - 1 do
-        local left, right = self._lines[i], self._lines[i + 1]
-        local lc = left:sub(-1)
-        if (lc == ")" or lc == "]") and right:sub(1, 1) == "(" then
-          self._lines[i] = self._lines[i] .. ";"
-        end
+        return error("Adding unknown item")
       end
     end,
     render = function(self)
-      local flatten
-      flatten = function(line)
-        if type(line) == "string" then
-          return line
+      local out = {
+        flatten(self.header)
+      }
+      local lines = (function()
+        local _accum_0 = { }
+        local _len_0 = 0
+        local _list_0 = self._lines
+        for _index_0 = 1, #_list_0 do
+          local line = _list_0[_index_0]
+          local _value_0 = flatten(line)
+          if _value_0 ~= nil then
+            _len_0 = _len_0 + 1
+            _accum_0[_len_0] = _value_0
+          end
+        end
+        return _accum_0
+      end)()
+      if self.next then
+        insert(out, lines)
+        insert_many(out, self.next:render())
+      else
+        local footer = flatten(self.footer)
+        if #lines == 0 and #out == 1 then
+          out[1] = out[1] .. (" " .. footer)
         else
-          return line:render()
+          insert(out, lines)
+          insert(out, footer)
         end
       end
-      local header = flatten(self.header)
-      if #self._lines == 0 then
-        local footer = flatten(self.footer)
-        return concat({
-          header,
-          footer
-        }, " ")
-      end
-      local indent = indent_char:rep(self.indent)
-      if not self.delim then
-        self:_insert_breaks()
-      end
-      local body = indent .. concat(self._lines, (self.delim or "") .. "\n" .. indent)
-      return concat({
-        header,
-        body,
-        indent_char:rep(self.indent - 1) .. (function()
-          if self.next then
-            return self.next:render()
-          else
-            return flatten(self.footer)
-          end
-        end)()
-      }, "\n")
+      return unpack(out)
     end,
     block = function(self, header, footer)
       return Block(self, header, footer)
@@ -492,11 +514,50 @@ Block = (function()
     end
   })
   _base_0.__class = _class_0
+  local self = _class_0
+  flatten = function(line)
+    local _exp_0 = mtype(line)
+    if Line == _exp_0 then
+      return line:render()
+    else
+      return line
+    end
+  end
   if _parent_0 and _parent_0.__inherited then
     _parent_0.__inherited(_parent_0, _class_0)
   end
   return _class_0
 end)()
+local flatten_lines
+flatten_lines = function(lines, indent, buffer)
+  if indent == nil then
+    indent = nil
+  end
+  if buffer == nil then
+    buffer = { }
+  end
+  for i = 1, #lines do
+    local l = lines[i]
+    local _exp_0 = type(l)
+    if "string" == _exp_0 then
+      if indent then
+        insert(buffer, indent)
+      end
+      insert(buffer, l)
+      if "string" == type(lines[i + 1]) then
+        local lc = l:sub(-1)
+        if (lc == ")" or lc == "]") and lines[i + 1]:sub(1, 1) == "(" then
+          insert(buffer, ";")
+        end
+      end
+      insert(buffer, "\n")
+      local last = l
+    elseif "table" == _exp_0 then
+      flatten_lines(l, indent and indent .. indent_char or indent_char, buffer)
+    end
+  end
+  return buffer
+end
 RootBlock = (function()
   local _parent_0 = Block
   local _base_0 = {
@@ -504,8 +565,11 @@ RootBlock = (function()
       return "RootBlock<>"
     end,
     render = function(self)
-      self:_insert_breaks()
-      return concat(self._lines, "\n")
+      local buffer = flatten_lines(self._lines)
+      if buffer[#buffer] == "\n" then
+        buffer[#buffer] = nil
+      end
+      return table.concat(buffer)
     end
   }
   _base_0.__index = _base_0
