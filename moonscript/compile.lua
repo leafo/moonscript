@@ -110,7 +110,13 @@ Block = (function()
     export_all = false,
     export_proper = false,
     __tostring = function(self)
-      return "Block<> <- " .. tostring(self.parent)
+      local h
+      if "string" == type(self.header) then
+        h = self.header
+      else
+        h = self.header:render()
+      end
+      return "Block<" .. tostring(h) .. "> <- " .. tostring(self.parent)
     end,
     bubble = function(self, other)
       if other == nil then

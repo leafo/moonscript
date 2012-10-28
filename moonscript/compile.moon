@@ -55,7 +55,13 @@ class Block
   export_all: false
   export_proper: false
 
-  __tostring: => "Block<> <- " .. tostring @parent
+  __tostring: =>
+    h = if "string" == type @header
+      @header
+    else
+      @header\render!
+
+    "Block<#{h}> <- " .. tostring @parent
 
   new: (@parent, @header, @footer) =>
     @current_line = 1
@@ -250,7 +256,7 @@ class Block
       \append_list [@value v for v in *values], delim
 
   stm: (node, ...) =>
-    return if not node -- slip blank statements
+    return if not node -- skip blank statements
     node = @root.transform.statement node
     fn = line_compile[ntype(node)]
     if not fn
