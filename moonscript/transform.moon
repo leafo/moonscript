@@ -117,11 +117,10 @@ expand_elseif_assign = (ifstm) ->
 constructor_name = "new"
 
 class Transformer
-  new: (@transformers, @scope) =>
-    @seen_nodes = {}
+  new: (@transformers) =>
+    @seen_nodes = setmetatable {}, __mode: "k"
 
   transform: (scope, node, ...) =>
-    -- print scope, node, ...
     return node if @seen_nodes[node]
     @seen_nodes[node] = true
     while true
@@ -132,12 +131,12 @@ class Transformer
         node
       return node if res == node
       node = res
+    node
 
-  __call: (node, ...) =>
-    @transform @scope, node, ...
+  bind: (scope) =>
+    (...) -> @transform scope, ...
 
-  instance: (scope) =>
-    Transformer @transformers, scope
+  __call: (...) => @transform ...
 
   can_transform: (node) =>
     @transformers[ntype node] != nil

@@ -71,6 +71,12 @@ class Block
     @_names = {}
     @_state = {}
 
+    with transform
+      @transform = {
+        value: .Value\bind self
+        statement: .Statement\bind self
+      }
+
     if @parent
       @root = @parent.root
       @indent = @parent.indent + 1
@@ -239,7 +245,7 @@ class Block
   -- line wise compile functions
   name: (node) => @value node
   value: (node, ...) =>
-    node = @root.transform.value node
+    node = @transform.value node
     action = if type(node) != "table"
       "raw_value"
     else
@@ -257,7 +263,7 @@ class Block
 
   stm: (node, ...) =>
     return if not node -- skip blank statements
-    node = @root.transform.statement node
+    node = @transform.statement node
     fn = line_compile[ntype(node)]
     if not fn
       -- coerce value into statement
@@ -279,10 +285,6 @@ class Block
 class RootBlock extends Block
   new: (...) =>
     @root = self
-    @transform = {
-      value: transform.Value\instance self
-      statement: transform.Statement\instance self
-    }
     super ...
 
   __tostring: => "RootBlock<>"

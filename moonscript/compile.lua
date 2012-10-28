@@ -344,7 +344,7 @@ Block = (function()
       return self:value(node)
     end,
     value = function(self, node, ...)
-      node = self.root.transform.value(node)
+      node = self.transform.value(node)
       local action
       if type(node) ~= "table" then
         action = "raw_value"
@@ -380,7 +380,7 @@ Block = (function()
       if not node then
         return 
       end
-      node = self.root.transform.statement(node)
+      node = self.transform.statement(node)
       local fn = line_compile[ntype(node)]
       if not fn then
         if has_value(node) then
@@ -429,6 +429,13 @@ Block = (function()
       self._posmap = { }
       self._names = { }
       self._state = { }
+      do
+        local _with_0 = transform
+        self.transform = {
+          value = _with_0.Value:bind(self),
+          statement = _with_0.Statement:bind(self)
+        }
+      end
       if self.parent then
         self.root = self.parent.root
         self.indent = self.parent.indent + 1
@@ -481,10 +488,6 @@ RootBlock = (function()
   local _class_0 = setmetatable({
     __init = function(self, ...)
       self.root = self
-      self.transform = {
-        value = transform.Value:instance(self),
-        statement = transform.Statement:instance(self)
-      }
       return _parent_0.__init(self, ...)
     end,
     __base = _base_0,

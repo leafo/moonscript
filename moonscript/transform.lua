@@ -297,12 +297,15 @@ Transformer = (function()
         end
         node = res
       end
+      return node
     end,
-    __call = function(self, node, ...)
-      return self:transform(self.scope, node, ...)
+    bind = function(self, scope)
+      return function(...)
+        return self:transform(scope, ...)
+      end
     end,
-    instance = function(self, scope)
-      return Transformer(self.transformers, scope)
+    __call = function(self, ...)
+      return self:transform(...)
     end,
     can_transform = function(self, node)
       return self.transformers[ntype(node)] ~= nil
@@ -313,9 +316,11 @@ Transformer = (function()
     setmetatable(_base_0, _parent_0.__base)
   end
   local _class_0 = setmetatable({
-    __init = function(self, transformers, scope)
-      self.transformers, self.scope = transformers, scope
-      self.seen_nodes = { }
+    __init = function(self, transformers)
+      self.transformers = transformers
+      self.seen_nodes = setmetatable({ }, {
+        __mode = "k"
+      })
     end,
     __base = _base_0,
     __name = "Transformer",
