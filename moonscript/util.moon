@@ -33,7 +33,8 @@ get_closest_line = (str, line_num) ->
     line, line_num
 
 get_line = (str, line_num) ->
-  for line in str\gmatch "(.-)[\n$]"
+  -- todo: this returns an extra blank line at the end
+  for line in str\gmatch "([^\n]*)\n?"
     return line if line_num == 1
     line_num -= 1
 

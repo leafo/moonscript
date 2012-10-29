@@ -73,6 +73,9 @@ rewrite_traceback = function(text, err)
         fname,
         ":",
         reverse_line_number(fname, tbl, line, cache),
+        "(",
+        line,
+        ")",
         ": ",
         msg
       })

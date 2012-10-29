@@ -14,7 +14,7 @@ import Set from require "moonscript.data"
 import ntype from require "moonscript.types"
 
 import concat, insert from table
-import pos_to_line, get_closest_line, trim from util
+import pos_to_line, get_line, get_closest_line, trim from util
 
 mtype = util.moon.type
 
@@ -82,8 +82,6 @@ class Block
     "Block<#{h}> <- " .. tostring @parent
 
   new: (@parent, @header, @footer) =>
-    @current_line = 1
-
     @_lines = {}
     @_posmap = {}
     @_names = {}
@@ -104,6 +102,8 @@ class Block
     else
       @indent = 0
 
+  -- maps from a output (lua) line number to a character position in the
+  -- original moon file
   line_table: =>
     @_posmap
 
@@ -177,35 +177,38 @@ class Block
     @stm {"assign", {name}, {value}}
     name
 
-  mark_pos: (node) =>
-    if node[-1]
-      @last_pos = node[-1]
-      if not @_posmap[@current_line]
-        @_posmap[@current_line] = @last_pos
+  mark_pos: (line_no, node) =>
+    if pos = node[-1]
+      @last_pos = pos
+      @_posmap[line_no] = pos unless @_posmap[line_no]
+
+  append_posmap: (map) =>
+    print "appending pos", self
+    @_posmap[#@_posmap + 1] = map
 
   -- add raw text as new line
   add_raw: (item) =>
     insert @_lines, item
 
-  append_line_table: (sub_table, offset) =>
-    offset = offset + @current_line
+  -- append_line_table: (sub_table, offset) =>
+  --   offset = offset + @current_line
 
-    for line, source in pairs sub_table
-      line += offset
-      if not @_posmap[line]
-        @_posmap[line] = source
+  --   for line, source in pairs sub_table
+  --     line += offset
+  --     if not @_posmap[line]
+  --       @_posmap[line] = source
 
-  add_line_tables: (line) =>
-      for chunk in *line
-        if util.moon.type(chunk) == Block
-          current = chunk
-          while current
-            if util.moon.type(current.header) == Line
-              @add_line_tables current.header
+  -- add_line_tables: (line) =>
+  --     for chunk in *line
+  --       if util.moon.type(chunk) == Block
+  --         current = chunk
+  --         while current
+  --           if util.moon.type(current.header) == Line
+  --             @add_line_tables current.header
 
-            @append_line_table current\line_table!, 0
-            @current_line += current.current_line
-            current = current.next
+  --           @append_line_table current\line_table!, 0
+  --           @current_line += current.current_line
+  --           current = current.next
 
   -- add a line object
   add: (line) =>
@@ -219,6 +222,7 @@ class Block
         line\render @_lines
       else
         error "Adding unknown item"
+    line
 
   add_to_buffer = (buffer, line) ->
     switch mtype line
@@ -269,7 +273,6 @@ class Block
     action = if type(node) != "table"
       "raw_value"
     else
-      @mark_pos node
       node[1]
 
     fn = value_compile[action]
@@ -281,20 +284,43 @@ class Block
     with Line!
       \append_list [@value v for v in *values], delim
 
+
+  block_iterator = (list) ->
+    coroutine.wrap ->
+      for item in *list
+        if Block == mtype item
+          coroutine.yield item
+
   stm: (node, ...) =>
     return if not node -- skip blank statements
     node = @transform.statement node
-    fn = line_compile[ntype(node)]
-    if not fn
+
+    before = #@_lines
+
+    added = if fn = line_compile[ntype(node)]
+      out = fn self, node, ...
+      @add out if out
+    else
       -- coerce value into statement
       if has_value node
         @stm {"assign", {"_"}, {node}}
       else
         @add @value node
-    else
-      @mark_pos node
-      out = fn self, node, ...
-      @add out if out
+
+    -- mark pos for each line added
+    if added
+      print "added #{#@_lines - before} lines"
+
+      list = if Line == mtype added then added else {added}
+      next_block = block_iterator list
+
+      for l=before + 1,#@_lines
+        if "table" == type @_lines[l]
+          block = next_block!
+          block._posmap.num_lines = #block._lines
+          @_posmap[l] = block._posmap
+        else
+          @mark_pos l, node
     nil
 
   stms: (stms, ret) =>
@@ -306,7 +332,6 @@ class Block
     lines = {"lines", @_lines}
     @_lines = {}
     @stms fn lines
-
 
 flatten_lines = (lines, indent=nil, buffer={}) ->
   for i = 1, #lines
@@ -328,6 +353,35 @@ flatten_lines = (lines, indent=nil, buffer={}) ->
         flatten_lines l, indent and indent .. indent_char or indent_char, buffer
 
   buffer
+
+flatten_posmap = (posmap, dl=0, out={}) ->
+  for k,v in pairs posmap
+    continue if "string" == type k
+    if "table" == type v
+      flatten_posmap v, k - 1 + dl, out
+      dl += v.num_lines - 1
+    else
+      out[k + dl] = v
+
+  out
+
+debug_posmap = (posmap, fname=error"pass in input file", lua_code) ->
+  moon_code = io.open(fname)\read "*a"
+
+  tuples = [{k, v} for k, v in pairs posmap]
+
+  table.sort tuples, (a, b) -> a[1] < b[1]
+
+  lines = for pair in *tuples
+    lua_line, pos = unpack pair
+    moon_line = pos_to_line moon_code, pos
+
+    lua_text = get_line lua_code, lua_line
+    moon_text = get_closest_line moon_code, moon_line
+
+    "#{pos}\t #{lua_line}:[ #{trim lua_text} ] >> #{moon_line}:[ #{trim moon_text} ]"
+
+  concat(lines, "\n") .. "\n"
 
 class RootBlock extends Block
   new: (...) =>
@@ -378,6 +432,10 @@ tree = (tree, scope=RootBlock!) ->
 
     nil, error_msg, scope.last_pos
   else
-    tbl = scope\line_table!
-    result, tbl
+    raw_posmap = scope\line_table!
+    posmap = flatten_posmap raw_posmap
+    print util.dump raw_posmap
+    print util.dump posmap
+    print debug_posmap posmap, "scrap.moon", result
+    result, posmap
 

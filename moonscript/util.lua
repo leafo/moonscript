@@ -31,7 +31,7 @@ get_closest_line = function(str, line_num)
   end
 end
 get_line = function(str, line_num)
-  for line in str:gmatch("(.-)[\n$]") do
+  for line in str:gmatch("([^\n]*)\n?") do
     if line_num == 1 then
       return line
     end

@@ -17,7 +17,7 @@ do
   ntype = _table_0.ntype
 end
 local concat, insert = table.concat, table.insert
-local pos_to_line, get_closest_line, trim = util.pos_to_line, util.get_closest_line, util.trim
+local pos_to_line, get_line, get_closest_line, trim = util.pos_to_line, util.get_line, util.get_closest_line, util.trim
 local mtype = util.moon.type
 local Line
 Line = (function()
@@ -123,7 +123,7 @@ Line = (function()
   return _class_0
 end)()
 Block = (function()
-  local add_to_buffer
+  local add_to_buffer, block_iterator
   local _parent_0 = nil
   local _base_0 = {
     header = "do",
@@ -260,54 +260,36 @@ Block = (function()
       })
       return name
     end,
-    mark_pos = function(self, node)
-      if node[-1] then
-        self.last_pos = node[-1]
-        if not self._posmap[self.current_line] then
-          self._posmap[self.current_line] = self.last_pos
-        end
-      end
-    end,
-    add_raw = function(self, item)
-      return insert(self._lines, item)
-    end,
-    append_line_table = function(self, sub_table, offset)
-      offset = offset + self.current_line
-      for line, source in pairs(sub_table) do
-        line = line + offset
-        if not self._posmap[line] then
-          self._posmap[line] = source
-        end
-      end
-    end,
-    add_line_tables = function(self, line)
-      local _list_0 = line
-      for _index_0 = 1, #_list_0 do
-        local chunk = _list_0[_index_0]
-        if util.moon.type(chunk) == Block then
-          local current = chunk
-          while current do
-            if util.moon.type(current.header) == Line then
-              self:add_line_tables(current.header)
-            end
-            self:append_line_table(current:line_table(), 0)
-            self.current_line = self.current_line + current.current_line
-            current = current.next
+    mark_pos = function(self, line_no, node)
+      do
+        local pos = node[-1]
+        if pos then
+          self.last_pos = pos
+          if not (self._posmap[line_no]) then
+            self._posmap[line_no] = pos
           end
         end
       end
     end,
+    append_posmap = function(self, map)
+      print("appending pos", self)
+      self._posmap[#self._posmap + 1] = map
+    end,
+    add_raw = function(self, item)
+      return insert(self._lines, item)
+    end,
     add = function(self, line)
       local _exp_0 = util.moon.type(line)
       if "string" == _exp_0 then
-        return insert(self._lines, line)
+        insert(self._lines, line)
       elseif Block == _exp_0 then
-        return line:render(self._lines)
+        line:render(self._lines)
       elseif Line == _exp_0 then
-        return line:render(self._lines)
+        line:render(self._lines)
       else
-        return error("Adding unknown item")
+        error("Adding unknown item")
       end
+      return line
     end,
     render = function(self, buffer)
       add_to_buffer(buffer, self.header)
@@ -361,7 +343,6 @@ Block = (function()
       if type(node) ~= "table" then
         action = "raw_value"
       else
-        self:mark_pos(node)
         action = node[1]
       end
       local fn = value_compile[action]
@@ -393,26 +374,50 @@ Block = (function()
         return 
       end
       node = self.transform.statement(node)
-      local fn = line_compile[ntype(node)]
-      if not fn then
-        if has_value(node) then
-          self:stm({
-            "assign",
-            {
-              "_"
-            },
-            {
-              node
-            }
-          })
+      local before = #self._lines
+      local added
+      do
+        local fn = line_compile[ntype(node)]
+        if fn then
+          local out = fn(self, node, ...)
+          if out then
+            added = self:add(out)
+          end
         else
-          self:add(self:value(node))
+          if has_value(node) then
+            added = self:stm({
+              "assign",
+              {
+                "_"
+              },
+              {
+                node
+              }
+            })
+          else
+            added = self:add(self:value(node))
+          end
         end
-      else
-        self:mark_pos(node)
-        local out = fn(self, node, ...)
-        if out then
-          self:add(out)
+      end
+      if added then
+        print("added " .. tostring(#self._lines - before) .. " lines")
+        local list
+        if Line == mtype(added) then
+          list = added
+        else
+          list = {
+            added
+          }
+        end
+        local next_block = block_iterator(list)
+        for l = before + 1, #self._lines do
+          if "table" == type(self._lines[l]) then
+            local block = next_block()
+            block._posmap.num_lines = #block._lines
+            self._posmap[l] = block._posmap
+          else
+            self:mark_pos(l, node)
+          end
         end
       end
       return nil
@@ -444,7 +449,6 @@ Block = (function()
   local _class_0 = setmetatable({
     __init = function(self, parent, header, footer)
       self.parent, self.header, self.footer = parent, header, footer
-      self.current_line = 1
       self._lines = { }
       self._posmap = { }
       self._names = { }
@@ -499,6 +503,17 @@ Block = (function()
     end
     return buffer
   end
+  block_iterator = function(list)
+    return coroutine.wrap(function()
+      local _list_0 = list
+      for _index_0 = 1, #_list_0 do
+        local item = _list_0[_index_0]
+        if Block == mtype(item) then
+          coroutine.yield(item)
+        end
+      end
+    end)
+  end
   if _parent_0 and _parent_0.__inherited then
     _parent_0.__inherited(_parent_0, _class_0)
   end
@@ -533,6 +548,76 @@ flatten_lines = function(lines, indent, buffer)
     end
   end
   return buffer
+end
+local flatten_posmap
+flatten_posmap = function(posmap, dl, out)
+  if dl == nil then
+    dl = 0
+  end
+  if out == nil then
+    out = { }
+  end
+  for k, v in pairs(posmap) do
+    local _continue_0 = false
+    repeat
+      if "string" == type(k) then
+        _continue_0 = true
+        break
+      end
+      if "table" == type(v) then
+        flatten_posmap(v, k - 1 + dl, out)
+        dl = dl + (v.num_lines - 1)
+      else
+        out[k + dl] = v
+      end
+      _continue_0 = true
+    until true
+    if not _continue_0 then
+      break
+    end
+  end
+  return out
+end
+local debug_posmap
+debug_posmap = function(posmap, fname, lua_code)
+  if fname == nil then
+    fname = error("pass in input file")
+  end
+  local moon_code = io.open(fname):read("*a")
+  local tuples = (function()
+    local _accum_0 = { }
+    local _len_0 = 0
+    for k, v in pairs(posmap) do
+      _len_0 = _len_0 + 1
+      _accum_0[_len_0] = {
+        k,
+        v
+      }
+    end
+    return _accum_0
+  end)()
+  table.sort(tuples, function(a, b)
+    return a[1] < b[1]
+  end)
+  local lines = (function()
+    local _accum_0 = { }
+    local _len_0 = 0
+    local _list_0 = tuples
+    for _index_0 = 1, #_list_0 do
+      local pair = _list_0[_index_0]
+      local lua_line, pos = unpack(pair)
+      local moon_line = pos_to_line(moon_code, pos)
+      local lua_text = get_line(lua_code, lua_line)
+      local moon_text = get_closest_line(moon_code, moon_line)
+      local _value_0 = tostring(pos) .. "\t " .. tostring(lua_line) .. ":[ " .. tostring(trim(lua_text)) .. " ] >> " .. tostring(moon_line) .. ":[ " .. tostring(trim(moon_text)) .. " ]"
+      if _value_0 ~= nil then
+        _len_0 = _len_0 + 1
+        _accum_0[_len_0] = _value_0
+      end
+    end
+    return _accum_0
+  end)()
+  return concat(lines, "\n") .. "\n"
 end
 RootBlock = (function()
   local _parent_0 = Block
@@ -631,7 +716,11 @@ tree = function(tree, scope)
     end
     return nil, error_msg, scope.last_pos
   else
-    local tbl = scope:line_table()
-    return result, tbl
+    local raw_posmap = scope:line_table()
+    local posmap = flatten_posmap(raw_posmap)
+    print(util.dump(raw_posmap))
+    print(util.dump(posmap))
+    print(debug_posmap(posmap, "scrap.moon", result))
+    return result, posmap
   end
 end

@@ -63,6 +63,7 @@ rewrite_traceback = (text, err) ->
       concat {
         fname, ":"
         reverse_line_number(fname, tbl, line, cache)
+        "(", line, ")"
         ": ", msg
       }
     else
