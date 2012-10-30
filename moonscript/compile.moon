@@ -21,7 +21,34 @@ mtype = util.moon.type
 export tree, value, format_error
 export Block, RootBlock
 
--- buffer for building up a line
+local Line, Lines
+
+-- a buffer for building up lines
+class Lines
+  new: =>
+    @posmap = {}
+
+  -- append a line or lines to the buffer
+  add: (item) =>
+    switch mtype item
+      when Line
+        item\render self
+      when Block
+        item\render self
+      else
+        @[#@ + 1] = item
+    @
+
+  __tostring: =>
+    -- strip non-array elements
+    strip = (t) ->
+      if "table" == type t
+        [strip v for v in *t]
+      else
+        t
+
+    -- copy with only array elements
+    "Lines<#{util.dump(strip @)\sub 1, -2}>"
 class Line
   _append_single: (item) =>
     if util.moon.type(item) == Line
@@ -39,22 +66,22 @@ class Line
     @_append_single item for item in *{...}
     nil
 
-  -- todo: remove concats from here
+  -- todo: try to remove concats from here
   render: (buffer) =>
     current = {}
 
     add_current = ->
-      insert buffer, concat current
+      buffer\add concat current
 
     for chunk in *@
       switch mtype chunk
         when Block
-          for block_chunk in *chunk\render{}
+          for block_chunk in *chunk\render Lines!
             if "string" == type block_chunk
               insert current, block_chunk
             else
               add_current!
-              insert buffer, block_chunk
+              buffer\add block_chunk
               current = {}
         else
           insert current, chunk
@@ -64,7 +91,8 @@ class Line
 
     buffer
 
-  __tostring: => "Line<#{@render!}>"
+  __tostring: =>
+    "Line<#{util.dump(@)\sub 1, -2}>"
 
 class Block
   header: "do"
@@ -82,8 +110,9 @@ class Block
     "Block<#{h}> <- " .. tostring @parent
 
   new: (@parent, @header, @footer) =>
-    @_lines = {}
-    @_posmap = {}
+    @_lines = Lines!
+
+    @_posmap = {} -- todo: kill me
     @_names = {}
     @_state = {}
     @_listeners = {}
@@ -186,10 +215,6 @@ class Block
     print "appending pos", self
     @_posmap[#@_posmap + 1] = map
 
-  -- add raw text as new line
-  add_raw: (item) =>
-    insert @_lines, item
-
   -- append_line_table: (sub_table, offset) =>
   --   offset = offset + @current_line
 
@@ -211,44 +236,24 @@ class Block
   --           current = current.next
 
   -- add a line object
-  add: (line) =>
-    -- print "adding", line
-    switch util.moon.type line
-      when "string"
-        insert @_lines, line
-      when Block
-        line\render @_lines
-      when Line
-        line\render @_lines
-      else
-        error "Adding unknown item"
-    line
-
-  add_to_buffer = (buffer, line) ->
-    switch mtype line
-      when Line
-        line\render buffer
-      else
-        insert buffer, line
-    buffer
+  add: (item) =>
+    @_lines\add item
+    item
 
   -- todo: pass in buffer as argument
   render: (buffer) =>
-    add_to_buffer buffer, @header
-
-    -- copy lines
-    lines = [l for l in *@_lines]
+    buffer\add @header
 
     if @next
-      insert buffer, lines
+      buffer\add @_lines
       @next\render buffer
     else
       -- join an empty block into a single line
-      if #lines == 0 and "string" == type buffer[#buffer]
-        buffer[#buffer] ..= " " .. (unpack add_to_buffer {}, @footer)
+      if #@_lines == 0 and "string" == type buffer[#buffer]
+        buffer[#buffer] ..= " " .. (unpack Lines!\add @footer)
       else
-        insert buffer, lines
-        add_to_buffer buffer, @footer
+        buffer\add @_lines
+        buffer\add @footer
 
     buffer
 
@@ -330,9 +335,10 @@ class Block
 
   splice: (fn) =>
     lines = {"lines", @_lines}
-    @_lines = {}
+    @_lines = Lines!
     @stms fn lines
 
+-- move this into Lines
 flatten_lines = (lines, indent=nil, buffer={}) ->
   for i = 1, #lines
     l = lines[i]

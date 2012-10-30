@@ -19,7 +19,75 @@ end
 local concat, insert = table.concat, table.insert
 local pos_to_line, get_line, get_closest_line, trim = util.pos_to_line, util.get_line, util.get_closest_line, util.trim
 local mtype = util.moon.type
-local Line
+local Line, Lines
+Lines = (function()
+  local _parent_0 = nil
+  local _base_0 = {
+    add = function(self, item)
+      local _exp_0 = mtype(item)
+      if Line == _exp_0 then
+        item:render(self)
+      elseif Block == _exp_0 then
+        item:render(self)
+      else
+        self[#self + 1] = item
+      end
+      return self
+    end,
+    __tostring = function(self)
+      local strip
+      strip = function(t)
+        if "table" == type(t) then
+          return (function()
+            local _accum_0 = { }
+            local _len_0 = 0
+            local _list_0 = t
+            for _index_0 = 1, #_list_0 do
+              local v = _list_0[_index_0]
+              _len_0 = _len_0 + 1
+              _accum_0[_len_0] = strip(v)
+            end
+            return _accum_0
+          end)()
+        else
+          return t
+        end
+      end
+      return "Lines<" .. tostring(util.dump(strip(self)):sub(1, -2)) .. ">"
+    end
+  }
+  _base_0.__index = _base_0
+  if _parent_0 then
+    setmetatable(_base_0, _parent_0.__base)
+  end
+  local _class_0 = setmetatable({
+    __init = function(self)
+      self.posmap = { }
+    end,
+    __base = _base_0,
+    __name = "Lines",
+    __parent = _parent_0
+  }, {
+    __index = function(cls, name)
+      local val = rawget(_base_0, name)
+      if val == nil and _parent_0 then
+        return _parent_0[name]
+      else
+        return val
+      end
+    end,
+    __call = function(cls, ...)
+      local _self_0 = setmetatable({}, _base_0)
+      cls.__init(_self_0, ...)
+      return _self_0
+    end
+  })
+  _base_0.__class = _class_0
+  if _parent_0 and _parent_0.__inherited then
+    _parent_0.__inherited(_parent_0, _class_0)
+  end
+  return _class_0
+end)()
 Line = (function()
   local _parent_0 = nil
   local _base_0 = {
@@ -57,21 +125,21 @@ Line = (function()
       local current = { }
       local add_current
       add_current = function()
-        return insert(buffer, concat(current))
+        return buffer:add(concat(current))
       end
       local _list_0 = self
       for _index_0 = 1, #_list_0 do
         local chunk = _list_0[_index_0]
         local _exp_0 = mtype(chunk)
         if Block == _exp_0 then
-          local _list_1 = chunk:render({ })
+          local _list_1 = chunk:render(Lines())
           for _index_1 = 1, #_list_1 do
             local block_chunk = _list_1[_index_1]
             if "string" == type(block_chunk) then
               insert(current, block_chunk)
             else
               add_current()
-              insert(buffer, block_chunk)
+              buffer:add(block_chunk)
               current = { }
             end
           end
@@ -85,7 +153,7 @@ Line = (function()
       return buffer
     end,
     __tostring = function(self)
-      return "Line<" .. tostring(self:render()) .. ">"
+      return "Line<" .. tostring(util.dump(self):sub(1, -2)) .. ">"
     end
   }
   _base_0.__index = _base_0
@@ -123,7 +191,7 @@ Line = (function()
   return _class_0
 end)()
 Block = (function()
-  local add_to_buffer, block_iterator
+  local block_iterator
   local _parent_0 = nil
   local _base_0 = {
     header = "do",
@@ -275,44 +343,21 @@ Block = (function()
       print("appending pos", self)
       self._posmap[#self._posmap + 1] = map
     end,
-    add_raw = function(self, item)
-      return insert(self._lines, item)
-    end,
-    add = function(self, line)
-      local _exp_0 = util.moon.type(line)
-      if "string" == _exp_0 then
-        insert(self._lines, line)
-      elseif Block == _exp_0 then
-        line:render(self._lines)
-      elseif Line == _exp_0 then
-        line:render(self._lines)
-      else
-        error("Adding unknown item")
-      end
-      return line
+    add = function(self, item)
+      self._lines:add(item)
+      return item
     end,
     render = function(self, buffer)
-      add_to_buffer(buffer, self.header)
-      local lines = (function()
-        local _accum_0 = { }
-        local _len_0 = 0
-        local _list_0 = self._lines
-        for _index_0 = 1, #_list_0 do
-          local l = _list_0[_index_0]
-          _len_0 = _len_0 + 1
-          _accum_0[_len_0] = l
-        end
-        return _accum_0
-      end)()
+      buffer:add(self.header)
       if self.next then
-        insert(buffer, lines)
+        buffer:add(self._lines)
         self.next:render(buffer)
       else
-        if #lines == 0 and "string" == type(buffer[#buffer]) then
-          buffer[#buffer] = buffer[#buffer] .. (" " .. (unpack(add_to_buffer({ }, self.footer))))
+        if #self._lines == 0 and "string" == type(buffer[#buffer]) then
+          buffer[#buffer] = buffer[#buffer] .. (" " .. (unpack(Lines():add(self.footer))))
         else
-          insert(buffer, lines)
-          add_to_buffer(buffer, self.footer)
+          buffer:add(self._lines)
+          buffer:add(self.footer)
         end
       end
       return buffer
@@ -438,7 +483,7 @@ Block = (function()
         "lines",
         self._lines
       }
-      self._lines = { }
+      self._lines = Lines()
       return self:stms(fn(lines))
     end
   }
@@ -449,7 +494,7 @@ Block = (function()
   local _class_0 = setmetatable({
     __init = function(self, parent, header, footer)
       self.parent, self.header, self.footer = parent, header, footer
-      self._lines = { }
+      self._lines = Lines()
       self._posmap = { }
       self._names = { }
       self._state = { }
@@ -494,15 +539,6 @@ Block = (function()
   })
   _base_0.__class = _class_0
   local self = _class_0
-  add_to_buffer = function(buffer, line)
-    local _exp_0 = mtype(line)
-    if Line == _exp_0 then
-      line:render(buffer)
-    else
-      insert(buffer, line)
-    end
-    return buffer
-  end
   block_iterator = function(list)
     return coroutine.wrap(function()
       local _list_0 = list
