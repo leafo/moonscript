@@ -143,6 +143,34 @@ x = (function()
   end
   return _accum_0
 end)()
+x = (function()
+  local _accum_0 = { }
+  local _len_0 = 0
+  local _list_1 = 3
+  for _index_0 = 1, #_list_1 do
+    local thing = _list_1[_index_0]
+    local _value_0
+    y = "hello"
+    if _value_0 ~= nil then
+      _len_0 = _len_0 + 1
+      _accum_0[_len_0] = _value_0
+    end
+  end
+  return _accum_0
+end)()
+x = (function()
+  local _accum_0 = { }
+  local _len_0 = 0
+  for x = 1, 2 do
+    local _value_0
+    y = "hello"
+    if _value_0 ~= nil then
+      _len_0 = _len_0 + 1
+      _accum_0[_len_0] = _value_0
+    end
+  end
+  return _accum_0
+end)()
 while true do
   local _continue_0 = false
   repeat

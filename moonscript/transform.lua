@@ -1250,7 +1250,19 @@ Accumulator = (function()
         end
       else
         body = apply_to_last(body, function(n)
-          return build.assign_one(self.value_name, n)
+          if types.is_value(n) then
+            return build.assign_one(self.value_name, n)
+          else
+            return build.group({
+              {
+                "declare",
+                {
+                  self.value_name
+                }
+              },
+              n
+            })
+          end
         end)
         val = self.value_name
       end

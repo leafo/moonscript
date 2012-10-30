@@ -651,7 +651,14 @@ class Accumulator
         body = {}
     else
       body = apply_to_last body, (n) ->
-        build.assign_one @value_name, n
+        if types.is_value n
+          build.assign_one @value_name, n
+        else
+          -- just ignore it
+          build.group {
+            {"declare", {@value_name}}
+            n
+          }
       @value_name
 
     update = {

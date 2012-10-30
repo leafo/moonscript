@@ -74,6 +74,15 @@ i = 0
 x = while i < 10
   i += 1
 
+-- values that can'e be coerced
+
+x = for thing in *3
+  y = "hello"
+
+x = for x=1,2
+  y = "hello"
+
+
 -- continue
 
 while true
