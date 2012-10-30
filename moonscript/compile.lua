@@ -17,7 +17,7 @@ do
   ntype = _table_0.ntype
 end
 local concat, insert = table.concat, table.insert
-local pos_to_line, get_line, get_closest_line, trim = util.pos_to_line, util.get_line, util.get_closest_line, util.trim
+local pos_to_line, get_closest_line, trim = util.pos_to_line, util.get_closest_line, util.trim
 local mtype = util.moon.type
 local Line, Lines
 Lines = (function()
@@ -254,7 +254,6 @@ Line = (function()
   return _class_0
 end)()
 Block = (function()
-  local block_iterator
   local _parent_0 = nil
   local _base_0 = {
     header = "do",
@@ -477,7 +476,6 @@ Block = (function()
         return 
       end
       node = self.transform.statement(node)
-      local before = #self._lines
       local result
       do
         local fn = line_compile[ntype(node)]
@@ -577,18 +575,6 @@ Block = (function()
     end
   })
   _base_0.__class = _class_0
-  local self = _class_0
-  block_iterator = function(list)
-    return coroutine.wrap(function()
-      local _list_0 = list
-      for _index_0 = 1, #_list_0 do
-        local item = _list_0[_index_0]
-        if Block == mtype(item) then
-          coroutine.yield(item)
-        end
-      end
-    end)
-  end
   if _parent_0 and _parent_0.__inherited then
     _parent_0.__inherited(_parent_0, _class_0)
   end

@@ -14,7 +14,7 @@ import Set from require "moonscript.data"
 import ntype from require "moonscript.types"
 
 import concat, insert from table
-import pos_to_line, get_line, get_closest_line, trim from util
+import pos_to_line, get_closest_line, trim from util
 
 mtype = util.moon.type
 
@@ -82,7 +82,6 @@ class Lines
       else
         t
 
-    -- copy with only array elements
     "Lines<#{util.dump(strip @)\sub 1, -2}>"
 
 -- Buffer for building up a line
@@ -255,8 +254,6 @@ class Block
     buffer\add @header
     buffer\mark_pos @pos
 
-    -- print "Header:", util.dump(@header), mtype(@header).__name
-
     if @next
       buffer\add @_lines
       @next\render buffer
@@ -312,18 +309,9 @@ class Block
     with Line!
       \append_list [@value v for v in *values], delim
 
-
-  block_iterator = (list) ->
-    coroutine.wrap ->
-      for item in *list
-        if Block == mtype item
-          coroutine.yield item
-
   stm: (node, ...) =>
     return if not node -- skip blank statements
     node = @transform.statement node
-
-    before = #@_lines
 
     result = if fn = line_compile[ntype(node)]
       fn self, node, ...
