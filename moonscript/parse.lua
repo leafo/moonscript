@@ -383,7 +383,7 @@ local build_grammar = wrap_env(function()
 		IfCond = Exp * Assign^-1 / format_assign_for_if,
 
 		If = key"if" * IfCond * key"then"^-1 * Body *
-			((Break * CheckIndent)^-1 * EmptyLine^0 * key"elseif" * IfCond * key"then"^-1 * Body / mark"elseif")^0 *
+			((Break * CheckIndent)^-1 * EmptyLine^0 * key"elseif" * pos(IfCond) * key"then"^-1 * Body / mark"elseif")^0 *
 			((Break * CheckIndent)^-1 * EmptyLine^0 * key"else" * Body / mark"else")^-1 / mark"if",
 
 		Unless = key"unless" * IfCond * key"then"^-1 * Body *

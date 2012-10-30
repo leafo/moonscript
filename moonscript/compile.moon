@@ -28,6 +28,9 @@ class Lines
   new: =>
     @posmap = {}
 
+  mark_pos: (pos, line=#@) =>
+    @posmap[line] = pos unless @posmap[line]
+
   -- append a line or lines to the buffer
   add: (item) =>
     switch mtype item
@@ -39,6 +42,38 @@ class Lines
         @[#@ + 1] = item
     @
 
+  flatten_posmap: (line_no=0, out={}) =>
+    posmap = @posmap
+    for i, l in ipairs @
+      switch type l
+        when "table"
+          _, line_no = l\flatten_posmap line_no, out
+        when "string"
+          line_no += 1
+          out[line_no] = posmap[i]
+
+    out, line_no
+
+  flatten: (indent=nil, buffer={}) =>
+    for i = 1, #@
+      l = @[i]
+      switch type l
+        when "string"
+          insert buffer, indent if indent
+          insert buffer, l
+
+          -- insert breaks between ambiguous statements
+          if "string" == type @[i + 1]
+            lc = l\sub(-1)
+            if (lc == ")" or lc == "]") and @[i + 1]\sub(1,1) == "("
+              insert buffer, ";"
+
+          insert buffer, "\n"
+          last = l
+        when "table"
+           l\flatten indent and indent .. indent_char or indent_char, buffer
+    buffer
+
   __tostring: =>
     -- strip non-array elements
     strip = (t) ->
@@ -49,9 +84,17 @@ class Lines
 
     -- copy with only array elements
     "Lines<#{util.dump(strip @)\sub 1, -2}>"
+
+-- Buffer for building up a line
+-- A plain old table holding either strings or Block objects.
+-- Adding a line to a line will cause that line to be merged in.
 class Line
+  pos: nil
+
   _append_single: (item) =>
-    if util.moon.type(item) == Line
+    if Line == mtype item
+      -- print "appending line to line", item.pos, item
+      @pos = item.pos unless @pos -- bubble pos if there isn't one
       @_append_single value for value in *item
     else
       insert self, item
@@ -61,6 +104,7 @@ class Line
     for i = 1,#items
       @_append_single items[i]
       if i < #items then insert self, delim
+    nil
 
   append: (...) =>
     @_append_single item for item in *{...}
@@ -72,6 +116,7 @@ class Line
 
     add_current = ->
       buffer\add concat current
+      buffer\mark_pos @pos
 
     for chunk in *@
       switch mtype chunk
@@ -112,7 +157,6 @@ class Block
   new: (@parent, @header, @footer) =>
     @_lines = Lines!
 
-    @_posmap = {} -- todo: kill me
     @_names = {}
     @_state = {}
     @_listeners = {}
@@ -130,11 +174,6 @@ class Block
       setmetatable @_listeners, { __index: @parent._listeners }
     else
       @indent = 0
-
-  -- maps from a output (lua) line number to a character position in the
-  -- original moon file
-  line_table: =>
-    @_posmap
 
   set: (name, value) =>
     @_state[name] = value
@@ -155,7 +194,7 @@ class Block
   declare: (names) =>
     undeclared = for name in *names
       is_local = false
-      real_name = switch util.moon.type name
+      real_name = switch mtype name
         when LocalName
           is_local = true
           name\get_name self
@@ -174,7 +213,7 @@ class Block
     value = ...
     value = true if select("#", ...) == 0
 
-    name = name\get_name self if util.moon.type(name) == NameProxy
+    name = name\get_name self if NameProxy == mtype name
     @_names[name] = value
 
   has_name: (name, skip_exports) =>
@@ -206,35 +245,6 @@ class Block
     @stm {"assign", {name}, {value}}
     name
 
-  mark_pos: (line_no, node) =>
-    if pos = node[-1]
-      @last_pos = pos
-      @_posmap[line_no] = pos unless @_posmap[line_no]
-
-  append_posmap: (map) =>
-    print "appending pos", self
-    @_posmap[#@_posmap + 1] = map
-
-  -- append_line_table: (sub_table, offset) =>
-  --   offset = offset + @current_line
-
-  --   for line, source in pairs sub_table
-  --     line += offset
-  --     if not @_posmap[line]
-  --       @_posmap[line] = source
-
-  -- add_line_tables: (line) =>
-  --     for chunk in *line
-  --       if util.moon.type(chunk) == Block
-  --         current = chunk
-  --         while current
-  --           if util.moon.type(current.header) == Line
-  --             @add_line_tables current.header
-
-  --           @append_line_table current\line_table!, 0
-  --           @current_line += current.current_line
-  --           current = current.next
-
   -- add a line object
   add: (item) =>
     @_lines\add item
@@ -243,6 +253,9 @@ class Block
   -- todo: pass in buffer as argument
   render: (buffer) =>
     buffer\add @header
+    buffer\mark_pos @pos
+
+    -- print "Header:", util.dump(@header), mtype(@header).__name
 
     if @next
       buffer\add @_lines
@@ -254,6 +267,7 @@ class Block
       else
         buffer\add @_lines
         buffer\add @footer
+        buffer\mark_pos @pos
 
     buffer
 
@@ -282,7 +296,16 @@ class Block
 
     fn = value_compile[action]
     error "Failed to compile value: "..dump.value node if not fn
-    fn self, node, ...
+
+    out = fn self, node, ...
+
+    -- store the pos, creating a line if necessary
+    if type(node) == "table" and node[-1]
+      if type(out) == "string"
+        out = with Line! do \append out
+      out.pos = node[-1]
+
+    out
 
   values: (values, delim) =>
     delim = delim or ', '
@@ -302,30 +325,20 @@ class Block
 
     before = #@_lines
 
-    added = if fn = line_compile[ntype(node)]
-      out = fn self, node, ...
-      @add out if out
+    result = if fn = line_compile[ntype(node)]
+      fn self, node, ...
     else
       -- coerce value into statement
       if has_value node
         @stm {"assign", {"_"}, {node}}
       else
-        @add @value node
+        @value node
 
-    -- mark pos for each line added
-    if added
-      print "added #{#@_lines - before} lines"
+    if result
+      if type(node) == "table" and type(result) == "table" and node[-1]
+        result.pos = node[-1]
+      @add result
 
-      list = if Line == mtype added then added else {added}
-      next_block = block_iterator list
-
-      for l=before + 1,#@_lines
-        if "table" == type @_lines[l]
-          block = next_block!
-          block._posmap.num_lines = #block._lines
-          @_posmap[l] = block._posmap
-        else
-          @mark_pos l, node
     nil
 
   stms: (stms, ret) =>
@@ -337,39 +350,6 @@ class Block
     lines = {"lines", @_lines}
     @_lines = Lines!
     @stms fn lines
-
--- move this into Lines
-flatten_lines = (lines, indent=nil, buffer={}) ->
-  for i = 1, #lines
-    l = lines[i]
-    switch type l
-      when "string"
-        insert buffer, indent if indent
-        insert buffer, l
-
-        -- insert breaks between ambiguous statements
-        if "string" == type lines[i + 1]
-          lc = l\sub(-1)
-          if (lc == ")" or lc == "]") and lines[i + 1]\sub(1,1) == "("
-            insert buffer, ";"
-
-        insert buffer, "\n"
-        last = l
-      when "table"
-        flatten_lines l, indent and indent .. indent_char or indent_char, buffer
-
-  buffer
-
-flatten_posmap = (posmap, dl=0, out={}) ->
-  for k,v in pairs posmap
-    continue if "string" == type k
-    if "table" == type v
-      flatten_posmap v, k - 1 + dl, out
-      dl += v.num_lines - 1
-    else
-      out[k + dl] = v
-
-  out
 
 debug_posmap = (posmap, fname=error"pass in input file", lua_code) ->
   moon_code = io.open(fname)\read "*a"
@@ -397,8 +377,8 @@ class RootBlock extends Block
   __tostring: => "RootBlock<>"
 
   render: =>
-    -- print util.dump @_lines
-    buffer = flatten_lines @_lines
+    -- print @_lines
+    buffer = @_lines\flatten!
     buffer[#buffer] = nil if buffer[#buffer] == "\n"
     table.concat buffer
 
@@ -423,25 +403,22 @@ tree = (tree, scope=RootBlock!) ->
 
   runner = coroutine.create ->
     scope\stm line for line in *tree
-    scope\render!
 
-  success, result = coroutine.resume runner
+  success, err = coroutine.resume runner
   if not success
-    error_msg = if type(result) == "table"
-      error_type = result[1]
+    error_msg = if type(err) == "table"
+      error_type = err[1]
       if error_type == "user-error"
-        result[2]
+        err[2]
       else
         error "Unknown error thrown", util.dump error_msg
     else
-      concat {result, debug.traceback runner}, "\n"
+      concat {err, debug.traceback runner}, "\n"
 
     nil, error_msg, scope.last_pos
   else
-    raw_posmap = scope\line_table!
-    posmap = flatten_posmap raw_posmap
-    print util.dump raw_posmap
-    print util.dump posmap
-    print debug_posmap posmap, "scrap.moon", result
-    result, posmap
+    lua_code = scope\render!
+    posmap = scope._lines\flatten_posmap!
+    -- print debug_posmap posmap, "scrap.moon", lua_code
+    lua_code, posmap
 
