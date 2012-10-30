@@ -129,4 +129,7 @@ class Whacko
 
 print "hello"
 
+yyy = ->
+  class Cool
+    nil
 

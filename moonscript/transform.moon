@@ -439,7 +439,7 @@ Statement = Transformer {
       if_stm
     }
 
-  class: (node) =>
+  class: (node, ret) =>
     _, name, parent_val, body = unpack node
 
     -- split apart properties and statements
@@ -620,6 +620,8 @@ Statement = Transformer {
           names: {name}
           values: {.block_exp out_body}
         }
+        if ret
+          ret name
       }
 
     value
@@ -694,15 +696,15 @@ implicitly_return = (scope) ->
       stm = scope.transform.statement stm
       t = ntype stm
 
-    if types.manual_return[t] or not types.is_value stm
+    if types.cascading[t]
+      is_top = false
+      scope.transform.statement stm, fn
+    elseif types.manual_return[t] or not types.is_value stm
       -- remove blank return statement
       if is_top and t == "return" and stm[2] == ""
         nil
       else
         stm
-    elseif types.cascading[t]
-      is_top = false
-      scope.transform.statement stm, fn
     else
       if t == "comprehension" and not types.comprehension_has_value stm
         stm
