@@ -9,7 +9,7 @@ require "moonscript.util"
 require "alt_getopt"
 require "lfs"
 
-local opts, ind = alt_getopt.get_opts(arg, "vhwt:pTb", {
+local opts, ind = alt_getopt.get_opts(arg, "vhwt:pTXb", {
 	print = "p", tree = "T", version = "v", help = "h"
 })
 
@@ -24,6 +24,7 @@ local help = [[Usage: %s [options] files...
     -t path     Specify where to place compiled files
     -p          Write output to standard out
     -T          Write parse tree instead of code (to stdout)
+    -X          Write line rewrite map instead of code (to stdout)
     -b          Dump parse and compile time (doesn't write output)
     -v          Print version
 
@@ -122,10 +123,18 @@ function compile_file(text, fname)
 		return ""
 	else
 		local compile_time = gettime()
-		local code, err, pos = compile.tree(tree)
+		local code, posmap_or_err, err_pos = compile.tree(tree)
 		compile_time = gettime() - compile_time
+
 		if not code then
-			return nil, compile.format_error(err, pos, text)
+			return nil, compile.format_error(posmap_or_err, err_pos, text)
+		end
+
+		if opts.X then
+			opts.p = true
+			print("Pos", "Lua", ">>", "Moon")
+			print(util.debug_posmap(posmap_or_err, text, code))
+			return ""
 		end
 
 		if opts.b then

@@ -4,7 +4,7 @@ module "moonscript.util", package.seeall
 export moon
 export pos_to_line, get_closest_line, get_line
 export reversed, trim, split
-export dump
+export dump, debug_posmap
 
 import concat from table
 
@@ -73,5 +73,21 @@ dump = (what) ->
       tostring(what).."\n"
 
   _dump what
+
+
+debug_posmap = (posmap, moon_code, lua_code) ->
+  tuples = [{k, v} for k, v in pairs posmap]
+  table.sort tuples, (a, b) -> a[1] < b[1]
+
+  lines = for pair in *tuples
+    lua_line, pos = unpack pair
+    moon_line = pos_to_line moon_code, pos
+
+    lua_text = get_line lua_code, lua_line
+    moon_text = get_closest_line moon_code, moon_line
+
+    "#{pos}\t #{lua_line}:[ #{trim lua_text} ] >> #{moon_line}:[ #{trim moon_text} ]"
+
+  concat(lines, "\n")
 
 

@@ -351,24 +351,6 @@ class Block
     @_lines = Lines!
     @stms fn lines
 
-debug_posmap = (posmap, fname=error"pass in input file", lua_code) ->
-  moon_code = io.open(fname)\read "*a"
-
-  tuples = [{k, v} for k, v in pairs posmap]
-
-  table.sort tuples, (a, b) -> a[1] < b[1]
-
-  lines = for pair in *tuples
-    lua_line, pos = unpack pair
-    moon_line = pos_to_line moon_code, pos
-
-    lua_text = get_line lua_code, lua_line
-    moon_text = get_closest_line moon_code, moon_line
-
-    "#{pos}\t #{lua_line}:[ #{trim lua_text} ] >> #{moon_line}:[ #{trim moon_text} ]"
-
-  concat(lines, "\n") .. "\n"
-
 class RootBlock extends Block
   new: (...) =>
     @root = self
@@ -419,6 +401,5 @@ tree = (tree, scope=RootBlock!) ->
   else
     lua_code = scope\render!
     posmap = scope._lines\flatten_posmap!
-    -- print debug_posmap posmap, "scrap.moon", lua_code
     lua_code, posmap
 
