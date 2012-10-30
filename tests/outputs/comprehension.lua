@@ -52,7 +52,7 @@ _ = (function()
   end
   return _tbl_0
 end)()
-_ = (function()
+return (function()
   local _tbl_0 = { }
   local _list_0 = {
     {

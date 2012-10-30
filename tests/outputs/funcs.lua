@@ -108,7 +108,7 @@ k(function()
     return 
   end
 end)
-_ = function()
+return function()
   if something then
     return real_name
   end

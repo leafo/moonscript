@@ -72,5 +72,5 @@ if hello(1, 2, 3, world, world) then
   print("hello")
 end
 if hello(1, 2, 3, world, world) then
-  print("hello")
+  return print("hello")
 end

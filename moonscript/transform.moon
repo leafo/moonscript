@@ -11,6 +11,8 @@ import insert from table
 
 export Statement, Value, NameProxy, LocalName, Run
 
+local implicitly_return
+
 -- always declares as local
 class LocalName
   new: (@name) => self[1] = "temp_name"
@@ -186,6 +188,9 @@ construct_comprehension = (inner, clauses) ->
   current_stms[1]
 
 Statement = Transformer {
+  root_stms: (body) =>
+    apply_to_last body, implicitly_return @
+
   assign: (node) =>
     names, values = unpack node, 2
     -- bubble cascading assigns
@@ -678,7 +683,6 @@ class Accumulator
 
 default_accumulator = (node) =>
   Accumulator!\convert node
-
 
 implicitly_return = (scope) ->
   is_top = true

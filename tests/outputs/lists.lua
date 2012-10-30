@@ -286,7 +286,7 @@ _ = function()
     _ = x
   end
 end
-_ = function()
+return function()
   return (function()
     local _accum_0 = { }
     local _len_0 = 0

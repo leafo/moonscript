@@ -34,4 +34,4 @@ local _ = "hello"
 ("hello"):format().hello(1, 2, 3);
 ("hello"):format(1, 2, 3)
 something("hello"):world()
-something(("hello"):world())
+return something(("hello"):world())

@@ -589,4 +589,4 @@ Whacko = (function()
   end
   return _class_0
 end)()
-print("hello")
+return print("hello")

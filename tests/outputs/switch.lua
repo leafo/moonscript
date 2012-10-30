@@ -43,7 +43,7 @@ do
   end
 end
 fix(this)
-call_func((function()
+return call_func((function()
   local _exp_5 = something
   if 1 == _exp_5 then
     return "yes"

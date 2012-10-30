@@ -586,6 +586,14 @@ RootBlock = (function()
     __tostring = function(self)
       return "RootBlock<>"
     end,
+    root_stms = function(self, stms)
+      stms = transform.Statement.transformers.root_stms(self, stms)
+      local _list_0 = stms
+      for _index_0 = 1, #_list_0 do
+        local s = _list_0[_index_0]
+        self:stm(s)
+      end
+    end,
     render = function(self)
       local buffer = self._lines:flatten()
       if buffer[#buffer] == "\n" then
@@ -652,11 +660,7 @@ tree = function(tree, scope)
   end
   assert(tree, "missing tree")
   local runner = coroutine.create(function()
-    local _list_0 = tree
-    for _index_0 = 1, #_list_0 do
-      local line = _list_0[_index_0]
-      scope:stm(line)
-    end
+    return scope:root_stms(tree)
   end)
   local success, err = coroutine.resume(runner)
   if not success then

@@ -69,4 +69,5 @@ end
 do
   local _with_0 = tmp
   local j = 2000
+  return _with_0
 end

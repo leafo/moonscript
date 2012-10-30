@@ -5,6 +5,7 @@ local data = require("moonscript.data")
 local reversed = util.reversed
 local ntype, build, smart_node, is_slice, value_is_singular = types.ntype, types.build, types.smart_node, types.is_slice, types.value_is_singular
 local insert = table.insert
+local implicitly_return
 LocalName = (function()
   local _parent_0 = nil
   local _base_0 = {
@@ -443,6 +444,9 @@ construct_comprehension = function(inner, clauses)
   return current_stms[1]
 end
 Statement = Transformer({
+  root_stms = function(self, body)
+    return apply_to_last(body, implicitly_return(self))
+  end,
   assign = function(self, node)
     local names, values = unpack(node, 2)
     local transformed
@@ -1329,7 +1333,6 @@ local default_accumulator
 default_accumulator = function(self, node)
   return Accumulator():convert(node)
 end
-local implicitly_return
 implicitly_return = function(scope)
   local is_top = true
   local fn

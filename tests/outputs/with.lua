@@ -45,4 +45,5 @@ do
   local _ = _with_0:prop("something").hello
   _with_0.prop:send(one)
   _with_0.prop:send(one)
+  return _with_0
 end

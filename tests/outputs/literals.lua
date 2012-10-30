@@ -11,4 +11,4 @@ _ = [[ hello world ]]
 _ = [=[ hello world ]=]
 _ = [====[ hello world ]====]
 _ = "another world"
-_ = 'what world'
+return 'what world'

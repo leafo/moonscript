@@ -346,6 +346,10 @@ class RootBlock extends Block
 
   __tostring: => "RootBlock<>"
 
+  root_stms: (stms) =>
+    stms = transform.Statement.transformers.root_stms self, stms
+    @stm s for s in *stms
+
   render: =>
     -- print @_lines
     buffer = @_lines\flatten!
@@ -372,7 +376,7 @@ tree = (tree, scope=RootBlock!) ->
   assert tree, "missing tree"
 
   runner = coroutine.create ->
-    scope\stm line for line in *tree
+    scope\root_stms tree
 
   success, err = coroutine.resume runner
   if not success
