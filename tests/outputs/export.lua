@@ -1,6 +1,6 @@
 a, b, c = 223, 343
 cool = "dad"
-Something = (function()
+do
   local _parent_0 = nil
   local _base_0 = {
     umm = "cool"
@@ -37,8 +37,8 @@ Something = (function()
   if _parent_0 and _parent_0.__inherited then
     _parent_0.__inherited(_parent_0, _class_0)
   end
-  return _class_0
-end)()
+  Something = _class_0
+end
 local What
 if this then
   What = 232

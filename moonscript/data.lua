@@ -9,7 +9,7 @@ Set = function(items)
   end
   return self
 end
-Stack = (function()
+do
   local _parent_0 = nil
   local _base_0 = {
     __tostring = function(self)
@@ -63,8 +63,8 @@ Stack = (function()
   if _parent_0 and _parent_0.__inherited then
     _parent_0.__inherited(_parent_0, _class_0)
   end
-  return _class_0
-end)()
+  Stack = _class_0
+end
 lua_keywords = Set({
   'and',
   'break',

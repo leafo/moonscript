@@ -6,7 +6,7 @@ local reversed = util.reversed
 local ntype, build, smart_node, is_slice, value_is_singular = types.ntype, types.build, types.smart_node, types.is_slice, types.value_is_singular
 local insert = table.insert
 local implicitly_return
-LocalName = (function()
+do
   local _parent_0 = nil
   local _base_0 = {
     get_name = function(self)
@@ -44,9 +44,9 @@ LocalName = (function()
   if _parent_0 and _parent_0.__inherited then
     _parent_0.__inherited(_parent_0, _class_0)
   end
-  return _class_0
-end)()
-NameProxy = (function()
+  LocalName = _class_0
+end
+do
   local _parent_0 = nil
   local _base_0 = {
     get_name = function(self, scope)
@@ -134,9 +134,9 @@ NameProxy = (function()
   if _parent_0 and _parent_0.__inherited then
     _parent_0.__inherited(_parent_0, _class_0)
   end
-  return _class_0
-end)()
-Run = (function()
+  NameProxy = _class_0
+end
+do
   local _parent_0 = nil
   local _base_0 = {
     call = function(self, state)
@@ -174,8 +174,8 @@ Run = (function()
   if _parent_0 and _parent_0.__inherited then
     _parent_0.__inherited(_parent_0, _class_0)
   end
-  return _class_0
-end)()
+  Run = _class_0
+end
 local apply_to_last
 apply_to_last = function(stms, fn)
   local last_exp_id = 0
@@ -340,7 +340,7 @@ with_continue_listener = function(body)
   }
 end
 local Transformer
-Transformer = (function()
+do
   local _parent_0 = nil
   local _base_0 = {
     transform = function(self, scope, node, ...)
@@ -408,8 +408,8 @@ Transformer = (function()
   if _parent_0 and _parent_0.__inherited then
     _parent_0.__inherited(_parent_0, _class_0)
   end
-  return _class_0
-end)()
+  Transformer = _class_0
+end
 local construct_comprehension
 construct_comprehension = function(inner, clauses)
   local current_stms = inner
@@ -1197,7 +1197,7 @@ Statement = Transformer({
             })
           }
         }),
-        cls_name
+        _with_0.assign_one(name, cls_name)
       }
       hoist_declarations(out_body)
       value = _with_0.group({
@@ -1206,14 +1206,7 @@ Statement = Transformer({
             name
           }
         }),
-        _with_0.assign({
-          names = {
-            name
-          },
-          values = {
-            _with_0.block_exp(out_body)
-          }
-        }),
+        _with_0["do"](out_body),
         (function()
           if ret then
             return ret(name)
@@ -1225,7 +1218,7 @@ Statement = Transformer({
   end
 })
 local Accumulator
-Accumulator = (function()
+do
   local _parent_0 = nil
   local _base_0 = {
     body_idx = {
@@ -1332,8 +1325,8 @@ Accumulator = (function()
   if _parent_0 and _parent_0.__inherited then
     _parent_0.__inherited(_parent_0, _class_0)
   end
-  return _class_0
-end)()
+  Accumulator = _class_0
+end
 local default_accumulator
 default_accumulator = function(self, node)
   return Accumulator():convert(node)

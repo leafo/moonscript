@@ -20,7 +20,7 @@ local concat, insert = table.concat, table.insert
 local pos_to_line, get_closest_line, trim = util.pos_to_line, util.get_closest_line, util.trim
 local mtype = util.moon.type
 local Line, Lines
-Lines = (function()
+do
   local _parent_0 = nil
   local _base_0 = {
     mark_pos = function(self, pos, line)
@@ -143,9 +143,9 @@ Lines = (function()
   if _parent_0 and _parent_0.__inherited then
     _parent_0.__inherited(_parent_0, _class_0)
   end
-  return _class_0
-end)()
-Line = (function()
+  Lines = _class_0
+end
+do
   local _parent_0 = nil
   local _base_0 = {
     pos = nil,
@@ -251,9 +251,9 @@ Line = (function()
   if _parent_0 and _parent_0.__inherited then
     _parent_0.__inherited(_parent_0, _class_0)
   end
-  return _class_0
-end)()
-Block = (function()
+  Line = _class_0
+end
+do
   local _parent_0 = nil
   local _base_0 = {
     header = "do",
@@ -578,9 +578,9 @@ Block = (function()
   if _parent_0 and _parent_0.__inherited then
     _parent_0.__inherited(_parent_0, _class_0)
   end
-  return _class_0
-end)()
-RootBlock = (function()
+  Block = _class_0
+end
+do
   local _parent_0 = Block
   local _base_0 = {
     __tostring = function(self)
@@ -636,8 +636,8 @@ RootBlock = (function()
   if _parent_0 and _parent_0.__inherited then
     _parent_0.__inherited(_parent_0, _class_0)
   end
-  return _class_0
-end)()
+  RootBlock = _class_0
+end
 format_error = function(msg, pos, file_str)
   local line = pos_to_line(file_str, pos)
   local line_str

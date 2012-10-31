@@ -1,5 +1,5 @@
 local Hello
-Hello = (function()
+do
   local _parent_0 = nil
   local _base_0 = {
     hello = function(self)
@@ -40,13 +40,13 @@ Hello = (function()
   if _parent_0 and _parent_0.__inherited then
     _parent_0.__inherited(_parent_0, _class_0)
   end
-  return _class_0
-end)()
+  Hello = _class_0
+end
 local x = Hello(1, 2)
 x:hello()
 print(x)
 local Simple
-Simple = (function()
+do
   local _parent_0 = nil
   local _base_0 = {
     cool = function(self)
@@ -85,10 +85,10 @@ Simple = (function()
   if _parent_0 and _parent_0.__inherited then
     _parent_0.__inherited(_parent_0, _class_0)
   end
-  return _class_0
-end)()
+  Simple = _class_0
+end
 local Yikes
-Yikes = (function()
+do
   local _parent_0 = Simple
   local _base_0 = { }
   _base_0.__index = _base_0
@@ -121,12 +121,12 @@ Yikes = (function()
   if _parent_0 and _parent_0.__inherited then
     _parent_0.__inherited(_parent_0, _class_0)
   end
-  return _class_0
-end)()
+  Yikes = _class_0
+end
 x = Yikes()
 x:cool()
 local Hi
-Hi = (function()
+do
   local _parent_0 = nil
   local _base_0 = {
     cool = function(self, num)
@@ -163,9 +163,9 @@ Hi = (function()
   if _parent_0 and _parent_0.__inherited then
     _parent_0.__inherited(_parent_0, _class_0)
   end
-  return _class_0
-end)()
-Simple = (function()
+  Hi = _class_0
+end
+do
   local _parent_0 = Hi
   local _base_0 = {
     cool = function(self)
@@ -202,13 +202,13 @@ Simple = (function()
   if _parent_0 and _parent_0.__inherited then
     _parent_0.__inherited(_parent_0, _class_0)
   end
-  return _class_0
-end)()
+  Simple = _class_0
+end
 x = Simple()
 x:cool()
 print(x.__class == Simple)
 local Okay
-Okay = (function()
+do
   local _parent_0 = nil
   local _base_0 = {
     something = 20323
@@ -245,10 +245,10 @@ Okay = (function()
   if _parent_0 and _parent_0.__inherited then
     _parent_0.__inherited(_parent_0, _class_0)
   end
-  return _class_0
-end)()
+  Okay = _class_0
+end
 local Biggie
-Biggie = (function()
+do
   local _parent_0 = Okay
   local _base_0 = {
     something = function(self)
@@ -289,10 +289,10 @@ Biggie = (function()
   if _parent_0 and _parent_0.__inherited then
     _parent_0.__inherited(_parent_0, _class_0)
   end
-  return _class_0
-end)()
+  Biggie = _class_0
+end
 local Yeah
-Yeah = (function()
+do
   local _parent_0 = nil
   local _base_0 = {
     okay = function(self)
@@ -331,10 +331,10 @@ Yeah = (function()
   if _parent_0 and _parent_0.__inherited then
     _parent_0.__inherited(_parent_0, _class_0)
   end
-  return _class_0
-end)()
+  Yeah = _class_0
+end
 local What
-What = (function()
+do
   local _parent_0 = nil
   local _base_0 = {
     something = function(self)
@@ -373,9 +373,9 @@ What = (function()
   if _parent_0 and _parent_0.__inherited then
     _parent_0.__inherited(_parent_0, _class_0)
   end
-  return _class_0
-end)()
-Hello = (function()
+  What = _class_0
+end
+do
   local _parent_0 = What
   local _base_0 = {
     val = 2323,
@@ -421,8 +421,8 @@ Hello = (function()
   if _parent_0 and _parent_0.__inherited then
     _parent_0.__inherited(_parent_0, _class_0)
   end
-  return _class_0
-end)()
+  Hello = _class_0
+end
 do
   local _with_0 = Hello()
   x = _with_0:something()
@@ -430,7 +430,7 @@ do
   x()
 end
 local CoolSuper
-CoolSuper = (function()
+do
   local _parent_0 = nil
   local _base_0 = {
     hi = function(self)
@@ -475,8 +475,8 @@ CoolSuper = (function()
   if _parent_0 and _parent_0.__inherited then
     _parent_0.__inherited(_parent_0, _class_0)
   end
-  return _class_0
-end)()
+  CoolSuper = _class_0
+end
 x = self.hello
 x = self.__class.hello
 self:hello("world")
@@ -487,7 +487,7 @@ xx = function(hello, world, cool)
   self.hello, self.__class.world = hello, world
 end
 local ClassMan
-ClassMan = (function()
+do
   local _parent_0 = nil
   local _base_0 = {
     blue = function(self) end,
@@ -530,8 +530,8 @@ ClassMan = (function()
   if _parent_0 and _parent_0.__inherited then
     _parent_0.__inherited(_parent_0, _class_0)
   end
-  return _class_0
-end)()
+  ClassMan = _class_0
+end
 x = self
 local y = self.__class
 self(something)
@@ -541,7 +541,7 @@ self = 343
 self.hello(2, 3, 4)
 local _ = hello[self].world
 local Whacko
-Whacko = (function()
+do
   local hello
   local _parent_0 = nil
   local _base_0 = { }
@@ -587,13 +587,13 @@ Whacko = (function()
   if _parent_0 and _parent_0.__inherited then
     _parent_0.__inherited(_parent_0, _class_0)
   end
-  return _class_0
-end)()
+  Whacko = _class_0
+end
 print("hello")
 local yyy
 yyy = function()
   local Cool
-  Cool = (function()
+  do
     local _parent_0 = nil
     local _base_0 = { }
     _base_0.__index = _base_0
@@ -630,7 +630,7 @@ yyy = function()
     if _parent_0 and _parent_0.__inherited then
       _parent_0.__inherited(_parent_0, _class_0)
     end
-    return _class_0
-  end)()
+    Cool = _class_0
+  end
   return Cool
 end

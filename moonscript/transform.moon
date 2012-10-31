@@ -609,17 +609,15 @@ Statement = Transformer {
           }
         }
 
-        cls_name
+        .assign_one name, cls_name
       }
 
       hoist_declarations out_body
 
       value = .group {
         .declare names: {name}
-        .assign {
-          names: {name}
-          values: {.block_exp out_body}
-        }
+        .do out_body
+
         if ret
           ret name
       }
