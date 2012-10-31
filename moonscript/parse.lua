@@ -166,10 +166,15 @@ end
 
 -- makes sure the last item in a chain is an index
 local _assignable = { index = true, dot = true, slice = true }
+
+local function is_assignable(node)
+	local t = ntype(node)
+	return t == "self" or t == "value" or
+		t == "chain" and _assignable[ntype(node[#node])]
+end
+
 local function check_assignable(str, pos, value)
-	if ntype(value) == "chain" and _assignable[ntype(value[#value])]
-		or type(value) == "string"
-	then
+	if is_assignable(value) then
 		return true, value
 	end
 	return false
@@ -179,6 +184,13 @@ local flatten_explist = flatten_or_mark"explist"
 local function format_assign(lhs_exps, assign)
 	if not assign then
 		return flatten_explist(lhs_exps)
+	end
+
+	for _, assign_exp in ipairs(lhs_exps) do
+		if not is_assignable(assign_exp) then
+			print(util.dump(assign_exp))
+			error {assign_exp, "left hand expression is not assignable"}
+		end
 	end
 
 	local t = ntype(assign)
@@ -276,7 +288,7 @@ local function self_assign(name)
 	return {{"key_literal", name}, name}
 end
 
-local err_msg = "Failed to parse:\n [%d] >>    %s (%d)"
+local err_msg = "Failed to parse:%s\n [%d] >>    %s"
 
 local build_grammar = wrap_env(function()
 	local _indent = Stack(0) -- current indent
@@ -559,16 +571,30 @@ local build_grammar = wrap_env(function()
 			end
 
 			local tree
-			local args = {...}
-			local pass, err = assert(pcall(function()
-				tree = self._g:match(str, unpack(args))
-			end))
+			local pass, err = pcall(function(...)
+				tree = self._g:match(str, ...)
+			end, ...)
+
+			-- regular error, let it bubble up
+			if type(err) == "string" then
+				error(err)
+			end
 
 			if not tree then
-				local line_no = pos_to_line(last_pos)
+				local pos = last_pos
+				local msg
+
+				if err then
+					local node
+					node, msg = unpack(err)
+					msg = msg and " " .. msg
+					pos = node[-1]
+				end
+
+				local line_no = pos_to_line(pos)
 				local line_str = get_line(line_no) or ""
 
-				return nil, err_msg:format(line_no, trim(line_str), _indent:top())
+				return nil, err_msg:format(msg or "", line_no, trim(line_str))
 			end
 			return tree
 		end
