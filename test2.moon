@@ -43,9 +43,9 @@ benchmark = (fn) ->
     nil, fn!
 
 read_all = (fname) ->
-  f = io.open(fname, "r")
-  with f\read "*a"
-    f\close!
+  if f = io.open(fname, "r")
+    with f\read "*a"
+      f\close!
 
 diff_file = (a_fname, b_fname) ->
   out = io.popen(options.diff.tool .. " ".. a_fname .. " " .. b_fname, "r")\read "*a"
@@ -107,7 +107,7 @@ describe "input tests", ->
           \close!
       else
         expected_str = read_all output_fname name
-        return "Test not built: " .. input_fname(name) unless expected_str
+        error "Test not built: " .. input_fname(name) unless expected_str
 
         string_assert expected_str, code
 
