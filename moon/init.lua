@@ -161,3 +161,4 @@ fold = function(items, fn)
     return items[1]
   end
 end
+return nil

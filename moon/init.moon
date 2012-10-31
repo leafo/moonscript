@@ -134,3 +134,4 @@ fold = (items, fn)->
   else
     items[1]
 
+nil

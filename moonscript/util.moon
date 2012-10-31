@@ -90,4 +90,5 @@ debug_posmap = (posmap, moon_code, lua_code) ->
 
   concat(lines, "\n")
 
+nil
 

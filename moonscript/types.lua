@@ -261,3 +261,4 @@ smart_node = function(node)
     end
   })
 end
+return nil

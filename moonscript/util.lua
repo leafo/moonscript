@@ -135,3 +135,4 @@ debug_posmap = function(posmap, moon_code, lua_code)
   end)()
   return concat(lines, "\n")
 end
+return nil

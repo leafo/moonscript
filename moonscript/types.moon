@@ -149,3 +149,4 @@ smart_node = (node) ->
       rawset node, key, value
   }
     
+nil
