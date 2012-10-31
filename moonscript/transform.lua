@@ -954,6 +954,28 @@ Statement = Transformer({
       smart_node(constructor)
       constructor.arrow = "fat"
     end
+    local real_name
+    if ntype(name) == "chain" then
+      local last = name[#name]
+      local _exp_0 = ntype(last)
+      if "dot" == _exp_0 then
+        real_name = {
+          "string",
+          '"',
+          last[2]
+        }
+      elseif "index" == _exp_0 then
+        real_name = last[2]
+      else
+        real_name = "nil"
+      end
+    else
+      real_name = {
+        "string",
+        '"',
+        name
+      }
+    end
     local cls = build.table({
       {
         "__init",
@@ -965,11 +987,7 @@ Statement = Transformer({
       },
       {
         "__name",
-        {
-          "string",
-          '"',
-          name
-        }
+        real_name
       },
       {
         "__parent",
@@ -1197,21 +1215,25 @@ Statement = Transformer({
             })
           }
         }),
-        _with_0.assign_one(name, cls_name)
+        _with_0.assign_one(name, cls_name),
+        (function()
+          if ret then
+            return ret(cls_name)
+          end
+        end)()
       }
       hoist_declarations(out_body)
       value = _with_0.group({
-        _with_0.declare({
-          names = {
-            name
-          }
-        }),
-        _with_0["do"](out_body),
         (function()
-          if ret then
-            return ret(name)
+          if ntype(name) == "value" then
+            return _with_0.declare({
+              names = {
+                name
+              }
+            })
           end
-        end)()
+        end)(),
+        _with_0["do"](out_body)
       })
     end
     return value

@@ -133,3 +133,17 @@ yyy = ->
   class Cool
     nil
 
+
+--
+
+class a.b.c.D
+  nil
+
+
+class a.b["hello"]
+  nil
+
+class (-> require "moon")!.Something extends Hello.World
+  nil
+
+

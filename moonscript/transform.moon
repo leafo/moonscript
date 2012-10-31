@@ -488,10 +488,22 @@ Statement = Transformer {
       smart_node constructor
       constructor.arrow = "fat"
 
+    real_name = if ntype(name) == "chain"
+      last = name[#name]
+      switch ntype last
+        when "dot"
+          {"string", '"', last[2]}
+        when "index"
+          last[2]
+        else
+          "nil"
+    else
+      {"string", '"', name}
+
     cls = build.table {
       {"__init", constructor}
       {"__base", base_name}
-      {"__name", {"string", '"', name}} -- "quote the string"
+      {"__name", real_name} -- "quote the string"
       {"__parent", parent_cls_name}
     }
 
@@ -610,16 +622,17 @@ Statement = Transformer {
         }
 
         .assign_one name, cls_name
+        if ret
+          ret cls_name
       }
 
       hoist_declarations out_body
 
       value = .group {
-        .declare names: {name}
-        .do out_body
+        if ntype(name) == "value"
+          .declare names: {name}
 
-        if ret
-          ret name
+        .do out_body
       }
 
     value
