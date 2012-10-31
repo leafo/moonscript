@@ -435,7 +435,7 @@ local build_grammar = wrap_env(function()
 		For = key"for" * DisableDo * ensure(Name * sym"=" * Ct(Exp * sym"," * Exp * (sym"," * Exp)^-1), PopDo) *
 			key"do"^-1 * Body / mark"for",
 
-		ForEach = key"for" * Ct(NameList) * key"in" * Ct(sym"*" * Exp / mark"unpack" + ExpList) * key"do"^-1 * Body / mark"foreach",
+		ForEach = key"for" * Ct(NameList) * key"in" * DisableDo * ensure(Ct(sym"*" * Exp / mark"unpack" + ExpList), PopDo) * key"do"^-1 * Body / mark"foreach",
 
 		Do = key"do" * Body / mark"do",
 
