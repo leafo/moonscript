@@ -71,11 +71,14 @@ rewrite_traceback = (text, err) ->
 
   err = rewrite_single err
   match = g\match text
+
+  return nil unless match
+
   for i, trace in ipairs match
     match[i] = rewrite_single trace
 
   concat {
-    "moon:" .. err
+    "moon: " .. err
     header_text
     "\t" .. concat match, "\n\t"
   }, "\n"

@@ -85,11 +85,14 @@ rewrite_traceback = function(text, err)
   end
   err = rewrite_single(err)
   local match = g:match(text)
+  if not (match) then
+    return nil
+  end
   for i, trace in ipairs(match) do
     match[i] = rewrite_single(trace)
   end
   return concat({
-    "moon:" .. err,
+    "moon: " .. err,
     header_text,
     "\t" .. concat(match, "\n\t")
   }, "\n")

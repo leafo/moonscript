@@ -587,7 +587,9 @@ RootBlock = (function()
       return "RootBlock<>"
     end,
     root_stms = function(self, stms)
-      stms = transform.Statement.transformers.root_stms(self, stms)
+      if not (self.options.implicitly_return_root == false) then
+        stms = transform.Statement.transformers.root_stms(self, stms)
+      end
       local _list_0 = stms
       for _index_0 = 1, #_list_0 do
         local s = _list_0[_index_0]
@@ -607,9 +609,10 @@ RootBlock = (function()
     setmetatable(_base_0, _parent_0.__base)
   end
   local _class_0 = setmetatable({
-    __init = function(self, ...)
+    __init = function(self, options)
+      self.options = options
       self.root = self
-      return _parent_0.__init(self, ...)
+      return _parent_0.__init(self)
     end,
     __base = _base_0,
     __name = "RootBlock",
@@ -654,11 +657,12 @@ value = function(value)
   end
   return out
 end
-tree = function(tree, scope)
-  if scope == nil then
-    scope = RootBlock()
+tree = function(tree, options)
+  if options == nil then
+    options = { }
   end
   assert(tree, "missing tree")
+  local scope = (options.scope or RootBlock)(options)
   local runner = coroutine.create(function()
     return scope:root_stms(tree)
   end)

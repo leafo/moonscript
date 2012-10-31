@@ -340,14 +340,15 @@ class Block
     @stms fn lines
 
 class RootBlock extends Block
-  new: (...) =>
+  new: (@options) =>
     @root = self
-    super ...
+    super!
 
   __tostring: => "RootBlock<>"
 
   root_stms: (stms) =>
-    stms = transform.Statement.transformers.root_stms self, stms
+    unless @options.implicitly_return_root == false
+      stms = transform.Statement.transformers.root_stms self, stms
     @stm s for s in *stms
 
   render: =>
@@ -372,8 +373,10 @@ value = (value) ->
     out = \render!
   out
 
-tree = (tree, scope=RootBlock!) ->
+tree = (tree, options={}) ->
   assert tree, "missing tree"
+
+  scope = (options.scope or RootBlock) options
 
   runner = coroutine.create ->
     scope\root_stms tree

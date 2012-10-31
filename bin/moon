@@ -17,7 +17,7 @@ local help = [=[Usage: %s [options] [script [args]]
 ]=]
 
 local function print_err(...)
-	msg = table.concat({...}, "\t")
+	local msg = table.concat({...}, "\t")
 	io.stderr:write(msg .. "\n")
 end
 
@@ -49,7 +49,7 @@ local new_arg = {
 
 local moonscript_chunk, lua_parse_error
 local passed, err = pcall(function()
-	moonscript_chunk, lua_parse_error = moonscript.loadfile(script_fname)
+	moonscript_chunk, lua_parse_error = moonscript.loadfile(script_fname, { implicitly_return_root = false })
 end)
 
 if not passed then
@@ -70,16 +70,25 @@ getfenv(moonscript_chunk).arg = new_arg
 
 if not opts.d then
 	local err, trace
+
 	xpcall(function() moonscript_chunk(unpack(new_arg)) end, function(_err)
 		err = _err
 		trace = debug.traceback("", 2)
 	end)
 
 	if err then
-		local traceback = util.trim(trace)
-		traceback = moonscript.errors.truncate_traceback(traceback)
-		print_err(moonscript.errors.rewrite_traceback(traceback, err))
-		os.exit(1)
+		local truncated = moonscript.errors.truncate_traceback(util.trim(trace))
+		local rewritten = moonscript.errors.rewrite_traceback(truncated, err)
+
+		if rewritten then
+			print_err(rewritten)
+		else
+			-- faield to rewrite, show original
+			print_err(table.concat({
+				err,
+				util.trim(trace)
+			}, "\n"))
+		end
 	end
 else
 	moonscript_chunk(unpack(new_arg))

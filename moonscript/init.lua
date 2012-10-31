@@ -20,7 +20,10 @@ create_moonpath = function(package_path)
   end
   return concat(paths, ";")
 end
-to_lua = function(text)
+to_lua = function(text, options)
+  if options == nil then
+    options = { }
+  end
   if "string" ~= type(text) then
     local t = type(text)
     error("expecting string (got " .. t .. ")", 2)
@@ -29,7 +32,7 @@ to_lua = function(text)
   if not tree then
     error(err, 2)
   end
-  local code, ltable, pos = compile.tree(tree)
+  local code, ltable, pos = compile.tree(tree, options)
   if not code then
     error(compile.format_error(ltable, pos, text), 2)
   end
@@ -65,9 +68,12 @@ end
 if not _G.moon_no_loader then
   init_loader()
 end
-loadstring = function(str, chunk_name)
+loadstring = function(str, chunk_name, options)
+  if options == nil then
+    options = nil
+  end
   local passed, code, ltable = pcall(function()
-    return to_lua(str)
+    return to_lua(str, options)
   end)
   if not passed then
     error(chunk_name .. ": " .. code, 2)
@@ -77,16 +83,19 @@ loadstring = function(str, chunk_name)
   end
   return lua.loadstring(code, chunk_name or "=(moonscript.loadstring)")
 end
-loadfile = function(fname)
+loadfile = function(fname, options)
+  if options == nil then
+    options = nil
+  end
   local file, err = io.open(fname)
   if not file then
     return nil, err
   end
   local text = assert(file:read("*a"))
   file:close()
-  return loadstring(text, fname)
+  return loadstring(text, fname, options)
 end
-dofile = function(fname)
+dofile = function(fname, options)
   local f = assert(loadfile(fname))
   return f()
 end
