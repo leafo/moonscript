@@ -9,6 +9,8 @@ import reversed from util
 import ntype, build, smart_node, is_slice, value_is_singular from types
 import insert from table
 
+mtype = util.moon.type
+
 export Statement, Value, NameProxy, LocalName, Run
 
 local implicitly_return
@@ -92,7 +94,7 @@ find_assigns = (body, out={}) ->
         table.insert out, thing[2] -- extract names
   out
 
-hoist_declarations = (body, rules) ->
+hoist_declarations = (body) ->
   assigns = {}
 
   -- hoist the plain old assigns
@@ -100,7 +102,11 @@ hoist_declarations = (body, rules) ->
     for name in *names
       table.insert assigns, name if type(name) == "string"
 
-  table.insert body, 1, {"declare", assigns}
+  -- insert after runs
+  idx = 1
+  while mtype(body[idx]) == Run do idx += 1
+
+  table.insert body, idx, {"declare", assigns}
 
 expand_elseif_assign = (ifstm) ->
   for i = 4, #ifstm
@@ -551,6 +557,9 @@ Statement = Transformer {
     with build
       out_body = {
         Run =>
+          -- make sure we don't assign the class to a local inside the do
+          @put_name name
+
           @set "super", (block, chain) ->
             if chain
               slice = [item for item in *chain[3,]]

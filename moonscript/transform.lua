@@ -5,6 +5,7 @@ local data = require("moonscript.data")
 local reversed = util.reversed
 local ntype, build, smart_node, is_slice, value_is_singular = types.ntype, types.build, types.smart_node, types.is_slice, types.value_is_singular
 local insert = table.insert
+local mtype = util.moon.type
 local implicitly_return
 do
   local _parent_0 = nil
@@ -233,7 +234,7 @@ find_assigns = function(body, out)
   return out
 end
 local hoist_declarations
-hoist_declarations = function(body, rules)
+hoist_declarations = function(body)
   local assigns = { }
   local _list_0 = find_assigns(body)
   for _index_0 = 1, #_list_0 do
@@ -246,7 +247,11 @@ hoist_declarations = function(body, rules)
       end
     end
   end
-  return table.insert(body, 1, {
+  local idx = 1
+  while mtype(body[idx]) == Run do
+    idx = idx + 1
+  end
+  return table.insert(body, idx, {
     "declare",
     assigns
   })
@@ -1092,6 +1097,7 @@ Statement = Transformer({
       local _with_0 = build
       local out_body = {
         Run(function(self)
+          self:put_name(name)
           return self:set("super", function(block, chain)
             if chain then
               local slice = (function()

@@ -147,3 +147,11 @@ class (-> require "moon")!.Something extends Hello.World
   nil
 
 
+
+--
+
+export ^
+class Something
+  nil
+
+
