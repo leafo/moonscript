@@ -729,6 +729,9 @@ Value = Transformer {
   while: default_accumulator
   foreach: default_accumulator
 
+  do: (node) =>
+    build.block_exp node[2]
+
   decorated: (node) =>
     @transform.statement node
 

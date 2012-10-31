@@ -292,6 +292,7 @@ local err_msg = "Failed to parse:%s\n [%d] >>    %s"
 
 local build_grammar = wrap_env(function()
 	local _indent = Stack(0) -- current indent
+	local _do_stack = Stack(0)
 
 	local last_pos = 0 -- used to know where to report error
 	local function check_indent(str, pos, indent)
@@ -316,6 +317,34 @@ local build_grammar = wrap_env(function()
 		if not _indent:pop() then error("unexpected outdent") end
 		return true
 	end
+
+
+	local function check_do(str, pos, do_node)
+		local top = _do_stack:top()
+		if top == nil or top then
+			return true, do_node
+		end
+		return false
+	end
+
+	local function disable_do(str_pos)
+		_do_stack:push(false)
+		return true
+	end
+
+	local function enable_do(str_pos)
+		_do_stack:push(true)
+		return true
+	end
+
+	local function pop_do(str, pos)
+		if nil == _do_stack:pop() then error("unexpected do pop") end
+		return true
+	end
+
+	local DisableDo = Cmt("", disable_do)
+	local EnableDo = Cmt("", enable_do)
+	local PopDo = Cmt("", pop_do)
 
 	local keywords = {}
 	local function key(chars)
@@ -384,9 +413,9 @@ local build_grammar = wrap_env(function()
 
 		Return = key"return" * (ExpListLow/mark"explist" + C"") / mark"return",
 
-		With = key"with" * Exp * key"do"^-1 * Body / mark"with",
+		With = key"with" * DisableDo * ensure(Exp, PopDo) * key"do"^-1 * Body / mark"with",
 
-		Switch = key"switch" * Exp * key"do"^-1 * Space^-1 * Break * SwitchBlock / mark"switch",
+		Switch = key"switch" * DisableDo * ensure(Exp, PopDo) * key"do"^-1 * Space^-1 * Break * SwitchBlock / mark"switch",
 
 		SwitchBlock = EmptyLine^0 * Advance * Ct(SwitchCase * (Break^1 * SwitchCase)^0 * (Break^1 * SwitchElse)^-1) * PopIndent,
 		SwitchCase = key"when" * Exp * key"then"^-1 * Body / mark"case",
@@ -401,12 +430,14 @@ local build_grammar = wrap_env(function()
 		Unless = key"unless" * IfCond * key"then"^-1 * Body *
 			((Break * CheckIndent)^-1 * EmptyLine^0 * key"else" * Body / mark"else")^-1 / mark"unless",
 
-		While = key"while" * Exp * key"do"^-1 * Body / mark"while",
+		While = key"while" * DisableDo * ensure(Exp, PopDo) * key"do"^-1 * Body / mark"while",
 
-		For = key"for" * (Name * sym"=" * Ct(Exp * sym"," * Exp * (sym"," * Exp)^-1)) *
+		For = key"for" * DisableDo * ensure(Name * sym"=" * Ct(Exp * sym"," * Exp * (sym"," * Exp)^-1), PopDo) *
 			key"do"^-1 * Body / mark"for",
 
 		ForEach = key"for" * Ct(NameList) * key"in" * Ct(sym"*" * Exp / mark"unpack" + ExpList) * key"do"^-1 * Body / mark"foreach",
+
+		Do = key"do" * Body / mark"do",
 
 		Comprehension = sym"[" * Exp * CompInner * sym"]" / mark"comprehension",
 
@@ -436,6 +467,7 @@ local build_grammar = wrap_env(function()
 			Switch +
 			With +
 			ForEach + For + While +
+			Cmt(Do, check_do) +
 			sym"-" * -SomeSpace * Exp / mark"minus" +
 			sym"#" * Exp / mark"length" +
 			key"not" * Exp / mark"not" +

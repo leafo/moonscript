@@ -13,7 +13,8 @@ cascading = data.Set({
   "unless",
   "with",
   "switch",
-  "class"
+  "class",
+  "do"
 })
 is_value = function(stm)
   local compile, transform = moonscript.compile, moonscript.transform

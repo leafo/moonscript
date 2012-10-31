@@ -14,7 +14,7 @@ manual_return = data.Set{"foreach", "for", "while", "return"}
 -- Assigns and returns are bubbled into their bodies.
 -- All cascading statement transform functions accept a second arugment that
 -- is the transformation to apply to the last statement in their body
-cascading = data.Set{ "if", "unless", "with", "switch", "class" }
+cascading = data.Set{ "if", "unless", "with", "switch", "class", "do" }
 
 is_value = (stm) ->
   import compile, transform from moonscript

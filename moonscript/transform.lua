@@ -1388,6 +1388,9 @@ Value = Transformer({
   ["for"] = default_accumulator,
   ["while"] = default_accumulator,
   foreach = default_accumulator,
+  ["do"] = function(self, node)
+    return build.block_exp(node[2])
+  end,
   decorated = function(self, node)
     return self.transform.statement(node)
   end,
