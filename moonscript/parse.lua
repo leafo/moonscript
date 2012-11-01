@@ -205,7 +205,7 @@ end
 
 -- the if statement only takes a single lhs, so we wrap in table to git to
 -- "assign" tuple format
-local function format_assign_for_if(lhs, assign)
+local function format_single_assign(lhs, assign)
 	if assign then
 		return format_assign({lhs}, assign)
 	end
@@ -413,7 +413,8 @@ local build_grammar = wrap_env(function()
 
 		Return = key"return" * (ExpListLow/mark"explist" + C"") / mark"return",
 
-		With = key"with" * DisableDo * ensure(Exp, PopDo) * key"do"^-1 * Body / mark"with",
+		WithExp = Ct(ExpList) * Assign^-1 / format_assign,
+		With = key"with" * DisableDo * ensure(WithExp, PopDo) * key"do"^-1 * Body / mark"with",
 
 		Switch = key"switch" * DisableDo * ensure(Exp, PopDo) * key"do"^-1 * Space^-1 * Break * SwitchBlock / mark"switch",
 
@@ -421,7 +422,7 @@ local build_grammar = wrap_env(function()
 		SwitchCase = key"when" * Exp * key"then"^-1 * Body / mark"case",
 		SwitchElse = key"else" * Body / mark"else",
 
-		IfCond = Exp * Assign^-1 / format_assign_for_if,
+		IfCond = Exp * Assign^-1 / format_single_assign,
 
 		If = key"if" * IfCond * key"then"^-1 * Body *
 			((Break * CheckIndent)^-1 * EmptyLine^0 * key"elseif" * pos(IfCond) * key"then"^-1 * Body / mark"elseif")^0 *

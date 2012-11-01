@@ -746,11 +746,26 @@ Statement = Transformer({
   with = function(self, node, ret)
     local _, exp, block = unpack(node)
     local scope_name = NameProxy("with")
+    local named_assign
+    if ntype(exp) == "assign" then
+      local names, values = unpack(exp, 2)
+      local assign_name = names[1]
+      exp = values[1]
+      values[1] = scope_name
+      named_assign = {
+        "assign",
+        names,
+        values
+      }
+    end
     return build["do"]({
-      build.assign_one(scope_name, exp),
       Run(function(self)
         return self:set("scope_var", scope_name)
       end),
+      build.assign_one(scope_name, exp),
+      build.group({
+        named_assign
+      }),
       build.group(block),
       (function()
         if ret then

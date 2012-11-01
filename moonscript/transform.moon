@@ -347,11 +347,22 @@ Statement = Transformer {
 
   with: (node, ret) =>
     _, exp, block = unpack node
+
     scope_name = NameProxy "with"
-    build["do"] {
-      build.assign_one scope_name, exp
+
+    named_assign = if ntype(exp) == "assign"
+      names, values = unpack exp, 2
+      assign_name = names[1]
+      exp = values[1]
+      values[1] = scope_name
+      {"assign", names, values}
+
+    build.do {
       Run => @set "scope_var", scope_name
+      build.assign_one scope_name, exp
+      build.group { named_assign }
       build.group block
+
       if ret
         ret scope_name
     }
