@@ -95,9 +95,9 @@ describe "input tests", ->
       file_str = read_all input_fname name
 
       parse_time, tree, err = benchmark -> parse.string file_str
-      return err if err
+      error err if err
       compile_time, code, err, pos = benchmark -> compile.tree tree
-      return compile.format_error err, pos, file_str unless code
+      error compile.format_error err, pos, file_str unless code
 
       table.insert timings, {name, parse_time, compile_time}
 
