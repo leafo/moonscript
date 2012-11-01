@@ -449,7 +449,7 @@ local build_grammar = wrap_env(function()
 		CompClause = CompFor + key"when" * Exp / mark"when",
 
 		Assign = sym"=" * (Ct(With + If + Switch) + Ct(TableBlock + ExpListLow)) / mark"assign",
-		Update = ((sym"..=" + sym"+=" + sym"-=" + sym"*=" + sym"/=" + sym"%=") / trim) * Exp / mark"update",
+		Update = ((sym"..=" + sym"+=" + sym"-=" + sym"*=" + sym"/=" + sym"%=" + sym"or=" + sym"and=") / trim) * Exp / mark"update",
 
 		-- we can ignore precedence for now
 		OtherOps = op"or" + op"and" + op"<=" + op">=" + op"~=" + op"!=" + op"==" + op".." + op"<" + op">",

@@ -229,3 +229,6 @@ a = a * 3
 a = a / func("cool")
 x["then"] = "hello"
 x["while"]["true"] = "hello"
+x = x or "hello"
+x = x and "hello"
+return x

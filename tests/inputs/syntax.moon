@@ -232,4 +232,9 @@ a /= func "cool"
 x.then = "hello"
 x.while.true = "hello"
 
+--
+
+x or= "hello"
+x and= "hello"
+
 -- cooool
