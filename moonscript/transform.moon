@@ -505,17 +505,20 @@ Statement = Transformer {
       smart_node constructor
       constructor.arrow = "fat"
 
-    real_name = if ntype(name) == "chain"
-      last = name[#name]
-      switch ntype last
-        when "dot"
-          {"string", '"', last[2]}
-        when "index"
-          last[2]
-        else
-          "nil"
-    else
-      {"string", '"', name}
+    real_name = switch ntype(name)
+      when "chain"
+        last = name[#name]
+        switch ntype last
+          when "dot"
+            {"string", '"', last[2]}
+          when "index"
+            last[2]
+          else
+            "nil"
+      when "nil"
+        "nil"
+      else
+        {"string", '"', name}
 
     cls = build.table {
       {"__init", constructor}
@@ -569,7 +572,7 @@ Statement = Transformer {
       out_body = {
         Run =>
           -- make sure we don't assign the class to a local inside the do
-          @put_name name
+          @put_name name if name
 
           @set "super", (block, chain) ->
             if chain
@@ -608,7 +611,7 @@ Statement = Transformer {
         .assign_one base_name, {"table", properties}
         .assign_one base_name\chain"__index", base_name
 
-        build["if"] {
+        .if {
           cond: parent_cls_name
           then: {
             .chain {
@@ -624,13 +627,13 @@ Statement = Transformer {
         .assign_one cls_name, cls
         .assign_one base_name\chain"__class", cls_name
 
-        .group if #statements > 0 {
+        .group if #statements > 0 then {
           .assign_one LocalName"self", cls_name
           .group statements
-        } else {}
+        }
 
         -- run the inherited callback
-        build["if"] {
+        .if {
           cond: {"exp",
             parent_cls_name, "and", parent_cls_name\chain "__inherited"
           }
@@ -641,7 +644,10 @@ Statement = Transformer {
           }
         }
 
-        .assign_one name, cls_name
+        .group if name then {
+          .assign_one name, cls_name
+        }
+
         if ret
           ret cls_name
       }
@@ -649,8 +655,9 @@ Statement = Transformer {
       hoist_declarations out_body
 
       value = .group {
-        if ntype(name) == "value"
+        .group if ntype(name) == "value" then {
           .declare names: {name}
+        }
 
         .do out_body
       }
@@ -754,6 +761,9 @@ Value = Transformer {
 
   decorated: (node) =>
     @transform.statement node
+
+  class: (node) =>
+    build.block_exp { node }
 
   string: (node) =>
     delim = node[2]

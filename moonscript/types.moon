@@ -25,10 +25,13 @@ comprehension_has_value = (comp) ->
 
 -- type of node as string
 ntype = (node) ->
-  if type(node) != "table"
-    "value"
-  else
-    node[1]
+  switch type node
+    when "nil"
+      "nil"
+    when "table"
+      node[1]
+    else
+      "value"
 
 value_is_singular = (node) ->
   type(node) != "table" or node[1] != "exp" or #node == 2
@@ -102,7 +105,7 @@ make_builder = (name) ->
 
 build = nil
 build = setmetatable {
-  group: (body) ->
+  group: (body={}) ->
     {"group", body}
   do: (body) ->
     {"do", body}

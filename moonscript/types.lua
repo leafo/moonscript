@@ -24,10 +24,13 @@ comprehension_has_value = function(comp)
   return is_value(comp[2])
 end
 ntype = function(node)
-  if type(node) ~= "table" then
-    return "value"
-  else
+  local _exp_0 = type(node)
+  if "nil" == _exp_0 then
+    return "nil"
+  elseif "table" == _exp_0 then
     return node[1]
+  else
+    return "value"
   end
 end
 value_is_singular = function(node)
@@ -175,6 +178,9 @@ end
 build = nil
 build = setmetatable({
   group = function(body)
+    if body == nil then
+      body = { }
+    end
     return {
       "group",
       body

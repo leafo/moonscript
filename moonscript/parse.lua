@@ -383,7 +383,7 @@ local build_grammar = wrap_env(function()
 		Line = (CheckIndent * Statement + Space * #Stop),
 
 		Statement = pos(
-				Import + While + With + For + ForEach + Switch + Return + ClassDecl +
+				Import + While + With + For + ForEach + Switch + Return +
 				Local + Export + BreakLoop +
 				Ct(ExpList) * (Update + Assign)^-1 / format_assign
 			) * Space * ((
@@ -467,6 +467,7 @@ local build_grammar = wrap_env(function()
 			If + Unless +
 			Switch +
 			With +
+			ClassDecl +
 			ForEach + For + While +
 			Cmt(Do, check_do) +
 			sym"-" * -SomeSpace * Exp / mark"minus" +
@@ -552,10 +553,10 @@ local build_grammar = wrap_env(function()
 		TableBlockInner = Ct(KeyValueLine * (SpaceBreak^1 * KeyValueLine)^0),
 		TableBlock = SpaceBreak^1 * Advance * ensure(TableBlockInner, PopIndent) / mark"table",
 
-		ClassDecl = key"class" * Assignable * (key"extends" * PreventIndent * ensure(Exp, PopIndent) + C"")^-1 * ClassBlock / mark"class",
+		ClassDecl = key"class" * (Assignable + Cc(nil)) * (key"extends" * PreventIndent * ensure(Exp, PopIndent) + C"")^-1 * (ClassBlock + Ct("")) / mark"class",
 
 		ClassBlock = SpaceBreak^1 * Advance *
-			Ct(ClassLine * (SpaceBreak^1 * ClassLine)^0) *  PopIndent,
+			Ct(ClassLine * (SpaceBreak^1 * ClassLine)^0) * PopIndent,
 		ClassLine = CheckIndent * ((
 				KeyValueList / mark"props" +
 				Statement / mark"stm" +

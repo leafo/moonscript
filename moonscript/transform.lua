@@ -975,20 +975,23 @@ Statement = Transformer({
       constructor.arrow = "fat"
     end
     local real_name
-    if ntype(name) == "chain" then
+    local _exp_0 = ntype(name)
+    if "chain" == _exp_0 then
       local last = name[#name]
-      local _exp_0 = ntype(last)
-      if "dot" == _exp_0 then
+      local _exp_1 = ntype(last)
+      if "dot" == _exp_1 then
         real_name = {
           "string",
           '"',
           last[2]
         }
-      elseif "index" == _exp_0 then
+      elseif "index" == _exp_1 then
         real_name = last[2]
       else
         real_name = "nil"
       end
+    elseif "nil" == _exp_0 then
+      real_name = "nil"
     else
       real_name = {
         "string",
@@ -1112,7 +1115,9 @@ Statement = Transformer({
       local _with_0 = build
       local out_body = {
         Run(function(self)
-          self:put_name(name)
+          if name then
+            self:put_name(name)
+          end
           return self:set("super", function(block, chain)
             if chain then
               local slice = (function()
@@ -1134,8 +1139,8 @@ Statement = Transformer({
               if head == nil then
                 return parent_cls_name
               end
-              local _exp_0 = head[1]
-              if "call" == _exp_0 then
+              local _exp_1 = head[1]
+              if "call" == _exp_1 then
                 local calling_name = block:get("current_block")
                 slice[1] = {
                   "call",
@@ -1155,7 +1160,7 @@ Statement = Transformer({
                     calling_name
                   })
                 end
-              elseif "colon" == _exp_0 then
+              elseif "colon" == _exp_1 then
                 local call = head[3]
                 insert(new_chain, {
                   "dot",
@@ -1186,7 +1191,7 @@ Statement = Transformer({
           properties
         }),
         _with_0.assign_one(base_name:chain("__index"), base_name),
-        build["if"]({
+        _with_0["if"]({
           cond = parent_cls_name,
           ["then"] = {
             _with_0.chain({
@@ -1215,11 +1220,9 @@ Statement = Transformer({
               _with_0.assign_one(LocalName("self"), cls_name),
               _with_0.group(statements)
             }
-          else
-            return { }
           end
         end)()),
-        build["if"]({
+        _with_0["if"]({
           cond = {
             "exp",
             parent_cls_name,
@@ -1236,7 +1239,13 @@ Statement = Transformer({
             })
           }
         }),
-        _with_0.assign_one(name, cls_name),
+        _with_0.group((function()
+          if name then
+            return {
+              _with_0.assign_one(name, cls_name)
+            }
+          end
+        end)()),
         (function()
           if ret then
             return ret(cls_name)
@@ -1245,15 +1254,17 @@ Statement = Transformer({
       }
       hoist_declarations(out_body)
       value = _with_0.group({
-        (function()
+        _with_0.group((function()
           if ntype(name) == "value" then
-            return _with_0.declare({
-              names = {
-                name
-              }
-            })
+            return {
+              _with_0.declare({
+                names = {
+                  name
+                }
+              })
+            }
           end
-        end)(),
+        end)()),
         _with_0["do"](out_body)
       })
     end
@@ -1414,6 +1425,11 @@ Value = Transformer({
   end,
   decorated = function(self, node)
     return self.transform.statement(node)
+  end,
+  class = function(self, node)
+    return build.block_exp({
+      node
+    })
   end,
   string = function(self, node)
     local delim = node[2]

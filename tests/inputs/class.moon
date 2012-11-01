@@ -146,7 +146,14 @@ class a.b["hello"]
 class (-> require "moon")!.Something extends Hello.World
   nil
 
+--
 
+a = class
+b = class Something
+c = class Something extends Hello
+d = class extends World
+
+print (class WhatsUp).__name
 
 --
 
