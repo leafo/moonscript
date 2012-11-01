@@ -32,9 +32,6 @@ moonlib = {
     })
   end
 }
-non_atomic = Set({
-  "update"
-})
 has_value = function(node)
   if ntype(node) == "chain" then
     local ctype = ntype(node[#node])
@@ -42,9 +39,6 @@ has_value = function(node)
   else
     return true
   end
-end
-is_non_atomic = function(node)
-  return non_atomic[ntype(node)]
 end
 count_lines = function(str)
   local count = 1

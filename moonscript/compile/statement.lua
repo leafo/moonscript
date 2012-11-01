@@ -159,29 +159,11 @@ line_compile = {
   end,
   ["while"] = function(self, node)
     local _, cond, block = unpack(node)
-    local out
-    if is_non_atomic(cond) then
-      do
-        local _with_0 = self:block("while true do")
-        _with_0:stm({
-          "if",
-          {
-            "not",
-            cond
-          },
-          {
-            {
-              "break"
-            }
-          }
-        })
-        out = _with_0
-      end
-    else
-      out = self:block(self:line("while ", self:value(cond), " do"))
+    do
+      local _with_0 = self:block(self:line("while ", self:value(cond), " do"))
+      _with_0:stms(block)
+      return _with_0
     end
-    out:stms(block)
-    return out
   end,
   ["for"] = function(self, node)
     local _, name, bounds, block = unpack(node)

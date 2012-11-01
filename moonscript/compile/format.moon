@@ -7,7 +7,7 @@ import Set from require "moonscript.data"
 import ntype from require "moonscript.types"
 import concat, insert from table
 
-export indent_char, default_return, moonlib, cascading, non_atomic, has_value, is_non_atomic
+export indent_char, default_return, moonlib, cascading, has_value
 export count_lines, user_error
 
 indent_char = "  "
@@ -23,9 +23,6 @@ moonlib =
   bind: (tbl, name) ->
     concat {"moon.bind(", tbl, ".", name, ", ", tbl, ")"}
 
--- an action that can't be completed in a single line
-non_atomic = Set{ "update" }
-
 -- does this always return a value
 has_value = (node) ->
   if ntype(node) == "chain"
@@ -33,9 +30,6 @@ has_value = (node) ->
     ctype != "call" and ctype != "colon"
   else
     true
-
-is_non_atomic = (node) ->
-  non_atomic[ntype(node)]
 
 count_lines = (str) ->
   count = 1

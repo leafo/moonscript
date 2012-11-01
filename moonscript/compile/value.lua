@@ -34,11 +34,6 @@ value_compile = {
       return _with_0
     end
   end,
-  update = function(self, node)
-    local _, name = unpack(node)
-    self:stm(node)
-    return self:name(name)
-  end,
   explist = function(self, node)
     do
       local _with_0 = self:line()

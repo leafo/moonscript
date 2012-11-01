@@ -156,7 +156,6 @@ for _index_0 = 1, #_list_0 do
   _ = ((function()
     if ntype(v) == "fndef" then
       x = x + 1
-      return x
     end
   end)())
 end
@@ -231,4 +230,3 @@ x["then"] = "hello"
 x["while"]["true"] = "hello"
 x = x or "hello"
 x = x and "hello"
-return x

@@ -134,8 +134,8 @@ x = (function()
   local _accum_0 = { }
   local _len_0 = 0
   while i < 10 do
+    local _value_0
     i = i + 1
-    local _value_0 = i
     if _value_0 ~= nil then
       _len_0 = _len_0 + 1
       _accum_0[_len_0] = _value_0

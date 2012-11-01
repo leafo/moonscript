@@ -92,15 +92,8 @@ line_compile =
 
   while: (node) =>
     _, cond, block = unpack node
-
-    out = if is_non_atomic cond
-      with @block "while true do"
-        \stm {"if", {"not", cond}, {{"break"}}}
-    else
-      @block @line "while ", @value(cond), " do"
-
-    out\stms block
-    out
+    with @block @line "while ", @value(cond), " do"
+      \stms block
 
   for: (node) =>
     _, name, bounds, block = unpack node

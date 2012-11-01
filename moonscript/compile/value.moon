@@ -24,12 +24,6 @@ value_compile =
     with @line!
       \append_list [_comp i,v for i,v in ipairs node when i > 1], " "
 
-  -- TODO refactor
-  update: (node) =>
-    _, name = unpack node
-    @stm node
-    @name name
-
   -- list of expressions separated by commas
   explist: (node) =>
     with @line!
