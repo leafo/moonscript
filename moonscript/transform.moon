@@ -209,13 +209,15 @@ Statement = Transformer {
         t = ntype value
 
       if types.cascading[t]
+        ret = (stm) ->
+          if types.is_value stm
+            {"assign", names, {stm}}
+          else
+            stm
+
         build.group {
           {"declare", names}
-          @transform.statement value, (stm) ->
-            if types.is_value stm
-              {"assign", names, {stm}}
-            else
-              stm
+          @transform.statement value, ret, node
         }
 
     transformed or node
@@ -456,7 +458,7 @@ Statement = Transformer {
       if_stm
     }
 
-  class: (node, ret) =>
+  class: (node, ret, parent_assign) =>
     _, name, parent_val, body = unpack node
 
     -- split apart properties and statements
@@ -505,9 +507,10 @@ Statement = Transformer {
       smart_node constructor
       constructor.arrow = "fat"
 
-    real_name = switch ntype(name)
+    real_name = name or parent_assign and parent_assign[2][1]
+    real_name = switch ntype real_name
       when "chain"
-        last = name[#name]
+        last = real_name[#real_name]
         switch ntype last
           when "dot"
             {"string", '"', last[2]}
@@ -518,7 +521,7 @@ Statement = Transformer {
       when "nil"
         "nil"
       else
-        {"string", '"', name}
+        {"string", '"', real_name}
 
     cls = build.table {
       {"__init", constructor}

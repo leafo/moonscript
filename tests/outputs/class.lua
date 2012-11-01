@@ -768,7 +768,7 @@ do
       end
     end,
     __base = _base_0,
-    __name = nil,
+    __name = "a",
     __parent = _parent_0
   }, {
     __index = function(cls, name)
@@ -885,7 +885,7 @@ do
       end
     end,
     __base = _base_0,
-    __name = nil,
+    __name = "d",
     __parent = _parent_0
   }, {
     __index = function(cls, name)

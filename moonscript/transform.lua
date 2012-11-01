@@ -463,24 +463,26 @@ Statement = Transformer({
         t = ntype(value)
       end
       if types.cascading[t] then
+        local ret
+        ret = function(stm)
+          if types.is_value(stm) then
+            return {
+              "assign",
+              names,
+              {
+                stm
+              }
+            }
+          else
+            return stm
+          end
+        end
         transformed = build.group({
           {
             "declare",
             names
           },
-          self.transform.statement(value, function(stm)
-            if types.is_value(stm) then
-              return {
-                "assign",
-                names,
-                {
-                  stm
-                }
-              }
-            else
-              return stm
-            end
-          end)
+          self.transform.statement(value, ret, node)
         })
       end
     end
@@ -897,7 +899,7 @@ Statement = Transformer({
       if_stm
     })
   end,
-  class = function(self, node, ret)
+  class = function(self, node, ret, parent_assign)
     local _, name, parent_val, body = unpack(node)
     local statements = { }
     local properties = { }
@@ -974,10 +976,10 @@ Statement = Transformer({
       smart_node(constructor)
       constructor.arrow = "fat"
     end
-    local real_name
-    local _exp_0 = ntype(name)
+    local real_name = name or parent_assign and parent_assign[2][1]
+    local _exp_0 = ntype(real_name)
     if "chain" == _exp_0 then
-      local last = name[#name]
+      local last = real_name[#real_name]
       local _exp_1 = ntype(last)
       if "dot" == _exp_1 then
         real_name = {
@@ -996,7 +998,7 @@ Statement = Transformer({
       real_name = {
         "string",
         '"',
-        name
+        real_name
       }
     end
     local cls = build.table({
