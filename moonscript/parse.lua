@@ -165,12 +165,12 @@ local function flatten_or_mark(name)
 end
 
 -- makes sure the last item in a chain is an index
-local _assignable = { index = true, dot = true, slice = true }
+local _chain_assignable = { index = true, dot = true, slice = true }
 
 local function is_assignable(node)
 	local t = ntype(node)
-	return t == "self" or t == "value" or
-		t == "chain" and _assignable[ntype(node[#node])]
+	return t == "self" or t == "value" or t == "self_class" or
+		t == "chain" and _chain_assignable[ntype(node[#node])]
 end
 
 local function check_assignable(str, pos, value)
@@ -188,7 +188,6 @@ local function format_assign(lhs_exps, assign)
 
 	for _, assign_exp in ipairs(lhs_exps) do
 		if not is_assignable(assign_exp) then
-			print(util.dump(assign_exp))
 			error {assign_exp, "left hand expression is not assignable"}
 		end
 	end

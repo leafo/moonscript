@@ -142,6 +142,9 @@ y /= 100
 m %= 2
 hello ..= "world"
 
+@@something += 10
+@something += 10
+
 x = 0
 (if ntype(v) == "fndef" then x += 1) for v in *values
 
