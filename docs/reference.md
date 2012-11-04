@@ -1,6 +1,6 @@
     target: reference/index
     template: reference
-    title: MoonScript v0.2.1 - Language Guide
+    title: MoonScript v0.2.2 - Language Guide
     short_name: lang
 --
 MoonScript is a programming language that compiles to
@@ -20,20 +20,27 @@ homepage are located at <http://moonscript.org>.
 
 ## Assignment
 
-Unlike Lua, there is no `local` keyword. All assignments to names that are not
-already defined will be declared as local to the scope of that declaration. If
-you wish to create a global variable it must be done using the `export`
-keyword.
+Assigning to an undeclared name will cause it to be declared as a new local
+variable. The language is dynamically typed so you can assign any value to any
+variable. You can assign multiple names and values at once just like Lua:
 
     ```moon
     hello = "world"
     a,b,c = 1, 2, 3
+    hello = 123 -- uses the existing variable
     ```
+
+If you wish to create a global variable it must be done using the
+[`export`](#export) keyword.
+
+The `local` keyword can be used to forward declare a variable, or shadow an
+existing one.
 
 ## Update Assignment
 
-`+=`, `-=`, `/=`, `*=`, `%=`, `..=` operators have been added for updating a value by
-a certain amount. They are aliases for their expanded equivalents.
+`+=`, `-=`, `/=`, `*=`, `%=`, `..=`, `or=`, `and=` operators have been added
+for updating and assigning at the same time. They are aliases for their
+expanded equivalents.
 
     ```moon
     x = 0
@@ -41,9 +48,12 @@ a certain amount. They are aliases for their expanded equivalents.
 
     s = "hello "
     s ..= "world"
+
+    b = false
+    b and= true or false
     ```
 
-## Comments 
+## Comments
 
 Like Lua, comments start with `--` and continue to the end of the line.
 Comments are not written to the output.
@@ -69,7 +79,6 @@ denoted using the arrow: `->`
     my_function = ->
     my_function() -- call the empty function
     ```
-
 
 The body of the function can either be one statement placed directly after the
 arrow, or it can be a series of statements indented on the following lines:
@@ -98,9 +107,9 @@ argument names in parentheses:
     sum = (x, y) -> print "sum", x + y
     ```
 
-Functions can be called by listing the values of the arguments after the name
-of the variable where the function is stored. When chaining together function
-calls, the arguments are applied to the closest function to the left.
+Functions can be called by listing the arguments after the name of an expresion
+that evaluates to a function. When chaining together function calls, the
+arguments are applied to the closest function to the left.
 
     ```moon
     sum 10, 20
@@ -116,6 +125,8 @@ right arguments get sent to the right functions.
     ```moon
     print "x:", sum(10, 20), "y:", sum(30, 40)
     ```
+
+There must not be any space between the opening parenthesis and the function.
 
 Functions will coerce the last statement in their body into a return statement,
 this is called implicit return:
@@ -133,7 +144,7 @@ And if you need to explicitly return, you can use the `return` keyword:
 
 Just like in Lua, functions can return multiple values. The last statement must
 be a list of values separated by commas:
-    
+
     ```moon
     mystery = (x, y) -> x + y, x - y
     a,b = mystery 10, 20
@@ -146,7 +157,7 @@ calling a method, a special syntax is provided for creating functions which
 automatically includes a `self` argument.
 
     ```moon
-    func = (num) => self.value + num
+    func = (num) => @value + num
     ```
 
 ### Argument Defaults
@@ -188,8 +199,9 @@ the `-`. Consider the examples below.
     ```
 
 The precedence of the first argument of a function call can also be controlled
-using whitespace if the argument is a literal string.In Lua, it is common to
-leave off parentheses when calling a function with a single string literal.
+using whitespace if the argument is a literal string. In Lua, it is common to
+leave off parentheses when calling a function with a single string or table
+literal.
 
 When there is no space between a variable and a string literal, the
 function call takes precedence over any following expressions. No other
@@ -249,7 +261,7 @@ instead of being part of the table.
     ```
 
 Although uncommon, notice how we can give a deeper indentation for function
-arguments if we know we will be using a lower indentation futher on.
+arguments if we know we will be using a lower indentation further on.
 
     ```moon
     y = { my_func 1,2,3,
@@ -299,7 +311,7 @@ The curly braces can be left off if a single table of key value pairs is being
 assigned.
 
     ```moon
-    profile = 
+    profile =
       height: "4 feet",
       shoe_size: 13,
       favorite_foods: {"ice cream", "donuts"}
@@ -348,7 +360,7 @@ same as the variable names, then the `:` prefix operator can be used:
 If you want the key of a field in the table to to be result of an expression,
 then you can wrap it in `[` `]`, just like in Lua. You can also use a string
 literal directly as a key, leaving out the square brackets. This is useful if
-your key has any special chacters.
+your key has any special characters.
 
     ```moon
     t = {
@@ -360,12 +372,12 @@ your key has any special chacters.
 
 ## Comprehensions
 
-Compiling provide a convenient syntax for constructing a new table by iterating
-over some existing object and applying an expression to its values. There are
-two kinds of comprehensions: list comprehensions and table comprehensions. They
-both produce Lua tables; _list comprehensions_ accumulate values into an
-array-like table, and _table comprehensions_ let you set both the key and the
-value on each iteration.
+Comprehensions provide a convenient syntax for constructing a new table by
+iterating over some existing object and applying an expression to its values.
+There are two kinds of comprehensions: list comprehensions and table
+comprehensions. They both produce Lua tables; _list comprehensions_ accumulate
+values into an array-like table, and _table comprehensions_ let you set both
+the key and the value on each iteration.
 
 ### List Comprehensions
 
@@ -405,10 +417,10 @@ Using multiple `for` clauses is the same as using nested loops:
 
 ### Table Comprehensions
 
-The syntax for table comprehensions is very similar, differing by using `{` and
+The syntax for table comprehensions is very similar, only differing by using `{` and
 `}` and taking two values from each iteration.
 
-This example copies the key-value table `thing`:
+This example makes a copy of the table`thing`:
 
     ```moon
     thing = {
@@ -456,7 +468,7 @@ a step size in a `for` loop.
 
 Here we can set the minimum and maximum bounds, taking all items with indexes
 between 1 and 5 inclusive:
-    
+
     ```moon
     slice = [item for item in *items[1,5]]
     ```
@@ -477,6 +489,15 @@ size and leave the other bounds blank. This takes all odd indexed items: (1, 3,
     slice = [item for item in *items[,,2]]
     ```
 
+## String Interpolation
+
+You can mix expressions into string literals using `#{}` syntax.
+
+    ```moon
+    print "I am #{math.random! * 100}% sure."
+    ```
+String interpolation is only available in double quoted strings.
+
 ## For Loop
 
 There are two for loop forms, just like in Lua. A numeric one and a generic one:
@@ -486,12 +507,12 @@ There are two for loop forms, just like in Lua. A numeric one and a generic one:
       print i
 
     for k = 1,15,2 -- an optional step provided
-      print k 
+      print k
 
     for key, value in pairs object
       print key, value
     ```
-    
+
 The slicing and `*` operators can be used, just like with comprehensions:
 
     ```moon
@@ -510,7 +531,7 @@ single line:
 
 A for loop can also be used an expression. The last statement in the body of
 the for loop is coerced into an expression and appended to an accumulating
-table if the value of that expression is not nil.
+table if the value of that expression is not `nil`.
 
 Doubling every even number:
 
@@ -523,7 +544,7 @@ Doubling every even number:
     ```
 
 Filtering out odd numbers:
-    
+
     ```moon
     my_numbers = {1,2,3,4,5,6}
     odds = for x in *my_numbers
@@ -531,7 +552,7 @@ Filtering out odd numbers:
     ```
 
 For loops at the end of a function body are not accumulated into a table for a
-return value (Instead the function will return `nil`).  Either an explicit
+return value (Instead the function will return `nil`). Either an explicit
 `return` statement can be used, or the loop can be converted into a list
 comprehension.
 
@@ -562,6 +583,27 @@ The while loop also comes in two variations:
 Like for loops, the while loop can also be used an expression. Additionally,
 for a function to return the accumulated value of a while loop, the statement
 must be explicitly returned.
+
+## Continue
+
+A `continue` statement can be used to skip the current iteration in a loop.
+
+    ```moon
+    i = 0
+    while i < 10
+      continue if i % 2 ==0
+      print i
+    ```
+`continue` can also be used with loop expressions to prevent that iteration
+from accumulating into the result. This examples filters the array table into
+just even numbers:
+
+    ```moon
+    my_numbers = {1,2,3,4,5,6}
+    odds = for x in *my_numbers
+      continue if x % 2 == 1
+      x
+    ```
 
 ## Conditionals
 
@@ -611,7 +653,7 @@ assigned variable is only in scope for the body of the conditional, meaning it
 is never available if the value is not truthy.
 
     ```moon
-    if user = database\find_user "moon"
+    if user = database.find_user "moon"
       print user.name
     ```
 
@@ -727,7 +769,7 @@ functions, but for other types of objects, undesired results may occur.
 Consider the example below, the `clothes` property is shared amongst all
 instances, so modifications to it in one instance will show up in another:
 
-    ```moon
+    ```moononly
     class Person
       clothes: {}
       give_item: (name) =>
@@ -746,7 +788,7 @@ instances, so modifications to it in one instance will show up in another:
 The proper way to avoid this problem is to create the mutable state of the
 object in the constructor:
 
-    ```moon
+    ```moononly
     class Person
       new: =>
         @clothes = {}
@@ -767,19 +809,23 @@ properties and methods from another class.
 
 Here we extend our Inventory class, and limit the amount of items it can carry.
 
+In this example, we don't define a constructor on the subclass, so the parent
+class' constructor is called when we make a new instance. If we did define a
+constructor then we can use the [`super`](#super) method to call the parent
+constructor.
+
 Whenever a class inherits from another, it sends a message to the parent class
-by calling the method `__inherited` on the parent class if it exists.  The
-function recieves two arguments, the class that is being inherited and the
+by calling the method `__inherited` on the parent class if it exists. The
+function receives two arguments, the class that is being inherited and the
 child class.
 
-    ```moon
+    ```moononly
     class Shelf
       @__inherited: (child) =>
         print @__name, "was inherited by", child.__name
 
     -- will print: Shelf was inherited by Cupboard
     class Cupboard extends Shelf
-      nil
     ```
 
 ### Super
@@ -874,7 +920,7 @@ If the class extends from anything, the parent class object is stored in
 We can create variables directly in the class object instead of in the *base*
 by using `@` in the front of the property name in a class declaration.
 
-    ```moon
+    ```moononly
     class Things
       @some_func: => print "Hello from", @__name
 
@@ -888,7 +934,7 @@ by using `@` in the front of the property name in a class declaration.
 In expressions, we can use `@@` to access a value that is stored in the
 `__class` of `self`.  Thus, `@@hello` is shorthand for `self.__class.hello`.
 
-    ```moon
+    ```moononly
     class Counter
       @count: 0
 
@@ -924,6 +970,20 @@ described above:
 These expressions are executed after all the properties have been added to the
 *base*.
 
+All variables declared in the body of the class are local to the classes
+properties. This is convenient for placing private values or helper functions
+that only the class methods can access:
+
+
+    ```moononly
+    class MoreThings
+      secret = 123
+      log = (msg) -> print "LOG:", msg
+
+      some_method: =>
+        log "hello world: " .. secret
+
+    ```
 
 ### `@` and `@@` Values
 
@@ -933,17 +993,54 @@ that name accessed in `self` and `self.__class`.
 If they are used all by themselves, they are aliases for `self` and
 `self.__class`.
 
+    ```moon
     assert @ == self
     assert @@ == self.__class
+    ```
 
 For example, a quick way to create a new instance of the same class from an
 instance method using `@@`:
 
+    ```moon
     some_instance_method = (...) => @@ ...
+    ```
+
+
+### Class Expressions
+
+The `class` syntax can also be used as an expression which can be assigned to a
+variable or explicitly returned.
+
+    ```moononly
+    x = class Bucket
+      drops: 0
+      add_drop: => @drops += 1
+    ```
+
+### Anonymous classes
+
+The name can be left out when declaring a class. The `__name` attribute will be
+`nil`, unless the class expression is in an assignment. The name on the left
+hand side of the assignment is used instead of `nil`.
+
+
+    ```moononly
+    BigBucket = class extends Bucket
+      add_drop: => @drops += 10
+
+    assert Bucket.__name == "BigBucket"
+    ```
+
+You can even leave off the body, meaning you can write a blank anonymous class
+like this:
+
+    ```moononly
+    x = class
+    ```
 
 ## Export Statement
 
-Because, by default, all assignments to variables that are not lexically visible will
+Because all assignments to variables that are not lexically visible will
 be declared as local, special syntax is required to declare a variable globally.
 
 The export keyword makes it so any following assignments to the specified names
@@ -953,7 +1050,6 @@ will not be assigned locally.
     export var_name, var_name2
     var_name, var_name3 = "hello", "world"
     ```
-
 
 This is especially useful when declaring what will be externally visible in a
 module:
@@ -985,6 +1081,9 @@ variables directly:
 
 Additionally, a class declaration can be prefixed with the export keyword in
 order to export it.
+
+Export will have no effect if there is already a local variable of the same
+name in scope.
 
 ### Export All & Export Proper
 
@@ -1066,6 +1165,51 @@ Or...
         \add_relative relative for relative in *relatives
 
     me = create_person "Leaf", {dad, mother, sister}
+    ```
+In this usage, `with` can be seen as a special form of the K combinator.
+
+The expression in the `with` statement can also be an assignment, if you want
+to give a name to the expression.
+
+    ```moon
+    with str = "Hello"
+      print "original:", str
+      print "upper:", \upper!
+    ```
+
+## Do
+
+When used as a statement, `do` works just like it does in Lua.
+
+    ```moon
+    do
+      var = "hello"
+      print var
+    print var -- nil here
+    ```
+
+MoonScript's `do` can also be used an expression . Allowing you to combine
+multiple lines into one. The result of the `do` expression is the last
+statement in its body.
+
+
+    ```moon
+    counter = do
+      i = 0
+      ->
+        i += 1
+        i
+
+    print counter!
+    print counter!
+    ```
+
+    ```moon
+    tbl = {
+      key: do
+        print "assigning key!"
+        1234
+    }
     ```
 
 ## Function Stubs
@@ -1154,12 +1298,39 @@ accessed, they just cant be modified:
     i, k = 100, 50
 
     my_func = (add using k,i) ->
-      tmp = tmp + add -- a new local tmp is created 
+      tmp = tmp + add -- a new local tmp is created
       i += tmp
       k += tmp
 
     my_func(22)
     print i,k -- these have been updated
+    ```
+
+## Misc.
+
+### Implicit Returns on Files
+
+By default, a file will also implicitly return like a function. This is useful
+for writing modules, where you can put your module's table as the last
+statement in the file so it is returned when loaded with `require`.
+
+
+### Writing Modules
+
+Lua 5.2 has removed the `module` function for creating modules. It is
+recommended to return a table instead when defining a module.
+
+The `with` statement along with implicit return on a file provides a convenient
+way to do this:
+
+
+    ```moonret
+    -- my_library.moon
+    with _M = {}
+      .SOME_CONSTANT = 100
+
+      .some_function = -> print .SOME_CONSTANT
+
     ```
 
 # MoonScript API
@@ -1192,30 +1363,67 @@ The `moonloader`, when finding a valid path to a `.moon` file, will parse and
 compile the file in memory. The code is then turned into a function using the
 built in `load` function, which is run as the module.
 
+### Load Functions
+
+
+MoonScript provides `moonscript.load`, `moonscript.loadfile`,
+`mooonscript.loadstring`, which are analogous to Lua's `load`, `loadfile`, and
+`loadstring`.
+
+The MoonScript functions work the same as their counterparts, except they deal
+with MoonScript code instead of Lua Code.
+
+
+    ```moononly
+    require "moonscript"
+    fn = moonscript.loadstring 'print "hi!"'
+    fn!
+    ```
+
+All of these functions can take an optional last argument, a table of options.
+The only option right now is `implicitly_return_root`. Setting this to `false`
+makes it so the file does not implicitly return its last statement.
+
+
+    ```moononly
+    require "moonscript"
+
+    fn = moonscript.loadstring "10"
+    print fn! -- prints "10"
+
+    fn = moonscript.loadstring "10", implicitly_return_root: false
+    print fn! -- prints nothing
+    ```
+
 ## Error Rewriting
 
-Runtime errors are given special attention when using the `moonloader`.
-Because we start off as MoonScript, but run code as Lua, errors that happen
-during runtime report their line numbers as they are in the compiled file. This
-can make debugging particularly difficult.
+Runtime errors are given special attention when running code using the `moon`
+binary.  Because we start off as MoonScript, but run code as Lua, errors that
+happen during runtime report their line numbers as they are in the compiled
+file. This can make debugging particularly difficult.
 
-Consider the following file with a bug:
+Consider the following file with a bug (note the invalid `z` variable):
 
     ```moon
-    add_numbers = (x,y) -> x + z
-    print add_numbers 10,0
+    add_numbers = (x,y) -> x + z  -- 1
+    print add_numbers 10,0        -- 2
     ```
 
 The following error is generated:
 
-    moon:err.moon:1: attempt to perform arithmetic on global 'z' (a nil value)
+    moon: scrap.moon:1(3): attempt to perform arithmetic on global 'z' (a nil value)
     stack traceback:
-        err.moon:1: in function 'add_numbers'
-        err.moon:2: in main chunk
+      scrap.moon:1(3): in function 'add_numbers'
+      scrap.moon:2(5): in main chunk
 
-Instead of the error being reported on line number 3, where it appears in the
-Lua file, it is reported on line 1, where the faulty line originated. The
-entire stack trace is rewritten in addition to the error.
+
+Notice how next to the file name there are two numbers. The first number is the
+rewritten line number. The number in the parentheses is the original Lua line
+number.
+
+The error in this example is being reported on line 1 of the `moon` file, which
+corresponds to line 3 of the generated Lua code. The entire stack trace is rewritten in
+addition to the error message.
 
 ## Programmatically Compiling
 
@@ -1228,7 +1436,7 @@ Lua code from MoonScript code.
 Here is a quick example of how you would compile a MoonScript string to a Lua
 String:
 
-    ```moon
+    ```moononly
     require "moonscript.parse"
     require "moonscript.compile"
 
@@ -1252,7 +1460,7 @@ String:
 
 Two tools are installed with MoonScript, `moon` and `moonc`.
 
-`moonc` is for compiling MoonScript code to Lua.  
+`moonc` is for compiling MoonScript code to Lua.
 `moon` is for running MoonsScript code directly.
 
 ## `moon`
@@ -1294,26 +1502,26 @@ for all MoonScript files and compile them.
 
 `moonc` can write to standard out by passing the `-p` flag.
 
-Combined with `linotify` on linux, the `-w` flag can be used to watch all files
-that match the given search path for changes, and then compile them only when
-required.
+The `-w` flag can be used to enable watch mode. `moonc` will stay running, and
+watch for changes to the input files. If any of them change then they will be
+compiled automatically.
 
 A full list of flags can be seen by passing the `-h` or `--help` flag.
 
 # License (MIT)
 
     Copyright (C) 2011 by Leaf Corcoran
-    
+
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
     in the Software without restriction, including without limitation the rights
     to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
     copies of the Software, and to permit persons to whom the Software is
     furnished to do so, subject to the following conditions:
-    
+
     The above copyright notice and this permission notice shall be included in
     all copies or substantial portions of the Software.
-    
+
     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
     IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
     FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
