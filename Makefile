@@ -22,7 +22,7 @@ moonscript.o: moonscript.c moonscript.h
 headers: moonscript.h moonc.h moon.h alt_getopt.h
 
 moonscript.h:
-	cd moonscript/; bin/splat.moon -l moonscript moonscript moon > ../moonscript.lua
+	(cd moonscript/; bin/splat.moon -l moonscript moonscript moon) > moonscript.lua
 	xxd -i moonscript.lua > $@
 	rm moonscript.lua
 
