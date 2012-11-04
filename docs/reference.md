@@ -646,6 +646,8 @@ Conditionals can also be used in return statements and assignments:
     print message -- prints: I am very tall
     ```
 
+### With Assignment
+
 `if` and `elseif` blocks can take an assignment in place of a conditional
 expression. Upon evaluating the conditional, the assignment will take place and
 the value that was assigned to will be used as the conditional expression. The
@@ -655,6 +657,15 @@ is never available if the value is not truthy.
     ```moon
     if user = database.find_user "moon"
       print user.name
+    ```
+
+    ```moon
+    if hello = os.getenv "hello"
+      print "You have hello", hello
+    elseif world = os.getenv "world"
+      print "you have world", world
+    else
+      print "nothing :("
     ```
 
 ## Line Decorators
