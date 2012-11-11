@@ -157,6 +157,8 @@ hello =
   good: 230203
 
 
+div class: "cool"
+
 5 + what wack
 what whack + 5
 

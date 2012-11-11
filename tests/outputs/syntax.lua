@@ -168,6 +168,9 @@ hello = {
   ["function"] = "okay",
   good = 230203
 }
+div({
+  class = "cool"
+})
 _ = 5 + what(wack)
 what(whack + 5)
 _ = 5 - what(wack)
