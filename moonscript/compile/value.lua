@@ -1,4 +1,3 @@
-module("moonscript.compile", package.seeall)
 local util = require("moonscript.util")
 local data = require("moonscript.data")
 local ntype
@@ -13,7 +12,7 @@ do
 end
 local concat, insert = table.concat, table.insert
 local table_delim = ","
-value_compile = {
+local value_compilers = {
   exp = function(self, node)
     local _comp
     _comp = function(i, value)
@@ -301,4 +300,7 @@ value_compile = {
     end
     return tostring(value)
   end
+}
+return {
+  value_compilers = value_compilers
 }

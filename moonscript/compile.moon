@@ -1,16 +1,14 @@
-module "moonscript.compile", package.seeall
 
 util = require "moonscript.util"
 dump = require "moonscript.dump"
-
-require "moonscript.compile.statement"
-require "moonscript.compile.value"
-
 transform = require "moonscript.transform"
 
 import NameProxy, LocalName from require "moonscript.transform.names"
 import Set from require "moonscript.data"
 import ntype, has_value from require "moonscript.types"
+
+import statement_compilers from require "moonscript.compile.statement"
+import value_compilers from require "moonscript.compile.value"
 
 import concat, insert from table
 import pos_to_line, get_closest_line, trim from util
@@ -19,10 +17,7 @@ mtype = util.moon.type
 
 indent_char = "  "
 
-export tree, value, format_error
-export Block, RootBlock
-
-local Line, Lines
+local Line, Lines, Block, RootBlock
 
 -- a buffer for building up lines
 class Lines
@@ -277,11 +272,11 @@ class Block
       \append ...
 
   is_stm: (node) =>
-    line_compile[ntype node] != nil
+    statement_compilers[ntype node] != nil
 
   is_value: (node) =>
     t = ntype node
-    value_compile[t] != nil or t == "value"
+    value_compilers[t] != nil or t == "value"
 
   -- line wise compile functions
   name: (node) => @value node
@@ -292,7 +287,7 @@ class Block
     else
       node[1]
 
-    fn = value_compile[action]
+    fn = value_compilers[action]
     error "Failed to compile value: "..dump.value node if not fn
 
     out = fn self, node, ...
@@ -314,7 +309,7 @@ class Block
     return if not node -- skip blank statements
     node = @transform.statement node
 
-    result = if fn = line_compile[ntype(node)]
+    result = if fn = statement_compilers[ntype(node)]
       fn self, node, ...
     else
       -- coerce value into statement
@@ -399,3 +394,4 @@ tree = (tree, options={}) ->
     posmap = scope._lines\flatten_posmap!
     lua_code, posmap
 
+{ :tree, :value, :format_error, :Block, :RootBlock }

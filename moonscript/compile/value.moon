@@ -1,19 +1,14 @@
 
-module "moonscript.compile", package.seeall
-
 util = require "moonscript.util"
 data = require "moonscript.data"
 
 import ntype from require "moonscript.types"
 import user_error from require "moonscript.errors"
-
 import concat, insert from table
-
-export value_compile
 
 table_delim = ","
 
-value_compile =
+value_compilers =
   -- list of values separated by binary operators
   exp: (node) =>
     _comp = (i, value) ->
@@ -189,3 +184,6 @@ value_compile =
       @send "varargs"
 
     tostring value
+
+
+{ :value_compilers }

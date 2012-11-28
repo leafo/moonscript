@@ -1,15 +1,15 @@
-module("moonscript.compile", package.seeall)
-local util = require("moonscript.util")
-local dump = require("moonscript.dump")
-local transform = require("moonscript.transform")
-local reversed = util.reversed
+local reversed
+do
+  local _table_0 = require("moonscript.util")
+  reversed = _table_0.reversed
+end
 local ntype
 do
   local _table_0 = require("moonscript.types")
   ntype = _table_0.ntype
 end
 local concat, insert = table.concat, table.insert
-line_compile = {
+local statement_compilers = {
   raw = function(self, node)
     return self:add(node[2])
   end,
@@ -245,4 +245,7 @@ line_compile = {
       return _with_0
     end
   end
+}
+return {
+  statement_compilers = statement_compilers
 }

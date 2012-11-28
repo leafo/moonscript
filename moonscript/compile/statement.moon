@@ -1,17 +1,9 @@
-module "moonscript.compile", package.seeall
 
-util = require "moonscript.util"
-
-dump = require "moonscript.dump"
-transform = require "moonscript.transform"
-
-import reversed from util
+import reversed from require "moonscript.util"
 import ntype from require "moonscript.types"
 import concat, insert from table
 
-export line_compile
-
-line_compile =
+statement_compilers =
   raw: (node) => @add node[2]
 
   lines: (node) =>
@@ -139,3 +131,5 @@ line_compile =
     with @block!
       \stms node[2]
 
+
+{ :statement_compilers }

@@ -1,8 +1,5 @@
-module("moonscript.compile", package.seeall)
 local util = require("moonscript.util")
 local dump = require("moonscript.dump")
-require("moonscript.compile.statement")
-require("moonscript.compile.value")
 local transform = require("moonscript.transform")
 local NameProxy, LocalName
 do
@@ -19,11 +16,21 @@ do
   local _table_0 = require("moonscript.types")
   ntype, has_value = _table_0.ntype, _table_0.has_value
 end
+local statement_compilers
+do
+  local _table_0 = require("moonscript.compile.statement")
+  statement_compilers = _table_0.statement_compilers
+end
+local value_compilers
+do
+  local _table_0 = require("moonscript.compile.value")
+  value_compilers = _table_0.value_compilers
+end
 local concat, insert = table.concat, table.insert
 local pos_to_line, get_closest_line, trim = util.pos_to_line, util.get_closest_line, util.trim
 local mtype = util.moon.type
 local indent_char = "  "
-local Line, Lines
+local Line, Lines, Block, RootBlock
 do
   local _parent_0 = nil
   local _base_0 = {
@@ -160,7 +167,7 @@ do
         end
         local _list_0 = item
         for _index_0 = 1, #_list_0 do
-          value = _list_0[_index_0]
+          local value = _list_0[_index_0]
           self:_append_single(value)
         end
       else
@@ -333,7 +340,7 @@ do
       self._name_whitelist = Set(names)
     end,
     put_name = function(self, name, ...)
-      value = ...
+      local value = ...
       if select("#", ...) == 0 then
         value = true
       end
@@ -423,11 +430,11 @@ do
       end
     end,
     is_stm = function(self, node)
-      return line_compile[ntype(node)] ~= nil
+      return statement_compilers[ntype(node)] ~= nil
     end,
     is_value = function(self, node)
       local t = ntype(node)
-      return value_compile[t] ~= nil or t == "value"
+      return value_compilers[t] ~= nil or t == "value"
     end,
     name = function(self, node)
       return self:value(node)
@@ -440,7 +447,7 @@ do
       else
         action = node[1]
       end
-      local fn = value_compile[action]
+      local fn = value_compilers[action]
       if not fn then
         error("Failed to compile value: " .. dump.value(node))
       end
@@ -482,7 +489,7 @@ do
       node = self.transform.statement(node)
       local result
       do
-        local fn = line_compile[ntype(node)]
+        local fn = statement_compilers[ntype(node)]
         if fn then
           result = fn(self, node, ...)
         else
@@ -642,6 +649,7 @@ do
   end
   RootBlock = _class_0
 end
+local format_error
 format_error = function(msg, pos, file_str)
   local line = pos_to_line(file_str, pos)
   local line_str
@@ -652,6 +660,7 @@ format_error = function(msg, pos, file_str)
     (" [%d] >>    %s"):format(line, trim(line_str))
   }, "\n")
 end
+local value
 value = function(value)
   local out = nil
   do
@@ -661,6 +670,7 @@ value = function(value)
   end
   return out
 end
+local tree
 tree = function(tree, options)
   if options == nil then
     options = { }
@@ -693,3 +703,10 @@ tree = function(tree, options)
     return lua_code, posmap
   end
 end
+return {
+  tree = tree,
+  value = value,
+  format_error = format_error,
+  Block = Block,
+  RootBlock = RootBlock
+}

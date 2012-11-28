@@ -37,7 +37,8 @@ has_value = function(node)
 end
 local is_value
 is_value = function(stm)
-  local compile, transform = moonscript.compile, moonscript.transform
+  local compile = require("moonscript.compile")
+  local transform = require("moonscript.transform")
   return compile.Block:is_value(stm) or transform.Value:can_transform(stm)
 end
 local comprehension_has_value

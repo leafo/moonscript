@@ -3,7 +3,7 @@
 module("moonscript", package.seeall)
 
 require "moonscript.parse"
-require "moonscript.compile"
+local compile = require "moonscript.compile"
 local util = require "moonscript.util"
 
 require "alt_getopt"

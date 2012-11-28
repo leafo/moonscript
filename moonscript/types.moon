@@ -31,7 +31,9 @@ has_value = (node) ->
     true
 
 is_value = (stm) ->
-  import compile, transform from moonscript
+  compile = require "moonscript.compile"
+  transform = require "moonscript.transform"
+
   compile.Block\is_value(stm) or transform.Value\can_transform stm
 
 comprehension_has_value = (comp) ->

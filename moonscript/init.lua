@@ -1,5 +1,5 @@
 module("moonscript", package.seeall)
-require("moonscript.compile")
+local compile = require("moonscript.compile")
 require("moonscript.parse")
 local concat, insert = table.concat, table.insert
 local split, dump
