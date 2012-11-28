@@ -5,6 +5,12 @@ local data = require("moonscript.data")
 local reversed = util.reversed
 local ntype, build, smart_node, is_slice, value_is_singular = types.ntype, types.build, types.smart_node, types.is_slice, types.value_is_singular
 local insert = table.insert
+local NameProxy, LocalName
+do
+  local _table_0 = require("moonscript.transform.names")
+  NameProxy, LocalName = _table_0.NameProxy, _table_0.LocalName
+end
+local destructure = require("moonscript.transform.destructure")
 local mtype
 do
   local moon_type = util.moon.type
@@ -18,136 +24,6 @@ do
   end
 end
 local implicitly_return
-do
-  local _parent_0 = nil
-  local _base_0 = {
-    get_name = function(self)
-      return self.name
-    end
-  }
-  _base_0.__index = _base_0
-  if _parent_0 then
-    setmetatable(_base_0, _parent_0.__base)
-  end
-  local _class_0 = setmetatable({
-    __init = function(self, name)
-      self.name = name
-      self[1] = "temp_name"
-    end,
-    __base = _base_0,
-    __name = "LocalName",
-    __parent = _parent_0
-  }, {
-    __index = function(cls, name)
-      local val = rawget(_base_0, name)
-      if val == nil and _parent_0 then
-        return _parent_0[name]
-      else
-        return val
-      end
-    end,
-    __call = function(cls, ...)
-      local _self_0 = setmetatable({}, _base_0)
-      cls.__init(_self_0, ...)
-      return _self_0
-    end
-  })
-  _base_0.__class = _class_0
-  if _parent_0 and _parent_0.__inherited then
-    _parent_0.__inherited(_parent_0, _class_0)
-  end
-  LocalName = _class_0
-end
-do
-  local _parent_0 = nil
-  local _base_0 = {
-    get_name = function(self, scope)
-      if not self.name then
-        self.name = scope:free_name(self.prefix, true)
-      end
-      return self.name
-    end,
-    chain = function(self, ...)
-      local items = {
-        ...
-      }
-      items = (function()
-        local _accum_0 = { }
-        local _len_0 = 0
-        local _list_0 = items
-        for _index_0 = 1, #_list_0 do
-          local i = _list_0[_index_0]
-          local _value_0
-          if type(i) == "string" then
-            _value_0 = {
-              "dot",
-              i
-            }
-          else
-            _value_0 = i
-          end
-          if _value_0 ~= nil then
-            _len_0 = _len_0 + 1
-            _accum_0[_len_0] = _value_0
-          end
-        end
-        return _accum_0
-      end)()
-      return build.chain({
-        base = self,
-        unpack(items)
-      })
-    end,
-    index = function(self, key)
-      return build.chain({
-        base = self,
-        {
-          "index",
-          key
-        }
-      })
-    end,
-    __tostring = function(self)
-      if self.name then
-        return ("name<%s>"):format(self.name)
-      else
-        return ("name<prefix(%s)>"):format(self.prefix)
-      end
-    end
-  }
-  _base_0.__index = _base_0
-  if _parent_0 then
-    setmetatable(_base_0, _parent_0.__base)
-  end
-  local _class_0 = setmetatable({
-    __init = function(self, prefix)
-      self.prefix = prefix
-      self[1] = "temp_name"
-    end,
-    __base = _base_0,
-    __name = "NameProxy",
-    __parent = _parent_0
-  }, {
-    __index = function(cls, name)
-      local val = rawget(_base_0, name)
-      if val == nil and _parent_0 then
-        return _parent_0[name]
-      else
-        return val
-      end
-    end,
-    __call = function(cls, ...)
-      local _self_0 = setmetatable({}, _base_0)
-      cls.__init(_self_0, ...)
-      return _self_0
-    end
-  })
-  _base_0.__class = _class_0
-  if _parent_0 and _parent_0.__inherited then
-    _parent_0.__inherited(_parent_0, _class_0)
-  end
-  NameProxy = _class_0
-end
 do
   local _parent_0 = nil
   local _base_0 = {
@@ -497,7 +373,11 @@ Statement = Transformer({
         })
       end
     end
-    return transformed or node
+    node = transformed or node
+    if destructure.has_destructure(names) then
+      return destructure.split_assign(node)
+    end
+    return node
   end,
   continue = function(self, node)
     local continue_name = self:send("continue")

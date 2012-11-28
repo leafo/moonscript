@@ -8,6 +8,9 @@ data = require "moonscript.data"
 import reversed from util
 import ntype, build, smart_node, is_slice, value_is_singular from types
 import insert from table
+import NameProxy, LocalName from require "moonscript.transform.names"
+
+destructure = require "moonscript.transform.destructure"
 
 mtype = do
   moon_type = util.moon.type
@@ -19,47 +22,9 @@ mtype = do
     else
       t
 
-export Statement, Value, NameProxy, LocalName, Run
+export Statement, Value, Run
 
 local implicitly_return
-
--- always declares as local
-class LocalName
-  new: (@name) => self[1] = "temp_name"
-  get_name: => @name
-
-class NameProxy
-  new: (@prefix) =>
-    self[1] = "temp_name"
-
-  get_name: (scope) =>
-    if not @name
-      @name = scope\free_name @prefix, true
-    @name
-
-  chain: (...) =>
-    items = {...} -- todo: fix ... propagation
-    items = for i in *items
-      if type(i) == "string"
-        {"dot", i}
-      else
-        i
-
-    build.chain {
-      base: self
-      unpack items
-    }
-
-  index: (key) =>
-    build.chain {
-      base: self, {"index", key}
-    }
-
-  __tostring: =>
-    if @name
-      ("name<%s>")\format @name
-    else
-      ("name<prefix(%s)>")\format @prefix
 
 class Run
   new: (@fn) =>
@@ -228,7 +193,12 @@ Statement = Transformer {
           @transform.statement value, ret, node
         }
 
-    transformed or node
+    node = transformed or node
+
+    if destructure.has_destructure names
+      return destructure.split_assign node
+
+    node
 
   continue: (node) =>
     continue_name = @send "continue"

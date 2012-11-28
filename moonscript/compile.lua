@@ -5,7 +5,11 @@ require("moonscript.compile.format")
 require("moonscript.compile.statement")
 require("moonscript.compile.value")
 local transform = require("moonscript.transform")
-local NameProxy, LocalName = transform.NameProxy, transform.LocalName
+local NameProxy, LocalName
+do
+  local _table_0 = require("moonscript.transform.names")
+  NameProxy, LocalName = _table_0.NameProxy, _table_0.LocalName
+end
 local Set
 do
   local _table_0 = require("moonscript.data")

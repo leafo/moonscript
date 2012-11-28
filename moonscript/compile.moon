@@ -9,7 +9,7 @@ require "moonscript.compile.value"
 
 transform = require "moonscript.transform"
 
-import NameProxy, LocalName from transform
+import NameProxy, LocalName from require "moonscript.transform.names"
 import Set from require "moonscript.data"
 import ntype from require "moonscript.types"
 

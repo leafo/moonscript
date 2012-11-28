@@ -170,7 +170,8 @@ local _chain_assignable = { index = true, dot = true, slice = true }
 local function is_assignable(node)
 	local t = ntype(node)
 	return t == "self" or t == "value" or t == "self_class" or
-		t == "chain" and _chain_assignable[ntype(node[#node])]
+		t == "chain" and _chain_assignable[ntype(node[#node])] or
+		t == "table"
 end
 
 local function check_assignable(str, pos, value)
