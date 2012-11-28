@@ -4,7 +4,7 @@ data = require "moonscript.data"
 
 export ntype, smart_node, build, is_value
 export is_slice, manual_return, cascading, value_is_singular
-export comprehension_has_value
+export comprehension_has_value, has_value
 
 import insert from table
 
@@ -15,6 +15,14 @@ manual_return = data.Set{"foreach", "for", "while", "return"}
 -- All cascading statement transform functions accept a second arugment that
 -- is the transformation to apply to the last statement in their body
 cascading = data.Set{ "if", "unless", "with", "switch", "class", "do" }
+
+-- does this always return a value
+has_value = (node) ->
+  if ntype(node) == "chain"
+    ctype = ntype(node[#node])
+    ctype != "call" and ctype != "colon"
+  else
+    true
 
 is_value = (stm) ->
   import compile, transform from moonscript

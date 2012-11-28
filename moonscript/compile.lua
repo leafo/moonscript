@@ -1,7 +1,6 @@
 module("moonscript.compile", package.seeall)
 local util = require("moonscript.util")
 local dump = require("moonscript.dump")
-require("moonscript.compile.format")
 require("moonscript.compile.statement")
 require("moonscript.compile.value")
 local transform = require("moonscript.transform")
@@ -15,14 +14,15 @@ do
   local _table_0 = require("moonscript.data")
   Set = _table_0.Set
 end
-local ntype
+local ntype, has_value
 do
   local _table_0 = require("moonscript.types")
-  ntype = _table_0.ntype
+  ntype, has_value = _table_0.ntype, _table_0.has_value
 end
 local concat, insert = table.concat, table.insert
 local pos_to_line, get_closest_line, trim = util.pos_to_line, util.get_closest_line, util.trim
 local mtype = util.moon.type
+local indent_char = "  "
 local Line, Lines
 do
   local _parent_0 = nil

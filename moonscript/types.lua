@@ -16,6 +16,14 @@ cascading = data.Set({
   "class",
   "do"
 })
+has_value = function(node)
+  if ntype(node) == "chain" then
+    local ctype = ntype(node[#node])
+    return ctype ~= "call" and ctype ~= "colon"
+  else
+    return true
+  end
+end
 is_value = function(stm)
   local compile, transform = moonscript.compile, moonscript.transform
   return compile.Block:is_value(stm) or transform.Value:can_transform(stm)

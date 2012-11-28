@@ -1,11 +1,15 @@
 module("moonscript.compile", package.seeall)
 local util = require("moonscript.util")
 local data = require("moonscript.data")
-require("moonscript.compile.format")
 local ntype
 do
   local _table_0 = require("moonscript.types")
   ntype = _table_0.ntype
+end
+local user_error
+do
+  local _table_0 = require("moonscript.errors")
+  user_error = _table_0.user_error
 end
 local concat, insert = table.concat, table.insert
 local table_delim = ","

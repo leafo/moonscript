@@ -4,6 +4,12 @@ local util = require("moonscript.util")
 require("lpeg")
 local concat, insert = table.concat, table.insert
 local split, pos_to_line = util.split, util.pos_to_line
+user_error = function(...)
+  return error({
+    "user-error",
+    ...
+  })
+end
 local lookup_line
 lookup_line = function(fname, pos, cache)
   if not cache[fname] then

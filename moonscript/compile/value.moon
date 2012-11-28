@@ -4,9 +4,9 @@ module "moonscript.compile", package.seeall
 util = require "moonscript.util"
 data = require "moonscript.data"
 
-require "moonscript.compile.format"
-
 import ntype from require "moonscript.types"
+import user_error from require "moonscript.errors"
+
 import concat, insert from table
 
 export value_compile

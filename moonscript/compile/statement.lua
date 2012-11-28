@@ -1,6 +1,5 @@
 module("moonscript.compile", package.seeall)
 local util = require("moonscript.util")
-require("moonscript.compile.format")
 local dump = require("moonscript.dump")
 local transform = require("moonscript.transform")
 local reversed = util.reversed

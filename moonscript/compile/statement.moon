@@ -2,7 +2,6 @@ module "moonscript.compile", package.seeall
 
 util = require "moonscript.util"
 
-require "moonscript.compile.format"
 dump = require "moonscript.dump"
 transform = require "moonscript.transform"
 

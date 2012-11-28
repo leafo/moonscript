@@ -11,7 +11,7 @@ end
 local insert = table.insert
 local user_error
 do
-  local _table_0 = require("moonscript.compile")
+  local _table_0 = require("moonscript.errors")
   user_error = _table_0.user_error
 end
 local join

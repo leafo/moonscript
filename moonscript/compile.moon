@@ -3,7 +3,6 @@ module "moonscript.compile", package.seeall
 util = require "moonscript.util"
 dump = require "moonscript.dump"
 
-require "moonscript.compile.format"
 require "moonscript.compile.statement"
 require "moonscript.compile.value"
 
@@ -11,12 +10,14 @@ transform = require "moonscript.transform"
 
 import NameProxy, LocalName from require "moonscript.transform.names"
 import Set from require "moonscript.data"
-import ntype from require "moonscript.types"
+import ntype, has_value from require "moonscript.types"
 
 import concat, insert from table
 import pos_to_line, get_closest_line, trim from util
 
 mtype = util.moon.type
+
+indent_char = "  "
 
 export tree, value, format_error
 export Block, RootBlock

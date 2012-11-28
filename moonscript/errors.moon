@@ -8,7 +8,10 @@ require "lpeg"
 import concat, insert from table
 import split, pos_to_line from util
 
-export rewrite_traceback, truncate_traceback
+export rewrite_traceback, truncate_traceback, user_error
+
+user_error = (...) ->
+  error {"user-error", ...}
 
 -- find the line number of `pos` chars into fname
 lookup_line = (fname, pos, cache) ->

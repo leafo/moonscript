@@ -3,7 +3,7 @@ import ntype, build from require "moonscript.types"
 import NameProxy from require "moonscript.transform.names"
 import insert from table
 
-import user_error from require "moonscript.compile"
+import user_error from require "moonscript.errors"
 
 join = (...) ->
   with out = {}
