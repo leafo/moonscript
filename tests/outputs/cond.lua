@@ -150,6 +150,22 @@ else
     end
   end
 end
+local kzy
+kzy = function()
+  do
+    local something = true
+    if something then
+      return 1
+    else
+      do
+        local another = false
+        if another then
+          return 2
+        end
+      end
+    end
+  end
+end
 if not (true) then
   print("cool!")
 end

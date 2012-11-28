@@ -9,7 +9,15 @@ import reversed from util
 import ntype, build, smart_node, is_slice, value_is_singular from types
 import insert from table
 
-mtype = util.moon.type
+mtype = do
+  moon_type = util.moon.type
+  -- lets us check a smart node without throwing an error
+  (val) ->
+    t = type(val)
+    if "table" == t and rawget(val, "__class")
+      moon_type val
+    else
+      t
 
 export Statement, Value, NameProxy, LocalName, Run
 
@@ -67,7 +75,7 @@ apply_to_last = (stms, fn) ->
   last_exp_id = 0
   for i = #stms, 1, -1
     stm = stms[i]
-    if stm and util.moon.type(stm) != Run
+    if stm and mtype(stm) != Run
       last_exp_id = i
       break
 

@@ -89,6 +89,12 @@ elseif z = true
 else
   four
 
+kzy = ->
+  if something = true
+    1
+  elseif another = false
+    2
+
 ---
 
 unless true

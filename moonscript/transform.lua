@@ -5,7 +5,18 @@ local data = require("moonscript.data")
 local reversed = util.reversed
 local ntype, build, smart_node, is_slice, value_is_singular = types.ntype, types.build, types.smart_node, types.is_slice, types.value_is_singular
 local insert = table.insert
-local mtype = util.moon.type
+local mtype
+do
+  local moon_type = util.moon.type
+  mtype = function(val)
+    local t = type(val)
+    if "table" == t and rawget(val, "__class") then
+      return moon_type(val)
+    else
+      return t
+    end
+  end
+end
 local implicitly_return
 do
   local _parent_0 = nil
@@ -182,7 +193,7 @@ apply_to_last = function(stms, fn)
   local last_exp_id = 0
   for i = #stms, 1, -1 do
     local stm = stms[i]
-    if stm and util.moon.type(stm) ~= Run then
+    if stm and mtype(stm) ~= Run then
       last_exp_id = i
       break
     end
