@@ -1,10 +1,10 @@
 #!/usr/bin/env lua
 
 require "alt_getopt"
-require "moonscript.errors"
 require "moonscript"
 
 local util = require "moonscript.util"
+local errors = require "moonscript.errors"
 
 -- moonloader and repl
 local opts, ind = alt_getopt.get_opts(arg, "cvhd", { version = "v", help = "h" })
@@ -77,8 +77,8 @@ if not opts.d then
 	end)
 
 	if err then
-		local truncated = moonscript.errors.truncate_traceback(util.trim(trace))
-		local rewritten = moonscript.errors.rewrite_traceback(truncated, err)
+		local truncated = errors.truncate_traceback(util.trim(trace))
+		local rewritten = errors.rewrite_traceback(truncated, err)
 
 		if rewritten then
 			print_err(rewritten)

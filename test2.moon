@@ -2,11 +2,9 @@
 require "lfs"
 require "busted"
 
-require "moonscript.parse"
-require "moonscript.compile"
-require "moonscript.util"
-
-import parse, compile, util from moonscript
+parse   = require "moonscript.parse"
+compile = require "moonscript.compile"
+util    = require "moonscript.util"
 
 pattern = ...
 

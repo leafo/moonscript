@@ -1,14 +1,13 @@
-module("moonscript.types", package.seeall)
 local util = require("moonscript.util")
 local data = require("moonscript.data")
 local insert = table.insert
-manual_return = data.Set({
+local manual_return = data.Set({
   "foreach",
   "for",
   "while",
   "return"
 })
-cascading = data.Set({
+local cascading = data.Set({
   "if",
   "unless",
   "with",
@@ -16,21 +15,7 @@ cascading = data.Set({
   "class",
   "do"
 })
-has_value = function(node)
-  if ntype(node) == "chain" then
-    local ctype = ntype(node[#node])
-    return ctype ~= "call" and ctype ~= "colon"
-  else
-    return true
-  end
-end
-is_value = function(stm)
-  local compile, transform = moonscript.compile, moonscript.transform
-  return compile.Block:is_value(stm) or transform.Value:can_transform(stm)
-end
-comprehension_has_value = function(comp)
-  return is_value(comp[2])
-end
+local ntype
 ntype = function(node)
   local _exp_0 = type(node)
   if "nil" == _exp_0 then
@@ -41,9 +26,29 @@ ntype = function(node)
     return "value"
   end
 end
+local has_value
+has_value = function(node)
+  if ntype(node) == "chain" then
+    local ctype = ntype(node[#node])
+    return ctype ~= "call" and ctype ~= "colon"
+  else
+    return true
+  end
+end
+local is_value
+is_value = function(stm)
+  local compile, transform = moonscript.compile, moonscript.transform
+  return compile.Block:is_value(stm) or transform.Value:can_transform(stm)
+end
+local comprehension_has_value
+comprehension_has_value = function(comp)
+  return is_value(comp[2])
+end
+local value_is_singular
 value_is_singular = function(node)
   return type(node) ~= "table" or node[1] ~= "exp" or #node == 2
 end
+local is_slice
 is_slice = function(node)
   return ntype(node) == "chain" and ntype(node[#node]) == "slice"
 end
@@ -183,7 +188,7 @@ make_builder = function(name)
     return node
   end
 end
-build = nil
+local build = nil
 build = setmetatable({
   group = function(body)
     if body == nil then
@@ -254,6 +259,7 @@ build = setmetatable({
     return rawget(self, name)
   end
 })
+local smart_node
 smart_node = function(node)
   local index = key_table[ntype(node)]
   if not index then
@@ -275,4 +281,15 @@ smart_node = function(node)
     end
   })
 end
-return nil
+return {
+  ntype = ntype,
+  smart_node = smart_node,
+  build = build,
+  is_value = is_value,
+  is_slice = is_slice,
+  manual_return = manual_return,
+  cascading = cascading,
+  value_is_singular = value_is_singular,
+  comprehension_has_value = comprehension_has_value,
+  has_value = has_value
+}

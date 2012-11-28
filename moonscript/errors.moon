@@ -1,5 +1,4 @@
 
-module "moonscript.errors", package.seeall
 moon = require "moonscript"
 util = require "moonscript.util"
 
@@ -7,8 +6,6 @@ require "lpeg"
 
 import concat, insert from table
 import split, pos_to_line from util
-
-export rewrite_traceback, truncate_traceback, user_error
 
 user_error = (...) ->
   error {"user-error", ...}
@@ -85,4 +82,7 @@ rewrite_traceback = (text, err) ->
     header_text
     "\t" .. concat match, "\n\t"
   }, "\n"
+
+
+{ :rewrite_traceback, :truncate_traceback, :user_error }
 

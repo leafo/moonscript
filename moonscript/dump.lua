@@ -1,4 +1,3 @@
-module("moonscript.dump", package.seeall)
 local flat_value
 flat_value = function(op, depth)
   if depth == nil then
@@ -24,9 +23,11 @@ flat_value = function(op, depth)
   local pos = op[-1]
   return "{" .. (pos and "[" .. pos .. "] " or "") .. table.concat(items, ", ") .. "}"
 end
+local value
 value = function(op)
   return flat_value(op)
 end
+local tree
 tree = function(block)
   local _list_0 = block
   for _index_0 = 1, #_list_0 do
@@ -34,3 +35,7 @@ tree = function(block)
     print(flat_value(value))
   end
 end
+return {
+  value = value,
+  tree = tree
+}

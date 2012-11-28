@@ -1,10 +1,6 @@
-module "moonscript.types", package.seeall
+
 util = require "moonscript.util"
 data = require "moonscript.data"
-
-export ntype, smart_node, build, is_value
-export is_slice, manual_return, cascading, value_is_singular
-export comprehension_has_value, has_value
 
 import insert from table
 
@@ -15,6 +11,16 @@ manual_return = data.Set{"foreach", "for", "while", "return"}
 -- All cascading statement transform functions accept a second arugment that
 -- is the transformation to apply to the last statement in their body
 cascading = data.Set{ "if", "unless", "with", "switch", "class", "do" }
+
+-- type of node as string
+ntype = (node) ->
+  switch type node
+    when "nil"
+      "nil"
+    when "table"
+      node[1]
+    else
+      "value"
 
 -- does this always return a value
 has_value = (node) ->
@@ -30,16 +36,6 @@ is_value = (stm) ->
 
 comprehension_has_value = (comp) ->
   is_value comp[2]
-
--- type of node as string
-ntype = (node) ->
-  switch type node
-    when "nil"
-      "nil"
-    when "table"
-      node[1]
-    else
-      "value"
 
 value_is_singular = (node) ->
   type(node) != "table" or node[1] != "exp" or #node == 2
@@ -160,4 +156,9 @@ smart_node = (node) ->
       rawset node, key, value
   }
     
-nil
+
+{
+  :ntype, :smart_node, :build, :is_value, :is_slice, :manual_return,
+  :cascading, :value_is_singular, :comprehension_has_value, :has_value
+}
+

@@ -1,11 +1,4 @@
 
-module "moonscript.util", package.seeall
-
-export moon
-export pos_to_line, get_closest_line, get_line
-export reversed, trim, split
-export dump, debug_posmap
-
 import concat from table
 
 moon =
@@ -25,12 +18,8 @@ pos_to_line = (str, pos) ->
     line += 1
   line
 
-get_closest_line = (str, line_num) ->
-  line = get_line str, line_num
-  if (not line or trim(line) == "") and line_num > 1
-    get_closest_line(str, line_num - 1)
-  else
-    line, line_num
+trim = (str) ->
+  str\match "^%s*(.-)%s*$"
 
 get_line = (str, line_num) ->
   -- todo: this returns an extra blank line at the end
@@ -38,13 +27,17 @@ get_line = (str, line_num) ->
     return line if line_num == 1
     line_num -= 1
 
+get_closest_line = (str, line_num) ->
+  line = get_line str, line_num
+  if (not line or trim(line) == "") and line_num > 1
+    get_closest_line(str, line_num - 1)
+  else
+    line, line_num
+
 reversed = (seq) ->
   coroutine.wrap ->
     for i=#seq,1,-1
       coroutine.yield i, seq[i]
-
-trim = (str) ->
-  str\match "^%s*(.-)%s*$"
 
 split = (str, delim) ->
   return {} if str == ""
@@ -90,5 +83,8 @@ debug_posmap = (posmap, moon_code, lua_code) ->
 
   concat(lines, "\n")
 
-nil
+{
+  :moon, :pos_to_line, :get_closest_line, :get_line, :reversed, :trim, :split,
+  :dump, :debug_posmap
+}
 

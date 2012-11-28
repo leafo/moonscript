@@ -3,10 +3,9 @@ module "moonscript", package.seeall
 
 require "moonscript.compile"
 require "moonscript.parse"
-require "moonscript.util"
 
 import concat, insert from table
-import split, dump from util
+import split, dump from require "moonscript.util"
 
 lua = :loadstring
 

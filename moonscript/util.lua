@@ -1,6 +1,5 @@
-module("moonscript.util", package.seeall)
 local concat = table.concat
-moon = {
+local moon = {
   is_object = function(value)
     return type(value) == "table" and value.__class
   end,
@@ -15,6 +14,7 @@ moon = {
     return base_type
   end
 }
+local pos_to_line
 pos_to_line = function(str, pos)
   local line = 1
   for _ in str:sub(1, pos):gmatch("\n") do
@@ -22,14 +22,11 @@ pos_to_line = function(str, pos)
   end
   return line
 end
-get_closest_line = function(str, line_num)
-  local line = get_line(str, line_num)
-  if (not line or trim(line) == "") and line_num > 1 then
-    return get_closest_line(str, line_num - 1)
-  else
-    return line, line_num
-  end
+local trim
+trim = function(str)
+  return str:match("^%s*(.-)%s*$")
 end
+local get_line
 get_line = function(str, line_num)
   for line in str:gmatch("([^\n]*)\n?") do
     if line_num == 1 then
@@ -38,6 +35,16 @@ get_line = function(str, line_num)
     line_num = line_num - 1
   end
 end
+local get_closest_line
+get_closest_line = function(str, line_num)
+  local line = get_line(str, line_num)
+  if (not line or trim(line) == "") and line_num > 1 then
+    return get_closest_line(str, line_num - 1)
+  else
+    return line, line_num
+  end
+end
+local reversed
 reversed = function(seq)
   return coroutine.wrap(function()
     for i = #seq, 1, -1 do
@@ -45,9 +52,7 @@ reversed = function(seq)
     end
   end)
 end
-trim = function(str)
-  return str:match("^%s*(.-)%s*$")
-end
+local split
 split = function(str, delim)
   if str == "" then
     return { }
@@ -63,6 +68,7 @@ split = function(str, delim)
     return _accum_0
   end)()
 end
+local dump
 dump = function(what)
   local seen = { }
   local _dump
@@ -99,6 +105,7 @@ dump = function(what)
   end
   return _dump(what)
 end
+local debug_posmap
 debug_posmap = function(posmap, moon_code, lua_code)
   local tuples = (function()
     local _accum_0 = { }
@@ -135,4 +142,14 @@ debug_posmap = function(posmap, moon_code, lua_code)
   end)()
   return concat(lines, "\n")
 end
-return nil
+return {
+  moon = moon,
+  pos_to_line = pos_to_line,
+  get_closest_line = get_closest_line,
+  get_line = get_line,
+  reversed = reversed,
+  trim = trim,
+  split = split,
+  dump = dump,
+  debug_posmap = debug_posmap
+}

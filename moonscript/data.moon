@@ -1,10 +1,6 @@
 -- data structures & static data
-module "moonscript.data", package.seeall
 
-export Set, Stack
-export lua_keywords
-
-import concat from table
+import concat, remove, insert from table
 
 Set = (items) ->
   self = {}
@@ -19,10 +15,10 @@ class Stack
     nil
 
   pop: =>
-    table.remove self
+    remove self
 
   push: (value) =>
-    table.insert self, value
+    insert self, value
     value
 
   top: =>
@@ -37,6 +33,7 @@ lua_keywords = Set{
 	'until', 'while'
 }
 
-nil
+
+{ :Set, :Stack, :lua_keywords }
 
 

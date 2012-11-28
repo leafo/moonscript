@@ -1,8 +1,4 @@
 
-module "moonscript.dump", package.seeall
-
-export value, tree
-
 flat_value = (op, depth=1) ->
   return '"'..op..'"' if type(op) == "string"
   return tostring(op) if type(op) != "table"
@@ -17,3 +13,6 @@ value = (op) ->
 
 tree = (block) ->
   print flat_value value for value in *block
+
+{ :value, :tree }
+
