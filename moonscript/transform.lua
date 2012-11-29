@@ -764,20 +764,33 @@ local Statement = Transformer({
     local exp_name = NameProxy("exp")
     local convert_cond
     convert_cond = function(cond)
-      local t, case_exp, body = unpack(cond)
+      local t, case_exps, body = unpack(cond)
       local out = { }
       insert(out, t == "case" and "elseif" or "else")
       if t ~= "else" then
-        if t ~= "else" then
-          insert(out, {
+        local cond_exp = { }
+        for i, case in ipairs(case_exps) do
+          if i == 1 then
+            insert(cond_exp, "exp")
+          else
+            insert(cond_exp, "or")
+          end
+          if not (value_is_singular(case)) then
+            case = {
+              "parens",
+              case
+            }
+          end
+          insert(cond_exp, {
             "exp",
-            case_exp,
+            case,
             "==",
             exp_name
           })
         end
+        insert(out, cond_exp)
       else
-        body = case_exp
+        body = case_exps
       end
       if ret then
         body = apply_to_last(body, ret)

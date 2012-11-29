@@ -404,13 +404,23 @@ Statement = Transformer {
 
     -- convert switch conds into if statment conds
     convert_cond = (cond) ->
-      t, case_exp, body = unpack cond
+      t, case_exps, body = unpack cond
       out = {}
       insert out, t == "case" and "elseif" or "else"
       if  t != "else"
-        insert out, {"exp", case_exp, "==", exp_name} if t != "else"
+        cond_exp = {}
+        for i, case in ipairs case_exps
+          if i == 1
+            insert cond_exp, "exp"
+          else
+            insert cond_exp, "or"
+
+          case = {"parens", case} unless value_is_singular case
+          insert cond_exp, {"exp", case, "==", exp_name}
+
+        insert out, cond_exp
       else
-        body = case_exp
+        body = case_exps
 
       if ret
         body = apply_to_last body, ret

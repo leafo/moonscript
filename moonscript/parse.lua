@@ -418,7 +418,7 @@ local build_grammar = wrap_env(function()
 		Switch = key"switch" * DisableDo * ensure(Exp, PopDo) * key"do"^-1 * Space^-1 * Break * SwitchBlock / mark"switch",
 
 		SwitchBlock = EmptyLine^0 * Advance * Ct(SwitchCase * (Break^1 * SwitchCase)^0 * (Break^1 * SwitchElse)^-1) * PopIndent,
-		SwitchCase = key"when" * Exp * key"then"^-1 * Body / mark"case",
+		SwitchCase = key"when" * Ct(ExpList) * key"then"^-1 * Body / mark"case",
 		SwitchElse = key"else" * Body / mark"else",
 
 		IfCond = Exp * Assign^-1 / format_single_assign,

@@ -13,7 +13,7 @@ if "cool" == _exp_2 then
   print("hello world")
 elseif "yeah" == _exp_2 then
   local _ = [[FFFF]] + [[MMMM]]
-elseif 2323 + 32434 == _exp_2 then
+elseif (2323 + 32434) == _exp_2 then
   print("okay")
 else
   print("okay rad")
@@ -43,7 +43,7 @@ do
   end
 end
 fix(this)
-return call_func((function()
+call_func((function()
   local _exp_5 = something
   if 1 == _exp_5 then
     return "yes"
@@ -51,3 +51,21 @@ return call_func((function()
     return "no"
   end
 end)())
+local _exp_5 = hi
+if (hello or world) == _exp_5 then
+  local _ = greene
+end
+local _exp_6 = hi
+if "one" == _exp_6 or "two" == _exp_6 then
+  print("cool")
+elseif "dad" == _exp_6 then
+  local _ = no
+end
+local _exp_7 = hi
+if (3 + 1) == _exp_7 or hello() == _exp_7 or (function()
+  return 4
+end)() == _exp_7 then
+  return yello
+else
+  return print("cool")
+end

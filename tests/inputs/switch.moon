@@ -42,3 +42,23 @@ call_func switch something
   when 1 then "yes"
   else "no"
 
+--
+
+switch hi
+  when hello or world
+    greene
+
+--
+
+switch hi
+  when "one", "two"
+    print "cool"
+  when "dad"
+    no
+
+switch hi
+  when 3+1, hello!, (-> 4)!
+    yello
+  else
+    print "cool"
+
