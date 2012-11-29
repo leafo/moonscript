@@ -81,6 +81,8 @@ output_fname = (base) ->
 describe "input tests", ->
   inputs = for file in lfs.dir options.in_dir
     file\match options.input_pattern
+
+  table.sort inputs
   
   for name in *inputs
     input = input_fname name
