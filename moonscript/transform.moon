@@ -291,11 +291,24 @@ Statement = Transformer {
     -- expand assign in cond
     if ntype(node[2]) == "assign"
       _, assign, body = unpack node
-      name = assign[2][1]
-      return build["do"] {
-        assign
-        {"if", name, unpack node, 3}
-      }
+      if destructure.has_destructure assign[2]
+        name = NameProxy "des"
+
+        body = {
+          destructure.build_assign assign[2][1], name
+          build.group node[3]
+        }
+
+        return build.do {
+          build.assign_one name, assign[3][1]
+          {"if", name, body, unpack node, 4}
+        }
+      else
+        name = assign[2][1]
+        return build["do"] {
+          assign
+          {"if", name, unpack node, 3}
+        }
 
     node = expand_elseif_assign node
 
@@ -341,8 +354,7 @@ Statement = Transformer {
     node.names = for i, name in ipairs node.names
       if ntype(name) == "table"
         with proxy = NameProxy "des"
-          extracted = destructure.extract_assign_names name
-          insert destructures, destructure.build_assign extracted, proxy
+          insert destructures, destructure.build_assign name, proxy
       else
         name
 

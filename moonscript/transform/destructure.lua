@@ -46,47 +46,6 @@ has_destructure = function(names)
   end
   return false
 end
-local build_assign
-build_assign = function(extracted_names, receiver)
-  local names = { }
-  local values = { }
-  local inner = {
-    "assign",
-    names,
-    values
-  }
-  local obj
-  if mtype(receiver) == NameProxy then
-    obj = receiver
-  else
-    do
-      local _with_0 = NameProxy("obj")
-      obj = _with_0
-      inner = build["do"]({
-        build.assign_one(obj, receiver),
-        {
-          "assign",
-          names,
-          values
-        }
-      })
-      obj = _with_0
-    end
-  end
-  local _list_0 = extracted_names
-  for _index_0 = 1, #_list_0 do
-    local tuple = _list_0[_index_0]
-    insert(names, tuple[1])
-    insert(values, obj:chain(unpack(tuple[2])))
-  end
-  return build.group({
-    {
-      "declare",
-      names
-    },
-    inner
-  })
-end
 local extract_assign_names
 extract_assign_names = function(name, accum, prefix)
   if accum == nil then
@@ -143,6 +102,48 @@ extract_assign_names = function(name, accum, prefix)
   end
   return accum
 end
+local build_assign
+build_assign = function(destruct_literal, receiver)
+  local extracted_names = extract_assign_names(destruct_literal)
+  local names = { }
+  local values = { }
+  local inner = {
+    "assign",
+    names,
+    values
+  }
+  local obj
+  if mtype(receiver) == NameProxy then
+    obj = receiver
+  else
+    do
+      local _with_0 = NameProxy("obj")
+      obj = _with_0
+      inner = build["do"]({
+        build.assign_one(obj, receiver),
+        {
+          "assign",
+          names,
+          values
+        }
+      })
+      obj = _with_0
+    end
+  end
+  local _list_0 = extracted_names
+  for _index_0 = 1, #_list_0 do
+    local tuple = _list_0[_index_0]
+    insert(names, tuple[1])
+    insert(values, obj:chain(unpack(tuple[2])))
+  end
+  return build.group({
+    {
+      "declare",
+      names
+    },
+    inner
+  })
+end
 local split_assign
 split_assign = function(assign)
   local names, values = unpack(assign, 2)
@@ -182,8 +183,7 @@ split_assign = function(assign)
           end)()
         })
       end
-      local extracted = extract_assign_names(n)
-      insert(g, build_assign(extracted, values[i]))
+      insert(g, build_assign(n, values[i]))
       start = i + 1
     end
   end
@@ -237,6 +237,5 @@ end
 return {
   has_destructure = has_destructure,
   split_assign = split_assign,
-  extract_assign_names = extract_assign_names,
   build_assign = build_assign
 }

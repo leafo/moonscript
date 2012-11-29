@@ -102,3 +102,46 @@ for _index_0 = 1, #_list_0 do
   x, y = _des_0[1], _des_0[2]
   print(x, y)
 end
+do
+  local _with_0 = thing
+  a, b = _with_0[1], _with_0[2]
+  print(a, b)
+end
+thing = nil
+do
+  local _des_0 = thing
+  if _des_0 then
+    a = _des_0[1]
+    print(a)
+  else
+    print("nothing")
+  end
+end
+local thang = {
+  1,
+  2
+}
+do
+  local _des_0 = thang
+  if _des_0 then
+    a, b = _des_0[1], _des_0[2]
+    print(a, b)
+  end
+end
+do
+  local _des_0 = thing
+  if _des_0 then
+    a, b = _des_0[1], _des_0[2]
+    print(a, b)
+  else
+    do
+      local _des_1 = thang
+      if _des_1 then
+        c, d = _des_1[1], _des_1[2]
+        print(c, d)
+      else
+        return print("NO")
+      end
+    end
+  end
+end

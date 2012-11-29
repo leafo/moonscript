@@ -18,30 +18,6 @@ has_destructure = (names) ->
     return true if ntype(n) == "table"
   false
 
-build_assign = (extracted_names, receiver) ->
-  names = {}
-  values = {}
-
-  inner = {"assign", names, values}
-
-  obj = if mtype(receiver) == NameProxy
-    receiver
-  else
-    with obj = NameProxy "obj"
-      inner = build.do {
-        build.assign_one obj, receiver
-        {"assign", names, values}
-      }
-
-  for tuple in *extracted_names
-    insert names, tuple[1]
-    insert values, obj\chain unpack tuple[2]
-
-  build.group {
-    {"declare", names}
-    inner
-  }
-
 extract_assign_names = (name, accum={}, prefix={}) ->
   i = 1
   for tuple in *name[2]
@@ -70,6 +46,32 @@ extract_assign_names = (name, accum={}, prefix={}) ->
 
   accum
 
+build_assign = (destruct_literal, receiver) ->
+  extracted_names = extract_assign_names destruct_literal
+
+  names = {}
+  values = {}
+
+  inner = {"assign", names, values}
+
+  obj = if mtype(receiver) == NameProxy
+    receiver
+  else
+    with obj = NameProxy "obj"
+      inner = build.do {
+        build.assign_one obj, receiver
+        {"assign", names, values}
+      }
+
+  for tuple in *extracted_names
+    insert names, tuple[1]
+    insert values, obj\chain unpack tuple[2]
+
+  build.group {
+    {"declare", names}
+    inner
+  }
+
 -- applies to destructuring to a assign node
 split_assign = (assign) ->
   names, values = unpack assign, 2
@@ -93,8 +95,7 @@ split_assign = (assign) ->
             values[i]
         }
 
-      extracted = extract_assign_names n
-      insert g, build_assign extracted, values[i]
+      insert g, build_assign n, values[i]
 
       start = i + 1
 
@@ -113,4 +114,4 @@ split_assign = (assign) ->
 
   build.group g
 
-{ :has_destructure, :split_assign, :extract_assign_names, :build_assign }
+{ :has_destructure, :split_assign, :build_assign }

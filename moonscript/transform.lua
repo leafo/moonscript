@@ -602,15 +602,32 @@ local Statement = Transformer({
   ["if"] = function(self, node, ret)
     if ntype(node[2]) == "assign" then
       local _, assign, body = unpack(node)
-      local name = assign[2][1]
-      return build["do"]({
-        assign,
-        {
-          "if",
-          name,
-          unpack(node, 3)
+      if destructure.has_destructure(assign[2]) then
+        local name = NameProxy("des")
+        body = {
+          destructure.build_assign(assign[2][1], name),
+          build.group(node[3])
         }
-      })
+        return build["do"]({
+          build.assign_one(name, assign[3][1]),
+          {
+            "if",
+            name,
+            body,
+            unpack(node, 4)
+          }
+        })
+      else
+        local name = assign[2][1]
+        return build["do"]({
+          assign,
+          {
+            "if",
+            name,
+            unpack(node, 3)
+          }
+        })
+      end
     end
     node = expand_elseif_assign(node)
     if ret then
@@ -668,8 +685,7 @@ local Statement = Transformer({
           do
             local _with_0 = NameProxy("des")
             local proxy = _with_0
-            local extracted = destructure.extract_assign_names(name)
-            insert(destructures, destructure.build_assign(extracted, proxy))
+            insert(destructures, destructure.build_assign(name, proxy))
             _value_0 = _with_0
           end
         else

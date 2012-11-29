@@ -1,4 +1,9 @@
 # TODO
+#
+#
+#
+
+-- local * and local ^
 
 -- seems like running in moon messes up require order
 
@@ -8,19 +13,14 @@
 
 - or= and=
 
-- a do block for making a quick anon func and calling it
-
 - error with stray comma at end of line
-- ugly error if attempting to assign to rvalue like #hello
-
-- class expressions, x = class extends Hello do new: => print "hello"
 
 * multiline comments
 * table slices (almost)
 
 * combine for and if line decorators
 
-* export later?
+* export later? nah
 
 	x = 232
 	export x

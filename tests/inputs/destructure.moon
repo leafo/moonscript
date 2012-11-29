@@ -51,3 +51,28 @@ for {x,y} in *thing
   print x,y
 
 
+--
+
+with {a,b} = thing
+  print a, b
+
+
+--
+
+thing = nil
+if {a} = thing
+  print a
+else
+  print "nothing"
+
+thang = {1,2}
+if {a,b} = thang
+  print a,b
+
+if {a,b} = thing
+  print a,b
+elseif {c,d} = thang
+  print c,d
+else
+  print "NO"
+
