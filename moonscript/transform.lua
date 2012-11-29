@@ -1,4 +1,3 @@
-module("moonscript.transform", package.seeall)
 local types = require("moonscript.types")
 local util = require("moonscript.util")
 local data = require("moonscript.data")
@@ -24,6 +23,7 @@ do
   end
 end
 local implicitly_return
+local Run
 do
   local _parent_0 = nil
   local _base_0 = {
@@ -335,7 +335,7 @@ construct_comprehension = function(inner, clauses)
   end
   return current_stms[1]
 end
-Statement = Transformer({
+local Statement = Transformer({
   root_stms = function(self, body)
     return apply_to_last(body, implicitly_return(self))
   end,
@@ -1309,7 +1309,7 @@ implicitly_return = function(scope)
   end
   return fn
 end
-Value = Transformer({
+local Value = Transformer({
   ["for"] = default_accumulator,
   ["while"] = default_accumulator,
   foreach = default_accumulator,
@@ -1549,3 +1549,8 @@ Value = Transformer({
     })
   end
 })
+return {
+  Statement = Statement,
+  Value = Value,
+  Run = Run
+}

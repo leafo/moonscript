@@ -1,6 +1,4 @@
 
-module "moonscript.transform", package.seeall
-
 types = require "moonscript.types"
 util = require "moonscript.util"
 data = require "moonscript.data"
@@ -21,8 +19,6 @@ mtype = do
       moon_type val
     else
       t
-
-export Statement, Value, Run
 
 local implicitly_return
 
@@ -879,3 +875,4 @@ Value = Transformer {
     build.chain { base: {"parens", fn}, {"call", arg_list} }
 }
 
+{ :Statement, :Value, :Run }

@@ -2,7 +2,7 @@
 
 module("moonscript", package.seeall)
 
-require "moonscript.parse"
+local parse = require "moonscript.parse"
 local compile = require "moonscript.compile"
 local util = require "moonscript.util"
 

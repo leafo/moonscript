@@ -1,4 +1,3 @@
-module("moonscript.parse", package.seeall)
 
 local util = require"moonscript.util"
 
@@ -117,7 +116,7 @@ local function wrap_env(fn)
 	}))
 end
 
-function extract_line(str, start_pos)
+local function extract_line(str, start_pos)
 	str = str:sub(start_pos)
 	m = str:match"^(.-)\n"
 	if m then return m end
@@ -633,13 +632,16 @@ local build_grammar = wrap_env(function()
 			return tree
 		end
 	}
-
 end)
 
--- parse a string
--- returns tree, or nil and error message
-function string(str)
-	local g = build_grammar()
-	return g:match(str)
-end
+return {
+	extract_line = extract_line,
+
+	-- parse a string
+	-- returns tree, or nil and error message
+	string = function (str)
+		local g = build_grammar()
+		return g:match(str)
+	end
+}
 

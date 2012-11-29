@@ -10,9 +10,8 @@ pcall(function()
 	gettime = socket.gettime
 end)
 
-require "moonscript.parse"
-require "moonscript.compile"
-local parse, compile = moonscript.parse, moonscript.compile
+parse = require "moonscript.parse"
+compile = require "moonscript.compile"
 
 local opts, ind = alt_getopt.get_opts(arg, "qd:", { })
 
