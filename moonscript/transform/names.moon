@@ -11,9 +11,9 @@ class NameProxy
   new: (@prefix) =>
     self[1] = "temp_name"
 
-  get_name: (scope) =>
+  get_name: (scope, dont_put=true) =>
     if not @name
-      @name = scope\free_name @prefix, true
+      @name = scope\free_name @prefix, dont_put
     @name
 
   chain: (...) =>

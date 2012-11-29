@@ -436,8 +436,8 @@ do
       local t = ntype(node)
       return value_compilers[t] ~= nil or t == "value"
     end,
-    name = function(self, node)
-      return self:value(node)
+    name = function(self, node, ...)
+      return self:value(node, ...)
     end,
     value = function(self, node, ...)
       node = self.transform.value(node)

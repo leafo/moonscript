@@ -100,12 +100,13 @@ statement_compilers =
 
     loop = with @line!
       \append "for "
-      \append_list [@name name for name in *names], ", "
-      \append " in "
-      \append_list [@value exp for exp in *exps], ","
-      \append " do"
 
     with @block loop
+      loop\append_list [\name name, false for name in *names], ", "
+      loop\append " in "
+      loop\append_list [@value exp for exp in *exps], ","
+      loop\append " do"
+
       \declare names
       \stms block
 

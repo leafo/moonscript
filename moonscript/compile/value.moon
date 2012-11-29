@@ -150,8 +150,8 @@ value_compilers =
   minus: (node) =>
     @line "-", @value node[2]
 
-  temp_name: (node) =>
-    node\get_name self
+  temp_name: (node, ...) =>
+    node\get_name self, ...
 
   number: (node) =>
     node[2]

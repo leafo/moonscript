@@ -279,7 +279,8 @@ class Block
     value_compilers[t] != nil or t == "value"
 
   -- line wise compile functions
-  name: (node) => @value node
+  name: (node, ...) => @value node, ...
+
   value: (node, ...) =>
     node = @transform.value node
     action = if type(node) != "table"

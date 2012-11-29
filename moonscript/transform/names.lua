@@ -48,9 +48,12 @@ local NameProxy
 do
   local _parent_0 = nil
   local _base_0 = {
-    get_name = function(self, scope)
+    get_name = function(self, scope, dont_put)
+      if dont_put == nil then
+        dont_put = true
+      end
       if not self.name then
-        self.name = scope:free_name(self.prefix, true)
+        self.name = scope:free_name(self.prefix, dont_put)
       end
       return self.name
     end,

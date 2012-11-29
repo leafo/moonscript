@@ -185,19 +185,23 @@ local statement_compilers = {
     do
       local _with_0 = self:line()
       _with_0:append("for ")
-      _with_0:append_list((function()
+      loop = _with_0
+    end
+    do
+      local _with_0 = self:block(loop)
+      loop:append_list((function()
         local _accum_0 = { }
         local _len_0 = 0
         local _list_0 = names
         for _index_0 = 1, #_list_0 do
           local name = _list_0[_index_0]
           _len_0 = _len_0 + 1
-          _accum_0[_len_0] = self:name(name)
+          _accum_0[_len_0] = _with_0:name(name, false)
         end
         return _accum_0
       end)(), ", ")
-      _with_0:append(" in ")
-      _with_0:append_list((function()
+      loop:append(" in ")
+      loop:append_list((function()
         local _accum_0 = { }
         local _len_0 = 0
         local _list_0 = exps
@@ -208,11 +212,7 @@ local statement_compilers = {
         end
         return _accum_0
       end)(), ",")
-      _with_0:append(" do")
-      loop = _with_0
-    end
-    do
-      local _with_0 = self:block(loop)
+      loop:append(" do")
       _with_0:declare(names)
       _with_0:stms(block)
       return _with_0
