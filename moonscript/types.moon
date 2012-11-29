@@ -22,6 +22,14 @@ ntype = (node) ->
     else
       "value"
 
+mtype = do
+  moon_type = util.moon.type
+  -- lets us check a smart node without throwing an error
+  (val) ->
+    mt = getmetatable val
+    return "table" if mt and mt.smart_node
+    moon_type val
+
 -- does this always return a value
 has_value = (node) ->
   if ntype(node) == "chain"
@@ -142,25 +150,33 @@ build = setmetatable {
     rawget self, name
 }
 
+smart_node_mt = setmetatable {}, {
+  __index: (node_type) =>
+    index = key_table[node_type]
+    mt = {
+      smart_node: true
+
+      __index: (node, key) ->
+        if index[key]
+          rawget node, index[key]
+        elseif type(key) == "string"
+          error "unknown key: `"..key.."` on node type: `"..ntype(node).. "`"
+
+      __newindex: (node, key, value) ->
+        key = index[key] if index[key]
+        rawset node, key, value
+    }
+    self[node_type] = mt
+    mt
+}
+
 -- makes it so node properties can be accessed by name instead of index
 smart_node = (node) ->
-  index = key_table[ntype node]
-  if not index then return node
-  setmetatable node, {
-    __index: (node, key) ->
-      if index[key]
-        rawget node, index[key]
-      elseif type(key) == "string"
-        error "unknown key: `"..key.."` on node type: `"..ntype(node).. "`"
-
-    __newindex: (node, key, value) ->
-      key = index[key] if index[key]
-      rawset node, key, value
-  }
-    
+  setmetatable node, smart_node_mt[ntype node]
 
 {
   :ntype, :smart_node, :build, :is_value, :is_slice, :manual_return,
-  :cascading, :value_is_singular, :comprehension_has_value, :has_value
+  :cascading, :value_is_singular, :comprehension_has_value, :has_value,
+  :mtype
 }
 

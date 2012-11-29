@@ -2,7 +2,7 @@ local types = require("moonscript.types")
 local util = require("moonscript.util")
 local data = require("moonscript.data")
 local reversed = util.reversed
-local ntype, build, smart_node, is_slice, value_is_singular = types.ntype, types.build, types.smart_node, types.is_slice, types.value_is_singular
+local ntype, mtype, build, smart_node, is_slice, value_is_singular = types.ntype, types.mtype, types.build, types.smart_node, types.is_slice, types.value_is_singular
 local insert = table.insert
 local NameProxy, LocalName
 do
@@ -10,18 +10,6 @@ do
   NameProxy, LocalName = _table_0.NameProxy, _table_0.LocalName
 end
 local destructure = require("moonscript.transform.destructure")
-local mtype
-do
-  local moon_type = util.moon.type
-  mtype = function(val)
-    local t = type(val)
-    if "table" == t and rawget(val, "__class") then
-      return moon_type(val)
-    else
-      return t
-    end
-  end
-end
 local implicitly_return
 local Run
 do
@@ -670,6 +658,34 @@ local Statement = Transformer({
   foreach = function(self, node)
     smart_node(node)
     local source = unpack(node.iter)
+    local destructures = { }
+    node.names = (function()
+      local _accum_0 = { }
+      local _len_0 = 0
+      for i, name in ipairs(node.names) do
+        local _value_0
+        if ntype(name) == "table" then
+          do
+            local _with_0 = NameProxy("des")
+            local proxy = _with_0
+            local extracted = destructure.extract_assign_names(name)
+            insert(destructures, destructure.build_assign(extracted, proxy))
+            _value_0 = _with_0
+          end
+        else
+          _value_0 = name
+        end
+        if _value_0 ~= nil then
+          _len_0 = _len_0 + 1
+          _accum_0[_len_0] = _value_0
+        end
+      end
+      return _accum_0
+    end)()
+    if next(destructures) then
+      insert(destructures, build.group(node.body))
+      node.body = destructures
+    end
     if ntype(source) == "unpack" then
       local list = source[2]
       local index_name = NameProxy("index")

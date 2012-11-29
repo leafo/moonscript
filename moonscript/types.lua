@@ -26,6 +26,17 @@ ntype = function(node)
     return "value"
   end
 end
+local mtype
+do
+  local moon_type = util.moon.type
+  mtype = function(val)
+    local mt = getmetatable(val)
+    if mt and mt.smart_node then
+      return "table"
+    end
+    return moon_type(val)
+  end
+end
 local has_value
 has_value = function(node)
   if ntype(node) == "chain" then
@@ -260,27 +271,32 @@ build = setmetatable({
     return rawget(self, name)
   end
 })
+local smart_node_mt = setmetatable({ }, {
+  __index = function(self, node_type)
+    local index = key_table[node_type]
+    local mt = {
+      smart_node = true,
+      __index = function(node, key)
+        if index[key] then
+          return rawget(node, index[key])
+        elseif type(key) == "string" then
+          return error("unknown key: `" .. key .. "` on node type: `" .. ntype(node) .. "`")
+        end
+      end,
+      __newindex = function(node, key, value)
+        if index[key] then
+          key = index[key]
+        end
+        return rawset(node, key, value)
+      end
+    }
+    self[node_type] = mt
+    return mt
+  end
+})
 local smart_node
 smart_node = function(node)
-  local index = key_table[ntype(node)]
-  if not index then
-    return node
-  end
-  return setmetatable(node, {
-    __index = function(node, key)
-      if index[key] then
-        return rawget(node, index[key])
-      elseif type(key) == "string" then
-        return error("unknown key: `" .. key .. "` on node type: `" .. ntype(node) .. "`")
-      end
-    end,
-    __newindex = function(node, key, value)
-      if index[key] then
-        key = index[key]
-      end
-      return rawset(node, key, value)
-    end
-  })
+  return setmetatable(node, smart_node_mt[ntype(node)])
 end
 return {
   ntype = ntype,
@@ -292,5 +308,6 @@ return {
   cascading = cascading,
   value_is_singular = value_is_singular,
   comprehension_has_value = comprehension_has_value,
-  has_value = has_value
+  has_value = has_value,
+  mtype = mtype
 }

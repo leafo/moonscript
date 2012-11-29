@@ -43,3 +43,11 @@ print name, street, city
 
 { world: @world } = x
 
+--
+
+thing = {{1,2}, {3,4}}
+
+for {x,y} in *thing
+  print x,y
+
+

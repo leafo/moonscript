@@ -1,7 +1,7 @@
-local ntype, build
+local ntype, mtype, build
 do
   local _table_0 = require("moonscript.types")
-  ntype, build = _table_0.ntype, _table_0.build
+  ntype, mtype, build = _table_0.ntype, _table_0.mtype, _table_0.build
 end
 local NameProxy
 do
@@ -48,9 +48,31 @@ has_destructure = function(names)
 end
 local build_assign
 build_assign = function(extracted_names, receiver)
-  local obj = NameProxy("obj")
   local names = { }
   local values = { }
+  local inner = {
+    "assign",
+    names,
+    values
+  }
+  local obj
+  if mtype(receiver) == NameProxy then
+    obj = receiver
+  else
+    do
+      local _with_0 = NameProxy("obj")
+      obj = _with_0
+      inner = build["do"]({
+        build.assign_one(obj, receiver),
+        {
+          "assign",
+          names,
+          values
+        }
+      })
+      obj = _with_0
+    end
+  end
   local _list_0 = extracted_names
   for _index_0 = 1, #_list_0 do
     local tuple = _list_0[_index_0]
@@ -62,14 +84,7 @@ build_assign = function(extracted_names, receiver)
       "declare",
       names
     },
-    build["do"]({
-      build.assign_one(obj, receiver),
-      {
-        "assign",
-        names,
-        values
-      }
-    })
+    inner
   })
 end
 local extract_assign_names

@@ -1,5 +1,5 @@
 
-import ntype, build from require "moonscript.types"
+import ntype, mtype, build from require "moonscript.types"
 import NameProxy from require "moonscript.transform.names"
 import insert from table
 
@@ -19,9 +19,19 @@ has_destructure = (names) ->
   false
 
 build_assign = (extracted_names, receiver) ->
-  obj = NameProxy "obj"
   names = {}
   values = {}
+
+  inner = {"assign", names, values}
+
+  obj = if mtype(receiver) == NameProxy
+    receiver
+  else
+    with obj = NameProxy "obj"
+      inner = build.do {
+        build.assign_one obj, receiver
+        {"assign", names, values}
+      }
 
   for tuple in *extracted_names
     insert names, tuple[1]
@@ -29,10 +39,7 @@ build_assign = (extracted_names, receiver) ->
 
   build.group {
     {"declare", names}
-    build.do {
-      build.assign_one obj, receiver
-      {"assign", names, values}
-    }
+    inner
   }
 
 extract_assign_names = (name, accum={}, prefix={}) ->

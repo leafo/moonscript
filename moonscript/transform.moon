@@ -4,21 +4,11 @@ util = require "moonscript.util"
 data = require "moonscript.data"
 
 import reversed from util
-import ntype, build, smart_node, is_slice, value_is_singular from types
+import ntype, mtype, build, smart_node, is_slice, value_is_singular from types
 import insert from table
 import NameProxy, LocalName from require "moonscript.transform.names"
 
 destructure = require "moonscript.transform.destructure"
-
-mtype = do
-  moon_type = util.moon.type
-  -- lets us check a smart node without throwing an error
-  (val) ->
-    t = type(val)
-    if "table" == t and rawget(val, "__class")
-      moon_type val
-    else
-      t
 
 local implicitly_return
 
@@ -346,6 +336,19 @@ Statement = Transformer {
   foreach: (node) =>
     smart_node node
     source = unpack node.iter
+
+    destructures = {}
+    node.names = for i, name in ipairs node.names
+      if ntype(name) == "table"
+        with proxy = NameProxy "des"
+          extracted = destructure.extract_assign_names name
+          insert destructures, destructure.build_assign extracted, proxy
+      else
+        name
+
+    if next destructures
+      insert destructures, build.group node.body
+      node.body = destructures
 
     if ntype(source) == "unpack"
       list = source[2]

@@ -435,7 +435,7 @@ local build_grammar = wrap_env(function()
 		For = key"for" * DisableDo * ensure(Name * sym"=" * Ct(Exp * sym"," * Exp * (sym"," * Exp)^-1), PopDo) *
 			key"do"^-1 * Body / mark"for",
 
-		ForEach = key"for" * Ct(NameList) * key"in" * DisableDo * ensure(Ct(sym"*" * Exp / mark"unpack" + ExpList), PopDo) * key"do"^-1 * Body / mark"foreach",
+		ForEach = key"for" * Ct(AssignableNameList) * key"in" * DisableDo * ensure(Ct(sym"*" * Exp / mark"unpack" + ExpList), PopDo) * key"do"^-1 * Body / mark"foreach",
 
 		Do = key"do" * Body / mark"do",
 
@@ -575,7 +575,7 @@ local build_grammar = wrap_env(function()
 			(key"using" * Ct(NameList + Space * "nil") + Ct"") *
 			sym")" + Ct"" * Ct"",
 
-		FnArgDefList =  FnArgDef * (sym"," * FnArgDef)^0,
+		FnArgDefList = FnArgDef * (sym"," * FnArgDef)^0,
 		FnArgDef = Ct(Name * (sym"=" * Exp)^-1),
 
 		FunLit = FnArgsDef *
@@ -583,6 +583,9 @@ local build_grammar = wrap_env(function()
 			(Body + Ct"") / mark"fndef",
 
 		NameList = Name * (sym"," * Name)^0,
+		NameOrDestructure = Name + TableLit,
+		AssignableNameList = NameOrDestructure * (sym"," * NameOrDestructure)^0,
+
 		ExpList = Exp * (sym"," * Exp)^0,
 		ExpListLow = Exp * ((sym"," + sym";") * Exp)^0,
 

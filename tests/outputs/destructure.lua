@@ -86,3 +86,19 @@ do
   local _obj_0 = x
   self.world = _obj_0.world
 end
+thing = {
+  {
+    1,
+    2
+  },
+  {
+    3,
+    4
+  }
+}
+local _list_0 = thing
+for _index_0 = 1, #_list_0 do
+  local _des_0 = _list_0[_index_0]
+  x, y = _des_0[1], _des_0[2]
+  print(x, y)
+end
