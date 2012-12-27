@@ -1,4 +1,3 @@
-
 # MoonScript for [scintillua][1]
 
 MoonScript syntax file for [SciTE][2] written in Lua for [scintillua][1].
@@ -14,7 +13,7 @@ the directions below.
 
 ## Installation
 
-Install SciTE, then [install scintillua][3].
+Install SciTE, then [install scintillua][1].
 
 Put `moonscript.properties` in in your ScITE installation folder or user
 properties folder.
@@ -32,6 +31,6 @@ file and change it to:
 
     lexer.lpeg.color.theme=moon
 
-  [1]: http://code.google.com/p/scintillua/ "scintillua"
+  [1]: http://foicica.com/scintillua/ "scintillua"
   [2]: http://www.scintilla.org/SciTE.html "SciTE"
-  [3]: http://code.google.com/p/scintillua/#Using_with_SciTE
+  
