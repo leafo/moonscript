@@ -1,7 +1,7 @@
 
 local util = require"moonscript.util"
 
-require"lpeg"
+local lpeg = require"lpeg"
 
 local debug_grammar = false
 
@@ -12,6 +12,9 @@ local ntype = types.ntype
 
 local dump = util.dump
 local trim = util.trim
+
+local getfenv = util.getfenv
+local setfenv = util.setfenv
 
 local Stack = data.Stack
 

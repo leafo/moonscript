@@ -1,6 +1,4 @@
 
-module "moonscript", package.seeall
-
 compile = require "moonscript.compile"
 parse = require "moonscript.parse"
 
@@ -9,11 +7,8 @@ import split, dump from require "moonscript.util"
 
 lua = :loadstring
 
-export to_lua, moon_chunk, moon_loader, dirsep, line_tables
-export dofile, loadfile, loadstring
-
 dirsep = "/"
-line_tables = {}
+line_tables = require "moonscript.line_tables"
 
 -- create moon path package from lua package path
 create_moonpath = (package_path) ->
@@ -81,4 +76,10 @@ loadfile = (fname, options=nil) ->
 dofile = (fname, options) ->
   f = assert loadfile fname
   f!
+
+{
+  _NAME: "moonscript"
+  :to_lua, :moon_chunk, :moon_loader, :dirsep, :dofile, :loadfile,
+  :loadstring
+}
 
