@@ -53,9 +53,9 @@ if not package.moonpath
   package.moonpath = create_moonpath package.path
 
 init_loader = ->
-  insert package.loaders, 2, moon_loader
+  insert package.loaders or package.searchers, 2, moon_loader
 
-init_loader! if not _G.moon_no_loader
+init_loader! unless _G.moon_no_loader
 
 loadstring = (str, chunk_name, options=nil) ->
   passed, code, ltable = pcall -> to_lua str, options

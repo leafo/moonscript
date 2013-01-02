@@ -67,9 +67,9 @@ if not package.moonpath then
 end
 local init_loader
 init_loader = function()
-  return insert(package.loaders, 2, moon_loader)
+  return insert(package.loaders or package.searchers, 2, moon_loader)
 end
-if not _G.moon_no_loader then
+if not (_G.moon_no_loader) then
   init_loader()
 end
 local loadstring
