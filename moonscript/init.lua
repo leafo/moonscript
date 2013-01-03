@@ -1,10 +1,10 @@
 local compile = require("moonscript.compile")
 local parse = require("moonscript.parse")
 local concat, insert = table.concat, table.insert
-local split, dump
+local split, dump, get_options, unpack
 do
   local _table_0 = require("moonscript.util")
-  split, dump = _table_0.split, _table_0.dump
+  split, dump, get_options, unpack = _table_0.split, _table_0.dump, _table_0.get_options, _table_0.unpack
 end
 local lua = {
   loadstring = loadstring
@@ -73,10 +73,9 @@ if not (_G.moon_no_loader) then
   init_loader()
 end
 local loadstring
-loadstring = function(str, chunk_name, options)
-  if options == nil then
-    options = nil
-  end
+loadstring = function(...)
+  local options, str, chunk_name, mode, env = get_options(...)
+  chunk_name = chunk_name or "=(moonscript.loadstring)"
   local passed, code, ltable = pcall(function()
     return to_lua(str, options)
   end)
@@ -86,24 +85,24 @@ loadstring = function(str, chunk_name, options)
   if chunk_name then
     line_tables[chunk_name] = ltable
   end
-  return lua.loadstring(code, chunk_name or "=(moonscript.loadstring)")
+  return (lua.loadstring or lua.load)(code, chunk_name, unpack({
+    mode,
+    env
+  }))
 end
 local loadfile
-loadfile = function(fname, options)
-  if options == nil then
-    options = nil
-  end
+loadfile = function(fname, ...)
   local file, err = io.open(fname)
   if not file then
     return nil, err
   end
   local text = assert(file:read("*a"))
   file:close()
-  return loadstring(text, fname, options)
+  return loadstring(text, fname, ...)
 end
 local dofile
-dofile = function(fname, options)
-  local f = assert(loadfile(fname))
+dofile = function(...)
+  local f = assert(loadfile(...))
   return f()
 end
 return {
