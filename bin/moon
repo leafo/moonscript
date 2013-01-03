@@ -1,7 +1,7 @@
 #!/usr/bin/env lua
 
 require "alt_getopt"
-require "moonscript"
+local moonscript = require "moonscript"
 
 local util = require "moonscript.util"
 local errors = require "moonscript.errors"
@@ -66,7 +66,7 @@ if not moonscript_chunk then
 	os.exit(1)
 end
 
-getfenv(moonscript_chunk).arg = new_arg
+util.getfenv(moonscript_chunk).arg = new_arg
 
 if not opts.d then
 	local err, trace

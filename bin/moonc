@@ -1,7 +1,5 @@
 #!/usr/bin/env lua
 
-module("moonscript", package.seeall)
-
 local parse = require "moonscript.parse"
 local compile = require "moonscript.compile"
 local util = require "moonscript.util"
@@ -267,7 +265,8 @@ function get_sleep_func()
 		require "socket"
 		sleep = socket.sleep
 	end) then
-		sleep = moonscript._sleep
+		-- This is set by moonc.c in windows binaries
+		sleep = require("moonscript")._sleep
 	end
 	if not sleep then
 		error("Missing sleep function; install LuaSocket")
