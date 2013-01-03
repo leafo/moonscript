@@ -32,6 +32,8 @@ pcall ->
   require "socket"
   gettime = socket.gettime
 
+gettime or= os.clock
+
 benchmark = (fn) ->
   if gettime
     start = gettime!
