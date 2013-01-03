@@ -1,6 +1,8 @@
 
 import concat from table
 
+unpack = unpack or table.unpack
+
 moon =
   is_object: (value) -> -- is a moonscript object
     type(value) == "table" and value.__class
@@ -105,8 +107,18 @@ getfenv = getfenv or (fn) ->
     i += 1
   nil
 
+-- moves the last argument to the front if it's a table, or returns empty table
+-- inserted to the front of args
+get_options = (...) ->
+  count = select "#", ...
+  opts = select count, ...
+  if type(opts) == "table"
+    opts, unpack {...}, nil, count - 1
+  else
+    {}, ...
+
 {
   :moon, :pos_to_line, :get_closest_line, :get_line, :reversed, :trim, :split,
-  :dump, :debug_posmap, :getfenv, :setfenv
+  :dump, :debug_posmap, :getfenv, :setfenv, :get_options, :unpack
 }
 

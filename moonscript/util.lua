@@ -1,4 +1,5 @@
 local concat = table.concat
+local unpack = unpack or table.unpack
 local moon = {
   is_object = function(value)
     return type(value) == "table" and value.__class
@@ -173,6 +174,18 @@ local getfenv = getfenv or function(fn)
   end
   return nil
 end
+local get_options
+get_options = function(...)
+  local count = select("#", ...)
+  local opts = select(count, ...)
+  if type(opts) == "table" then
+    return opts, unpack({
+      ...
+    }, nil, count - 1)
+  else
+    return { }, ...
+  end
+end
 return {
   moon = moon,
   pos_to_line = pos_to_line,
@@ -184,5 +197,7 @@ return {
   dump = dump,
   debug_posmap = debug_posmap,
   getfenv = getfenv,
-  setfenv = setfenv
+  setfenv = setfenv,
+  get_options = get_options,
+  unpack = unpack
 }
