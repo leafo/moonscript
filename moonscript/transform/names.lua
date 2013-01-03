@@ -3,6 +3,11 @@ do
   local _table_0 = require("moonscript.types")
   build = _table_0.build
 end
+local unpack
+do
+  local _table_0 = require("moonscript.util")
+  unpack = _table_0.unpack
+end
 local LocalName
 do
   local _parent_0 = nil

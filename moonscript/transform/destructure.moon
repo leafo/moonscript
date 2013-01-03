@@ -2,6 +2,7 @@
 import ntype, mtype, build from require "moonscript.types"
 import NameProxy from require "moonscript.transform.names"
 import insert from table
+import unpack from require "moonscript.util"
 
 import user_error from require "moonscript.errors"
 

@@ -11,6 +11,7 @@ do
   user_error = _table_0.user_error
 end
 local concat, insert = table.concat, table.insert
+local unpack = util.unpack
 local table_delim = ","
 local value_compilers = {
   exp = function(self, node)

@@ -27,7 +27,7 @@ do
   value_compilers = _table_0.value_compilers
 end
 local concat, insert = table.concat, table.insert
-local pos_to_line, get_closest_line, trim = util.pos_to_line, util.get_closest_line, util.trim
+local pos_to_line, get_closest_line, trim, unpack = util.pos_to_line, util.get_closest_line, util.trim, util.unpack
 local mtype = util.moon.type
 local indent_char = "  "
 local Line, Lines, Block, RootBlock

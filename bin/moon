@@ -6,6 +6,8 @@ local moonscript = require "moonscript"
 local util = require "moonscript.util"
 local errors = require "moonscript.errors"
 
+local unpack = util.unpack
+
 -- moonloader and repl
 local opts, ind = alt_getopt.get_opts(arg, "cvhd", { version = "v", help = "h" })
 

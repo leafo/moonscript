@@ -3,7 +3,7 @@ types = require "moonscript.types"
 util = require "moonscript.util"
 data = require "moonscript.data"
 
-import reversed from util
+import reversed, unpack from util
 import ntype, mtype, build, smart_node, is_slice, value_is_singular from types
 import insert from table
 import NameProxy, LocalName from require "moonscript.transform.names"

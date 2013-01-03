@@ -1,5 +1,5 @@
 
-import reversed from require "moonscript.util"
+import reversed, unpack from require "moonscript.util"
 import ntype from require "moonscript.types"
 import concat, insert from table
 

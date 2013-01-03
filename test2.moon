@@ -8,6 +8,8 @@ util    = require "moonscript.util"
 
 pattern = ...
 
+import unpack from util
+
 options = {
   in_dir: "tests/inputs",
   out_dir: "tests/outputs",

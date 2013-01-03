@@ -1,7 +1,7 @@
-local reversed
+local reversed, unpack
 do
   local _table_0 = require("moonscript.util")
-  reversed = _table_0.reversed
+  reversed, unpack = _table_0.reversed, _table_0.unpack
 end
 local ntype
 do

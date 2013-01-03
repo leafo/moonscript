@@ -3,6 +3,7 @@ util = require "moonscript.util"
 data = require "moonscript.data"
 
 import insert from table
+import unpack from util
 
 -- implicit return does not work on these statements
 manual_return = data.Set{"foreach", "for", "while", "return"}

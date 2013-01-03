@@ -5,6 +5,7 @@ data = require "moonscript.data"
 import ntype from require "moonscript.types"
 import user_error from require "moonscript.errors"
 import concat, insert from table
+import unpack from util
 
 table_delim = ","
 

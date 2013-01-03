@@ -11,7 +11,7 @@ import statement_compilers from require "moonscript.compile.statement"
 import value_compilers from require "moonscript.compile.value"
 
 import concat, insert from table
-import pos_to_line, get_closest_line, trim from util
+import pos_to_line, get_closest_line, trim, unpack from util
 
 mtype = util.moon.type
 

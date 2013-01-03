@@ -9,6 +9,11 @@ do
   NameProxy = _table_0.NameProxy
 end
 local insert = table.insert
+local unpack
+do
+  local _table_0 = require("moonscript.util")
+  unpack = _table_0.unpack
+end
 local user_error
 do
   local _table_0 = require("moonscript.errors")

@@ -15,6 +15,7 @@ local trim = util.trim
 
 local getfenv = util.getfenv
 local setfenv = util.setfenv
+local unpack = util.unpack
 
 local Stack = data.Stack
 

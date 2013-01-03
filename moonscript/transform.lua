@@ -1,7 +1,7 @@
 local types = require("moonscript.types")
 local util = require("moonscript.util")
 local data = require("moonscript.data")
-local reversed = util.reversed
+local reversed, unpack = util.reversed, util.unpack
 local ntype, mtype, build, smart_node, is_slice, value_is_singular = types.ntype, types.mtype, types.build, types.smart_node, types.is_slice, types.value_is_singular
 local insert = table.insert
 local NameProxy, LocalName

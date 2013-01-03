@@ -1,6 +1,7 @@
 local util = require("moonscript.util")
 local data = require("moonscript.data")
 local insert = table.insert
+local unpack = util.unpack
 local manual_return = data.Set({
   "foreach",
   "for",

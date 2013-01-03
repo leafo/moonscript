@@ -1,5 +1,6 @@
 
 import build from require "moonscript.types"
+import unpack from require "moonscript.util"
 
 -- always declares as local
 class LocalName
