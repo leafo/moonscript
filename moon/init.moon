@@ -129,7 +129,7 @@ fold = (items, fn)->
   if len > 1
     accum = fn items[1], items[2]
     for i=3,len
-      accum = fn acum, items[i]
+      accum = fn accum, items[i]
     accum
   else
     items[1]
