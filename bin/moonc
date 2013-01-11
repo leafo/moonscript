@@ -4,6 +4,8 @@ local parse = require "moonscript.parse"
 local compile = require "moonscript.compile"
 local util = require "moonscript.util"
 
+local dump_tree = require"moonscript.dump".tree
+
 require "alt_getopt"
 require "lfs"
 
@@ -117,7 +119,7 @@ function compile_file(text, fname)
 
 	if opts.T then
 		opts.p = true
-		dump.tree(tree)
+		dump_tree(tree)
 		return ""
 	else
 		local compile_time = gettime()
