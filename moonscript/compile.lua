@@ -66,9 +66,11 @@ do
         if "string" == _exp_0 or DelayedLine == _exp_0 then
           line_no = line_no + 1
           out[line_no] = posmap[i]
-        elseif "table" == _exp_0 then
+        elseif Lines == _exp_0 then
           local _
           _, line_no = l:flatten_posmap(line_no, out)
+        else
+          error("Unknown item in Lines: " .. tostring(l))
         end
       end
       return out, line_no
@@ -101,8 +103,10 @@ do
           end
           insert(buffer, "\n")
           local last = l
-        elseif "table" == _exp_0 then
+        elseif Lines == _exp_0 then
           l:flatten(indent and indent .. indent_char or indent_char, buffer)
+        else
+          error("Unknown item in Lines: " .. tostring(l))
         end
       end
       return buffer

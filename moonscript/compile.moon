@@ -45,8 +45,10 @@ class Lines
         when "string", DelayedLine
           line_no += 1
           out[line_no] = posmap[i]
-        when "table"
+        when Lines
           _, line_no = l\flatten_posmap line_no, out
+        else
+          error "Unknown item in Lines: #{l}"
 
     out, line_no
 
@@ -72,8 +74,10 @@ class Lines
 
           insert buffer, "\n"
           last = l
-        when "table" -- Lines
+        when Lines
            l\flatten indent and indent .. indent_char or indent_char, buffer
+        else
+          error "Unknown item in Lines: #{l}"
     buffer
 
   __tostring: =>
