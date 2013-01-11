@@ -17,7 +17,7 @@ mtype = util.moon.type
 
 indent_char = "  "
 
-local Line, Lines, Block, RootBlock
+local Line, DelayedLine, Lines, Block, RootBlock
 
 -- a buffer for building up lines
 class Lines
@@ -34,26 +34,32 @@ class Lines
         item\render self
       when Block
         item\render self
-      else
+      else -- also captures DelayedLine
         @[#@ + 1] = item
     @
 
   flatten_posmap: (line_no=0, out={}) =>
     posmap = @posmap
     for i, l in ipairs @
-      switch type l
-        when "table"
-          _, line_no = l\flatten_posmap line_no, out
-        when "string"
+      switch mtype l
+        when "string", DelayedLine
           line_no += 1
           out[line_no] = posmap[i]
+        when "table"
+          _, line_no = l\flatten_posmap line_no, out
 
     out, line_no
 
   flatten: (indent=nil, buffer={}) =>
     for i = 1, #@
       l = @[i]
-      switch type l
+      t = mtype l
+
+      if t == DelayedLine
+        l = l\render!
+        t = "string"
+
+      switch t
         when "string"
           insert buffer, indent if indent
           insert buffer, l
@@ -66,7 +72,7 @@ class Lines
 
           insert buffer, "\n"
           last = l
-        when "table"
+        when "table" -- Lines
            l\flatten indent and indent .. indent_char or indent_char, buffer
     buffer
 
@@ -133,6 +139,16 @@ class Line
 
   __tostring: =>
     "Line<#{util.dump(@)\sub 1, -2}>"
+
+class DelayedLine
+  new: (fn) =>
+    @prepare = fn
+
+  prepare: ->
+
+  render: =>
+    @prepare!
+    concat @
 
 class Block
   header: "do"

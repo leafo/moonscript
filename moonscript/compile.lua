@@ -30,7 +30,7 @@ local concat, insert = table.concat, table.insert
 local pos_to_line, get_closest_line, trim, unpack = util.pos_to_line, util.get_closest_line, util.trim, util.unpack
 local mtype = util.moon.type
 local indent_char = "  "
-local Line, Lines, Block, RootBlock
+local Line, DelayedLine, Lines, Block, RootBlock
 do
   local _parent_0 = nil
   local _base_0 = {
@@ -62,13 +62,13 @@ do
       end
       local posmap = self.posmap
       for i, l in ipairs(self) do
-        local _exp_0 = type(l)
-        if "table" == _exp_0 then
-          local _
-          _, line_no = l:flatten_posmap(line_no, out)
-        elseif "string" == _exp_0 then
+        local _exp_0 = mtype(l)
+        if "string" == _exp_0 or DelayedLine == _exp_0 then
           line_no = line_no + 1
           out[line_no] = posmap[i]
+        elseif "table" == _exp_0 then
+          local _
+          _, line_no = l:flatten_posmap(line_no, out)
         end
       end
       return out, line_no
@@ -82,7 +82,12 @@ do
       end
       for i = 1, #self do
         local l = self[i]
-        local _exp_0 = type(l)
+        local t = mtype(l)
+        if t == DelayedLine then
+          l = l:render()
+          t = "string"
+        end
+        local _exp_0 = t
         if "string" == _exp_0 then
           if indent then
             insert(buffer, indent)
@@ -263,6 +268,47 @@ do
     _parent_0.__inherited(_parent_0, _class_0)
   end
   Line = _class_0
+end
+do
+  local _parent_0 = nil
+  local _base_0 = {
+    prepare = function() end,
+    render = function(self)
+      self:prepare()
+      return concat(self)
+    end
+  }
+  _base_0.__index = _base_0
+  if _parent_0 then
+    setmetatable(_base_0, _parent_0.__base)
+  end
+  local _class_0 = setmetatable({
+    __init = function(self, fn)
+      self.prepare = fn
+    end,
+    __base = _base_0,
+    __name = "DelayedLine",
+    __parent = _parent_0
+  }, {
+    __index = function(cls, name)
+      local val = rawget(_base_0, name)
+      if val == nil and _parent_0 then
+        return _parent_0[name]
+      else
+        return val
+      end
+    end,
+    __call = function(cls, ...)
+      local _self_0 = setmetatable({}, _base_0)
+      cls.__init(_self_0, ...)
+      return _self_0
+    end
+  })
+  _base_0.__class = _class_0
+  if _parent_0 and _parent_0.__inherited then
+    _parent_0.__inherited(_parent_0, _class_0)
+  end
+  DelayedLine = _class_0
 end
 do
   local _parent_0 = nil
