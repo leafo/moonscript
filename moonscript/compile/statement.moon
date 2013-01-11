@@ -1,5 +1,8 @@
 
-import reversed, unpack from require "moonscript.util"
+util = require "moonscript.util"
+data = require "moonscript.data"
+
+import reversed, unpack from util
 import ntype from require "moonscript.types"
 import concat, insert from table
 
@@ -16,6 +19,19 @@ statement_compilers =
     if #undeclared > 0
       with @line "local "
         \append_list [@name name for name in *undeclared], ", "
+
+  declare_glob: (node) =>
+    names = {}
+    @set "name_glob", (name) ->
+      insert names, name
+      true
+
+    data.DelayedLine (buff) ->
+      insert buff, "local "
+      for name in *names
+        insert buff, @name name
+        insert buff, ", "
+      buff[#buff] = nil -- strips local if no names
 
   -- this overrides the existing names with new locals, used for local keyword
   declare_with_shadows: (node) =>

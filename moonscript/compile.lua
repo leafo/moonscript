@@ -749,6 +749,17 @@ tree = function(tree, options)
     return lua_code, posmap
   end
 end
+do
+  local _with_0 = require("moonscript.data")
+  local data = _with_0
+  for name, cls in pairs({
+    Line = Line,
+    Lines = Lines,
+    DelayedLine = DelayedLine
+  }) do
+    data[name] = cls
+  end
+end
 return {
   tree = tree,
   value = value,

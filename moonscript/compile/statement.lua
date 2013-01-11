@@ -1,8 +1,6 @@
-local reversed, unpack
-do
-  local _table_0 = require("moonscript.util")
-  reversed, unpack = _table_0.reversed, _table_0.unpack
-end
+local util = require("moonscript.util")
+local data = require("moonscript.data")
+local reversed, unpack = util.reversed, util.unpack
 local ntype
 do
   local _table_0 = require("moonscript.types")
@@ -40,6 +38,23 @@ local statement_compilers = {
         return _with_0
       end
     end
+  end,
+  declare_glob = function(self, node)
+    local names = { }
+    self:set("name_glob", function(name)
+      insert(names, name)
+      return true
+    end)
+    return data.DelayedLine(function(buff)
+      insert(buff, "local ")
+      local _list_0 = names
+      for _index_0 = 1, #_list_0 do
+        local name = _list_0[_index_0]
+        insert(buff, self:name(name))
+        insert(buff, ", ")
+      end
+      buff[#buff] = nil
+    end)
   end,
   declare_with_shadows = function(self, node)
     local names = node[2]

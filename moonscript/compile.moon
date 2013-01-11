@@ -411,4 +411,9 @@ tree = (tree, options={}) ->
     posmap = scope._lines\flatten_posmap!
     lua_code, posmap
 
+-- mmmm
+with data = require "moonscript.data"
+  for name, cls in pairs {:Line, :Lines, :DelayedLine}
+    data[name] = cls
+
 { :tree, :value, :format_error, :Block, :RootBlock }

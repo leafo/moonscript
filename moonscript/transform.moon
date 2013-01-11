@@ -158,6 +158,12 @@ Statement = Transformer {
 
   assign: (node) =>
     names, values = unpack node, 2
+
+    if globber = @get "name_glob"
+      for name in *names
+        if globber name
+          @put_name name
+
     -- bubble cascading assigns
     transformed = if #values == 1
       value = values[1]

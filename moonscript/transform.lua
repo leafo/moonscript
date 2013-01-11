@@ -329,6 +329,18 @@ local Statement = Transformer({
   end,
   assign = function(self, node)
     local names, values = unpack(node, 2)
+    do
+      local globber = self:get("name_glob")
+      if globber then
+        local _list_0 = names
+        for _index_0 = 1, #_list_0 do
+          local name = _list_0[_index_0]
+          if globber(name) then
+            self:put_name(name)
+          end
+        end
+      end
+    end
     local transformed
     if #values == 1 then
       local value = values[1]
