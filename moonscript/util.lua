@@ -1,8 +1,22 @@
 local concat = table.concat
 local unpack = unpack or table.unpack
+local type = type
 local moon = {
   is_object = function(value)
     return type(value) == "table" and value.__class
+  end,
+  is_a = function(thing, t)
+    if not (type(thing) == "table") then
+      return false
+    end
+    local cls = thing.__class
+    while cls do
+      if cls == t then
+        return true
+      end
+      cls = cls.__parent
+    end
+    return false
   end,
   type = function(value)
     local base_type = type(value)

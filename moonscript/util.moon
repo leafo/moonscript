@@ -2,10 +2,22 @@
 import concat from table
 
 unpack = unpack or table.unpack
+type = type
 
 moon =
   is_object: (value) -> -- is a moonscript object
     type(value) == "table" and value.__class
+
+  is_a: (thing, t) ->
+    return false unless type(thing) == "table"
+    cls = thing.__class
+    while cls
+      if cls == t
+        return true
+      cls = cls.__parent
+
+    false
+
   type: (value) -> -- the moonscript object class
     base_type = type value
     if base_type == "table"
