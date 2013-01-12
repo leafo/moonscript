@@ -875,18 +875,26 @@ local Statement = Transformer({
       local _len_0 = 1
       local _list_1 = properties
       for _index_0 = 1, #_list_1 do
-        local tuple = _list_1[_index_0]
-        local key = tuple[1]
-        local _value_0
-        if key[1] == "key_literal" and key[2] == constructor_name then
-          constructor = tuple[2]
-          _value_0 = nil
-        else
-          _value_0 = tuple
-        end
-        if _value_0 ~= nil then
-          _accum_0[_len_0] = _value_0
-          _len_0 = _len_0 + 1
+        local _continue_0 = false
+        repeat
+          local tuple = _list_1[_index_0]
+          local key = tuple[1]
+          local _value_0
+          if key[1] == "key_literal" and key[2] == constructor_name then
+            constructor = tuple[2]
+            _continue_0 = true
+            break
+          else
+            _value_0 = tuple
+          end
+          if _value_0 ~= nil then
+            _accum_0[_len_0] = _value_0
+            _len_0 = _len_0 + 1
+          end
+          _continue_0 = true
+        until true
+        if not _continue_0 then
+          break
         end
       end
       return _accum_0

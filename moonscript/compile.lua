@@ -356,25 +356,33 @@ do
         local _len_0 = 1
         local _list_0 = names
         for _index_0 = 1, #_list_0 do
-          local name = _list_0[_index_0]
-          local is_local = false
-          local real_name
-          local _exp_0 = mtype(name)
-          if LocalName == _exp_0 then
-            is_local = true
-            real_name = name:get_name(self)
-          elseif NameProxy == _exp_0 then
-            real_name = name:get_name(self)
-          elseif "string" == _exp_0 then
-            real_name = name
-          end
-          local _value_0
-          if is_local or real_name and not self:has_name(real_name) then
-            _value_0 = real_name
-          end
-          if _value_0 ~= nil then
-            _accum_0[_len_0] = _value_0
-            _len_0 = _len_0 + 1
+          local _continue_0 = false
+          repeat
+            local name = _list_0[_index_0]
+            local is_local = false
+            local real_name
+            local _exp_0 = mtype(name)
+            if LocalName == _exp_0 then
+              is_local = true
+              real_name = name:get_name(self)
+            elseif NameProxy == _exp_0 then
+              real_name = name:get_name(self)
+            elseif "string" == _exp_0 then
+              real_name = name
+            end
+            if not (is_local or real_name and not self:has_name(real_name)) then
+              _continue_0 = true
+              break
+            end
+            local _value_0 = real_name
+            if _value_0 ~= nil then
+              _accum_0[_len_0] = _value_0
+              _len_0 = _len_0 + 1
+            end
+            _continue_0 = true
+          until true
+          if not _continue_0 then
+            break
           end
         end
         return _accum_0

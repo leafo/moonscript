@@ -11,5 +11,9 @@ global:
 compile:
 	bin/moonc moon/ moonscript/
 
+
+compile_global:
+	moonc moon/ moonscript/
+
 watch:
 	moonc -w moon/ moonscript/

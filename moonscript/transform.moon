@@ -486,7 +486,7 @@ Statement = Transformer {
       key = tuple[1]
       if key[1] == "key_literal" and key[2] == constructor_name
         constructor = tuple[2]
-        nil
+        continue
       else
         tuple
 

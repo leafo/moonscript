@@ -112,9 +112,9 @@ value_compilers =
       \stms block
 
       -- inject more args if the block manipulated arguments
+      -- only varargs bubbling does this currently
       if #args > #arg_names -- will only work for simple adjustments
-        arg_names = for arg in *args
-          arg[1]
+        arg_names = [arg[1] for arg in *args]
 
       .header = "function("..concat(arg_names, ", ")..")"
 

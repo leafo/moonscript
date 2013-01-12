@@ -209,11 +209,8 @@ local value_compilers = {
           local _list_2 = args
           for _index_0 = 1, #_list_2 do
             local arg = _list_2[_index_0]
-            local _value_0 = arg[1]
-            if _value_0 ~= nil then
-              _accum_0[_len_0] = _value_0
-              _len_0 = _len_0 + 1
-            end
+            _accum_0[_len_0] = arg[1]
+            _len_0 = _len_0 + 1
           end
           return _accum_0
         end)()

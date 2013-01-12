@@ -216,7 +216,8 @@ class Block
         when NameProxy then name\get_name self
         when "string" then name
 
-      real_name if is_local or real_name and not @has_name real_name
+      continue unless is_local or real_name and not @has_name real_name
+      real_name
 
     @put_name name for name in *undeclared
     undeclared
