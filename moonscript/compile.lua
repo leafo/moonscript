@@ -404,7 +404,7 @@ do
         if self.export_all then
           return true
         end
-        if self.export_proper and name:match("^[A-Z]") then
+        if self.export_proper and name:match("^%u") then
           return true
         end
       end

@@ -21,10 +21,24 @@ statement_compilers =
         \append_list [@name name for name in *undeclared], ", "
 
   declare_glob: (node) =>
+    kind = node[2]
+
     names = {}
-    @set "name_glob", (name) ->
-      insert names, name
-      true
+    fn = switch node[2]
+      when "*"
+        (name) ->
+          if type(name) == "string"
+            insert names, name
+            true
+      when "^"
+        (name) ->
+          if type(name) == "string" and name\match "^%u"
+            insert names, name
+            true
+      else
+        error "unknown glob"
+
+    @set "name_glob", fn
 
     data.DelayedLine (buff) ->
       insert buff, "local "

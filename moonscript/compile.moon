@@ -234,7 +234,7 @@ class Block
   has_name: (name, skip_exports) =>
     if not skip_exports
       return true if @export_all
-      return true if @export_proper and name\match"^[A-Z]"
+      return true if @export_proper and name\match"^%u"
 
     yes = @_names[name]
     if yes == nil and @parent

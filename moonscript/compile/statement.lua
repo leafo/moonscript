@@ -40,11 +40,28 @@ local statement_compilers = {
     end
   end,
   declare_glob = function(self, node)
+    local kind = node[2]
     local names = { }
-    self:set("name_glob", function(name)
-      insert(names, name)
-      return true
-    end)
+    local fn
+    local _exp_0 = node[2]
+    if "*" == _exp_0 then
+      fn = function(name)
+        if type(name) == "string" then
+          insert(names, name)
+          return true
+        end
+      end
+    elseif "^" == _exp_0 then
+      fn = function(name)
+        if type(name) == "string" and name:match("^%u") then
+          insert(names, name)
+          return true
+        end
+      end
+    else
+      fn = error("unknown glob")
+    end
+    self:set("name_glob", fn)
     return data.DelayedLine(function(buff)
       insert(buff, "local ")
       local _list_0 = names
