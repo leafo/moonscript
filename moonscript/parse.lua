@@ -447,9 +447,10 @@ local build_grammar = wrap_env(function()
 
 		TblComprehension = sym"{" * Ct(Exp * (sym"," * Exp)^-1) * CompInner * sym"}" / mark"tblcomprehension",
 
-		CompInner = Ct(CompFor * CompClause^0),
-		CompFor = key"for" * Ct(NameList) * key"in" * (sym"*" * Exp / mark"unpack" + Exp) / mark"for",
-		CompClause = CompFor + key"when" * Exp / mark"when",
+		CompInner = Ct((CompForEach + CompFor) * CompClause^0),
+		CompForEach = key"for" * Ct(NameList) * key"in" * (sym"*" * Exp / mark"unpack" + Exp) / mark"foreach",
+		CompFor = key "for" * Name * sym"=" * Ct(Exp * sym"," * Exp * (sym"," * Exp)^-1) / mark"for",
+		CompClause = CompFor + CompForEach + key"when" * Exp / mark"when",
 
 		Assign = sym"=" * (Ct(With + If + Switch) + Ct(TableBlock + ExpListLow)) / mark"assign",
 		Update = ((sym"..=" + sym"+=" + sym"-=" + sym"*=" + sym"/=" + sym"%=" + sym"or=" + sym"and=") / trim) * Exp / mark"update",

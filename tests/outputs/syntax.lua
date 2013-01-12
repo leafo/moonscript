@@ -107,6 +107,9 @@ end
 if not (1212 and 3434) then
   print("hello")
 end
+for i = 1, 10 do
+  print("hello")
+end
 print("nutjob")
 if hello then
   _ = 343

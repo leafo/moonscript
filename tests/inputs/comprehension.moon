@@ -17,3 +17,17 @@ copy  = {k,v for k,v in pairs x when k != "okay"}
 { xxxx for x in yes }
 { unpack [a*i for i, a in ipairs x] for x in *{{1,2}, {3,4}} }
 
+
+--
+
+n1 = [i for i=1,10]
+n2 = [i for i=1,10 when i % 2 == 1]
+
+aa = [{x,y} for x=1,10 for y=5,14]
+bb = [y for thing in y for i=1,10]
+cc = [y for i=1,10 for thing in y]
+dd = [y for i=1,10 when cool for thing in y when x > 3 when c + 3]
+
+{"hello", "world" for i=1,10}
+
+nil

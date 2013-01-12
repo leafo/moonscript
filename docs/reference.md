@@ -415,6 +415,12 @@ Using multiple `for` clauses is the same as using nested loops:
     points = [{x,y} for x in *x_coords for y in *y_coords]
     ```
 
+Numeric for loops can also be used in comprehensions:
+
+    ```moon
+    evens = [i for i=1,100 when i % 2 == 0]
+    ```
+
 ### Table Comprehensions
 
 The syntax for table comprehensions is very similar, only differing by using `{` and

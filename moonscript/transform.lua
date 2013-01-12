@@ -66,12 +66,16 @@ apply_to_last = function(stms, fn)
     local _accum_0 = { }
     local _len_0 = 1
     for i, stm in ipairs(stms) do
+      local _value_0
       if i == last_exp_id then
-        _accum_0[_len_0] = fn(stm)
+        _value_0 = fn(stm)
       else
-        _accum_0[_len_0] = stm
+        _value_0 = stm
       end
-      _len_0 = _len_0 + 1
+      if _value_0 ~= nil then
+        _accum_0[_len_0] = _value_0
+        _len_0 = _len_0 + 1
+      end
     end
     return _accum_0
   end)()
@@ -291,9 +295,25 @@ construct_comprehension = function(inner, clauses)
   local current_stms = inner
   for _, clause in reversed(clauses) do
     local t = clause[1]
-    if t == "for" then
+    local _exp_0 = t
+    if "for" == _exp_0 then
+      local name, bounds
+      do
+        local _obj_0 = clause
+        _, name, bounds = _obj_0[1], _obj_0[2], _obj_0[3]
+      end
+      current_stms = {
+        "for",
+        name,
+        bounds,
+        current_stms
+      }
+    elseif "foreach" == _exp_0 then
       local names, iter
-      _, names, iter = unpack(clause)
+      do
+        local _obj_0 = clause
+        _, names, iter = _obj_0[1], _obj_0[2], _obj_0[3]
+      end
       current_stms = {
         "foreach",
         names,
@@ -302,9 +322,12 @@ construct_comprehension = function(inner, clauses)
         },
         current_stms
       }
-    elseif t == "when" then
+    elseif "when" == _exp_0 then
       local cond
-      _, cond = unpack(clause)
+      do
+        local _obj_0 = clause
+        _, cond = _obj_0[1], _obj_0[2]
+      end
       current_stms = {
         "if",
         cond,
@@ -440,15 +463,19 @@ local Statement = Transformer({
       local _list_0 = names
       for _index_0 = 1, #_list_0 do
         local name = _list_0[_index_0]
+        local _value_0
         if type(name) == "table" then
-          _accum_0[_len_0] = name
+          _value_0 = name
         else
-          _accum_0[_len_0] = {
+          _value_0 = {
             "dot",
             name
           }
         end
-        _len_0 = _len_0 + 1
+        if _value_0 ~= nil then
+          _accum_0[_len_0] = _value_0
+          _len_0 = _len_0 + 1
+        end
       end
       return _accum_0
     end)()
@@ -458,8 +485,11 @@ local Statement = Transformer({
       local _list_0 = names
       for _index_0 = 1, #_list_0 do
         local name = _list_0[_index_0]
-        _accum_0[_len_0] = type(name) == "table" and name[2] or name
-        _len_0 = _len_0 + 1
+        local _value_0 = type(name) == "table" and name[2] or name
+        if _value_0 ~= nil then
+          _accum_0[_len_0] = _value_0
+          _len_0 = _len_0 + 1
+        end
       end
       return _accum_0
     end)()
@@ -681,17 +711,21 @@ local Statement = Transformer({
       local _accum_0 = { }
       local _len_0 = 1
       for i, name in ipairs(node.names) do
+        local _value_0
         if ntype(name) == "table" then
           do
             local _with_0 = NameProxy("des")
             local proxy = _with_0
             insert(destructures, destructure.build_assign(name, proxy))
-            _accum_0[_len_0] = _with_0
+            _value_0 = _with_0
           end
         else
-          _accum_0[_len_0] = name
+          _value_0 = name
         end
-        _len_0 = _len_0 + 1
+        if _value_0 ~= nil then
+          _accum_0[_len_0] = _value_0
+          _len_0 = _len_0 + 1
+        end
       end
       return _accum_0
     end)()
@@ -872,8 +906,10 @@ local Statement = Transformer({
           else
             _value_0 = tuple
           end
-          _accum_0[_len_0] = _value_0
-          _len_0 = _len_0 + 1
+          if _value_0 ~= nil then
+            _accum_0[_len_0] = _value_0
+            _len_0 = _len_0 + 1
+          end
           _continue_0 = true
         until true
         if not _continue_0 then
