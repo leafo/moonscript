@@ -71,19 +71,15 @@ do
         }
         for _index_0 = 1, #_list_0 do
           local i = _list_0[_index_0]
-          local _value_0
           if type(i) == "string" then
-            _value_0 = {
+            _accum_0[_len_0] = {
               "dot",
               i
             }
           else
-            _value_0 = i
+            _accum_0[_len_0] = i
           end
-          if _value_0 ~= nil then
-            _accum_0[_len_0] = _value_0
-            _len_0 = _len_0 + 1
-          end
+          _len_0 = _len_0 + 1
         end
         return _accum_0
       end)(...)

@@ -166,11 +166,8 @@ split_assign = function(assign)
             local _accum_0 = { }
             local _len_0 = 1
             for i = start, stop do
-              local _value_0 = names[i]
-              if _value_0 ~= nil then
-                _accum_0[_len_0] = _value_0
-                _len_0 = _len_0 + 1
-              end
+              _accum_0[_len_0] = names[i]
+              _len_0 = _len_0 + 1
             end
             return _accum_0
           end)(),
@@ -178,11 +175,8 @@ split_assign = function(assign)
             local _accum_0 = { }
             local _len_0 = 1
             for i = start, stop do
-              local _value_0 = values[i]
-              if _value_0 ~= nil then
-                _accum_0[_len_0] = _value_0
-                _len_0 = _len_0 + 1
-              end
+              _accum_0[_len_0] = values[i]
+              _len_0 = _len_0 + 1
             end
             return _accum_0
           end)()
@@ -203,11 +197,8 @@ split_assign = function(assign)
         local _accum_0 = { }
         local _len_0 = 1
         for i = start, total_names do
-          local _value_0 = names[i]
-          if _value_0 ~= nil then
-            _accum_0[_len_0] = _value_0
-            _len_0 = _len_0 + 1
-          end
+          _accum_0[_len_0] = names[i]
+          _len_0 = _len_0 + 1
         end
         return _accum_0
       end)()
@@ -222,11 +213,8 @@ split_assign = function(assign)
         local _accum_0 = { }
         local _len_0 = 1
         for i = start, total_values do
-          local _value_0 = values[i]
-          if _value_0 ~= nil then
-            _accum_0[_len_0] = _value_0
-            _len_0 = _len_0 + 1
-          end
+          _accum_0[_len_0] = values[i]
+          _len_0 = _len_0 + 1
         end
         return _accum_0
       end)()

@@ -104,11 +104,8 @@ dump = function(what)
         local _accum_0 = { }
         local _len_0 = 1
         for k, v in pairs(what) do
-          local _value_0 = (" "):rep(depth * 4) .. "[" .. tostring(k) .. "] = " .. _dump(v, depth)
-          if _value_0 ~= nil then
-            _accum_0[_len_0] = _value_0
-            _len_0 = _len_0 + 1
-          end
+          _accum_0[_len_0] = (" "):rep(depth * 4) .. "[" .. tostring(k) .. "] = " .. _dump(v, depth)
+          _len_0 = _len_0 + 1
         end
         return _accum_0
       end)()
@@ -148,10 +145,8 @@ debug_posmap = function(posmap, moon_code, lua_code)
       local lua_text = get_line(lua_code, lua_line)
       local moon_text = get_closest_line(moon_code, moon_line)
       local _value_0 = tostring(pos) .. "\t " .. tostring(lua_line) .. ":[ " .. tostring(trim(lua_text)) .. " ] >> " .. tostring(moon_line) .. ":[ " .. tostring(trim(moon_text)) .. " ]"
-      if _value_0 ~= nil then
-        _accum_0[_len_0] = _value_0
-        _len_0 = _len_0 + 1
-      end
+      _accum_0[_len_0] = _value_0
+      _len_0 = _len_0 + 1
     end
     return _accum_0
   end)()

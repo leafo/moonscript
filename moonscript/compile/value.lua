@@ -135,10 +135,8 @@ local value_compilers = {
           insert(default_args, arg)
         end
         local _value_0 = name
-        if _value_0 ~= nil then
-          _accum_0[_len_0] = _value_0
-          _len_0 = _len_0 + 1
-        end
+        _accum_0[_len_0] = _value_0
+        _len_0 = _len_0 + 1
       end
       return _accum_0
     end)()

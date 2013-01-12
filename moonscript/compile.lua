@@ -375,10 +375,8 @@ do
               break
             end
             local _value_0 = real_name
-            if _value_0 ~= nil then
-              _accum_0[_len_0] = _value_0
-              _len_0 = _len_0 + 1
-            end
+            _accum_0[_len_0] = _value_0
+            _len_0 = _len_0 + 1
             _continue_0 = true
           until true
           if not _continue_0 then

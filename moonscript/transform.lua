@@ -66,16 +66,12 @@ apply_to_last = function(stms, fn)
     local _accum_0 = { }
     local _len_0 = 1
     for i, stm in ipairs(stms) do
-      local _value_0
       if i == last_exp_id then
-        _value_0 = fn(stm)
+        _accum_0[_len_0] = fn(stm)
       else
-        _value_0 = stm
+        _accum_0[_len_0] = stm
       end
-      if _value_0 ~= nil then
-        _accum_0[_len_0] = _value_0
-        _len_0 = _len_0 + 1
-      end
+      _len_0 = _len_0 + 1
     end
     return _accum_0
   end)()
@@ -444,19 +440,15 @@ local Statement = Transformer({
       local _list_0 = names
       for _index_0 = 1, #_list_0 do
         local name = _list_0[_index_0]
-        local _value_0
         if type(name) == "table" then
-          _value_0 = name
+          _accum_0[_len_0] = name
         else
-          _value_0 = {
+          _accum_0[_len_0] = {
             "dot",
             name
           }
         end
-        if _value_0 ~= nil then
-          _accum_0[_len_0] = _value_0
-          _len_0 = _len_0 + 1
-        end
+        _len_0 = _len_0 + 1
       end
       return _accum_0
     end)()
@@ -466,11 +458,8 @@ local Statement = Transformer({
       local _list_0 = names
       for _index_0 = 1, #_list_0 do
         local name = _list_0[_index_0]
-        local _value_0 = type(name) == "table" and name[2] or name
-        if _value_0 ~= nil then
-          _accum_0[_len_0] = _value_0
-          _len_0 = _len_0 + 1
-        end
+        _accum_0[_len_0] = type(name) == "table" and name[2] or name
+        _len_0 = _len_0 + 1
       end
       return _accum_0
     end)()
@@ -692,21 +681,17 @@ local Statement = Transformer({
       local _accum_0 = { }
       local _len_0 = 1
       for i, name in ipairs(node.names) do
-        local _value_0
         if ntype(name) == "table" then
           do
             local _with_0 = NameProxy("des")
             local proxy = _with_0
             insert(destructures, destructure.build_assign(name, proxy))
-            _value_0 = _with_0
+            _accum_0[_len_0] = _with_0
           end
         else
-          _value_0 = name
+          _accum_0[_len_0] = name
         end
-        if _value_0 ~= nil then
-          _accum_0[_len_0] = _value_0
-          _len_0 = _len_0 + 1
-        end
+        _len_0 = _len_0 + 1
       end
       return _accum_0
     end)()
@@ -887,10 +872,8 @@ local Statement = Transformer({
           else
             _value_0 = tuple
           end
-          if _value_0 ~= nil then
-            _accum_0[_len_0] = _value_0
-            _len_0 = _len_0 + 1
-          end
+          _accum_0[_len_0] = _value_0
+          _len_0 = _len_0 + 1
           _continue_0 = true
         until true
         if not _continue_0 then
