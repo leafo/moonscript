@@ -65,7 +65,7 @@ do
     chain = function(self, ...)
       local items = (function(...)
         local _accum_0 = { }
-        local _len_0 = 0
+        local _len_0 = 1
         local _list_0 = {
           ...
         }
@@ -81,8 +81,8 @@ do
             _value_0 = i
           end
           if _value_0 ~= nil then
-            _len_0 = _len_0 + 1
             _accum_0[_len_0] = _value_0
+            _len_0 = _len_0 + 1
           end
         end
         return _accum_0

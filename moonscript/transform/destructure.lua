@@ -164,24 +164,24 @@ split_assign = function(assign)
           "assign",
           (function()
             local _accum_0 = { }
-            local _len_0 = 0
+            local _len_0 = 1
             for i = start, stop do
               local _value_0 = names[i]
               if _value_0 ~= nil then
-                _len_0 = _len_0 + 1
                 _accum_0[_len_0] = _value_0
+                _len_0 = _len_0 + 1
               end
             end
             return _accum_0
           end)(),
           (function()
             local _accum_0 = { }
-            local _len_0 = 0
+            local _len_0 = 1
             for i = start, stop do
               local _value_0 = values[i]
               if _value_0 ~= nil then
-                _len_0 = _len_0 + 1
                 _accum_0[_len_0] = _value_0
+                _len_0 = _len_0 + 1
               end
             end
             return _accum_0
@@ -201,12 +201,12 @@ split_assign = function(assign)
     else
       name_slice = (function()
         local _accum_0 = { }
-        local _len_0 = 0
+        local _len_0 = 1
         for i = start, total_names do
           local _value_0 = names[i]
           if _value_0 ~= nil then
-            _len_0 = _len_0 + 1
             _accum_0[_len_0] = _value_0
+            _len_0 = _len_0 + 1
           end
         end
         return _accum_0
@@ -220,12 +220,12 @@ split_assign = function(assign)
     else
       value_slice = (function()
         local _accum_0 = { }
-        local _len_0 = 0
+        local _len_0 = 1
         for i = start, total_values do
           local _value_0 = values[i]
           if _value_0 ~= nil then
-            _len_0 = _len_0 + 1
             _accum_0[_len_0] = _value_0
+            _len_0 = _len_0 + 1
           end
         end
         return _accum_0

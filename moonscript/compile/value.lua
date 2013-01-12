@@ -26,11 +26,11 @@ local value_compilers = {
       local _with_0 = self:line()
       _with_0:append_list((function()
         local _accum_0 = { }
-        local _len_0 = 0
+        local _len_0 = 1
         for i, v in ipairs(node) do
           if i > 1 then
-            _len_0 = _len_0 + 1
             _accum_0[_len_0] = _comp(i, v)
+            _len_0 = _len_0 + 1
           end
         end
         return _accum_0
@@ -43,12 +43,12 @@ local value_compilers = {
       local _with_0 = self:line()
       _with_0:append_list((function()
         local _accum_0 = { }
-        local _len_0 = 0
+        local _len_0 = 1
         local _list_0 = node
         for _index_0 = 2, #_list_0 do
           local v = _list_0[_index_0]
-          _len_0 = _len_0 + 1
           _accum_0[_len_0] = self:value(v)
+          _len_0 = _len_0 + 1
         end
         return _accum_0
       end)(), ", ")
@@ -118,7 +118,7 @@ local value_compilers = {
     local self_args = { }
     local arg_names = (function()
       local _accum_0 = { }
-      local _len_0 = 0
+      local _len_0 = 1
       local _list_0 = args
       for _index_0 = 1, #_list_0 do
         local arg = _list_0[_index_0]
@@ -136,8 +136,8 @@ local value_compilers = {
         end
         local _value_0 = name
         if _value_0 ~= nil then
-          _len_0 = _len_0 + 1
           _accum_0[_len_0] = _value_0
+          _len_0 = _len_0 + 1
         end
       end
       return _accum_0
@@ -185,12 +185,12 @@ local value_compilers = {
       end
       local self_arg_values = (function()
         local _accum_0 = { }
-        local _len_0 = 0
+        local _len_0 = 1
         local _list_2 = self_args
         for _index_0 = 1, #_list_2 do
           local arg = _list_2[_index_0]
-          _len_0 = _len_0 + 1
           _accum_0[_len_0] = arg[2]
+          _len_0 = _len_0 + 1
         end
         return _accum_0
       end)()
@@ -205,14 +205,14 @@ local value_compilers = {
       if #args > #arg_names then
         arg_names = (function()
           local _accum_0 = { }
-          local _len_0 = 0
+          local _len_0 = 1
           local _list_2 = args
           for _index_0 = 1, #_list_2 do
             local arg = _list_2[_index_0]
             local _value_0 = arg[1]
             if _value_0 ~= nil then
-              _len_0 = _len_0 + 1
               _accum_0[_len_0] = _value_0
+              _len_0 = _len_0 + 1
             end
           end
           return _accum_0

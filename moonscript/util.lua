@@ -75,10 +75,10 @@ split = function(str, delim)
   str = str .. delim
   return (function()
     local _accum_0 = { }
-    local _len_0 = 0
+    local _len_0 = 1
     for m in str:gmatch("(.-)" .. delim) do
-      _len_0 = _len_0 + 1
       _accum_0[_len_0] = m
+      _len_0 = _len_0 + 1
     end
     return _accum_0
   end)()
@@ -102,12 +102,12 @@ dump = function(what)
       depth = depth + 1
       local lines = (function()
         local _accum_0 = { }
-        local _len_0 = 0
+        local _len_0 = 1
         for k, v in pairs(what) do
           local _value_0 = (" "):rep(depth * 4) .. "[" .. tostring(k) .. "] = " .. _dump(v, depth)
           if _value_0 ~= nil then
-            _len_0 = _len_0 + 1
             _accum_0[_len_0] = _value_0
+            _len_0 = _len_0 + 1
           end
         end
         return _accum_0
@@ -124,13 +124,13 @@ local debug_posmap
 debug_posmap = function(posmap, moon_code, lua_code)
   local tuples = (function()
     local _accum_0 = { }
-    local _len_0 = 0
+    local _len_0 = 1
     for k, v in pairs(posmap) do
-      _len_0 = _len_0 + 1
       _accum_0[_len_0] = {
         k,
         v
       }
+      _len_0 = _len_0 + 1
     end
     return _accum_0
   end)()
@@ -139,7 +139,7 @@ debug_posmap = function(posmap, moon_code, lua_code)
   end)
   local lines = (function()
     local _accum_0 = { }
-    local _len_0 = 0
+    local _len_0 = 1
     local _list_0 = tuples
     for _index_0 = 1, #_list_0 do
       local pair = _list_0[_index_0]
@@ -149,8 +149,8 @@ debug_posmap = function(posmap, moon_code, lua_code)
       local moon_text = get_closest_line(moon_code, moon_line)
       local _value_0 = tostring(pos) .. "\t " .. tostring(lua_line) .. ":[ " .. tostring(trim(lua_text)) .. " ] >> " .. tostring(moon_line) .. ":[ " .. tostring(trim(moon_text)) .. " ]"
       if _value_0 ~= nil then
-        _len_0 = _len_0 + 1
         _accum_0[_len_0] = _value_0
+        _len_0 = _len_0 + 1
       end
     end
     return _accum_0

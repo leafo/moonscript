@@ -117,12 +117,12 @@ do
         if "table" == type(t) then
           return (function()
             local _accum_0 = { }
-            local _len_0 = 0
+            local _len_0 = 1
             local _list_0 = t
             for _index_0 = 1, #_list_0 do
               local v = _list_0[_index_0]
-              _len_0 = _len_0 + 1
               _accum_0[_len_0] = strip(v)
+              _len_0 = _len_0 + 1
             end
             return _accum_0
           end)()
@@ -353,7 +353,7 @@ do
     declare = function(self, names)
       local undeclared = (function()
         local _accum_0 = { }
-        local _len_0 = 0
+        local _len_0 = 1
         local _list_0 = names
         for _index_0 = 1, #_list_0 do
           local name = _list_0[_index_0]
@@ -373,8 +373,8 @@ do
             _value_0 = real_name
           end
           if _value_0 ~= nil then
-            _len_0 = _len_0 + 1
             _accum_0[_len_0] = _value_0
+            _len_0 = _len_0 + 1
           end
         end
         return _accum_0
@@ -520,12 +520,12 @@ do
         local _with_0 = Line()
         _with_0:append_list((function()
           local _accum_0 = { }
-          local _len_0 = 0
+          local _len_0 = 1
           local _list_0 = values
           for _index_0 = 1, #_list_0 do
             local v = _list_0[_index_0]
-            _len_0 = _len_0 + 1
             _accum_0[_len_0] = self:value(v)
+            _len_0 = _len_0 + 1
           end
           return _accum_0
         end)(), delim)

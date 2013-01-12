@@ -64,7 +64,7 @@ apply_to_last = function(stms, fn)
   end
   return (function()
     local _accum_0 = { }
-    local _len_0 = 0
+    local _len_0 = 1
     for i, stm in ipairs(stms) do
       local _value_0
       if i == last_exp_id then
@@ -73,8 +73,8 @@ apply_to_last = function(stms, fn)
         _value_0 = stm
       end
       if _value_0 ~= nil then
-        _len_0 = _len_0 + 1
         _accum_0[_len_0] = _value_0
+        _len_0 = _len_0 + 1
       end
     end
     return _accum_0
@@ -440,7 +440,7 @@ local Statement = Transformer({
     local _, names, source = unpack(node)
     local stubs = (function()
       local _accum_0 = { }
-      local _len_0 = 0
+      local _len_0 = 1
       local _list_0 = names
       for _index_0 = 1, #_list_0 do
         local name = _list_0[_index_0]
@@ -454,22 +454,22 @@ local Statement = Transformer({
           }
         end
         if _value_0 ~= nil then
-          _len_0 = _len_0 + 1
           _accum_0[_len_0] = _value_0
+          _len_0 = _len_0 + 1
         end
       end
       return _accum_0
     end)()
     local real_names = (function()
       local _accum_0 = { }
-      local _len_0 = 0
+      local _len_0 = 1
       local _list_0 = names
       for _index_0 = 1, #_list_0 do
         local name = _list_0[_index_0]
         local _value_0 = type(name) == "table" and name[2] or name
         if _value_0 ~= nil then
-          _len_0 = _len_0 + 1
           _accum_0[_len_0] = _value_0
+          _len_0 = _len_0 + 1
         end
       end
       return _accum_0
@@ -479,15 +479,15 @@ local Statement = Transformer({
         names = real_names,
         values = (function()
           local _accum_0 = { }
-          local _len_0 = 0
+          local _len_0 = 1
           local _list_0 = stubs
           for _index_0 = 1, #_list_0 do
             local stub = _list_0[_index_0]
-            _len_0 = _len_0 + 1
             _accum_0[_len_0] = build.chain({
               base = source,
               stub
             })
+            _len_0 = _len_0 + 1
           end
           return _accum_0
         end)()
@@ -505,15 +505,15 @@ local Statement = Transformer({
             names = real_names,
             values = (function()
               local _accum_0 = { }
-              local _len_0 = 0
+              local _len_0 = 1
               local _list_0 = stubs
               for _index_0 = 1, #_list_0 do
                 local stub = _list_0[_index_0]
-                _len_0 = _len_0 + 1
                 _accum_0[_len_0] = build.chain({
                   base = source_name,
                   stub
                 })
+                _len_0 = _len_0 + 1
               end
               return _accum_0
             end)()
@@ -581,13 +581,13 @@ local Statement = Transformer({
         build.declare({
           names = (function()
             local _accum_0 = { }
-            local _len_0 = 0
+            local _len_0 = 1
             local _list_0 = stm[2]
             for _index_0 = 1, #_list_0 do
               local name = _list_0[_index_0]
               if type(name) == "string" then
-                _len_0 = _len_0 + 1
                 _accum_0[_len_0] = name
+                _len_0 = _len_0 + 1
               end
             end
             return _accum_0
@@ -690,7 +690,7 @@ local Statement = Transformer({
     local destructures = { }
     node.names = (function()
       local _accum_0 = { }
-      local _len_0 = 0
+      local _len_0 = 1
       for i, name in ipairs(node.names) do
         local _value_0
         if ntype(name) == "table" then
@@ -704,8 +704,8 @@ local Statement = Transformer({
           _value_0 = name
         end
         if _value_0 ~= nil then
-          _len_0 = _len_0 + 1
           _accum_0[_len_0] = _value_0
+          _len_0 = _len_0 + 1
         end
       end
       return _accum_0
@@ -872,7 +872,7 @@ local Statement = Transformer({
     local constructor = nil
     properties = (function()
       local _accum_0 = { }
-      local _len_0 = 0
+      local _len_0 = 1
       local _list_1 = properties
       for _index_0 = 1, #_list_1 do
         local tuple = _list_1[_index_0]
@@ -885,8 +885,8 @@ local Statement = Transformer({
           _value_0 = tuple
         end
         if _value_0 ~= nil then
-          _len_0 = _len_0 + 1
           _accum_0[_len_0] = _value_0
+          _len_0 = _len_0 + 1
         end
       end
       return _accum_0
@@ -1072,12 +1072,12 @@ local Statement = Transformer({
             if chain then
               local slice = (function()
                 local _accum_0 = { }
-                local _len_0 = 0
+                local _len_0 = 1
                 local _list_1 = chain
                 for _index_0 = 3, #_list_1 do
                   local item = _list_1[_index_0]
-                  _len_0 = _len_0 + 1
                   _accum_0[_len_0] = item
+                  _len_0 = _len_0 + 1
                 end
                 return _accum_0
               end)()
