@@ -1,14 +1,14 @@
 local hi = (function()
   local _accum_0 = { }
-  local _len_0 = 0
+  local _len_0 = 1
   for _, x in ipairs({
     1,
     2,
     3,
     4
   }) do
-    _len_0 = _len_0 + 1
     _accum_0[_len_0] = x * 2
+    _len_0 = _len_0 + 1
   end
   return _accum_0
 end)()
@@ -22,10 +22,10 @@ local items = {
 }
 local mm = (function()
   local _accum_0 = { }
-  local _len_0 = 0
+  local _len_0 = 1
   for self.x in ipairs(items) do
-    _len_0 = _len_0 + 1
     _accum_0[_len_0] = self.x
+    _len_0 = _len_0 + 1
   end
   return _accum_0
 end)()
@@ -36,7 +36,7 @@ for z in ipairs(items) do
 end
 local rad = (function()
   local _accum_0 = { }
-  local _len_0 = 0
+  local _len_0 = 1
   for a in ipairs({
     1,
     2,
@@ -46,10 +46,10 @@ local rad = (function()
     6
   }) do
     if good_number(a) then
-      _len_0 = _len_0 + 1
       _accum_0[_len_0] = {
         a
       }
+      _len_0 = _len_0 + 1
     end
   end
   return _accum_0
@@ -78,24 +78,24 @@ range = function(count)
 end
 dump((function()
   local _accum_0 = { }
-  local _len_0 = 0
+  local _len_0 = 1
   for x in range(10) do
-    _len_0 = _len_0 + 1
     _accum_0[_len_0] = x
+    _len_0 = _len_0 + 1
   end
   return _accum_0
 end)())
 dump((function()
   local _accum_0 = { }
-  local _len_0 = 0
+  local _len_0 = 1
   for x in range(5) do
     if x > 2 then
       for y in range(5) do
-        _len_0 = _len_0 + 1
         _accum_0[_len_0] = {
           x,
           y
         }
+        _len_0 = _len_0 + 1
       end
     end
   end
@@ -103,13 +103,13 @@ dump((function()
 end)())
 local things = (function()
   local _accum_0 = { }
-  local _len_0 = 0
+  local _len_0 = 1
   for x in range(10) do
     if x > 5 then
       for y in range(10) do
         if y > 7 then
-          _len_0 = _len_0 + 1
           _accum_0[_len_0] = x + y
+          _len_0 = _len_0 + 1
         end
       end
     end
@@ -139,10 +139,10 @@ for x in x do
 end
 local x = (function()
   local _accum_0 = { }
-  local _len_0 = 0
+  local _len_0 = 1
   for x in x do
-    _len_0 = _len_0 + 1
     _accum_0[_len_0] = x
+    _len_0 = _len_0 + 1
   end
   return _accum_0
 end)()
@@ -163,12 +163,12 @@ for x in ipairs({
 end
 local double = (function()
   local _accum_0 = { }
-  local _len_0 = 0
+  local _len_0 = 1
   local _list_0 = items
   for _index_0 = 1, #_list_0 do
     x = _list_0[_index_0]
-    _len_0 = _len_0 + 1
     _accum_0[_len_0] = x * 2
+    _len_0 = _len_0 + 1
   end
   return _accum_0
 end)()
@@ -179,28 +179,28 @@ for _index_0 = 1, #_list_0 do
 end
 local cut = (function()
   local _accum_0 = { }
-  local _len_0 = 0
+  local _len_0 = 1
   local _list_1 = items
   for _index_0 = 1, #_list_1 do
     x = _list_1[_index_0]
     if x > 3 then
-      _len_0 = _len_0 + 1
       _accum_0[_len_0] = x
+      _len_0 = _len_0 + 1
     end
   end
   return _accum_0
 end)()
 local hello = (function()
   local _accum_0 = { }
-  local _len_0 = 0
+  local _len_0 = 1
   local _list_1 = items
   for _index_0 = 1, #_list_1 do
     x = _list_1[_index_0]
     local _list_2 = items
     for _index_1 = 1, #_list_2 do
       local y = _list_2[_index_1]
-      _len_0 = _len_0 + 1
       _accum_0[_len_0] = x + y
+      _len_0 = _len_0 + 1
     end
   end
   return _accum_0
@@ -257,10 +257,10 @@ local normal
 normal = function(hello)
   return (function()
     local _accum_0 = { }
-    local _len_0 = 0
+    local _len_0 = 1
     for x in yeah do
-      _len_0 = _len_0 + 1
       _accum_0[_len_0] = x
+      _len_0 = _len_0 + 1
     end
     return _accum_0
   end)()
@@ -289,12 +289,12 @@ end
 return function()
   return (function()
     local _accum_0 = { }
-    local _len_0 = 0
+    local _len_0 = 1
     local _list_9 = things
     for _index_0 = 1, #_list_9 do
       x = _list_9[_index_0]
-      _len_0 = _len_0 + 1
       _accum_0[_len_0] = x
+      _len_0 = _len_0 + 1
     end
     return _accum_0
   end)()

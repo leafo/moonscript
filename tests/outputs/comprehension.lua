@@ -68,10 +68,10 @@ return (function()
     x = _list_0[_index_0]
     local _key_0, _val_0 = unpack((function()
       local _accum_0 = { }
-      local _len_0 = 0
+      local _len_0 = 1
       for i, a in ipairs(x) do
-        _len_0 = _len_0 + 1
         _accum_0[_len_0] = a * i
+        _len_0 = _len_0 + 1
       end
       return _accum_0
     end)())

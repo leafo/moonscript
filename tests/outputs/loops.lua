@@ -50,7 +50,7 @@ local hello = {
 }
 x = (function()
   local _accum_0 = { }
-  local _len_0 = 0
+  local _len_0 = 1
   local _list_1 = hello
   for _index_0 = 1, #_list_1 do
     local y = _list_1[_index_0]
@@ -59,8 +59,8 @@ x = (function()
       _value_0 = y
     end
     if _value_0 ~= nil then
-      _len_0 = _len_0 + 1
       _accum_0[_len_0] = _value_0
+      _len_0 = _len_0 + 1
     end
   end
   return _accum_0
@@ -74,12 +74,12 @@ x = function()
 end
 local t = (function()
   local _accum_0 = { }
-  local _len_0 = 0
+  local _len_0 = 1
   for i = 10, 20 do
     local _value_0 = i * 2
     if _value_0 ~= nil then
-      _len_0 = _len_0 + 1
       _accum_0[_len_0] = _value_0
+      _len_0 = _len_0 + 1
     end
   end
   return _accum_0
@@ -87,13 +87,13 @@ end)()
 local hmm = 0
 local y = (function()
   local _accum_0 = { }
-  local _len_0 = 0
+  local _len_0 = 1
   for j = 3, 30, 8 do
     hmm = hmm + 1
     local _value_0 = j * hmm
     if _value_0 ~= nil then
-      _len_0 = _len_0 + 1
       _accum_0[_len_0] = _value_0
+      _len_0 = _len_0 + 1
     end
   end
   return _accum_0
@@ -107,12 +107,12 @@ end
 _ = function()
   return (function()
     local _accum_0 = { }
-    local _len_0 = 0
+    local _len_0 = 1
     for k = 10, 40 do
       local _value_0 = "okay"
       if _value_0 ~= nil then
-        _len_0 = _len_0 + 1
         _accum_0[_len_0] = _value_0
+        _len_0 = _len_0 + 1
       end
     end
     return _accum_0
@@ -132,41 +132,41 @@ end
 local i = 0
 x = (function()
   local _accum_0 = { }
-  local _len_0 = 0
+  local _len_0 = 1
   while i < 10 do
     local _value_0
     i = i + 1
     if _value_0 ~= nil then
-      _len_0 = _len_0 + 1
       _accum_0[_len_0] = _value_0
+      _len_0 = _len_0 + 1
     end
   end
   return _accum_0
 end)()
 x = (function()
   local _accum_0 = { }
-  local _len_0 = 0
+  local _len_0 = 1
   local _list_1 = 3
   for _index_0 = 1, #_list_1 do
     local thing = _list_1[_index_0]
     local _value_0
     y = "hello"
     if _value_0 ~= nil then
-      _len_0 = _len_0 + 1
       _accum_0[_len_0] = _value_0
+      _len_0 = _len_0 + 1
     end
   end
   return _accum_0
 end)()
 x = (function()
   local _accum_0 = { }
-  local _len_0 = 0
+  local _len_0 = 1
   for x = 1, 2 do
     local _value_0
     y = "hello"
     if _value_0 ~= nil then
-      _len_0 = _len_0 + 1
       _accum_0[_len_0] = _value_0
+      _len_0 = _len_0 + 1
     end
   end
   return _accum_0
@@ -205,7 +205,7 @@ for x = 1, 10 do
 end
 local list = (function()
   local _accum_0 = { }
-  local _len_0 = 0
+  local _len_0 = 1
   for x = 1, 10 do
     local _continue_0 = false
     repeat
@@ -215,8 +215,8 @@ local list = (function()
       end
       local _value_0 = x
       if _value_0 ~= nil then
-        _len_0 = _len_0 + 1
         _accum_0[_len_0] = _value_0
+        _len_0 = _len_0 + 1
       end
       _continue_0 = true
     until true

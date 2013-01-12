@@ -691,7 +691,7 @@ class Accumulator
   wrap: (node) =>
     build.block_exp {
       build.assign_one @accum_name, build.table!
-      build.assign_one @len_name, 0
+      build.assign_one @len_name, 1
       node
       @accum_name
     }
@@ -715,8 +715,8 @@ class Accumulator
       @value_name
 
     update = {
-      {"update", @len_name, "+=", 1}
       build.assign_one @accum_name\index(@len_name), val
+      {"update", @len_name, "+=", 1}
     }
 
     if skip_nil

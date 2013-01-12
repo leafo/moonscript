@@ -1238,7 +1238,7 @@ do
     wrap = function(self, node)
       return build.block_exp({
         build.assign_one(self.accum_name, build.table()),
-        build.assign_one(self.len_name, 0),
+        build.assign_one(self.len_name, 1),
         node,
         self.accum_name
       })
@@ -1273,13 +1273,13 @@ do
         val = self.value_name
       end
       local update = {
+        build.assign_one(self.accum_name:index(self.len_name), val),
         {
           "update",
           self.len_name,
           "+=",
           1
-        },
-        build.assign_one(self.accum_name:index(self.len_name), val)
+        }
       }
       if skip_nil then
         table.insert(body, build["if"]({
