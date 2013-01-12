@@ -42,7 +42,7 @@ is_singular = (body) ->
   if "group" == ntype body
     is_singular body[2]
   else
-    true
+    body[1]
 
 find_assigns = (body, out={}) ->
   for thing in *body
@@ -697,11 +697,12 @@ class Accumulator
     }
 
   -- mutates the body of a loop construct to save last value into accumulator
-  -- can optionally skip nil results
-  mutate_body: (body, skip_nil=true) =>
-    val = if not skip_nil and is_singular body
-      with body[1]
-        body = {}
+  mutate_body: (body) =>
+    -- shortcut to write simpler code if body is a single expression
+    single_stm = is_singular body
+    val = if single_stm and types.is_value single_stm
+      body = {}
+      single_stm
     else
       body = apply_to_last body, (n) ->
         if types.is_value n
@@ -719,14 +720,7 @@ class Accumulator
       {"update", @len_name, "+=", 1}
     }
 
-    if skip_nil
-      table.insert body, build["if"] {
-        cond: {"exp", @value_name, "!=", "nil"}
-        then: update
-      }
-    else
-      table.insert body, build.group update
-
+    insert body, build.group update
     body
 
 default_accumulator = (node) =>
@@ -799,7 +793,7 @@ Value = Transformer {
   comprehension: (node) =>
     a = Accumulator!
     node = @transform.statement node, (exp) ->
-      a\mutate_body {exp}, false
+      a\mutate_body {exp}
     a\wrap node
 
   tblcomprehension: (node) =>

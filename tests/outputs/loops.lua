@@ -54,14 +54,10 @@ x = (function()
   local _list_1 = hello
   for _index_0 = 1, #_list_1 do
     local y = _list_1[_index_0]
-    local _value_0
     if y % 2 == 0 then
-      _value_0 = y
+      _accum_0[_len_0] = y
     end
-    if _value_0 ~= nil then
-      _accum_0[_len_0] = _value_0
-      _len_0 = _len_0 + 1
-    end
+    _len_0 = _len_0 + 1
   end
   return _accum_0
 end)()
@@ -76,11 +72,8 @@ local t = (function()
   local _accum_0 = { }
   local _len_0 = 1
   for i = 10, 20 do
-    local _value_0 = i * 2
-    if _value_0 ~= nil then
-      _accum_0[_len_0] = _value_0
-      _len_0 = _len_0 + 1
-    end
+    _accum_0[_len_0] = i * 2
+    _len_0 = _len_0 + 1
   end
   return _accum_0
 end)()
@@ -91,10 +84,8 @@ local y = (function()
   for j = 3, 30, 8 do
     hmm = hmm + 1
     local _value_0 = j * hmm
-    if _value_0 ~= nil then
-      _accum_0[_len_0] = _value_0
-      _len_0 = _len_0 + 1
-    end
+    _accum_0[_len_0] = _value_0
+    _len_0 = _len_0 + 1
   end
   return _accum_0
 end)()
@@ -109,11 +100,8 @@ _ = function()
     local _accum_0 = { }
     local _len_0 = 1
     for k = 10, 40 do
-      local _value_0 = "okay"
-      if _value_0 ~= nil then
-        _accum_0[_len_0] = _value_0
-        _len_0 = _len_0 + 1
-      end
+      _accum_0[_len_0] = "okay"
+      _len_0 = _len_0 + 1
     end
     return _accum_0
   end)()
@@ -136,10 +124,8 @@ x = (function()
   while i < 10 do
     local _value_0
     i = i + 1
-    if _value_0 ~= nil then
-      _accum_0[_len_0] = _value_0
-      _len_0 = _len_0 + 1
-    end
+    _accum_0[_len_0] = _value_0
+    _len_0 = _len_0 + 1
   end
   return _accum_0
 end)()
@@ -151,10 +137,8 @@ x = (function()
     local thing = _list_1[_index_0]
     local _value_0
     y = "hello"
-    if _value_0 ~= nil then
-      _accum_0[_len_0] = _value_0
-      _len_0 = _len_0 + 1
-    end
+    _accum_0[_len_0] = _value_0
+    _len_0 = _len_0 + 1
   end
   return _accum_0
 end)()
@@ -164,10 +148,8 @@ x = (function()
   for x = 1, 2 do
     local _value_0
     y = "hello"
-    if _value_0 ~= nil then
-      _accum_0[_len_0] = _value_0
-      _len_0 = _len_0 + 1
-    end
+    _accum_0[_len_0] = _value_0
+    _len_0 = _len_0 + 1
   end
   return _accum_0
 end)()
@@ -214,10 +196,8 @@ local list = (function()
         break
       end
       local _value_0 = x
-      if _value_0 ~= nil then
-        _accum_0[_len_0] = _value_0
-        _len_0 = _len_0 + 1
-      end
+      _accum_0[_len_0] = _value_0
+      _len_0 = _len_0 + 1
       _continue_0 = true
     until true
     if not _continue_0 then

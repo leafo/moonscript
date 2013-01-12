@@ -84,7 +84,8 @@ output_fname = (base) ->
 
 describe "input tests", ->
   inputs = for file in lfs.dir options.in_dir
-    file\match options.input_pattern
+    with match = file\match options.input_pattern
+      continue unless match
 
   table.sort inputs
   

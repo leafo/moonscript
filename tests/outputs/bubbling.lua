@@ -33,14 +33,10 @@ local j = (function()
   local _accum_0 = { }
   local _len_0 = 1
   for i = 1, 10 do
-    local _value_0
-    _value_0 = function(...)
+    _accum_0[_len_0] = function(...)
       return print(...)
     end
-    if _value_0 ~= nil then
-      _accum_0[_len_0] = _value_0
-      _len_0 = _len_0 + 1
-    end
+    _len_0 = _len_0 + 1
   end
   return _accum_0
 end)()
@@ -70,11 +66,8 @@ local x = (function(...)
   }
   for _index_0 = 1, #_list_0 do
     local i = _list_0[_index_0]
-    local _value_0 = i
-    if _value_0 ~= nil then
-      _accum_0[_len_0] = _value_0
-      _len_0 = _len_0 + 1
-    end
+    _accum_0[_len_0] = i
+    _len_0 = _len_0 + 1
   end
   return _accum_0
 end)(...)
@@ -106,11 +99,8 @@ local a = (function(...)
   local _accum_0 = { }
   local _len_0 = 1
   for i = 1, 10 do
-    local _value_0 = ...
-    if _value_0 ~= nil then
-      _accum_0[_len_0] = _value_0
-      _len_0 = _len_0 + 1
-    end
+    _accum_0[_len_0] = ...
+    _len_0 = _len_0 + 1
   end
   return _accum_0
 end)(...)
@@ -118,14 +108,10 @@ local b = (function()
   local _accum_0 = { }
   local _len_0 = 1
   for i = 1, 10 do
-    local _value_0
-    _value_0 = function()
+    _accum_0[_len_0] = function()
       return print(...)
     end
-    if _value_0 ~= nil then
-      _accum_0[_len_0] = _value_0
-      _len_0 = _len_0 + 1
-    end
+    _len_0 = _len_0 + 1
   end
   return _accum_0
 end)()

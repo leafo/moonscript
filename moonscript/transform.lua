@@ -88,7 +88,7 @@ is_singular = function(body)
   if "group" == ntype(body) then
     return is_singular(body[2])
   else
-    return true
+    return body[1]
   end
 end
 local find_assigns
@@ -1243,17 +1243,12 @@ do
         self.accum_name
       })
     end,
-    mutate_body = function(self, body, skip_nil)
-      if skip_nil == nil then
-        skip_nil = true
-      end
+    mutate_body = function(self, body)
+      local single_stm = is_singular(body)
       local val
-      if not skip_nil and is_singular(body) then
-        do
-          local _with_0 = body[1]
-          body = { }
-          val = _with_0
-        end
+      if single_stm and types.is_value(single_stm) then
+        body = { }
+        val = single_stm
       else
         body = apply_to_last(body, function(n)
           if types.is_value(n) then
@@ -1281,19 +1276,7 @@ do
           1
         }
       }
-      if skip_nil then
-        table.insert(body, build["if"]({
-          cond = {
-            "exp",
-            self.value_name,
-            "!=",
-            "nil"
-          },
-          ["then"] = update
-        }))
-      else
-        table.insert(body, build.group(update))
-      end
+      insert(body, build.group(update))
       return body
     end
   }
@@ -1427,7 +1410,7 @@ local Value = Transformer({
     node = self.transform.statement(node, function(exp)
       return a:mutate_body({
         exp
-      }, false)
+      })
     end)
     return a:wrap(node)
   end,
