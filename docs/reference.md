@@ -31,10 +31,10 @@ variable. You can assign multiple names and values at once just like Lua:
     ```
 
 If you wish to create a global variable it must be done using the
-[`export`](#export) keyword.
+[`export`](#export_statement) keyword.
 
-The `local` keyword can be used to forward declare a variable, or shadow an
-existing one.
+The [`local`](#local_statement) keyword can be used to forward declare a
+variable, or shadow an existing one.
 
 ## Update Assignment
 
@@ -163,7 +163,7 @@ automatically includes a `self` argument.
 ### Argument Defaults
 
 It is possible to provide default values for the arguments of a function. An
-argument is determined to be empty if it's value is `nil`. Any `nil` arguments
+argument is determined to be empty if its value is `nil`. Any `nil` arguments
 that have a default value will be replace before the body of the function is run.
 
     ```moon
@@ -1102,6 +1102,70 @@ The `export` statement can also take special symbols `*` and `^`.
 
 `export *` will cause any name declared after the statement to be exported in the
 current scope. `export ^` will export all proper names, names that begin with a
+capital letter.
+
+## Local Statement
+
+Sometimes you want to declare a variable name before the first time you assign
+it. The `local` statement can be used to do that.
+
+In this example we declare the variable `a` in the outer scope so its value
+can be accessed after the `if` statement. If there was no `local` statement then
+`a` would only be accessible inside the `if` statement.
+
+    ```moon
+    local a
+    if something
+      a = 1
+    print a
+    ```
+
+`local` can also be used to shadow existing variables for the rest of a scope.
+
+    ```moon
+    x = 10
+    if something
+      local x
+      x = 12
+    print x -- prints 10
+    ```
+
+When you have one function that calls another, you typically order them such
+that the second function can access the first. If both functions happen to
+call each other, then you must forward declare the names:
+
+    ```moon
+    local first, second
+
+    first = ->
+      second!
+
+    second = ->
+      first!
+    ```
+
+The same problem occurs with declaring classes and regular values too.
+
+Because forward declaring is often better than manually ordering your assigns,
+a special form of `local` is provided:
+
+    ```moon
+    local *
+
+    first = ->
+      print data
+      second!
+
+    second = ->
+      first!
+
+    data = {}
+    ```
+
+`local *` will forward declare all names below it in the current scope.
+
+Similarly to [`export`](#export_all_and_export_proper) one more special form is
+provided, `local ^`. This will forward declare all names that begin with a
 capital letter.
 
 ## Import Statement
