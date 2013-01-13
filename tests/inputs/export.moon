@@ -48,3 +48,30 @@ do
     j = 2000
 
 
+do
+  export *
+  x = 3434
+  if y then
+    x = 10
+
+do
+  export *
+  if y then
+    x = 10
+  x = 3434
+
+do
+  do
+    export *
+
+    k = 1212
+
+    do
+      h = 100
+
+    y = ->
+      h = 100
+      k = 100
+
+  h = 100
+

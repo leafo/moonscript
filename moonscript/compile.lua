@@ -370,7 +370,12 @@ do
             elseif "string" == _exp_0 then
               real_name = name
             end
-            if not (is_local or real_name and not self:has_name(real_name)) then
+            if not (is_local or real_name and not self:has_name(real_name, true)) then
+              _continue_0 = true
+              break
+            end
+            self:put_name(real_name)
+            if self:name_exported(real_name) then
               _continue_0 = true
               break
             end
@@ -385,15 +390,18 @@ do
         end
         return _accum_0
       end)()
-      local _list_0 = undeclared
-      for _index_0 = 1, #_list_0 do
-        local name = _list_0[_index_0]
-        self:put_name(name)
-      end
       return undeclared
     end,
     whitelist_names = function(self, names)
       self._name_whitelist = Set(names)
+    end,
+    name_exported = function(self, name)
+      if self.export_all then
+        return true
+      end
+      if self.export_proper and name:match("^%u") then
+        return true
+      end
     end,
     put_name = function(self, name, ...)
       local value = ...
@@ -406,13 +414,8 @@ do
       self._names[name] = value
     end,
     has_name = function(self, name, skip_exports)
-      if not skip_exports then
-        if self.export_all then
-          return true
-        end
-        if self.export_proper and name:match("^%u") then
-          return true
-        end
+      if not skip_exports and self:name_exported(name) then
+        return true
       end
       local yes = self._names[name]
       if yes == nil and self.parent then

@@ -195,6 +195,7 @@ Statement = Transformer {
     if destructure.has_destructure names
       return destructure.split_assign node
 
+    -- print util.dump node
     node
 
   continue: (node) =>

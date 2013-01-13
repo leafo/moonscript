@@ -216,14 +216,20 @@ class Block
         when NameProxy then name\get_name self
         when "string" then name
 
-      continue unless is_local or real_name and not @has_name real_name
+      continue unless is_local or real_name and not @has_name real_name, true
+      -- put exported names so they can be assigned to in deeper scope
+      @put_name real_name
+      continue if @name_exported real_name
       real_name
 
-    @put_name name for name in *undeclared
     undeclared
 
   whitelist_names: (names) =>
     @_name_whitelist = Set names
+
+  name_exported: (name) =>
+    return true if @export_all
+    return true if @export_proper and name\match"^%u"
 
   put_name: (name, ...) =>
     value = ...
@@ -233,9 +239,7 @@ class Block
     @_names[name] = value
 
   has_name: (name, skip_exports) =>
-    if not skip_exports
-      return true if @export_all
-      return true if @export_proper and name\match"^%u"
+    return true if not skip_exports and @name_exported name
 
     yes = @_names[name]
     if yes == nil and @parent

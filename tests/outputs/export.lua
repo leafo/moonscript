@@ -67,9 +67,9 @@ do
 end
 do
   if this then
-    local What = 232
+    What = 232
   else
-    local What = 4343
+    What = 4343
   end
   x, y, z = 1, 2, 3
   y = function()
@@ -78,6 +78,30 @@ do
   do
     local _with_0 = tmp
     local j = 2000
-    return _with_0
   end
+end
+do
+  x = 3434
+  if y then
+    x = 10
+  end
+end
+do
+  if y then
+    local x = 10
+  end
+  x = 3434
+end
+do
+  do
+    k = 1212
+    do
+      local h = 100
+    end
+    y = function()
+      local h = 100
+      k = 100
+    end
+  end
+  local h = 100
 end
