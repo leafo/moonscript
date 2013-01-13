@@ -196,6 +196,9 @@ class Block
   get: (name) =>
     @_state[name]
 
+  get_current: (name) =>
+    rawget @_state, name
+
   listen: (name, fn) =>
     @_listeners[name] = fn
 

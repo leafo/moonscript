@@ -336,6 +336,9 @@ do
     get = function(self, name)
       return self._state[name]
     end,
+    get_current = function(self, name)
+      return rawget(self._state, name)
+    end,
     listen = function(self, name, fn)
       self._listeners[name] = fn
     end,

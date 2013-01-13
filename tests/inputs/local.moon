@@ -33,3 +33,20 @@ do
   local *
   x,y = "a", "b"
 
+
+do
+  local *
+  if something
+    x = 2323
+
+-- this is broken
+do
+  local *
+  do
+    x = "one"
+
+  x = 100
+
+  do
+    x = "two"
+

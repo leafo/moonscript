@@ -345,7 +345,7 @@ local Statement = Transformer({
   assign = function(self, node)
     local names, values = unpack(node, 2)
     do
-      local globber = self:get("name_glob")
+      local globber = self:get_current("name_glob")
       if globber then
         local _list_0 = names
         for _index_0 = 1, #_list_0 do

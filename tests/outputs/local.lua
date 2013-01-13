@@ -31,3 +31,19 @@ do
   local x, y
   x, y = "a", "b"
 end
+do
+  
+  if something then
+    x = 2323
+  end
+end
+do
+  local x
+  do
+    x = "one"
+  end
+  x = 100
+  do
+    x = "two"
+  end
+end

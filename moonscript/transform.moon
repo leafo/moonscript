@@ -164,7 +164,7 @@ Statement = Transformer {
   assign: (node) =>
     names, values = unpack node, 2
 
-    if globber = @get "name_glob"
+    if globber = @get_current "name_glob"
       for name in *names
         if globber name
           @put_name name
