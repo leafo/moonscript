@@ -162,3 +162,14 @@ class Something
   nil
 
 
+--
+
+-- hoisting
+class Something
+  val = 23
+  {:insert} = table
+  new: => print insert, val -- prints nil 23
+
+--
+
+nil

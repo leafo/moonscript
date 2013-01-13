@@ -44,30 +44,6 @@ is_singular = (body) ->
   else
     body[1]
 
-find_assigns = (body, out={}) ->
-  for thing in *body
-    switch thing[1]
-      when "group"
-        find_assigns thing[2], out
-      when "assign"
-        table.insert out, thing[2] -- extract names
-  out
-
-hoist_declarations = (body) ->
-  assigns = {}
-
-  -- hoist the plain old assigns
-  for names in *find_assigns body
-    for name in *names
-      table.insert assigns, name if type(name) == "string"
-
-  -- insert after runs
-  idx = 1
-  while mtype(body[idx]) == Run do idx += 1
-
-  table.insert body, idx, {"declare", assigns}
-
-
 -- this mutates body searching for assigns
 extract_declarations = (body=@current_stms, start=@current_stm_i + 1, out={}) =>
   for i=start,#body
@@ -640,6 +616,8 @@ Statement = Transformer {
             else
               parent_cls_name
 
+        {"declare_glob", "*"}
+
         .assign_one parent_cls_name, parent_val == "" and "nil" or parent_val
         .assign_one base_name, {"table", properties}
         .assign_one base_name\chain"__index", base_name
@@ -684,8 +662,6 @@ Statement = Transformer {
         if ret
           ret cls_name
       }
-
-      hoist_declarations out_body
 
       value = .group {
         .group if ntype(name) == "value" then {
