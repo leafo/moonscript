@@ -356,7 +356,16 @@ class Block
 
   stms: (stms, ret) =>
     error "deprecated stms call, use transformer" if ret
-    @stm stm for stm in *stms
+    {:current_stms, :current_stm_i} = @
+
+    @current_stms = stms
+    for i=1,#stms
+      @current_stm_i = i
+      @stm stms[i]
+
+    @current_stms = current_stms
+    @current_stm_i = current_stm_i
+
     nil
 
   splice: (fn) =>
@@ -374,7 +383,7 @@ class RootBlock extends Block
   root_stms: (stms) =>
     unless @options.implicitly_return_root == false
       stms = transform.Statement.transformers.root_stms self, stms
-    @stm s for s in *stms
+    @stms stms
 
   render: =>
     -- print @_lines

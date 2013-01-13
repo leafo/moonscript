@@ -127,6 +127,35 @@ hoist_declarations = function(body)
     assigns
   })
 end
+local extract_declarations
+extract_declarations = function(self, body, start, out)
+  if body == nil then
+    body = self.current_stms
+  end
+  if start == nil then
+    start = self.current_stm_i + 1
+  end
+  if out == nil then
+    out = { }
+  end
+  for i = start, #body do
+    local stm = self.transform.statement(body[i])
+    body[i] = stm
+    local _exp_0 = stm[1]
+    if "assign" == _exp_0 or "declare" == _exp_0 then
+      local _list_0 = stm[2]
+      for _index_0 = 1, #_list_0 do
+        local name = _list_0[_index_0]
+        if type(name) == "string" then
+          insert(out, name)
+        end
+      end
+    elseif "group" == _exp_0 then
+      extract_declarations(self, stm[2], 1, out)
+    end
+  end
+  return out
+end
 local expand_elseif_assign
 expand_elseif_assign = function(ifstm)
   for i = 4, #ifstm do
@@ -342,20 +371,40 @@ local Statement = Transformer({
   root_stms = function(self, body)
     return apply_to_last(body, implicitly_return(self))
   end,
-  assign = function(self, node)
-    local names, values = unpack(node, 2)
-    do
-      local globber = self:get_current("name_glob")
-      if globber then
+  declare_glob = function(self, node)
+    local names = extract_declarations(self)
+    if node[2] == "^" then
+      names = (function()
+        local _accum_0 = { }
+        local _len_0 = 1
         local _list_0 = names
         for _index_0 = 1, #_list_0 do
-          local name = _list_0[_index_0]
-          if globber(name) then
-            self:put_name(name)
+          local _continue_0 = false
+          repeat
+            local name = _list_0[_index_0]
+            if not (name:match("^%u")) then
+              _continue_0 = true
+              break
+            end
+            local _value_0 = name
+            _accum_0[_len_0] = _value_0
+            _len_0 = _len_0 + 1
+            _continue_0 = true
+          until true
+          if not _continue_0 then
+            break
           end
         end
-      end
+        return _accum_0
+      end)()
     end
+    return {
+      "declare",
+      names
+    }
+  end,
+  assign = function(self, node)
+    local names, values = unpack(node, 2)
     local transformed
     if #values == 1 then
       local value = values[1]

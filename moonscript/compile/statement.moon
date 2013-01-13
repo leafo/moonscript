@@ -20,33 +20,6 @@ statement_compilers =
       with @line "local "
         \append_list [@name name for name in *undeclared], ", "
 
-  declare_glob: (node) =>
-    kind = node[2]
-
-    names = {}
-    fn = switch node[2]
-      when "*"
-        (name) ->
-          if type(name) == "string"
-            insert names, name
-            true
-      when "^"
-        (name) ->
-          if type(name) == "string" and name\match "^%u"
-            insert names, name
-            true
-      else
-        error "unknown glob"
-
-    @set "name_glob", fn
-
-    data.DelayedLine (buff) ->
-      insert buff, "local "
-      for name in *names
-        insert buff, @name name
-        insert buff, ", "
-      buff[#buff] = nil -- strips local if no names
-
   -- this overrides the existing names with new locals, used for local keyword
   declare_with_shadows: (node) =>
     names = node[2]

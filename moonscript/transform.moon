@@ -67,6 +67,20 @@ hoist_declarations = (body) ->
 
   table.insert body, idx, {"declare", assigns}
 
+
+-- this mutates body searching for assigns
+extract_declarations = (body=@current_stms, start=@current_stm_i + 1, out={}) =>
+  for i=start,#body
+    stm = @transform.statement body[i]
+    body[i] = stm
+    switch stm[1]
+      when "assign", "declare"
+        for name in *stm[2]
+          insert out, name if type(name) == "string"
+      when "group"
+        extract_declarations @, stm[2], 1, out
+  out
+
 expand_elseif_assign = (ifstm) ->
   for i = 4, #ifstm
     case = ifstm[i]
@@ -161,13 +175,18 @@ Statement = Transformer {
   root_stms: (body) =>
     apply_to_last body, implicitly_return @
 
+  declare_glob: (node) =>
+    names = extract_declarations @
+
+    if node[2] == "^"
+      names = for name in *names
+        continue unless name\match "^%u"
+        name
+
+    {"declare", names}
+
   assign: (node) =>
     names, values = unpack node, 2
-
-    if globber = @get_current "name_glob"
-      for name in *names
-        if globber name
-          @put_name name
 
     -- bubble cascading assigns
     transformed = if #values == 1

@@ -582,11 +582,18 @@ do
       if ret then
         error("deprecated stms call, use transformer")
       end
-      local _list_0 = stms
-      for _index_0 = 1, #_list_0 do
-        local stm = _list_0[_index_0]
-        self:stm(stm)
+      local current_stms, current_stm_i
+      do
+        local _obj_0 = self
+        current_stms, current_stm_i = _obj_0.current_stms, _obj_0.current_stm_i
       end
+      self.current_stms = stms
+      for i = 1, #stms do
+        self.current_stm_i = i
+        self:stm(stms[i])
+      end
+      self.current_stms = current_stms
+      self.current_stm_i = current_stm_i
       return nil
     end,
     splice = function(self, fn)
@@ -663,11 +670,7 @@ do
       if not (self.options.implicitly_return_root == false) then
         stms = transform.Statement.transformers.root_stms(self, stms)
       end
-      local _list_0 = stms
-      for _index_0 = 1, #_list_0 do
-        local s = _list_0[_index_0]
-        self:stm(s)
-      end
+      return self:stms(stms)
     end,
     render = function(self)
       local buffer = self._lines:flatten()

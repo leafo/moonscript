@@ -1,13 +1,16 @@
 
-local a
-local a,b,c
+do
+  local a
+  local a,b,c
+
+  b,g = 23232
 
 
-x = 1212
-something = ->
-  local x
+do
   x = 1212
-
+  something = ->
+    local x
+    x = 1212
 
 do
   local *
@@ -39,7 +42,6 @@ do
   if something
     x = 2323
 
--- this is broken
 do
   local *
   do
@@ -50,3 +52,27 @@ do
   do
     x = "two"
 
+do
+  local *
+  k = if what
+    10
+  x = 100
+
+  {:a,:b, :c} = y
+
+
+do
+  local *
+
+  a = 100
+  print "hi"
+  b = 200
+
+  local *
+  c = 100
+  print "hi"
+  d = 200
+  d = 2323
+
+
+g = 2323 -- test if anything leaked
