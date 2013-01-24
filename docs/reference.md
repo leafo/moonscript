@@ -1293,6 +1293,82 @@ statement in its body.
     }
     ```
 
+## Destructuring Assignment
+
+Destructuring assignment is a way to quickly extract values from a table by
+their name or position in array based tables.
+
+Typically when you see a table literal, `{1,2,3}`, it is on the right hand side
+of an assignment because it is a value. Destructuring assignment swaps the role
+of the table literal, and puts it on the left hand side of an assign
+statement.
+
+This is best explained with examples. Here is how you would unpack the first
+two values from a table:
+
+    ```moon
+    thing = {1,2}
+
+    {a,b} = thing
+    print a,b
+    ```
+
+In the destructuring table literal, the key represents the key to read from the
+right hand side, and the value represents the name the read value will be
+assigned to.
+
+    ```moon
+    obj = {
+      hello: "world"
+      day: "tuesday"
+      length: 20
+    }
+
+    {hello: hello, day: the_day} = obj
+    print hello, the_day
+    ```
+
+This also works with nested data structures as well:
+
+    ```moon
+    obj2 = {
+      numbers: {1,2,3,4}
+      properties: {
+        color: "green"
+        height: 13.5
+      }
+    }
+
+    {numbers: {first, second}} = obj2
+    print first, second, color
+    ```
+If the destructuring statement is complicated, feel free to spread it out over
+a few lines. A slightly more complicated example:
+
+    ```moon
+    {
+      numbers: { first, second }
+      properties: {
+        color: color
+      }
+    } = obj2
+    ```
+
+It's common to extract values from at table and assign them the local variables
+that have the same name as the key. In order to avoid repetition we can use the
+`:` prefix operator:
+
+    ```moon
+    {:concat, :insert} = table
+    ```
+
+This is effectively the same as import, but we can rename fields we want to
+extract by mixing the syntax:
+
+    ```moon
+    {:mix, :max, random: rand } = math
+    ```
+
 ## Function Stubs
 
 It is common to pass a function from an object around as a value, for example,
