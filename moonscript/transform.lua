@@ -882,7 +882,7 @@ local Statement = Transformer({
         end
       end
     end
-    local constructor = nil
+    local constructor
     properties = (function()
       local _accum_0 = { }
       local _len_0 = 1
@@ -914,7 +914,7 @@ local Statement = Transformer({
     local base_name = NameProxy("base")
     local self_name = NameProxy("self")
     local cls_name = NameProxy("class")
-    if not constructor then
+    if not (constructor) then
       constructor = build.fndef({
         args = {
           {
@@ -939,9 +939,6 @@ local Statement = Transformer({
           })
         }
       })
-    else
-      smart_node(constructor)
-      constructor.arrow = "fat"
     end
     local real_name = name or parent_assign and parent_assign[2][1]
     local _exp_0 = ntype(real_name)

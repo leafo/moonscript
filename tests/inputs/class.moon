@@ -172,4 +172,7 @@ class Something
 
 --
 
+class X
+  new: hi
+
 nil

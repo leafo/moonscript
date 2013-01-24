@@ -482,7 +482,7 @@ Statement = Transformer {
               insert properties, tuple
 
     -- find constructor
-    constructor = nil
+    local constructor
     properties = for tuple in *properties
       key = tuple[1]
       if key[1] == "key_literal" and key[2] == constructor_name
@@ -496,7 +496,7 @@ Statement = Transformer {
     self_name = NameProxy "self"
     cls_name = NameProxy "class"
 
-    if not constructor
+    unless constructor
       constructor = build.fndef {
         args: {{"..."}}
         arrow: "fat"
@@ -509,9 +509,6 @@ Statement = Transformer {
           }
         }
       }
-    else
-      smart_node constructor
-      constructor.arrow = "fat"
 
     real_name = name or parent_assign and parent_assign[2][1]
     real_name = switch ntype real_name
