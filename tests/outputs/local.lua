@@ -70,4 +70,11 @@ do
   d = 200
   d = 2323
 end
+do
+  local _list_0 = { }
+  for _index_0 = 1, #_list_0 do
+    local a = _list_0[_index_0]
+    local _ = a
+  end
+end
 local g = 2323

@@ -99,19 +99,31 @@ extract_declarations = function(self, body, start, out)
     out = { }
   end
   for i = start, #body do
-    local stm = self.transform.statement(body[i])
-    body[i] = stm
-    local _exp_0 = stm[1]
-    if "assign" == _exp_0 or "declare" == _exp_0 then
-      local _list_0 = stm[2]
-      for _index_0 = 1, #_list_0 do
-        local name = _list_0[_index_0]
-        if type(name) == "string" then
-          insert(out, name)
-        end
+    local _continue_0 = false
+    repeat
+      local stm = body[i]
+      if stm == nil then
+        _continue_0 = true
+        break
       end
-    elseif "group" == _exp_0 then
-      extract_declarations(self, stm[2], 1, out)
+      stm = self.transform.statement(stm)
+      body[i] = stm
+      local _exp_0 = stm[1]
+      if "assign" == _exp_0 or "declare" == _exp_0 then
+        local _list_0 = stm[2]
+        for _index_0 = 1, #_list_0 do
+          local name = _list_0[_index_0]
+          if type(name) == "string" then
+            insert(out, name)
+          end
+        end
+      elseif "group" == _exp_0 then
+        extract_declarations(self, stm[2], 1, out)
+      end
+      _continue_0 = true
+    until true
+    if not _continue_0 then
+      break
     end
   end
   return out

@@ -47,7 +47,9 @@ is_singular = (body) ->
 -- this mutates body searching for assigns
 extract_declarations = (body=@current_stms, start=@current_stm_i + 1, out={}) =>
   for i=start,#body
-    stm = @transform.statement body[i]
+    stm = body[i]
+    continue if stm == nil
+    stm = @transform.statement stm
     body[i] = stm
     switch stm[1]
       when "assign", "declare"

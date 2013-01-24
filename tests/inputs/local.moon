@@ -75,4 +75,9 @@ do
   d = 2323
 
 
+do
+  local *
+  -- this generates a nil value in the body
+  for a in *{} do a
+
 g = 2323 -- test if anything leaked
