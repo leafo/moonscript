@@ -52,7 +52,10 @@ local _Name = C(R("az", "AZ", "__") * AlphaNum^0)
 local Name = Space * _Name
 
 local Num = P"0x" * R("09", "af", "AF")^1 +
-	R"09"^1 * (P"." * R"09"^1)^-1 * (S"eE" * P"-"^-1 * R"09"^1)^-1
+	(
+		R"09"^1 * (P"." * R"09"^1)^-1 +
+		P"." * R"09"^1
+	) * (S"eE" * P"-"^-1 * R"09"^1)^-1
 
 Num = Space * (Num / function(value) return {"number", value} end)
 

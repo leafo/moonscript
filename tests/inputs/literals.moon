@@ -11,6 +11,10 @@
 0xabcdef
 0xABCDEF
 
+.2323
+.2323e-1
+.2323e13434
+
 [[ hello world ]]
 
 [=[ hello world ]=]
