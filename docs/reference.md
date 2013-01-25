@@ -537,7 +537,7 @@ single line:
 
 A for loop can also be used an expression. The last statement in the body of
 the for loop is coerced into an expression and appended to an accumulating
-table if the value of that expression is not `nil`.
+array table.
 
 Doubling every even number:
 
@@ -549,13 +549,8 @@ Doubling every even number:
         i
     ```
 
-Filtering out odd numbers:
-
-    ```moon
-    my_numbers = {1,2,3,4,5,6}
-    odds = for x in *my_numbers
-      if x % 2 == 1 then x
-    ```
+You can also filter values by combining the for loop expression with the
+[`continue`](#continue) statement.
 
 For loops at the end of a function body are not accumulated into a table for a
 return value (Instead the function will return `nil`). Either an explicit
@@ -1369,6 +1364,26 @@ extract by mixing the syntax:
     {:mix, :max, random: rand } = math
     ```
 
+### Destructuring In Other Places
+
+Destructuring can also show up in places where an assignment implicitly takes
+place. An example of this is a `for` loop:
+
+
+    ```moon
+    tuples = {
+      {"hello", "world"}
+      {"egg", "head"}
+    }
+
+    for {left, right} in *tuples
+      print left, right
+    ```
+
+We know each element in the array table is a two item tuple, so we can unpack
+it directly in the names clause of the for statement using a destructure.
+
+
 ## Function Stubs
 
 It is common to pass a function from an object around as a value, for example,
@@ -1497,7 +1512,7 @@ way to do this:
 Upon installing MoonScript, a `moonscript` module is made available. The best
 use of this module is making your Lua's require function MoonScript aware.
 
-    ```moon
+    ```lua
     require "moonscript"
     ```
 
@@ -1522,7 +1537,6 @@ built in `load` function, which is run as the module.
 
 ### Load Functions
 
-
 MoonScript provides `moonscript.load`, `moonscript.loadfile`,
 `mooonscript.loadstring`, which are analogous to Lua's `load`, `loadfile`, and
 `loadstring`.
@@ -1532,7 +1546,8 @@ with MoonScript code instead of Lua Code.
 
 
     ```moononly
-    require "moonscript"
+    moonscript = require "moonscript"
+
     fn = moonscript.loadstring 'print "hi!"'
     fn!
     ```
@@ -1543,7 +1558,7 @@ makes it so the file does not implicitly return its last statement.
 
 
     ```moononly
-    require "moonscript"
+    moonscript = require "moonscript"
 
     fn = moonscript.loadstring "10"
     print fn! -- prints "10"
@@ -1594,10 +1609,8 @@ Here is a quick example of how you would compile a MoonScript string to a Lua
 String:
 
     ```moononly
-    require "moonscript.parse"
-    require "moonscript.compile"
-
-    import parse, compile from moonscript
+    parse = require "moonscript.parse"
+    compile = require "moonscript.compile"
 
     moon_code = [[(-> print "hello world")!]]
 
