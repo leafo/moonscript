@@ -40,7 +40,7 @@ int main(int argc, char **argv) {
 		lua_pushstring(l, argv[i]);
 		lua_rawseti(l, -2, i);
 	}
-	lua_setfield(l, LUA_GLOBALSINDEX, "arg");
+	lua_setglobal(l, "arg");
 
 	if (!luaL_loadbuffer(l, (const char *)moon_lua, moon_lua_len, "moon") == 0) {
 		fprintf(stderr, "Failed to load moon\n");

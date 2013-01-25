@@ -36,7 +36,9 @@ int main(int argc, char **argv) {
 
 	// add sleep method
 #ifdef _WIN32
-	lua_getfield(l, LUA_GLOBALSINDEX, "moonscript");
+	lua_getglobal(l, "require");
+	lua_pushstring(l, "moonscript");
+	lua_call(l, 1, 1);
 	lua_pushcfunction(l, _l_sleep);
 	lua_setfield(l, -2, "_sleep");
 	lua_pop(l, 1);
@@ -58,7 +60,7 @@ int main(int argc, char **argv) {
 		lua_pushstring(l, argv[i]);
 		lua_rawseti(l, -2, i);
 	}
-	lua_setfield(l, LUA_GLOBALSINDEX, "arg");
+	lua_setglobal(l, "arg");
 
 	if (!luaL_loadbuffer(l, (const char *)moonc_lua, moonc_lua_len, "moon") == 0) {
 		fprintf(stderr, "Failed to load moon\n");
