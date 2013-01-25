@@ -18,6 +18,12 @@ int main(int argc, char **argv) {
 	luaopen_lpeg(l);
 	luaopen_lfs(l);
 
+	// lfs doesn't fill package.loaded :(
+	lua_getglobal(l, "package");
+	lua_getfield(l, -1, "loaded");
+	lua_getglobal(l, "lfs");
+	lua_setfield(l, -2, "lfs");
+
 	if (!luaL_loadbuffer(l, (const char *)moonscript_lua, moonscript_lua_len, "moonscript.lua") == 0) {
 		fprintf(stderr, "Failed to load moonscript.lua\n");
 		return 1;
