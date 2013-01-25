@@ -21,18 +21,30 @@ int _l_sleep(lua_State *l) {
 
 #endif
 
+// put whatever is on top of stack into package.loaded under name something is
+// already there
+void setloaded(lua_State* l, char* name) {
+	int top = lua_gettop(l);
+	lua_getglobal(l, "package");
+	lua_getfield(l, -1, "loaded");
+	lua_getfield(l, -1, name);
+	if (lua_isnil(l, -1)) {
+		lua_pop(l, 1);
+		lua_pushvalue(l, top);
+		lua_setfield(l, -2, name);
+	}
+
+	lua_settop(l, top);
+}
+
 int main(int argc, char **argv) {
 	lua_State *l = luaL_newstate();
 	luaL_openlibs(l);
 
 	luaopen_lpeg(l);
+	setloaded(l, "lpeg");
 	luaopen_lfs(l);
-
-	// lfs doesn't fill package.loaded :(
-	lua_getglobal(l, "package");
-	lua_getfield(l, -1, "loaded");
-	lua_getglobal(l, "lfs");
-	lua_setfield(l, -2, "lfs");
+	setloaded(l, "lfs");
 
 	if (!luaL_loadbuffer(l, (const char *)moonscript_lua, moonscript_lua_len, "moonscript.lua") == 0) {
 		fprintf(stderr, "Failed to load moonscript.lua\n");
