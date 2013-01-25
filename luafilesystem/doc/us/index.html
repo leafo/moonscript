@@ -71,7 +71,8 @@ the underlying directory structure and file attributes.</p>
 
 <h2><a name="status"></a>Status</h2>
 
-<p>Current version is 1.5.0. It was developed for Lua 5.1.</p>
+<p>Current version is 1.6.2. It was developed for Lua 5.1 but also
+  works with Lua 5.2.</p>
 
 <h2><a name="download"></a>Download</h2>
 
@@ -82,10 +83,30 @@ page.</p>
 <h2><a name="history"></a>History</h2>
 
 <dl class="history">
+	<dt><strong>Version 1.6.2</strong> [??/Oct/2012]</dt>
+	<dd><ul>
+        <li>Full Lua 5.2 compatibility (with Lua 5.1 fallbacks)</li>
+	</ul></dd>
+
+	<dt><strong>Version 1.6.1</strong> [01/Oct/2012]</dt>
+	<dd><ul>
+        <li>fix build for Lua 5.2</li>
+	</ul></dd>
+
+	<dt><strong>Version 1.6.0</strong> [26/Sep/2012]</dt>
+	<dd><ul>
+       <li>getcwd fix for Android</li>
+        <li>support for Lua 5.2</li>
+        <li>add lfs.link</li>
+        <li>other bug fixes</li>
+	</ul></dd>
+ 
 	<dt><strong>Version 1.5.0</strong> [20/Oct/2009]</dt>
+	<dd><ul>
 	<li>Added explicit next and close methods to second return value of lfs.dir 
 (the directory object), for explicit iteration or explicit closing.</li>
 	<li>Added directory locking via lfs.lock_dir function (see the <a href="manual.html">manual</a>).</li>
+	</ul></dd>
 	<dt><strong>Version 1.4.2</strong> [03/Feb/2009]</dt>
 	<dd>
 		<ul>

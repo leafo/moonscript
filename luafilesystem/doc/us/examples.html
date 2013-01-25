@@ -65,7 +65,7 @@
 attributes for each file inside it.</p>
 
 <pre class="example">
-require"lfs"
+local lfs = require"lfs"
 
 function attrdir (path)
     for file in lfs.dir(path) do
