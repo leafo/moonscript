@@ -696,11 +696,14 @@ is done with the `==` operator.
     switch name
       when "Robert"
         print "You are robert"
-      when "Dan"
+      when "Dan", "Daniel"
         print "Your name, it's Dan"
       else
         print "I don't know about your name"
     ```
+
+A switch `when` clause can match against multiple values by listing them out
+comma separated.
 
 Switches can be used as expressions as well, here we can assign the result of
 the switch to a variable:
