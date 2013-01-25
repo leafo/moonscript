@@ -1,6 +1,6 @@
     target: reference/index
     template: reference
-    title: MoonScript v0.2.2 - Language Guide
+    title: MoonScript v0.2.3 - Language Guide
     short_name: lang
 --
 MoonScript is a programming language that compiles to
