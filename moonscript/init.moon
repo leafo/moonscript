@@ -5,7 +5,9 @@ parse = require "moonscript.parse"
 import concat, insert from table
 import split, dump, get_options, unpack from require "moonscript.util"
 
-lua = :loadstring
+lua = :loadstring, :load
+
+local *
 
 dirsep = "/"
 line_tables = require "moonscript.line_tables"
@@ -36,7 +38,7 @@ to_lua = (text, options={}) ->
 moon_loader = (name) ->
   name_path = name\gsub "%.", dirsep
 
-  file, file_path = nil, nil
+  local file, file_path
   for path in *split package.moonpath, ";"
     file_path = path\gsub "?", name_path
     file = io.open file_path
