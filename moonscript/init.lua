@@ -41,37 +41,6 @@ to_lua = function(text, options)
   end
   return code, ltable
 end
-local moon_loader
-moon_loader = function(name)
-  local name_path = name:gsub("%.", dirsep)
-  local file, file_path = nil, nil
-  local _list_0 = split(package.moonpath, ";")
-  for _index_0 = 1, #_list_0 do
-    local path = _list_0[_index_0]
-    file_path = path:gsub("?", name_path)
-    file = io.open(file_path)
-    if file then
-      break
-    end
-  end
-  if file then
-    local text = file:read("*a")
-    file:close()
-    return loadstring(text, file_path)
-  else
-    return nil, "Could not find moon file"
-  end
-end
-if not package.moonpath then
-  package.moonpath = create_moonpath(package.path)
-end
-local init_loader
-init_loader = function()
-  return insert(package.loaders or package.searchers, 2, moon_loader)
-end
-if not (_G.moon_no_loader) then
-  init_loader()
-end
 local loadstring
 loadstring = function(...)
   local options, str, chunk_name, mode, env = get_options(...)
@@ -104,6 +73,37 @@ local dofile
 dofile = function(...)
   local f = assert(loadfile(...))
   return f()
+end
+local moon_loader
+moon_loader = function(name)
+  local name_path = name:gsub("%.", dirsep)
+  local file, file_path = nil, nil
+  local _list_0 = split(package.moonpath, ";")
+  for _index_0 = 1, #_list_0 do
+    local path = _list_0[_index_0]
+    file_path = path:gsub("?", name_path)
+    file = io.open(file_path)
+    if file then
+      break
+    end
+  end
+  if file then
+    local text = file:read("*a")
+    file:close()
+    return loadstring(text, file_path)
+  else
+    return nil, "Could not find moon file"
+  end
+end
+if not package.moonpath then
+  package.moonpath = create_moonpath(package.path)
+end
+local init_loader
+init_loader = function()
+  return insert(package.loaders or package.searchers, 2, moon_loader)
+end
+if not (_G.moon_no_loader) then
+  init_loader()
 end
 return {
   _NAME = "moonscript",

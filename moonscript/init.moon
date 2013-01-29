@@ -33,30 +33,6 @@ to_lua = (text, options={}) ->
 
   code, ltable
 
-moon_loader = (name) ->
-  name_path = name\gsub "%.", dirsep
-
-  file, file_path = nil, nil
-  for path in *split package.moonpath, ";"
-    file_path = path\gsub "?", name_path
-    file = io.open file_path
-    break if file
-
-  if file
-    text = file\read "*a"
-    file\close!
-    loadstring text, file_path
-  else
-    nil, "Could not find moon file"
-
-if not package.moonpath
-  package.moonpath = create_moonpath package.path
-
-init_loader = ->
-  insert package.loaders or package.searchers, 2, moon_loader
-
-init_loader! unless _G.moon_no_loader
-
 loadstring = (...) ->
   options, str, chunk_name, mode, env = get_options ...
   chunk_name or= "=(moonscript.loadstring)"
@@ -80,6 +56,30 @@ loadfile = (fname, ...) ->
 dofile = (...) ->
   f = assert loadfile ...
   f!
+
+moon_loader = (name) ->
+  name_path = name\gsub "%.", dirsep
+
+  file, file_path = nil, nil
+  for path in *split package.moonpath, ";"
+    file_path = path\gsub "?", name_path
+    file = io.open file_path
+    break if file
+
+  if file
+    text = file\read "*a"
+    file\close!
+    loadstring text, file_path
+  else
+    nil, "Could not find moon file"
+
+if not package.moonpath
+  package.moonpath = create_moonpath package.path
+
+init_loader = ->
+  insert package.loaders or package.searchers, 2, moon_loader
+
+init_loader! unless _G.moon_no_loader
 
 {
   _NAME: "moonscript"
