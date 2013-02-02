@@ -3,9 +3,9 @@
 
 local l = lexer
 local token, word_match = l.token, l.word_match
-local P, S, R = l.lpeg.P, l.lpeg.S, l.lpeg.R
+local P, S, R = lpeg.P, lpeg.S, lpeg.R
 
-module(...)
+local M = { _NAME = 'moonscript' }
 
 -- Whitespace.
 local ws = token(l.WHITESPACE, l.space^1)
@@ -41,7 +41,7 @@ local keyword = token(l.KEYWORD, word_match {
 	'using', 'switch', 'when',
 })
 
-local special = token("special", word_match { "true", "false", "nil" }) 
+local special = token("special", word_match { "true", "false", "nil" })
 
 -- Functions.
 local builtin = token(l.FUNCTION, word_match({
@@ -92,7 +92,7 @@ local proper_ident = token("proper_ident", R("AZ") * l.word)
 
 local tbl_key = token("tbl_key", l.word * ":" + ":" * l.word )
 
-_rules = {
+M._rules = {
   { 'whitespace', ws },
   { 'error', err },
   { 'self', self_var },
@@ -112,7 +112,7 @@ _rules = {
 local style_special = { fore = l.colors.light_blue }
 local style_fndef = { fore = l.colors.green }
 
-_tokenstyles = {
+M._tokenstyles = {
   { 'self_ref', style_special },
   { 'proper_ident', l.style_class },
   { 'fndef', style_fndef },
@@ -120,3 +120,5 @@ _tokenstyles = {
   { 'special', style_special },
   { 'tbl_key', { fore = l.colors.red } },
 }
+
+return M
