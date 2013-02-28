@@ -6,8 +6,8 @@ local util = require "moonscript.util"
 
 local dump_tree = require"moonscript.dump".tree
 
-require "alt_getopt"
-require "lfs"
+local alt_getopt = require "alt_getopt"
+local lfs = require "lfs"
 
 local opts, ind = alt_getopt.get_opts(arg, "vhwt:pTXb", {
 	print = "p", tree = "T", version = "v", help = "h"
