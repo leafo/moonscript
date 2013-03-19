@@ -1,6 +1,6 @@
 
 test::
-	TIME=1 lua5.1 bin/moon test2.moon
+	moonc test2.moon && TIME=1 busted test2.lua
 
 local:
 	luarocks make --local moonscript-dev-1.rockspec

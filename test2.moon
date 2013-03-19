@@ -1,6 +1,5 @@
 
-require "lfs"
-require "busted"
+lfs = require "lfs"
 
 parse   = require "moonscript.parse"
 compile = require "moonscript.compile"
@@ -118,31 +117,24 @@ describe "input tests", ->
 
       nil
 
-busted.options = {
-  output: require'busted.output.utf_terminal'!
-  suppress_pending: true
-}
+  if options.show_timings
+    teardown ->
+      format_time = (sec) -> ("%.3fms")\format(sec*1000)
+      col_width = math.max unpack [#t[1] for t in *timings]
 
-print busted!
+      print "\nTimings:"
+      total_parse, total_compile = 0, 0
+      for tuple in *timings
+        name, parse_time, compile_time = unpack tuple
+        name = name .. (" ")\rep col_width - #name
+        total_parse += parse_time
+        total_compile += compile_time
 
-if options.show_timings
-  format_time = (sec) -> ("%.3fms")\format(sec*1000)
-  col_width = math.max unpack [#t[1] for t in *timings]
+        print " * " .. name,
+          "p: " .. format_time(parse_time),
+          "c: " .. format_time(compile_time)
 
-  print "\nTimings:"
-  total_parse, total_compile = 0, 0
-  for tuple in *timings
-    name, parse_time, compile_time = unpack tuple
-    name = name .. (" ")\rep col_width - #name
-    total_parse += parse_time
-    total_compile += compile_time
-
-    print " * " .. name,
-      "p: " .. format_time(parse_time),
-      "c: " .. format_time(compile_time)
-
-  print "\nTotal:"
-  print "    parse:", format_time total_parse
-  print "  compile:", format_time total_compile
-
+      print "\nTotal:"
+      print "    parse:", format_time total_parse
+      print "  compile:", format_time total_compile
 
