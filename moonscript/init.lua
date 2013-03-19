@@ -29,15 +29,15 @@ to_lua = function(text, options)
   end
   if "string" ~= type(text) then
     local t = type(text)
-    error("expecting string (got " .. t .. ")", 2)
+    return nil, "expecting string (got " .. t .. ")", 2
   end
   local tree, err = parse.string(text)
   if not tree then
-    error(err, 2)
+    return nil, err
   end
   local code, ltable, pos = compile.tree(tree, options)
   if not code then
-    error(compile.format_error(ltable, pos, text), 2)
+    return nil, compile.format_error(ltable, pos, text), 2
   end
   return code, ltable
 end
@@ -73,14 +73,12 @@ end
 loadstring = function(...)
   local options, str, chunk_name, mode, env = get_options(...)
   chunk_name = chunk_name or "=(moonscript.loadstring)"
-  local passed, code, ltable = pcall(function()
-    return to_lua(str, options)
-  end)
-  if not passed then
-    error(chunk_name .. ": " .. code, 2)
+  local code, ltable_or_err = to_lua(str, options)
+  if not (code) then
+    return nil, ltable_or_err
   end
   if chunk_name then
-    line_tables[chunk_name] = ltable
+    line_tables[chunk_name] = ltable_or_err
   end
   return (lua.loadstring or lua.load)(code, chunk_name, unpack({
     mode,
@@ -89,7 +87,7 @@ loadstring = function(...)
 end
 loadfile = function(fname, ...)
   local file, err = io.open(fname)
-  if not file then
+  if not (file) then
     return nil, err
   end
   local text = assert(file:read("*a"))

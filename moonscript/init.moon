@@ -23,15 +23,15 @@ create_moonpath = (package_path) ->
 to_lua = (text, options={}) ->
   if "string" != type text
     t = type text
-    error "expecting string (got ".. t ..")", 2
+    return nil, "expecting string (got ".. t ..")", 2
 
   tree, err = parse.string text
   if not tree
-    error err, 2
+    return nil, err
 
   code, ltable, pos = compile.tree tree, options
   if not code
-    error compile.format_error(ltable, pos, text), 2
+    return nil, compile.format_error(ltable, pos, text), 2
 
   code, ltable
 
@@ -63,17 +63,17 @@ loadstring = (...) ->
   options, str, chunk_name, mode, env = get_options ...
   chunk_name or= "=(moonscript.loadstring)"
 
-  passed, code, ltable = pcall -> to_lua str, options
-  if not passed
-    error chunk_name .. ": " .. code, 2
+  code, ltable_or_err = to_lua str, options
+  unless code
+    return nil, ltable_or_err
 
-  line_tables[chunk_name] = ltable if chunk_name
+  line_tables[chunk_name] = ltable_or_err if chunk_name
   -- the unpack prevents us from passing nil
   (lua.loadstring or lua.load) code, chunk_name, unpack { mode, env }
 
 loadfile = (fname, ...) ->
   file, err = io.open fname
-  return nil, err if not file
+  return nil, err unless file
   text = assert file\read "*a"
   file\close!
   loadstring text, fname, ...
