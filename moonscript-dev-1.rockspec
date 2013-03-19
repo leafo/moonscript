@@ -25,6 +25,7 @@ build = {
 		["moon"] = "moon/init.lua",
 		["moon.all"] = "moon/all.lua",
 		["moonscript"] = "moonscript/init.lua",
+		["moonscript.base"] = "moonscript/base.lua",
 		["moonscript.compile"] = "moonscript/compile.lua",
 		["moonscript.compile.statement"] = "moonscript/compile/statement.lua",
 		["moonscript.compile.value"] = "moonscript/compile/value.lua",
