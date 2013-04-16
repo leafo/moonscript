@@ -597,7 +597,7 @@ local build_grammar = wrap_env(function()
 		ExpList = Exp * (sym"," * Exp)^0,
 		ExpListLow = Exp * ((sym"," + sym";") * Exp)^0,
 
-		InvokeArgs = ExpList * (sym"," * (TableBlock + SpaceBreak * Advance * ArgBlock * TableBlock^-1) + TableBlock)^-1 + TableBlock,
+		InvokeArgs = -P"-" * (ExpList * (sym"," * (TableBlock + SpaceBreak * Advance * ArgBlock * TableBlock^-1) + TableBlock)^-1 + TableBlock),
 		ArgBlock = ArgLine * (sym"," * SpaceBreak * ArgLine)^0 * PopIndent,
 		ArgLine = CheckIndent * ExpList
 	}

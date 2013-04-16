@@ -188,20 +188,18 @@ restrictions must be put in place to avoid parsing ambiguity involving
 whitespace.
 
 The minus sign plays two roles, a unary negation operator and a binary
-subtraction operator. In order to force subtraction a space must be placed
-after the `-` operator. In order to force a negation, no space must follow
-the `-`. Consider the examples below.
+subtraction operator. Consider how the following examples compile:
 
     ```moon
     a = x - 10
     b = x-10
     c = x -y
+    d = x- z
     ```
 
-The precedence of the first argument of a function call can also be controlled
-using whitespace if the argument is a literal string. In Lua, it is common to
-leave off parentheses when calling a function with a single string or table
-literal.
+The precedence of the first argument of a function call can be controlled using
+whitespace if the argument is a literal string. In Lua, it is common to leave
+off parentheses when calling a function with a single string or table literal.
 
 When there is no space between a variable and a string literal, the
 function call takes precedence over any following expressions. No other

@@ -243,4 +243,12 @@ x.while.true = "hello"
 x or= "hello"
 x and= "hello"
 
+--
+
+z = a-b
+z = a -b
+z = a - b
+z = a- b
+
+
 -- cooool

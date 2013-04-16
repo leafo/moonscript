@@ -238,3 +238,7 @@ x["then"] = "hello"
 x["while"]["true"] = "hello"
 x = x or "hello"
 x = x and "hello"
+z = a - b
+z = a(-b)
+z = a - b
+z = a - b
