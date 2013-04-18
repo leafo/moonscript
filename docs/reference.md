@@ -24,11 +24,11 @@ Assigning to an undeclared name will cause it to be declared as a new local
 variable. The language is dynamically typed so you can assign any value to any
 variable. You can assign multiple names and values at once just like Lua:
 
-    ```moon
-    hello = "world"
-    a,b,c = 1, 2, 3
-    hello = 123 -- uses the existing variable
-    ```
+```moon
+hello = "world"
+a,b,c = 1, 2, 3
+hello = 123 -- uses the existing variable
+```
 
 If you wish to create a global variable it must be done using the
 [`export`](#export_statement) keyword.
@@ -42,25 +42,25 @@ variable, or shadow an existing one.
 for updating and assigning at the same time. They are aliases for their
 expanded equivalents.
 
-    ```moon
-    x = 0
-    x += 10
+```moon
+x = 0
+x += 10
 
-    s = "hello "
-    s ..= "world"
+s = "hello "
+s ..= "world"
 
-    b = false
-    b and= true or false
-    ```
+b = false
+b and= true or false
+```
 
 ## Comments
 
 Like Lua, comments start with `--` and continue to the end of the line.
 Comments are not written to the output.
 
-    ```moon
-    -- I am a comment
-    ```
+```moon
+-- I am a comment
+```
 
 ## Literals & Operators
 
@@ -75,80 +75,80 @@ MoonScript also supports all the same binary and unary operators. Additionally
 All functions are created using a function expression. A simple function is
 denoted using the arrow: `->`
 
-    ```moon
-    my_function = ->
-    my_function() -- call the empty function
-    ```
+```moon
+my_function = ->
+my_function() -- call the empty function
+```
 
 The body of the function can either be one statement placed directly after the
 arrow, or it can be a series of statements indented on the following lines:
 
-    ```moon
-    func_a = -> print "hello world"
+```moon
+func_a = -> print "hello world"
 
-    func_b = ->
-      value = 100
-      print "The value:", value
-    ```
+func_b = ->
+  value = 100
+  print "The value:", value
+```
 
 If a function has no arguments, it can be called using the `!` operator,
 instead of empty parentheses. The `!` invocation is the preferred way to call
 functions with no arguments.
 
-    ```moon
-    func_a!
-    func_b()
-    ```
+```moon
+func_a!
+func_b()
+```
 
 Functions with arguments can be created by preceding the arrow with a list of
 argument names in parentheses:
 
-    ```moon
-    sum = (x, y) -> print "sum", x + y
-    ```
+```moon
+sum = (x, y) -> print "sum", x + y
+```
 
 Functions can be called by listing the arguments after the name of an expresion
 that evaluates to a function. When chaining together function calls, the
 arguments are applied to the closest function to the left.
 
-    ```moon
-    sum 10, 20
-    print sum 10, 20
+```moon
+sum 10, 20
+print sum 10, 20
 
-    a b c "a", "b", "c"
-    ```
+a b c "a", "b", "c"
+```
 
 In order to avoid ambiguity in when calling functions, parentheses can also be
 used to surround the arguments. This is required here in order to make sure the
 right arguments get sent to the right functions.
 
-    ```moon
-    print "x:", sum(10, 20), "y:", sum(30, 40)
-    ```
+```moon
+print "x:", sum(10, 20), "y:", sum(30, 40)
+```
 
 There must not be any space between the opening parenthesis and the function.
 
 Functions will coerce the last statement in their body into a return statement,
 this is called implicit return:
 
-    ```moon
-    sum = (x, y) -> x + y
-    print "The sum is ", sum 10, 20
-    ```
+```moon
+sum = (x, y) -> x + y
+print "The sum is ", sum 10, 20
+```
 
 And if you need to explicitly return, you can use the `return` keyword:
 
-    ```moon
-    sum = (x, y) -> return x + y
-    ```
+```moon
+sum = (x, y) -> return x + y
+```
 
 Just like in Lua, functions can return multiple values. The last statement must
 be a list of values separated by commas:
 
-    ```moon
-    mystery = (x, y) -> x + y, x - y
-    a,b = mystery 10, 20
-    ```
+```moon
+mystery = (x, y) -> x + y, x - y
+a,b = mystery 10, 20
+```
 
 ### Fat Arrows
 
@@ -156,9 +156,9 @@ Because it is an idiom in Lua to send an object as the first argument when
 calling a method, a special syntax is provided for creating functions which
 automatically includes a `self` argument.
 
-    ```moon
-    func = (num) => @value + num
-    ```
+```moon
+func = (num) => @value + num
+```
 
 ### Argument Defaults
 
@@ -166,20 +166,20 @@ It is possible to provide default values for the arguments of a function. An
 argument is determined to be empty if its value is `nil`. Any `nil` arguments
 that have a default value will be replace before the body of the function is run.
 
-    ```moon
-    my_function = (name="something", height=100) ->
-      print "Hello I am", name
-      print "My height is", height
-    ```
+```moon
+my_function = (name="something", height=100) ->
+  print "Hello I am", name
+  print "My height is", height
+```
 
 An argument default value expression is evaluated in the body of the function
 in the order of the argument declarations. For this reason default values have
 access to previously declared arguments.
 
-    ```moon
-    some_args = (x=100, y=x+1000) ->
-      print x + y
-    ```
+```moon
+some_args = (x=100, y=x+1000) ->
+  print x + y
+```
 
 ### Considerations
 
@@ -190,12 +190,12 @@ whitespace.
 The minus sign plays two roles, a unary negation operator and a binary
 subtraction operator. Consider how the following examples compile:
 
-    ```moon
-    a = x - 10
-    b = x-10
-    c = x -y
-    d = x- z
-    ```
+```moon
+a = x - 10
+b = x-10
+c = x -y
+d = x- z
+```
 
 The precedence of the first argument of a function call can be controlled using
 whitespace if the argument is a literal string. In Lua, it is common to leave
@@ -209,10 +209,10 @@ Where there is a space following a variable and a string literal, the function
 call acts as show above. The string literal belongs to any following
 expressions (if they exist), which serves as the argument list.
 
-    ```moon
-    x = func"hello" + 100
-    y = func "hello" + 100
-    ```
+```moon
+x = func"hello" + 100
+y = func "hello" + 100
+```
 
 ### Multi-line arguments
 
@@ -226,147 +226,147 @@ must end in a comma. And the following line must be indented more than the
 current indentation. Once indented, all other argument lines must be at the
 same level of indentation to be part of the argument list
 
-    ```moon
-    my_func 5,4,3,
-      8,9,10
+```moon
+my_func 5,4,3,
+  8,9,10
 
-    cool_func 1,2,
-      3,4,
-      5,6,
-      7,8
-    ```
+cool_func 1,2,
+  3,4,
+  5,6,
+  7,8
+```
 
 This type of invocation can be nested. The level of indentation is used to
 determine to which function the arguments belong to.
 
-    ```moon
-    my_func 5,6,7,
-      6, another_func 6,7,8,
-        9,1,2,
-      5,4
-    ```
+```moon
+my_func 5,6,7,
+  6, another_func 6,7,8,
+    9,1,2,
+  5,4
+```
 
 Because [tables](#table_literals) also use the comma as a delimiter, this
 indentation syntax is helpful for letting values be part of the argument list
 instead of being part of the table.
 
-    ```moon
-    x = {
-      1,2,3,4, a_func 4,5,
-        5,6,
-      8,9,10
-    }
-    ```
+```moon
+x = {
+  1,2,3,4, a_func 4,5,
+    5,6,
+  8,9,10
+}
+```
 
 Although uncommon, notice how we can give a deeper indentation for function
 arguments if we know we will be using a lower indentation further on.
 
-    ```moon
-    y = { my_func 1,2,3,
-       4,5,
-      5,6,7
-    }
-    ```
+```moon
+y = { my_func 1,2,3,
+   4,5,
+  5,6,7
+}
+```
 
 The same thing can be done with other block level statements like
 [conditionals](#conditionals). We can use indentation level to determine what
 statement a value belongs to:
 
-    ```moon
-    if func 1,2,3,
-      "hello",
-      "world"
-        print "hello"
-        print "I am inside if"
+```moon
+if func 1,2,3,
+  "hello",
+  "world"
+    print "hello"
+    print "I am inside if"
 
-    if func 1,2,3,
-        "hello",
-        "world"
-      print "hello"
-      print "I am inside if"
-    ```
+if func 1,2,3,
+    "hello",
+    "world"
+  print "hello"
+  print "I am inside if"
+```
 
 ## Table Literals
 
 Like in Lua, tables are delimited in curly braces.
 
-    ```moon
-    some_values = { 1, 2, 3, 4 }
-    ```
+```moon
+some_values = { 1, 2, 3, 4 }
+```
 
 Unlike Lua, assigning a value to a key in a table is done with `:` (instead of
 `=`).
 
-    ```moon
-    some_values = {
-      name: "Bill",
-      age: 200,
-      ["favorite food"]: "rice"
-    }
-    ```
+```moon
+some_values = {
+  name: "Bill",
+  age: 200,
+  ["favorite food"]: "rice"
+}
+```
 
 The curly braces can be left off if a single table of key value pairs is being
 assigned.
 
-    ```moon
-    profile =
-      height: "4 feet",
-      shoe_size: 13,
-      favorite_foods: {"ice cream", "donuts"}
-    ```
+```moon
+profile =
+  height: "4 feet",
+  shoe_size: 13,
+  favorite_foods: {"ice cream", "donuts"}
+```
 
 Newlines can be used to delimit values instead of a comma (or both):
 
-    ```moon
-    values = {
-      1,2,3,4
-      5,6,7,8
-      name: "superman"
-      occupation: "crime fighting"
-    }
-    ```
+```moon
+values = {
+  1,2,3,4
+  5,6,7,8
+  name: "superman"
+  occupation: "crime fighting"
+}
+```
 
 When creating a single line table literal, the curly braces can also be left
 off:
 
-    ```moon
-    my_function dance: "Tango", partner: "none"
+```moon
+my_function dance: "Tango", partner: "none"
 
-    y = type: "dog", legs: 4, tails: 1
-    ```
+y = type: "dog", legs: 4, tails: 1
+```
 
 The keys of a table literal can be language keywords without being escaped:
 
-    ```moon
-    tbl = {
-      do: "something"
-      end: "hunger"
-    }
-    ```
+```moon
+tbl = {
+  do: "something"
+  end: "hunger"
+}
+```
 
 If you are constructing a table out of variables and wish the keys to be the
 same as the variable names, then the `:` prefix operator can be used:
 
-    ```moon
-    hair = "golden"
-    height = 200
-    person = { :hair, :height, shoe_size: 40 }
+```moon
+hair = "golden"
+height = 200
+person = { :hair, :height, shoe_size: 40 }
 
-    print_table :hair, :height
-    ```
+print_table :hair, :height
+```
 
 If you want the key of a field in the table to to be result of an expression,
 then you can wrap it in `[` `]`, just like in Lua. You can also use a string
 literal directly as a key, leaving out the square brackets. This is useful if
 your key has any special characters.
 
-    ```moon
-    t = {
-      [1 + 2]: "hello"
-      "hello world": true
-    }
+```moon
+t = {
+  [1 + 2]: "hello"
+  "hello world": true
+}
 
-    ```
+```
 
 ## Comprehensions
 
@@ -382,42 +382,42 @@ the key and the value on each iteration.
 The following creates a copy of the `items` table but with all the values
 doubled.
 
-    ```moon
-    items = { 1, 2, 3, 4 }
-    doubled = [item * 2 for i, item in ipairs items]
-    ```
+```moon
+items = { 1, 2, 3, 4 }
+doubled = [item * 2 for i, item in ipairs items]
+```
 
 The items included in the new table can be restricted with a `when` clause:
 
-    ```moon
-    iter = ipairs items
-    slice = [item for i, item in iter when i > 1 and i < 3]
-    ```
+```moon
+iter = ipairs items
+slice = [item for i, item in iter when i > 1 and i < 3]
+```
 
 Because it is common to iterate over the values of a numerically indexed table,
 an `*` operator is introduced. The doubled example can be rewritten as:
 
-    ```moon
-    doubled = [item * 2 for item in *items]
-    ```
+```moon
+doubled = [item * 2 for item in *items]
+```
 
 The `for` and `when` clauses can be chained as much as desired. The only
 requirement is that a comprehension has at least one `for` clause.
 
 Using multiple `for` clauses is the same as using nested loops:
 
-    ```moon
-    x_coords = {4, 5, 6, 7}
-    y_coords = {9, 2, 3}
+```moon
+x_coords = {4, 5, 6, 7}
+y_coords = {9, 2, 3}
 
-    points = [{x,y} for x in *x_coords for y in *y_coords]
-    ```
+points = [{x,y} for x in *x_coords for y in *y_coords]
+```
 
 Numeric for loops can also be used in comprehensions:
 
-    ```moon
-    evens = [i for i=1,100 when i % 2 == 0]
-    ```
+```moon
+evens = [i for i=1,100 when i % 2 == 0]
+```
 
 ### Table Comprehensions
 
@@ -426,31 +426,31 @@ The syntax for table comprehensions is very similar, only differing by using `{`
 
 This example makes a copy of the table`thing`:
 
-    ```moon
-    thing = {
-      color: "red"
-      name: "fast"
-      width: 123
-    }
+```moon
+thing = {
+  color: "red"
+  name: "fast"
+  width: 123
+}
 
-    thing_copy = {k,v for k,v in pairs thing}
-    ```
+thing_copy = {k,v for k,v in pairs thing}
+```
 
 Table comprehensions, like list comprehensions, also support multiple `for` and
 `when` clauses. In this example we use a `when` clause to prevent the value
 associated with the `color` key from being copied.
 
-    ```moon
-    no_color = {k,v for k,v in pairs thing when k != "color"}
-    ```
+```moon
+no_color = {k,v for k,v in pairs thing when k != "color"}
+```
 
 The `*` operator is also supported. Here we create a square root look up table
 for a few numbers.
 
-    ```moon
-    numbers = {1,2,3,4}
-    sqrts = {i, math.sqrt i for i in *numbers}
-    ```
+```moon
+numbers = {1,2,3,4}
+sqrts = {i, math.sqrt i for i in *numbers}
+```
 
 The key-value tuple in a table comprehension can also come from a single
 expression, in which case the expression should return two values. The
@@ -459,10 +459,10 @@ first is used as the key and the second is used as the value:
 In this example we convert an array of pairs to a table where the first item in
 the pair is the key and the second is the value.
 
-    ```moon
-    tuples = {{"hello", "world"}, {"foo", "bar"}}
-    tbl = {unpack tuple for tuple in *tuples}
-    ```
+```moon
+tuples = {{"hello", "world"}, {"foo", "bar"}}
+tbl = {unpack tuple for tuple in *tuples}
+```
 
 ### Slicing
 
@@ -473,65 +473,65 @@ a step size in a `for` loop.
 Here we can set the minimum and maximum bounds, taking all items with indexes
 between 1 and 5 inclusive:
 
-    ```moon
-    slice = [item for item in *items[1,5]]
-    ```
+```moon
+slice = [item for item in *items[1,5]]
+```
 
 Any of the slice arguments can be left off to use a sensible default. In this
 example, if the max index is left off it defaults to the length of the table.
 This will take everything but the first element:
 
-    ```moon
-    slice = [item for item in *items[2,]]
-    ```
+```moon
+slice = [item for item in *items[2,]]
+```
 
 If the minimum bound is left out, it defaults to 1. Here we only provide a step
 size and leave the other bounds blank. This takes all odd indexed items: (1, 3,
 5, ...)
 
-    ```moon
-    slice = [item for item in *items[,,2]]
-    ```
+```moon
+slice = [item for item in *items[,,2]]
+```
 
 ## String Interpolation
 
 You can mix expressions into string literals using `#{}` syntax.
 
-    ```moon
-    print "I am #{math.random! * 100}% sure."
-    ```
+```moon
+print "I am #{math.random! * 100}% sure."
+```
 String interpolation is only available in double quoted strings.
 
 ## For Loop
 
 There are two for loop forms, just like in Lua. A numeric one and a generic one:
 
-    ```moon
-    for i = 10, 20
-      print i
+```moon
+for i = 10, 20
+  print i
 
-    for k = 1,15,2 -- an optional step provided
-      print k
+for k = 1,15,2 -- an optional step provided
+  print k
 
-    for key, value in pairs object
-      print key, value
-    ```
+for key, value in pairs object
+  print key, value
+```
 
 The slicing and `*` operators can be used, just like with comprehensions:
 
-    ```moon
-    for item in *items[2,4]
-      print item
-    ```
+```moon
+for item in *items[2,4]
+  print item
+```
 
 A shorter syntax is also available for all variations when the body is only a
 single line:
 
-    ```moon
-    for item in *items do print item
+```moon
+for item in *items do print item
 
-    for j = 1,10,3 do print j
-    ```
+for j = 1,10,3 do print j
+```
 
 A for loop can also be used an expression. The last statement in the body of
 the for loop is coerced into an expression and appended to an accumulating
@@ -539,13 +539,13 @@ array table.
 
 Doubling every even number:
 
-    ```moon
-    doubled_evens = for i=1,20
-      if i % 2 == 0
-        i * 2
-      else
-        i
-    ```
+```moon
+doubled_evens = for i=1,20
+  if i % 2 == 0
+    i * 2
+  else
+    i
+```
 
 You can also filter values by combining the for loop expression with the
 [`continue`](#continue) statement.
@@ -555,13 +555,13 @@ return value (Instead the function will return `nil`). Either an explicit
 `return` statement can be used, or the loop can be converted into a list
 comprehension.
 
-    ```moon
-    func_a = -> for i=1,10 do i
-    func_b = -> return for i=1,10 do i
+```moon
+func_a = -> for i=1,10 do i
+func_b = -> return for i=1,10 do i
 
-    print func_a! -- prints nil
-    print func_b! -- prints table object
-    ```
+print func_a! -- prints nil
+print func_b! -- prints table object
+```
 
 This is done to avoid the needless creation of tables for functions that don't
 need to return the results of the loop.
@@ -570,14 +570,14 @@ need to return the results of the loop.
 
 The while loop also comes in two variations:
 
-    ```moon
-    i = 10
-    while i > 0
-      print i
-      i -= 1
+```moon
+i = 10
+while i > 0
+  print i
+  i -= 1
 
-    while running == true do my_function!
-    ```
+while running == true do my_function!
+```
 
 Like for loops, the while loop can also be used an expression. Additionally,
 for a function to return the accumulated value of a while loop, the statement
@@ -587,63 +587,63 @@ must be explicitly returned.
 
 A `continue` statement can be used to skip the current iteration in a loop.
 
-    ```moon
-    i = 0
-    while i < 10
-      continue if i % 2 ==0
-      print i
-    ```
+```moon
+i = 0
+while i < 10
+  continue if i % 2 ==0
+  print i
+```
 `continue` can also be used with loop expressions to prevent that iteration
 from accumulating into the result. This examples filters the array table into
 just even numbers:
 
-    ```moon
-    my_numbers = {1,2,3,4,5,6}
-    odds = for x in *my_numbers
-      continue if x % 2 == 1
-      x
-    ```
+```moon
+my_numbers = {1,2,3,4,5,6}
+odds = for x in *my_numbers
+  continue if x % 2 == 1
+  x
+```
 
 ## Conditionals
 
-    ```moon
-    have_coins = false
-    if have_coins
-      print "Got coins"
-    else
-      print "No coins"
-    ```
+```moon
+have_coins = false
+if have_coins
+  print "Got coins"
+else
+  print "No coins"
+```
 
 A short syntax for single statements can also be used:
 
-    ```moon
-    have_coins = false
-    if have_coins then print "Got coins" else print "No coins"
-    ```
+```moon
+have_coins = false
+if have_coins then print "Got coins" else print "No coins"
+```
 
 Because if statements can be used as expressions, this can able be written as:
 
-    ```moon
-    have_coins = false
-    print if have_coins then "Got coins" else "No coins"
-    ```
+```moon
+have_coins = false
+print if have_coins then "Got coins" else "No coins"
+```
 
 Conditionals can also be used in return statements and assignments:
 
-    ```moon
-    is_tall = (name) ->
-      if name == "Rob"
-        true
-      else
-        false
+```moon
+is_tall = (name) ->
+  if name == "Rob"
+    true
+  else
+    false
 
-    message = if is_tall "Rob"
-      "I am very tall"
-    else
-      "I am not so tall"
+message = if is_tall "Rob"
+  "I am very tall"
+else
+  "I am not so tall"
 
-    print message -- prints: I am very tall
-    ```
+print message -- prints: I am very tall
+```
 
 ### With Assignment
 
@@ -653,34 +653,34 @@ the value that was assigned to will be used as the conditional expression. The
 assigned variable is only in scope for the body of the conditional, meaning it
 is never available if the value is not truthy.
 
-    ```moon
-    if user = database.find_user "moon"
-      print user.name
-    ```
+```moon
+if user = database.find_user "moon"
+  print user.name
+```
 
-    ```moon
-    if hello = os.getenv "hello"
-      print "You have hello", hello
-    elseif world = os.getenv "world"
-      print "you have world", world
-    else
-      print "nothing :("
-    ```
+```moon
+if hello = os.getenv "hello"
+  print "You have hello", hello
+elseif world = os.getenv "world"
+  print "you have world", world
+else
+  print "nothing :("
+```
 
 ## Line Decorators
 
 For convenience, the for loop and if statement can be applied to single
 statements at the end of the line:
 
-    ```moon
-    print "hello world" if name == "Rob"
-    ```
+```moon
+print "hello world" if name == "Rob"
+```
 
 And with basic loops:
 
-    ```moon
-    print "item: ", item for item in *items
-    ```
+```moon
+print "item: ", item for item in *items
+```
 
 ## Switch
 
@@ -689,16 +689,16 @@ check against the same value. Note that the value is only evaluated once. Like
 if statements, switches can have an else block to handle no matches. Comparison
 is done with the `==` operator.
 
-    ```moon
-    name = "Dan"
-    switch name
-      when "Robert"
-        print "You are robert"
-      when "Dan", "Daniel"
-        print "Your name, it's Dan"
-      else
-        print "I don't know about your name"
-    ```
+```moon
+name = "Dan"
+switch name
+  when "Robert"
+    print "You are robert"
+  when "Dan", "Daniel"
+    print "Your name, it's Dan"
+  else
+    print "I don't know about your name"
+```
 
 A switch `when` clause can match against multiple values by listing them out
 comma separated.
@@ -706,26 +706,26 @@ comma separated.
 Switches can be used as expressions as well, here we can assign the result of
 the switch to a variable:
 
-    ```moon
-    b = 1
-    next_number = switch b
-      when 1
-        2
-      when 2
-        3
-      else
-        error "can't count that high!"
-    ```
+```moon
+b = 1
+next_number = switch b
+  when 1
+    2
+  when 2
+    3
+  else
+    error "can't count that high!"
+```
 
 We can use the `then` keyword to write a switch's `when` block on a single line.
 No extra keyword is needed to write the else block on a single line.
 
-    ```moon
-    msg = switch math.random(1, 5)
-      when 1 then "you are lucky"
-      when 2 then "you are almost lucky"
-      else "not so lucky"
-    ```
+```moon
+msg = switch math.random(1, 5)
+  when 1 then "you are lucky"
+  when 2 then "you are almost lucky"
+  else "not so lucky"
+```
 
 It is worth noting the order of the case comparison expression. The case's
 expression is on the left hand side. This can be useful if the case's
@@ -740,17 +740,17 @@ code if you wish to know the implementation details.
 
 A simple class:
 
-    ```moon
-    class Inventory
-      new: =>
-        @items = {}
+```moon
+class Inventory
+  new: =>
+    @items = {}
 
-      add_item: (name) =>
-        if @items[name]
-          @items[name] += 1
-        else
-          @items[name] = 1
-    ```
+  add_item: (name) =>
+    if @items[name]
+      @items[name] += 1
+    else
+      @items[name] = 1
+```
 
 A class is declared with a `class` statement followed by a table-like
 declaration where all of the methods and properties are listed.
@@ -767,11 +767,11 @@ The `@` prefix on a variable name is shorthand for `self.`. `@items` becomes
 Creating an instance of the class is done by calling the name of the class as a
 function.
 
-    ```moon
-    inv = Inventory!
-    inv\add_item "t-shirt"
-    inv\add_item "pants"
-    ```
+```moon
+inv = Inventory!
+inv\add_item "t-shirt"
+inv\add_item "pants"
+```
 
 Because the instance of the class needs to be sent to the methods when they are
 called, the <code>\\</code> operator is used.
@@ -782,43 +782,43 @@ functions, but for other types of objects, undesired results may occur.
 Consider the example below, the `clothes` property is shared amongst all
 instances, so modifications to it in one instance will show up in another:
 
-    ```moononly
-    class Person
-      clothes: {}
-      give_item: (name) =>
-        table.insert @clothes, name
+```moononly
+class Person
+  clothes: {}
+  give_item: (name) =>
+    table.insert @clothes, name
 
-    a = Person!
-    b = Person!
+a = Person!
+b = Person!
 
-    a\give_item "pants"
-    b\give_item "shirt"
+a\give_item "pants"
+b\give_item "shirt"
 
-    -- will print both pants and shirt
-    print item for item in *a.clothes
-    ```
+-- will print both pants and shirt
+print item for item in *a.clothes
+```
 
 The proper way to avoid this problem is to create the mutable state of the
 object in the constructor:
 
-    ```moononly
-    class Person
-      new: =>
-        @clothes = {}
-    ```
+```moononly
+class Person
+  new: =>
+    @clothes = {}
+```
 
 ### Inheritance
 
 The `extends` keyword can be used in a class declaration to inherit the
 properties and methods from another class.
 
-    ```moon
-    class BackPack extends Inventory
-      size: 10
-      add_item: (name) =>
-        if #@items > size then error "backpack is full"
-        super name
-    ```
+```moon
+class BackPack extends Inventory
+  size: 10
+  add_item: (name) =>
+    if #@items > size then error "backpack is full"
+    super name
+```
 
 Here we extend our Inventory class, and limit the amount of items it can carry.
 
@@ -832,14 +832,14 @@ by calling the method `__inherited` on the parent class if it exists. The
 function receives two arguments, the class that is being inherited and the
 child class.
 
-    ```moononly
-    class Shelf
-      @__inherited: (child) =>
-        print @__name, "was inherited by", child.__name
+```moononly
+class Shelf
+  @__inherited: (child) =>
+    print @__name, "was inherited by", child.__name
 
-    -- will print: Shelf was inherited by Cupboard
-    class Cupboard extends Shelf
-    ```
+-- will print: Shelf was inherited by Cupboard
+class Cupboard extends Shelf
+```
 
 ### Super
 
@@ -863,17 +863,17 @@ retrieve a function, the raw function is returned.
 
 A few examples of using `super` in different ways:
 
-    ```moon
-    class MyClass extends ParentClass
-      a_method: =>
-        -- the following have the same effect:
-        super "hello", "world"
-        super\a_method "hello", "world"
-        super.a_method self, "hello", "world"
+```moon
+class MyClass extends ParentClass
+  a_method: =>
+    -- the following have the same effect:
+    super "hello", "world"
+    super\a_method "hello", "world"
+    super.a_method self, "hello", "world"
 
-        -- super as a value is equal to the parent class:
-        assert super == ParentClass
-    ```
+    -- super as a value is equal to the parent class:
+    assert super == ParentClass
+```
 
 `super` can also be used on left side of a [Function Stub](#function_stubs).
 The only major difference is that instead of the resulting function being bound
@@ -886,12 +886,12 @@ special `__class` property. This property holds the class object. The class
 object is what we call to build a new instance. We can also index the class
 object to retrieve class methods and properties.
 
-    ```moon
-    b = BackPack!
-    assert b.__class == BackPack
+```moon
+b = BackPack!
+assert b.__class == BackPack
 
-    print BackPack.size -- prints 10
-    ```
+print BackPack.size -- prints 10
+```
 ### Class Objects
 
 The class object is what we create when we use a `class` statement. The class
@@ -917,9 +917,9 @@ The class object has a couple special properties:
 The name of the class as when it was declared is stored as a string in the
 `__name` field of the class object.
 
-    ```moon
-    print BackPack.__name -- prints Backpack
-    ```
+```moon
+print BackPack.__name -- prints Backpack
+```
 
 The *base* object is stored in `__base`. We can modify this table to add
 functionality to instances that have already been created and ones that are yet
@@ -933,39 +933,39 @@ If the class extends from anything, the parent class object is stored in
 We can create variables directly in the class object instead of in the *base*
 by using `@` in the front of the property name in a class declaration.
 
-    ```moononly
-    class Things
-      @some_func: => print "Hello from", @__name
+```moononly
+class Things
+  @some_func: => print "Hello from", @__name
 
-    Things\some_func!
+Things\some_func!
 
-    -- class variables not visible in instances
-    assert Things().some_func == nil
+-- class variables not visible in instances
+assert Things().some_func == nil
 
-    ```
+```
 
 In expressions, we can use `@@` to access a value that is stored in the
 `__class` of `self`.  Thus, `@@hello` is shorthand for `self.__class.hello`.
 
-    ```moononly
-    class Counter
-      @count: 0
+```moononly
+class Counter
+  @count: 0
 
-      new: =>
-        @@count += 1
+  new: =>
+    @@count += 1
 
-    Counter!
-    Counter!
+Counter!
+Counter!
 
-    print Counter.count -- prints 2
-    ```
+print Counter.count -- prints 2
+```
 
 The calling semantics of `@@` are similar to `@`. Calling a `@@` name will pass
 the class in as the first argument using Lua's colon syntax.
 
-    ```moon
-    @@hello 1,2,3,4
-    ```
+```moon
+@@hello 1,2,3,4
+```
 ### Class Declaration Statements
 
 In the body of a class declaration, we can have normal expressions in addition
@@ -974,11 +974,11 @@ to key/value pairs. In this context, `self` is equal to the class object.
 Here is an alternative way to create a class variable compared to what's
 described above:
 
-    ```moon
-    class Things
-      @class_var = "hello world"
+```moon
+class Things
+  @class_var = "hello world"
 
-    ```
+```
 
 These expressions are executed after all the properties have been added to the
 *base*.
@@ -988,15 +988,15 @@ properties. This is convenient for placing private values or helper functions
 that only the class methods can access:
 
 
-    ```moononly
-    class MoreThings
-      secret = 123
-      log = (msg) -> print "LOG:", msg
+```moononly
+class MoreThings
+  secret = 123
+  log = (msg) -> print "LOG:", msg
 
-      some_method: =>
-        log "hello world: " .. secret
+  some_method: =>
+    log "hello world: " .. secret
 
-    ```
+```
 
 ### `@` and `@@` Values
 
@@ -1006,17 +1006,17 @@ that name accessed in `self` and `self.__class`.
 If they are used all by themselves, they are aliases for `self` and
 `self.__class`.
 
-    ```moon
-    assert @ == self
-    assert @@ == self.__class
-    ```
+```moon
+assert @ == self
+assert @@ == self.__class
+```
 
 For example, a quick way to create a new instance of the same class from an
 instance method using `@@`:
 
-    ```moon
-    some_instance_method = (...) => @@ ...
-    ```
+```moon
+some_instance_method = (...) => @@ ...
+```
 
 
 ### Class Expressions
@@ -1024,11 +1024,11 @@ instance method using `@@`:
 The `class` syntax can also be used as an expression which can be assigned to a
 variable or explicitly returned.
 
-    ```moononly
-    x = class Bucket
-      drops: 0
-      add_drop: => @drops += 1
-    ```
+```moononly
+x = class Bucket
+  drops: 0
+  add_drop: => @drops += 1
+```
 
 ### Anonymous classes
 
@@ -1037,19 +1037,19 @@ The name can be left out when declaring a class. The `__name` attribute will be
 hand side of the assignment is used instead of `nil`.
 
 
-    ```moononly
-    BigBucket = class extends Bucket
-      add_drop: => @drops += 10
+```moononly
+BigBucket = class extends Bucket
+  add_drop: => @drops += 10
 
-    assert Bucket.__name == "BigBucket"
-    ```
+assert Bucket.__name == "BigBucket"
+```
 
 You can even leave off the body, meaning you can write a blank anonymous class
 like this:
 
-    ```moononly
-    x = class
-    ```
+```moononly
+x = class
+```
 
 ## Export Statement
 
@@ -1059,38 +1059,38 @@ be declared as local, special syntax is required to declare a variable globally.
 The export keyword makes it so any following assignments to the specified names
 will not be assigned locally.
 
-    ```moon
-    export var_name, var_name2
-    var_name, var_name3 = "hello", "world"
-    ```
+```moon
+export var_name, var_name2
+var_name, var_name3 = "hello", "world"
+```
 
 This is especially useful when declaring what will be externally visible in a
 module:
 
-    ```moon
-    -- my_module.moon
-    module "my_module", package.seeall
-    export print_result
+```moon
+-- my_module.moon
+module "my_module", package.seeall
+export print_result
 
-    length = (x, y) -> math.sqrt x*x + y*y
+length = (x, y) -> math.sqrt x*x + y*y
 
-    print_result = (x, y) ->
-      print "Length is ", length x, y
+print_result = (x, y) ->
+  print "Length is ", length x, y
 
-    -- main.moon
-    require "my_module"
+-- main.moon
+require "my_module"
 
-    my_module.print_result 4, 5 -- prints the result
+my_module.print_result 4, 5 -- prints the result
 
-    print my_module.length 6, 7 -- errors, `length` not visible
-    ```
+print my_module.length 6, 7 -- errors, `length` not visible
+```
 
 Assignment can be combined with the export keyword to assign to global
 variables directly:
 
-    ```moon
-    export some_number, message_str = 100, "hello world"
-    ```
+```moon
+export some_number, message_str = 100, "hello world"
+```
 
 Additionally, a class declaration can be prefixed with the export keyword in
 order to export it.
@@ -1115,54 +1115,54 @@ In this example we declare the variable `a` in the outer scope so its value
 can be accessed after the `if` statement. If there was no `local` statement then
 `a` would only be accessible inside the `if` statement.
 
-    ```moon
-    local a
-    if something
-      a = 1
-    print a
-    ```
+```moon
+local a
+if something
+  a = 1
+print a
+```
 
 `local` can also be used to shadow existing variables for the rest of a scope.
 
-    ```moon
-    x = 10
-    if something
-      local x
-      x = 12
-    print x -- prints 10
-    ```
+```moon
+x = 10
+if something
+  local x
+  x = 12
+print x -- prints 10
+```
 
 When you have one function that calls another, you typically order them such
 that the second function can access the first. If both functions happen to
 call each other, then you must forward declare the names:
 
-    ```moon
-    local first, second
+```moon
+local first, second
 
-    first = ->
-      second!
+first = ->
+  second!
 
-    second = ->
-      first!
-    ```
+second = ->
+  first!
+```
 
 The same problem occurs with declaring classes and regular values too.
 
 Because forward declaring is often better than manually ordering your assigns,
 a special form of `local` is provided:
 
-    ```moon
-    local *
+```moon
+local *
 
-    first = ->
-      print data
-      second!
+first = ->
+  print data
+  second!
 
-    second = ->
-      first!
+second = ->
+  first!
 
-    data = {}
-    ```
+data = {}
+```
 
 `local *` will forward declare all names below it in the current scope.
 
@@ -1175,31 +1175,31 @@ capital letter.
 Often you want to bring some values from a table into the current scope as
 local variables by their name. The import statement lets us accomplish this:
 
-    ```moon
-    import insert from table
-    ```
+```moon
+import insert from table
+```
 
 The multiple names can be given, each separated by a comma:
 
-    ```moon
-    import C, Ct, Cmt from lpeg
-    ```
+```moon
+import C, Ct, Cmt from lpeg
+```
 
 Sometimes a function requires that the table be sent in as the first argument
 (when using the <code>\\</code> syntax). As a shortcut, we can prefix the name
 with a <code>\\</code> to bind it to that table:
 
-    ```moon
-    -- some object
-    my_module =
-      state: 100
-      add: (value) =>
-        self.state + value
+```moon
+-- some object
+my_module =
+  state: 100
+  add: (value) =>
+    self.state + value
 
-    import \add from my_module
+import \add from my_module
 
-    print add 22 -- equivalent to calling my_module\get 22
-    ```
+print add 22 -- equivalent to calling my_module\get 22
+```
 
 ## With Statement
 
@@ -1217,77 +1217,77 @@ those operations applied to the object we are using `with` on.
 
 For example, we work with a newly created object:
 
-    ```moon
-    with Person!
-      .name = "Oswald"
-      \add_relative my_dad
-      \save!
-      print .name
-    ```
+```moon
+with Person!
+  .name = "Oswald"
+  \add_relative my_dad
+  \save!
+  print .name
+```
 
 The `with` statement can also be used as an expression which returns the value
 it has been giving access to.
 
-    ```moon
-    file = with File "favorite_foods.txt"
-      \set_encoding "utf8"
-    ```
+```moon
+file = with File "favorite_foods.txt"
+  \set_encoding "utf8"
+```
 
 Or...
 
-    ```moon
-    create_person = (name,  relatives) ->
-      with Person!
-        .name = name
-        \add_relative relative for relative in *relatives
+```moon
+create_person = (name,  relatives) ->
+  with Person!
+    .name = name
+    \add_relative relative for relative in *relatives
 
-    me = create_person "Leaf", {dad, mother, sister}
-    ```
+me = create_person "Leaf", {dad, mother, sister}
+```
 In this usage, `with` can be seen as a special form of the K combinator.
 
 The expression in the `with` statement can also be an assignment, if you want
 to give a name to the expression.
 
-    ```moon
-    with str = "Hello"
-      print "original:", str
-      print "upper:", \upper!
-    ```
+```moon
+with str = "Hello"
+  print "original:", str
+  print "upper:", \upper!
+```
 
 ## Do
 
 When used as a statement, `do` works just like it does in Lua.
 
-    ```moon
-    do
-      var = "hello"
-      print var
-    print var -- nil here
-    ```
+```moon
+do
+  var = "hello"
+  print var
+print var -- nil here
+```
 
 MoonScript's `do` can also be used an expression . Allowing you to combine
 multiple lines into one. The result of the `do` expression is the last
 statement in its body.
 
 
-    ```moon
-    counter = do
-      i = 0
-      ->
-        i += 1
-        i
+```moon
+counter = do
+  i = 0
+  ->
+    i += 1
+    i
 
-    print counter!
-    print counter!
-    ```
+print counter!
+print counter!
+```
 
-    ```moon
-    tbl = {
-      key: do
-        print "assigning key!"
-        1234
-    }
-    ```
+```moon
+tbl = {
+  key: do
+    print "assigning key!"
+    1234
+}
+```
 
 ## Destructuring Assignment
 
@@ -1302,68 +1302,68 @@ statement.
 This is best explained with examples. Here is how you would unpack the first
 two values from a table:
 
-    ```moon
-    thing = {1,2}
+```moon
+thing = {1,2}
 
-    {a,b} = thing
-    print a,b
-    ```
+{a,b} = thing
+print a,b
+```
 
 In the destructuring table literal, the key represents the key to read from the
 right hand side, and the value represents the name the read value will be
 assigned to.
 
-    ```moon
-    obj = {
-      hello: "world"
-      day: "tuesday"
-      length: 20
-    }
+```moon
+obj = {
+  hello: "world"
+  day: "tuesday"
+  length: 20
+}
 
-    {hello: hello, day: the_day} = obj
-    print hello, the_day
-    ```
+{hello: hello, day: the_day} = obj
+print hello, the_day
+```
 
 This also works with nested data structures as well:
 
-    ```moon
-    obj2 = {
-      numbers: {1,2,3,4}
-      properties: {
-        color: "green"
-        height: 13.5
-      }
-    }
+```moon
+obj2 = {
+  numbers: {1,2,3,4}
+  properties: {
+    color: "green"
+    height: 13.5
+  }
+}
 
-    {numbers: {first, second}} = obj2
-    print first, second, color
-    ```
+{numbers: {first, second}} = obj2
+print first, second, color
+```
 If the destructuring statement is complicated, feel free to spread it out over
 a few lines. A slightly more complicated example:
 
-    ```moon
-    {
-      numbers: { first, second }
-      properties: {
-        color: color
-      }
-    } = obj2
-    ```
+```moon
+{
+  numbers: { first, second }
+  properties: {
+    color: color
+  }
+} = obj2
+```
 
 It's common to extract values from at table and assign them the local variables
 that have the same name as the key. In order to avoid repetition we can use the
 `:` prefix operator:
 
-    ```moon
-    {:concat, :insert} = table
-    ```
+```moon
+{:concat, :insert} = table
+```
 
 This is effectively the same as import, but we can rename fields we want to
 extract by mixing the syntax:
 
-    ```moon
-    {:mix, :max, random: rand } = math
-    ```
+```moon
+{:mix, :max, random: rand } = math
+```
 
 ### Destructuring In Other Places
 
@@ -1371,15 +1371,15 @@ Destructuring can also show up in places where an assignment implicitly takes
 place. An example of this is a `for` loop:
 
 
-    ```moon
-    tuples = {
-      {"hello", "world"}
-      {"egg", "head"}
-    }
+```moon
+tuples = {
+  {"hello", "world"}
+  {"egg", "head"}
+}
 
-    for {left, right} in *tuples
-      print left, right
-    ```
+for {left, right} in *tuples
+  print left, right
+```
 
 We know each element in the array table is a two item tuple, so we can unpack
 it directly in the names clause of the for statement using a destructure.
@@ -1399,24 +1399,24 @@ function in the correct context of the object.
 Its syntax is the same as calling an instance method with the <code>\\</code> operator but
 with no argument list provided.
 
-    ```moon
-    my_object = {
-      value: 1000
-      write: => print "the value:", @value
-    }
+```moon
+my_object = {
+  value: 1000
+  write: => print "the value:", @value
+}
 
-    run_callback (func) ->
-      print "running callback..."
-      func!
+run_callback (func) ->
+  print "running callback..."
+  func!
 
-    -- this will not work:
-    -- the function has to no reference to my_object
-    run_callback my_object.write
+-- this will not work:
+-- the function has to no reference to my_object
+run_callback my_object.write
 
-    -- function stub syntax
-    -- lets us bundle the object into a new function
-    run_callback my_object\write
-    ```
+-- function stub syntax
+-- lets us bundle the object into a new function
+run_callback my_object\write
+```
 
 ## The Using Clause; Controlling Destructive Assignment
 
@@ -1424,21 +1424,21 @@ While lexical scoping can be a great help in reducing the complexity of the
 code we write, things can get unwieldy as the code size increases. Consider
 the following snippet:
 
-    ```moon
-    i = 100
+```moon
+i = 100
 
-    -- many lines of code...
+-- many lines of code...
 
-    my_func = ->
-      i = 10
-      while i > 0
-        print i
-        i -= 1
+my_func = ->
+  i = 10
+  while i > 0
+    print i
+    i -= 1
 
-    my_func!
+my_func!
 
-    print i -- will print 0
-    ```
+print i -- will print 0
+```
 
 
 In `my_func`, we've overwritten the value of `i` mistakenly. In this example it
@@ -1452,32 +1452,32 @@ The `using` keyword lets us do that. `using nil` makes sure that no closed
 variables are overwritten in assignment. The `using` clause is placed after the
 argument list in a function, or in place of it if there are no arguments.
 
-    ```moon
-    i = 100
+```moon
+i = 100
 
-    my_func = (using nil) ->
-      i = "hello" -- a new local variable is created here
+my_func = (using nil) ->
+  i = "hello" -- a new local variable is created here
 
-    my_func!
-    print i -- prints 100, i is unaffected
-    ```
+my_func!
+print i -- prints 100, i is unaffected
+```
 
 
 Multiple names can be separated by commas. Closure values can still be
 accessed, they just cant be modified:
 
-    ```moon
-    tmp = 1213
-    i, k = 100, 50
+```moon
+tmp = 1213
+i, k = 100, 50
 
-    my_func = (add using k,i) ->
-      tmp = tmp + add -- a new local tmp is created
-      i += tmp
-      k += tmp
+my_func = (add using k,i) ->
+  tmp = tmp + add -- a new local tmp is created
+  i += tmp
+  k += tmp
 
-    my_func(22)
-    print i,k -- these have been updated
-    ```
+my_func(22)
+print i,k -- these have been updated
+```
 
 ## Misc.
 
@@ -1497,14 +1497,14 @@ The `with` statement along with implicit return on a file provides a convenient
 way to do this:
 
 
-    ```moonret
-    -- my_library.moon
-    with _M = {}
-      .SOME_CONSTANT = 100
+```moonret
+-- my_library.moon
+with _M = {}
+  .SOME_CONSTANT = 100
 
-      .some_function = -> print .SOME_CONSTANT
+  .some_function = -> print .SOME_CONSTANT
 
-    ```
+```
 
 # MoonScript API
 
@@ -1513,9 +1513,9 @@ way to do this:
 Upon installing MoonScript, a `moonscript` module is made available. The best
 use of this module is making your Lua's require function MoonScript aware.
 
-    ```lua
-    require "moonscript"
-    ```
+```lua
+require "moonscript"
+```
 
 After `moonscript` is required, Lua's package loader is updated to search for
 `.moon` files on any subsequent calls to `require`. The search path for `.moon`
@@ -1546,27 +1546,27 @@ The MoonScript functions work the same as their counterparts, except they deal
 with MoonScript code instead of Lua Code.
 
 
-    ```moononly
-    moonscript = require "moonscript"
+```moononly
+moonscript = require "moonscript"
 
-    fn = moonscript.loadstring 'print "hi!"'
-    fn!
-    ```
+fn = moonscript.loadstring 'print "hi!"'
+fn!
+```
 
 All of these functions can take an optional last argument, a table of options.
 The only option right now is `implicitly_return_root`. Setting this to `false`
 makes it so the file does not implicitly return its last statement.
 
 
-    ```moononly
-    moonscript = require "moonscript"
+```moononly
+moonscript = require "moonscript"
 
-    fn = moonscript.loadstring "10"
-    print fn! -- prints "10"
+fn = moonscript.loadstring "10"
+print fn! -- prints "10"
 
-    fn = moonscript.loadstring "10", implicitly_return_root: false
-    print fn! -- prints nothing
-    ```
+fn = moonscript.loadstring "10", implicitly_return_root: false
+print fn! -- prints nothing
+```
 
 ## Error Rewriting
 
@@ -1577,10 +1577,10 @@ file. This can make debugging particularly difficult.
 
 Consider the following file with a bug (note the invalid `z` variable):
 
-    ```moon
-    add_numbers = (x,y) -> x + z  -- 1
-    print add_numbers 10,0        -- 2
-    ```
+```moon
+add_numbers = (x,y) -> x + z  -- 1
+print add_numbers 10,0        -- 2
+```
 
 The following error is generated:
 
@@ -1609,23 +1609,23 @@ Lua code from MoonScript code.
 Here is a quick example of how you would compile a MoonScript string to a Lua
 String:
 
-    ```moononly
-    parse = require "moonscript.parse"
-    compile = require "moonscript.compile"
+```moononly
+parse = require "moonscript.parse"
+compile = require "moonscript.compile"
 
-    moon_code = [[(-> print "hello world")!]]
+moon_code = [[(-> print "hello world")!]]
 
-    tree, err = parse.string moon_code
-    if not tree
-      error "Parse error: " .. err
+tree, err = parse.string moon_code
+if not tree
+  error "Parse error: " .. err
 
-    lua_code, err, pos = compile.tree tree
-    if not lua_code
-      error compile.format_error err, pos, moon_code
+lua_code, err, pos = compile.tree tree
+if not lua_code
+  error compile.format_error err, pos, moon_code
 
-    -- our code is ready
-    print lua_code
-    ```
+-- our code is ready
+print lua_code
+```
 
 # Command Line Use
 
@@ -1640,9 +1640,9 @@ Two tools are installed with MoonScript, `moon` and `moonc`.
 without needing a separate compile step. All MoonsScript files are compiled in
 memory as they are run.
 
-    ```bash
-    $ moon my_script.moon
-    ```
+```bash
+$ moon my_script.moon
+```
 
 Any MoonScript files that are required will also be compiled and run
 automatically.
@@ -1661,9 +1661,9 @@ flag.
 It takes a list of files, compiles them all, and creates the associated `.lua`
 files in the same directories.
 
-    ```bash
-    $ moonc my_script1.moon my_script2.moon ...
-    ```
+```bash
+$ moonc my_script1.moon my_script2.moon ...
+```
 
 You can control where the compiled files are put using the `-t` flag, followed
 by a directory.
@@ -1700,5 +1700,6 @@ A full list of flags can be seen by passing the `-h` or `--help` flag.
     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
     THE SOFTWARE.
+
 
 
