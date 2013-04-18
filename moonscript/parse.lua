@@ -227,7 +227,7 @@ local function symx(chars)
 end
 
 local function simple_string(delim, allow_interpolation)
-	local inner = P('\\'..delim) + "\\\\" + (1 - S('\r\n'..delim))
+	local inner = P('\\'..delim) + "\\\\" + (1 - P(delim))
 	if allow_interpolation then
 		inter = symx"#{" * V"Exp" * sym"}"
 		inner = (C((inner - inter)^1) + inter / mark"interpolate")^0

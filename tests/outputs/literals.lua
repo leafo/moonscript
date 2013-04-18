@@ -14,4 +14,7 @@ _ = [[ hello world ]]
 _ = [=[ hello world ]=]
 _ = [====[ hello world ]====]
 _ = "another world"
-return 'what world'
+_ = 'what world'
+_ = "\nhello world\n"
+_ = 'yeah\nwhat is going on\nhere is something cool'
+return nil

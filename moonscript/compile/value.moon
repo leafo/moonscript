@@ -9,6 +9,11 @@ import unpack from util
 
 table_delim = ","
 
+string_chars = {
+  "\r": "\\r"
+  "\n": "\\n"
+}
+
 value_compilers =
   -- list of values separated by binary operators
   exp: (node) =>
@@ -31,6 +36,9 @@ value_compilers =
   string: (node) =>
     _, delim, inner = unpack node
     end_delim = delim\gsub "%[", "]"
+    if delim == "'" or delim == '"'
+      inner = inner\gsub "[\r\n]", string_chars
+
     delim..inner..end_delim
 
   chain: (node) =>

@@ -64,11 +64,19 @@ Comments are not written to the output.
 
 ## Literals & Operators
 
-MoonScript supports all the same primitive literals as Lua and uses the same
-syntax. This applies to numbers, strings, booleans, and `nil`.
+All of the primitive literals in Lua can be used. This applies to numbers,
+strings, booleans, and `nil`.
 
-MoonScript also supports all the same binary and unary operators. Additionally
-`!=` is as an alias for `~=`.
+All of Lua's binary and unary operators are available. Additionally `!=` is as
+an alias for `~=`.
+
+Unlike Lua, Line breaks are allowed inside of single and double quote strings
+without an escape sequence:
+
+```moon
+some_string = "Here is a string
+	that has a line break in it."
+```
 
 ## Function Literals
 

@@ -13,6 +13,10 @@ end
 local concat, insert = table.concat, table.insert
 local unpack = util.unpack
 local table_delim = ","
+local string_chars = {
+  ["\r"] = "\\r",
+  ["\n"] = "\\n"
+}
 local value_compilers = {
   exp = function(self, node)
     local _comp
@@ -61,6 +65,9 @@ local value_compilers = {
   string = function(self, node)
     local _, delim, inner = unpack(node)
     local end_delim = delim:gsub("%[", "]")
+    if delim == "'" or delim == '"' then
+      inner = inner:gsub("[\r\n]", string_chars)
+    end
     return delim .. inner .. end_delim
   end,
   chain = function(self, node)

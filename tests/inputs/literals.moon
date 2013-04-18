@@ -23,3 +23,16 @@
 "another world"
 
 'what world'
+
+
+"
+hello world
+"
+
+'yeah
+what is going on
+here is something cool'
+
+
+nil
+
