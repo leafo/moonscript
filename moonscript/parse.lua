@@ -575,7 +575,7 @@ local build_grammar = wrap_env(function()
 			op"*" + op"^" +
 			Ct(NameList) * (sym"=" * Ct(ExpListLow))^-1) / mark"export",
 
-		KeyValue = (sym":" * Name) / self_assign + Ct((KeyName + sym"[" * Exp * sym"]" + DoubleString + SingleString) * symx":" * (Exp + TableBlock)),
+		KeyValue = (sym":" * -SomeSpace *  Name) / self_assign + Ct((KeyName + sym"[" * Exp * sym"]" + DoubleString + SingleString) * symx":" * (Exp + TableBlock)),
 		KeyValueList = KeyValue * (sym"," * KeyValue)^0,
 		KeyValueLine = CheckIndent * KeyValueList * sym","^-1,
 
