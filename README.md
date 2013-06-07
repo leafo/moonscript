@@ -8,6 +8,16 @@ See <http://moonscript.org>.
 
 Online demo/compiler at <http://moonscript.org/compiler>.
 
+
+## Running Tests
+
+Tests are written in MoonScript using [Busted](http://olivinelabs.com/busted/).
+In order to run the tests you must compile the test runner file before executing.
+
+```bash
+moonc test2.moon && busted test2.lua
+```
+
 ## License (MIT)
 
 Copyright (C) 2012 by Leaf Corcoran
