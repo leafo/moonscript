@@ -1,81 +1,85 @@
 
-{a, b} = hello
+do
+  {a, b} = hello
 
-{{a}, b, {c}} = hello
+  {{a}, b, {c}} = hello
 
-{ :hello, :world } = value
+  { :hello, :world } = value
 
-{ yes: no, thing } = world
+do
+  { yes: no, thing } = world
 
-{:a,:b,:c,:d} = yeah
+  {:a,:b,:c,:d} = yeah
 
-{a} = one, two
-{b}, c = one
-{d}, e = one, two
+  {a} = one, two
+  {b}, c = one
+  {d}, e = one, two
 
-x, {y} = one, two
+  x, {y} = one, two
 
-xx, yy = 1, 2
-{yy, xx} = {xx, yy}
+  xx, yy = 1, 2
+  {yy, xx} = {xx, yy}
 
-{a, :b, c, :d, e, :f, g} = tbl
+  {a, :b, c, :d, e, :f, g} = tbl
 
 --- 
 
-futurists =
-  sculptor: "Umberto Boccioni"
-  painter:  "Vladimir Burliuk"
-  poet:
-    name:   "F.T. Marinetti"
-    address: {
-      "Via Roma 42R"
-      "Bellagio, Italy 22021"
-    }
+do
+  futurists =
+    sculptor: "Umberto Boccioni"
+    painter:  "Vladimir Burliuk"
+    poet:
+      name:   "F.T. Marinetti"
+      address: {
+        "Via Roma 42R"
+        "Bellagio, Italy 22021"
+      }
 
-{poet: {:name, address: {street, city}}} = futurists
-
-print name, street, city
-
---
-
-{ @world } = x
-{ a.b, c.y, func!.z } = x
-
-{ world: @world } = x
+  {poet: {:name, address: {street, city}}} = futurists
 
 --
 
-thing = {{1,2}, {3,4}}
+do
+  { @world } = x
+  { a.b, c.y, func!.z } = x
 
-for {x,y} in *thing
-  print x,y
-
+  { world: @world } = x
 
 --
 
-with {a,b} = thing
-  print a, b
+do
+  thing = {{1,2}, {3,4}}
+
+  for {x,y} in *thing
+    print x,y
 
 
 --
 
-thing = nil
-if {a} = thing
-  print a
-else
-  print "nothing"
+do
+  with {a,b} = thing
+    print a, b
 
-thang = {1,2}
-if {a,b} = thang
-  print a,b
 
-if {a,b} = thing
-  print a,b
-elseif {c,d} = thang
-  print c,d
-else
-  print "NO"
+--
 
+do
+  thing = nil
+  if {a} = thing
+    print a
+  else
+    print "nothing"
+
+  thang = {1,2}
+  if {a,b} = thang
+    print a,b
+
+  if {a,b} = thing
+    print a,b
+  elseif {c,d} = thang
+    print c,d
+  else
+    print "NO"
 
 --
 
