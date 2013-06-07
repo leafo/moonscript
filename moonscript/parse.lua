@@ -409,9 +409,9 @@ local build_grammar = wrap_env(function()
 
 		Local = key"local" * ((op"*" + op"^") / mark"declare_glob" + Ct(NameList) / mark"declare_with_shadows"),
 
-		Import = key"import" *  Ct(ImportNameList) * key"from" * Exp / mark"import",
+		Import = key"import" * Ct(ImportNameList) * SpaceBreak^0 * key"from" * Exp / mark"import",
 		ImportName = (sym"\\" * Ct(Cc"colon_stub" * Name) + Name),
-		ImportNameList = ImportName * (sym"," * ImportName)^0,
+		ImportNameList = SpaceBreak^0 * ImportName * ((SpaceBreak^1 + sym"," * SpaceBreak^0) * ImportName)^0,
 
 		NameList = Name * (sym"," * Name)^0,
 

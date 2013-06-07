@@ -43,3 +43,18 @@ if indent then
     end)()
   end
 end
+do
+  a, b, c = z.a, z.b, z.c
+end
+do
+  a, b, c = z.a, z.b, z.c
+end
+do
+  a, b, c = z.a, z.b, z.c
+end
+do
+  a, b, c = z.a, z.b, z.c
+end
+do
+  a, b, c = z.a, z.b, z.c
+end

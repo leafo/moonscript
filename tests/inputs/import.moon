@@ -20,3 +20,29 @@ import something from a table
 if indent
   import okay, \well from tables[100]
 
+do
+  import a, b, c from z
+
+do
+  import a,
+    b, c from z
+
+do
+  import a
+    b
+    c from z
+
+do
+  import
+    a
+    b
+    c from z
+
+
+do
+  import
+    a
+    b
+    c
+    from z
+
