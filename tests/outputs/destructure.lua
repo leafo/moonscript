@@ -14,10 +14,7 @@ do
   hello, world = _obj_0.hello, _obj_0.world
 end
 local no, thing
-do
-  local _obj_0 = world
-  no, thing = _obj_0.yes, _obj_0[1]
-end
+no, thing = world.yes, world[1]
 local d
 do
   local _obj_0 = yeah
@@ -69,23 +66,11 @@ local futurists = {
   }
 }
 local name, street, city
-do
-  local _obj_0 = futurists
-  name, street, city = _obj_0.poet.name, _obj_0.poet.address[1], _obj_0.poet.address[2]
-end
+name, street, city = futurists.poet.name, futurists.poet.address[1], futurists.poet.address[2]
 print(name, street, city)
-do
-  local _obj_0 = x
-  self.world = _obj_0[1]
-end
-do
-  local _obj_0 = x
-  a.b, c.y, func().z = _obj_0[1], _obj_0[2], _obj_0[3]
-end
-do
-  local _obj_0 = x
-  self.world = _obj_0.world
-end
+self.world = x[1]
+a.b, c.y, func().z = x[1], x[2], x[3]
+self.world = x.world
 thing = {
   {
     1,
@@ -140,8 +125,27 @@ do
         c, d = _des_1[1], _des_1[2]
         print(c, d)
       else
-        return print("NO")
+        print("NO")
       end
     end
+  end
+end
+do
+  local z = "yeah"
+  a, b, c = z[1], z[2], z[3]
+end
+do
+  do
+    local _obj_0 = z
+    a, b, c = _obj_0[1], _obj_0[2], _obj_0[3]
+  end
+end
+_ = function(z)
+  a, b, c = z[1], z[2], z[3]
+end
+do
+  local z = "oo"
+  return function(k)
+    a, b, c = z[1], z[2], z[3]
   end
 end

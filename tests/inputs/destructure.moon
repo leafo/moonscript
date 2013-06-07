@@ -76,3 +76,21 @@ elseif {c,d} = thang
 else
   print "NO"
 
+
+--
+
+do
+  z = "yeah"
+  {a,b,c} = z
+
+do
+  {a,b,c} = z
+
+(z) ->
+  {a,b,c} = z
+
+do
+  z = "oo"
+  (k) ->
+    {a,b,c} = z
+

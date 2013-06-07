@@ -429,6 +429,16 @@ do
         return yes
       end
     end,
+    is_local = function(self, node)
+      local t = mtype(node)
+      if t == "string" then
+        return self:has_name(node, false)
+      end
+      if t == NameProxy or t == LocalName then
+        return true
+      end
+      return false
+    end,
     free_name = function(self, prefix, dont_put)
       prefix = prefix or "moon"
       local searching = true

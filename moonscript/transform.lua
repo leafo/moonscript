@@ -411,7 +411,7 @@ local Statement = Transformer({
     end
     node = transformed or node
     if destructure.has_destructure(names) then
-      return destructure.split_assign(node)
+      return destructure.split_assign(self, node)
     end
     return node
   end,
@@ -646,7 +646,7 @@ local Statement = Transformer({
       if destructure.has_destructure(assign[2]) then
         local name = NameProxy("des")
         body = {
-          destructure.build_assign(assign[2][1], name),
+          destructure.build_assign(self, assign[2][1], name),
           build.group(node[3])
         }
         return build["do"]({
@@ -725,7 +725,7 @@ local Statement = Transformer({
           do
             local _with_0 = NameProxy("des")
             local proxy = _with_0
-            insert(destructures, destructure.build_assign(name, proxy))
+            insert(destructures, destructure.build_assign(self, name, proxy))
             _accum_0[_len_0] = _with_0
           end
         else

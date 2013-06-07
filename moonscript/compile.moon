@@ -241,6 +241,8 @@ class Block
     name = name\get_name self if NameProxy == mtype name
     @_names[name] = value
 
+  -- Check if a name is defined in the current or any enclosing scope
+  -- skip_exports: ignore names that have been exported using `export`
   has_name: (name, skip_exports) =>
     return true if not skip_exports and @name_exported name
 
@@ -250,6 +252,12 @@ class Block
         @parent\has_name name, true
     else
       yes
+
+  is_local: (node) =>
+    t = mtype node
+    return @has_name(node, false) if t == "string"
+    return true if t == NameProxy or t == LocalName
+    false
 
   free_name: (prefix, dont_put) =>
     prefix = prefix or "moon"

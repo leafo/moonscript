@@ -108,7 +108,7 @@ extract_assign_names = function(name, accum, prefix)
   return accum
 end
 local build_assign
-build_assign = function(destruct_literal, receiver)
+build_assign = function(scope, destruct_literal, receiver)
   local extracted_names = extract_assign_names(destruct_literal)
   local names = { }
   local values = { }
@@ -118,7 +118,7 @@ build_assign = function(destruct_literal, receiver)
     values
   }
   local obj
-  if mtype(receiver) == NameProxy then
+  if scope:is_local(receiver) then
     obj = receiver
   else
     do
@@ -139,7 +139,7 @@ build_assign = function(destruct_literal, receiver)
   for _index_0 = 1, #_list_0 do
     local tuple = _list_0[_index_0]
     insert(names, tuple[1])
-    insert(values, obj:chain(unpack(tuple[2])))
+    insert(values, NameProxy.chain(obj, unpack(tuple[2])))
   end
   return build.group({
     {
@@ -150,7 +150,7 @@ build_assign = function(destruct_literal, receiver)
   })
 end
 local split_assign
-split_assign = function(assign)
+split_assign = function(scope, assign)
   local names, values = unpack(assign, 2)
   local g = { }
   local total_names = #names
@@ -182,7 +182,7 @@ split_assign = function(assign)
           end)()
         })
       end
-      insert(g, build_assign(n, values[i]))
+      insert(g, build_assign(scope, n, values[i]))
       start = i + 1
     end
   end

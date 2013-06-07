@@ -189,8 +189,9 @@ Statement = Transformer {
 
     node = transformed or node
 
+
     if destructure.has_destructure names
-      return destructure.split_assign node
+      return destructure.split_assign @, node
 
     -- print util.dump node
     node
@@ -304,7 +305,7 @@ Statement = Transformer {
         name = NameProxy "des"
 
         body = {
-          destructure.build_assign assign[2][1], name
+          destructure.build_assign @, assign[2][1], name
           build.group node[3]
         }
 
@@ -363,7 +364,7 @@ Statement = Transformer {
     node.names = for i, name in ipairs node.names
       if ntype(name) == "table"
         with proxy = NameProxy "des"
-          insert destructures, destructure.build_assign name, proxy
+          insert destructures, destructure.build_assign @, name, proxy
       else
         name
 
