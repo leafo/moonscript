@@ -593,10 +593,7 @@ do
         error("deprecated stms call, use transformer")
       end
       local current_stms, current_stm_i
-      do
-        local _obj_0 = self
-        current_stms, current_stm_i = _obj_0.current_stms, _obj_0.current_stm_i
-      end
+      current_stms, current_stm_i = self.current_stms, self.current_stm_i
       self.current_stms = stms
       for i = 1, #stms do
         self.current_stm_i = i

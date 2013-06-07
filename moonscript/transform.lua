@@ -295,10 +295,7 @@ construct_comprehension = function(inner, clauses)
     local _exp_0 = t
     if "for" == _exp_0 then
       local name, bounds
-      do
-        local _obj_0 = clause
-        _, name, bounds = _obj_0[1], _obj_0[2], _obj_0[3]
-      end
+      _, name, bounds = clause[1], clause[2], clause[3]
       current_stms = {
         "for",
         name,
@@ -307,10 +304,7 @@ construct_comprehension = function(inner, clauses)
       }
     elseif "foreach" == _exp_0 then
       local names, iter
-      do
-        local _obj_0 = clause
-        _, names, iter = _obj_0[1], _obj_0[2], _obj_0[3]
-      end
+      _, names, iter = clause[1], clause[2], clause[3]
       current_stms = {
         "foreach",
         names,
@@ -321,10 +315,7 @@ construct_comprehension = function(inner, clauses)
       }
     elseif "when" == _exp_0 then
       local cond
-      do
-        local _obj_0 = clause
-        _, cond = _obj_0[1], _obj_0[2]
-      end
+      _, cond = clause[1], clause[2]
       current_stms = {
         "if",
         cond,
