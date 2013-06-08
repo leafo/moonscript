@@ -117,8 +117,7 @@ copy = function(self)
   end)()
 end
 mixin = function(self, cls, ...)
-  local meta = getmetatable(cls)
-  for key, val in pairs(meta.__index) do
+  for key, val in pairs(cls.__base) do
     if not key:match("^__") then
       self[key] = val
     end

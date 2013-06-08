@@ -100,8 +100,7 @@ copy = =>
 
 -- mixin class properties into self, call new
 mixin = (cls, ...) =>
-  meta = getmetatable cls
-  for key, val in pairs meta.__index
+  for key, val in pairs cls.__base
     self[key] = val if not key\match"^__"
   cls.__init self, ...
 
