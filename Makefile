@@ -16,4 +16,4 @@ compile_global:
 	moonc moon/ moonscript/
 
 watch:
-	moonc -w moon/ moonscript/
+	moonc moon/ moonscript/ && moonc -w moon/ moonscript/
