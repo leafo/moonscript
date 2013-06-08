@@ -1,12 +1,8 @@
 
-if not moon or not moon.inject
-  module "moon", package.seeall
-
 util = require "moonscript.util"
-
 lua = { :debug, :type }
 
-export *
+local *
 
 dump = util.dump
 
@@ -134,4 +130,7 @@ fold = (items, fn)->
   else
     items[1]
 
-nil
+{
+  :dump, :p, :is_object, :type, :debug, :run_with_scope, :bind_methods,
+  :defaultbl, :extend, :copy, :mixin, :mixin_object, :mixin_table, :fold
+}

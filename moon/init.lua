@@ -1,11 +1,9 @@
-if not moon or not moon.inject then
-  module("moon", package.seeall)
-end
 local util = require("moonscript.util")
 local lua = {
   debug = debug,
   type = type
 }
+local dump, p, is_object, type, debug, run_with_scope, bind_methods, defaultbl, extend, copy, mixin, mixin_object, mixin_table, fold
 dump = util.dump
 p = function(...)
   return print(dump(...))
@@ -161,4 +159,19 @@ fold = function(items, fn)
     return items[1]
   end
 end
-return nil
+return {
+  dump = dump,
+  p = p,
+  is_object = is_object,
+  type = type,
+  debug = debug,
+  run_with_scope = run_with_scope,
+  bind_methods = bind_methods,
+  defaultbl = defaultbl,
+  extend = extend,
+  copy = copy,
+  mixin = mixin,
+  mixin_object = mixin_object,
+  mixin_table = mixin_table,
+  fold = fold
+}
