@@ -107,5 +107,6 @@ end
 return {
   rewrite_traceback = rewrite_traceback,
   truncate_traceback = truncate_traceback,
-  user_error = user_error
+  user_error = user_error,
+  reverse_line_number = reverse_line_number
 }

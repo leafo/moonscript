@@ -1,4 +1,6 @@
 
+print = ->
+
 if (->
   print "hello world"
   print "who is this")
