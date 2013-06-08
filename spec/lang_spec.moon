@@ -1,4 +1,3 @@
-
 lfs = require "lfs"
 
 parse   = require "moonscript.parse"
@@ -10,8 +9,8 @@ pattern = ...
 import unpack from util
 
 options = {
-  in_dir: "tests/inputs",
-  out_dir: "tests/outputs",
+  in_dir: "spec/inputs",
+  out_dir: "spec/outputs",
   input_pattern: "(.*)%.moon$",
   output_ext: ".lua"
 

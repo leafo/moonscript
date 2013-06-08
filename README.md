@@ -8,14 +8,15 @@ See <http://moonscript.org>.
 
 Online demo/compiler at <http://moonscript.org/compiler>.
 
-
 ## Running Tests
 
-Tests are written in MoonScript using [Busted](http://olivinelabs.com/busted/).
-In order to run the tests you must compile the test runner file before executing.
+Tests are written in MoonScript and use [Busted](http://olivinelabs.com/busted/).
+In order to run the tests you must have MoonScript installed.
+
+To run tests, execute from the root directory:
 
 ```bash
-moonc test2.moon && busted test2.lua
+busted
 ```
 
 ## License (MIT)
