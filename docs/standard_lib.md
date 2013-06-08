@@ -166,7 +166,7 @@ overwritten.
 
 ### `mixin_object(obj, other_obj, method_names)`
 
-Inserts into `obj` methods from `other_obj` whose names are listen in
+Inserts into `obj` methods from `other_obj` whose names are listed in
 `method_names`. The inserted methods are bound methods that will run with
 `other_obj` as the receiver.
 
