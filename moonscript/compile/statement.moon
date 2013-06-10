@@ -135,5 +135,7 @@ statement_compilers =
     with @block!
       \stms node[2]
 
+  noop: => -- nothing!
+
 
 { :statement_compilers }

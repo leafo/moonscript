@@ -67,7 +67,11 @@ apply_to_last = function(stms, fn)
     local _len_0 = 1
     for i, stm in ipairs(stms) do
       if i == last_exp_id then
-        _accum_0[_len_0] = fn(stm)
+        _accum_0[_len_0] = {
+          "transform",
+          stm,
+          fn
+        }
       else
         _accum_0[_len_0] = stm
       end
@@ -331,6 +335,11 @@ construct_comprehension = function(inner, clauses)
   return current_stms[1]
 end
 local Statement = Transformer({
+  transform = function(self, tuple)
+    local _, node, fn
+    _, node, fn = tuple[1], tuple[2], tuple[3]
+    return fn(node)
+  end,
   root_stms = function(self, body)
     return apply_to_last(body, implicitly_return(self))
   end,
@@ -1354,7 +1363,9 @@ implicitly_return = function(scope)
       return scope.transform.statement(stm, fn)
     elseif types.manual_return[t] or not types.is_value(stm) then
       if is_top and t == "return" and stm[2] == "" then
-        return nil
+        return {
+          "noop"
+        }
       else
         return stm
       end

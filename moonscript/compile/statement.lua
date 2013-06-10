@@ -242,7 +242,8 @@ local statement_compilers = {
       _with_0:stms(node[2])
       return _with_0
     end
-  end
+  end,
+  noop = function(self) end
 }
 return {
   statement_compilers = statement_compilers

@@ -32,7 +32,7 @@ apply_to_last = (stms, fn) ->
 
   return for i, stm in ipairs stms
     if i == last_exp_id
-      fn stm
+      {"transform", stm, fn}
     else
       stm
 
@@ -150,6 +150,10 @@ construct_comprehension = (inner, clauses) ->
   current_stms[1]
 
 Statement = Transformer {
+  transform: (tuple) =>
+    {_, node, fn} = tuple
+    fn node
+
   root_stms: (body) =>
     apply_to_last body, implicitly_return @
 
@@ -743,7 +747,7 @@ implicitly_return = (scope) ->
     elseif types.manual_return[t] or not types.is_value stm
       -- remove blank return statement
       if is_top and t == "return" and stm[2] == ""
-        nil
+        {"noop"}
       else
         stm
     else
