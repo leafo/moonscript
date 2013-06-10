@@ -10,6 +10,9 @@ do
   NameProxy, LocalName = _table_0.NameProxy, _table_0.LocalName
 end
 local destructure = require("moonscript.transform.destructure")
+local NOOP = {
+  "noop"
+}
 local implicitly_return
 local Run
 do
@@ -683,28 +686,38 @@ local Statement = Transformer({
     return node
   end,
   with = function(self, node, ret)
-    local _, exp, block = unpack(node)
-    local scope_name = NameProxy("with")
-    local named_assign
+    local exp, block = unpack(node, 2)
+    local copy_scope = true
+    local scope_name, named_assign
     if ntype(exp) == "assign" then
       local names, values = unpack(exp, 2)
-      local assign_name = names[1]
-      exp = values[1]
-      values[1] = scope_name
-      named_assign = {
-        "assign",
-        names,
-        values
-      }
+      local first_name = names[1]
+      if ntype(first_name) == "value" then
+        scope_name = first_name
+        named_assign = exp
+        exp = values[1]
+        copy_scope = false
+      else
+        scope_name = NameProxy("with")
+        exp = values[1]
+        values[1] = scope_name
+        named_assign = {
+          "assign",
+          names,
+          values
+        }
+      end
+    elseif self:is_local(exp) then
+      scope_name = exp
+      copy_scope = false
     end
+    scope_name = scope_name or NameProxy("with")
     return build["do"]({
       Run(function(self)
         return self:set("scope_var", scope_name)
       end),
-      build.assign_one(scope_name, exp),
-      build.group({
-        named_assign
-      }),
+      copy_scope and build.assign_one(scope_name, exp) or NOOP,
+      named_assign or NOOP,
       build.group(block),
       (function()
         if ret then
@@ -1363,9 +1376,7 @@ implicitly_return = function(scope)
       return scope.transform.statement(stm, fn)
     elseif types.manual_return[t] or not types.is_value(stm) then
       if is_top and t == "return" and stm[2] == "" then
-        return {
-          "noop"
-        }
+        return NOOP
       else
         return stm
       end

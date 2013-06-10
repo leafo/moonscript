@@ -9,6 +9,7 @@ import insert from table
 import NameProxy, LocalName from require "moonscript.transform.names"
 
 destructure = require "moonscript.transform.destructure"
+NOOP = {"noop"}
 
 local implicitly_return
 
@@ -339,21 +340,36 @@ Statement = Transformer {
     node
 
   with: (node, ret) =>
-    _, exp, block = unpack node
+    exp, block = unpack node, 2
 
-    scope_name = NameProxy "with"
+    copy_scope = true
+    local scope_name, named_assign
 
-    named_assign = if ntype(exp) == "assign"
+    if ntype(exp) == "assign"
       names, values = unpack exp, 2
-      assign_name = names[1]
-      exp = values[1]
-      values[1] = scope_name
-      {"assign", names, values}
+      first_name = names[1]
+
+      if ntype(first_name) == "value"
+        scope_name = first_name
+        named_assign = exp
+        exp = values[1]
+        copy_scope = false
+      else
+        scope_name = NameProxy "with"
+        exp = values[1]
+        values[1] = scope_name
+        named_assign = {"assign", names, values}
+
+    elseif @is_local exp
+      scope_name = exp
+      copy_scope = false
+
+    scope_name or= NameProxy "with"
 
     build.do {
       Run => @set "scope_var", scope_name
-      build.assign_one scope_name, exp
-      build.group { named_assign }
+      copy_scope and build.assign_one(scope_name, exp) or NOOP
+      named_assign or NOOP
       build.group block
 
       if ret
@@ -747,7 +763,7 @@ implicitly_return = (scope) ->
     elseif types.manual_return[t] or not types.is_value stm
       -- remove blank return statement
       if is_top and t == "return" and stm[2] == ""
-        {"noop"}
+        NOOP
       else
         stm
     else
