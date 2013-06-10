@@ -624,10 +624,9 @@ do
       self._state = { }
       self._listeners = { }
       do
-        local _with_0 = transform
         self.transform = {
-          value = _with_0.Value:bind(self),
-          statement = _with_0.Statement:bind(self)
+          value = transform.Value:bind(self),
+          statement = transform.Statement:bind(self)
         }
       end
       if self.parent then
@@ -776,8 +775,7 @@ tree = function(tree, options)
   end
 end
 do
-  local _with_0 = require("moonscript.data")
-  local data = _with_0
+  local data = require("moonscript.data")
   for name, cls in pairs({
     Line = Line,
     Lines = Lines,

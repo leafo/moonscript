@@ -736,10 +736,9 @@ local Statement = Transformer({
       for i, name in ipairs(node.names) do
         if ntype(name) == "table" then
           do
-            local _with_0 = NameProxy("des")
-            local proxy = _with_0
+            local proxy = NameProxy("des")
             insert(destructures, destructure.build_assign(self, name, proxy))
-            _accum_0[_len_0] = _with_0
+            _accum_0[_len_0] = proxy
           end
         else
           _accum_0[_len_0] = name
@@ -1103,7 +1102,6 @@ local Statement = Transformer({
     })
     local value = nil
     do
-      local _with_0 = build
       local out_body = {
         Run(function(self)
           if name then
@@ -1180,22 +1178,22 @@ local Statement = Transformer({
           "declare_glob",
           "*"
         },
-        _with_0.assign_one(parent_cls_name, parent_val == "" and "nil" or parent_val),
-        _with_0.assign_one(base_name, {
+        build.assign_one(parent_cls_name, parent_val == "" and "nil" or parent_val),
+        build.assign_one(base_name, {
           "table",
           properties
         }),
-        _with_0.assign_one(base_name:chain("__index"), base_name),
-        _with_0["if"]({
+        build.assign_one(base_name:chain("__index"), base_name),
+        build["if"]({
           cond = parent_cls_name,
           ["then"] = {
-            _with_0.chain({
+            build.chain({
               base = "setmetatable",
               {
                 "call",
                 {
                   base_name,
-                  _with_0.chain({
+                  build.chain({
                     base = parent_cls_name,
                     {
                       "dot",
@@ -1207,17 +1205,17 @@ local Statement = Transformer({
             })
           }
         }),
-        _with_0.assign_one(cls_name, cls),
-        _with_0.assign_one(base_name:chain("__class"), cls_name),
-        _with_0.group((function()
+        build.assign_one(cls_name, cls),
+        build.assign_one(base_name:chain("__class"), cls_name),
+        build.group((function()
           if #statements > 0 then
             return {
-              _with_0.assign_one(LocalName("self"), cls_name),
-              _with_0.group(statements)
+              build.assign_one(LocalName("self"), cls_name),
+              build.group(statements)
             }
           end
         end)()),
-        _with_0["if"]({
+        build["if"]({
           cond = {
             "exp",
             parent_cls_name,
@@ -1234,10 +1232,10 @@ local Statement = Transformer({
             })
           }
         }),
-        _with_0.group((function()
+        build.group((function()
           if name then
             return {
-              _with_0.assign_one(name, cls_name)
+              build.assign_one(name, cls_name)
             }
           end
         end)()),
@@ -1247,11 +1245,11 @@ local Statement = Transformer({
           end
         end)()
       }
-      value = _with_0.group({
-        _with_0.group((function()
+      value = build.group({
+        build.group((function()
           if ntype(name) == "value" then
             return {
-              _with_0.declare({
+              build.declare({
                 names = {
                   name
                 }
@@ -1259,7 +1257,7 @@ local Statement = Transformer({
             }
           end
         end)()),
-        _with_0["do"](out_body)
+        build["do"](out_body)
       })
     end
     return value

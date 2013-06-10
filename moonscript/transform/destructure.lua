@@ -22,8 +22,7 @@ end
 local join
 join = function(...)
   do
-    local _with_0 = { }
-    local out = _with_0
+    local out = { }
     local i = 1
     local _list_0 = {
       ...
@@ -37,7 +36,7 @@ join = function(...)
         i = i + 1
       end
     end
-    return _with_0
+    return out
   end
 end
 local has_destructure
@@ -122,8 +121,7 @@ build_assign = function(scope, destruct_literal, receiver)
     obj = receiver
   else
     do
-      local _with_0 = NameProxy("obj")
-      obj = _with_0
+      obj = NameProxy("obj")
       inner = build["do"]({
         build.assign_one(obj, receiver),
         {
@@ -132,7 +130,7 @@ build_assign = function(scope, destruct_literal, receiver)
           values
         }
       })
-      obj = _with_0
+      obj = obj
     end
   end
   local _list_0 = extracted_names
