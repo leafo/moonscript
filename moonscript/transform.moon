@@ -11,7 +11,7 @@ import NameProxy, LocalName from require "moonscript.transform.names"
 destructure = require "moonscript.transform.destructure"
 NOOP = {"noop"}
 
-local implicitly_return
+local *
 
 class Run
   new: (@fn) =>
@@ -171,8 +171,23 @@ Statement = Transformer {
   assign: (node) =>
     names, values = unpack node, 2
 
+    num_values = #values
+    num_names = #values
+
+    if num_names == 1 and num_values == 1
+      first_value = values[1]
+      switch ntype first_value
+        when "comprehension"
+          first_name = names[1]
+
+          a = Accumulator first_name
+          node = @transform.statement first_value, (exp) ->
+            a\mutate_body { exp }
+
+          return a\wrap node, "group"
+
     -- bubble cascading assigns
-    transformed = if #values == 1
+    transformed = if num_values == 1
       value = values[1]
       t = ntype value
 
@@ -194,11 +209,9 @@ Statement = Transformer {
 
     node = transformed or node
 
-
     if destructure.has_destructure names
       return destructure.split_assign @, node
 
-    -- print util.dump node
     node
 
   continue: (node) =>
@@ -697,8 +710,8 @@ Statement = Transformer {
 class Accumulator
   body_idx: { for: 4, while: 3, foreach: 4 }
 
-  new: =>
-    @accum_name = NameProxy "accum"
+  new: (accum_name) =>
+    @accum_name = accum_name or NameProxy "accum"
     @value_name = NameProxy "value"
     @len_name = NameProxy "len"
 
@@ -709,12 +722,12 @@ class Accumulator
     @wrap node
 
   -- wrap the node into a block_exp
-  wrap: (node) =>
-    build.block_exp {
+  wrap: (node, group_type="block_exp") =>
+    build[group_type] {
       build.assign_one @accum_name, build.table!
       build.assign_one @len_name, 1
       node
-      @accum_name
+      group_type == "block_exp" and @accum_name or NOOP
     }
 
   -- mutates the body of a loop construct to save last value into accumulator
@@ -737,7 +750,7 @@ class Accumulator
       @value_name
 
     update = {
-      build.assign_one @accum_name\index(@len_name), val
+      build.assign_one NameProxy.index(@accum_name, @len_name), val
       {"update", @len_name, "+=", 1}
     }
 

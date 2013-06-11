@@ -13,8 +13,7 @@ local destructure = require("moonscript.transform.destructure")
 local NOOP = {
   "noop"
 }
-local implicitly_return
-local Run
+local Run, apply_to_last, is_singular, extract_declarations, expand_elseif_assign, constructor_name, with_continue_listener, Transformer, construct_comprehension, Statement, Accumulator, default_accumulator, implicitly_return, Value
 do
   local _parent_0 = nil
   local _base_0 = {
@@ -55,7 +54,6 @@ do
   end
   Run = _class_0
 end
-local apply_to_last
 apply_to_last = function(stms, fn)
   local last_exp_id = 0
   for i = #stms, 1, -1 do
@@ -83,7 +81,6 @@ apply_to_last = function(stms, fn)
     return _accum_0
   end)()
 end
-local is_singular
 is_singular = function(body)
   if #body ~= 1 then
     return false
@@ -94,7 +91,6 @@ is_singular = function(body)
     return body[1]
   end
 end
-local extract_declarations
 extract_declarations = function(self, body, start, out)
   if body == nil then
     body = self.current_stms
@@ -135,7 +131,6 @@ extract_declarations = function(self, body, start, out)
   end
   return out
 end
-local expand_elseif_assign
 expand_elseif_assign = function(ifstm)
   for i = 4, #ifstm do
     local case = ifstm[i]
@@ -159,8 +154,7 @@ expand_elseif_assign = function(ifstm)
   end
   return ifstm
 end
-local constructor_name = "new"
-local with_continue_listener
+constructor_name = "new"
 with_continue_listener = function(body)
   local continue_name = nil
   return {
@@ -223,7 +217,6 @@ with_continue_listener = function(body)
     end)
   }
 end
-local Transformer
 do
   local _parent_0 = nil
   local _base_0 = {
@@ -294,7 +287,6 @@ do
   end
   Transformer = _class_0
 end
-local construct_comprehension
 construct_comprehension = function(inner, clauses)
   local current_stms = inner
   for _, clause in reversed(clauses) do
@@ -337,7 +329,7 @@ construct_comprehension = function(inner, clauses)
   end
   return current_stms[1]
 end
-local Statement = Transformer({
+Statement = Transformer({
   transform = function(self, tuple)
     local _, node, fn
     _, node, fn = tuple[1], tuple[2], tuple[3]
@@ -379,8 +371,24 @@ local Statement = Transformer({
   end,
   assign = function(self, node)
     local names, values = unpack(node, 2)
+    local num_values = #values
+    local num_names = #values
+    if num_names == 1 and num_values == 1 then
+      local first_value = values[1]
+      local _exp_0 = ntype(first_value)
+      if "comprehension" == _exp_0 then
+        local first_name = names[1]
+        local a = Accumulator(first_name)
+        node = self.transform.statement(first_value, function(exp)
+          return a:mutate_body({
+            exp
+          })
+        end)
+        return a:wrap(node, "group")
+      end
+    end
     local transformed
-    if #values == 1 then
+    if num_values == 1 then
       local value = values[1]
       local t = ntype(value)
       if t == "decorated" then
@@ -1254,7 +1262,6 @@ local Statement = Transformer({
     return value
   end
 })
-local Accumulator
 do
   local _parent_0 = nil
   local _base_0 = {
@@ -1268,12 +1275,15 @@ do
       node[index] = self:mutate_body(node[index])
       return self:wrap(node)
     end,
-    wrap = function(self, node)
-      return build.block_exp({
+    wrap = function(self, node, group_type)
+      if group_type == nil then
+        group_type = "block_exp"
+      end
+      return build[group_type]({
         build.assign_one(self.accum_name, build.table()),
         build.assign_one(self.len_name, 1),
         node,
-        self.accum_name
+        group_type == "block_exp" and self.accum_name or NOOP
       })
     end,
     mutate_body = function(self, body)
@@ -1301,7 +1311,7 @@ do
         val = self.value_name
       end
       local update = {
-        build.assign_one(self.accum_name:index(self.len_name), val),
+        build.assign_one(NameProxy.index(self.accum_name, self.len_name), val),
         {
           "update",
           self.len_name,
@@ -1318,8 +1328,8 @@ do
     setmetatable(_base_0, _parent_0.__base)
   end
   local _class_0 = setmetatable({
-    __init = function(self)
-      self.accum_name = NameProxy("accum")
+    __init = function(self, accum_name)
+      self.accum_name = accum_name or NameProxy("accum")
       self.value_name = NameProxy("value")
       self.len_name = NameProxy("len")
     end,
@@ -1347,7 +1357,6 @@ do
   end
   Accumulator = _class_0
 end
-local default_accumulator
 default_accumulator = function(self, node)
   return Accumulator():convert(node)
 end
@@ -1382,7 +1391,7 @@ implicitly_return = function(scope)
   end
   return fn
 end
-local Value = Transformer({
+Value = Transformer({
   ["for"] = default_accumulator,
   ["while"] = default_accumulator,
   foreach = default_accumulator,
