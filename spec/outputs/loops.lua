@@ -51,9 +51,8 @@ local hello = {
 x = (function()
   local _accum_0 = { }
   local _len_0 = 1
-  local _list_1 = hello
-  for _index_0 = 1, #_list_1 do
-    local y = _list_1[_index_0]
+  for _index_0 = 1, #hello do
+    local y = hello[_index_0]
     if y % 2 == 0 then
       _accum_0[_len_0] = y
     end
@@ -62,9 +61,8 @@ x = (function()
   return _accum_0
 end)()
 x = function()
-  local _list_1 = hello
-  for _index_0 = 1, #_list_1 do
-    x = _list_1[_index_0]
+  for _index_0 = 1, #hello do
+    x = hello[_index_0]
     local _ = y
   end
 end
@@ -257,5 +255,17 @@ for x = 1, 10 do
   until true
   if not _continue_0 then
     break
+  end
+end
+do
+  local xxx = {
+    1,
+    2,
+    3,
+    4
+  }
+  for _index_0 = 1, #xxx do
+    local thing = xxx[_index_0]
+    print(thing)
   end
 end

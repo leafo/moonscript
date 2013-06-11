@@ -101,9 +101,8 @@ do
       4
     }
   }
-  local _list_0 = thing
-  for _index_0 = 1, #_list_0 do
-    local _des_0 = _list_0[_index_0]
+  for _index_0 = 1, #thing do
+    local _des_0 = thing[_index_0]
     local x, y
     x, y = _des_0[1], _des_0[2]
     print(x, y)

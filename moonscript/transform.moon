@@ -396,7 +396,7 @@ Statement = Transformer {
       list = source[2]
 
       index_name = NameProxy "index"
-      list_name = NameProxy "list"
+      list_name = @is_local(list) and list or NameProxy "list"
 
       slice_var = nil
       bounds = if is_slice list
@@ -418,13 +418,13 @@ Statement = Transformer {
         {1, {"length", list_name}}
 
       return build.group {
-        build.assign_one list_name, list
-        slice_var
+        list_name != list and build.assign_one(list_name, list) or NOOP
+        slice_var or NOOP
         build["for"] {
           name: index_name
           bounds: bounds
           body: {
-            {"assign", node.names, {list_name\index index_name}}
+            {"assign", node.names, { NameProxy.index list_name, index_name }}
             build.group node.body
           }
         }

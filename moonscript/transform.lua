@@ -754,7 +754,7 @@ local Statement = Transformer({
     if ntype(source) == "unpack" then
       local list = source[2]
       local index_name = NameProxy("index")
-      local list_name = NameProxy("list")
+      local list_name = self:is_local(list) and list or NameProxy("list")
       local slice_var = nil
       local bounds
       if is_slice(list) then
@@ -796,8 +796,8 @@ local Statement = Transformer({
         }
       end
       return build.group({
-        build.assign_one(list_name, list),
-        slice_var,
+        list_name ~= list and build.assign_one(list_name, list) or NOOP,
+        slice_var or NOOP,
         build["for"]({
           name = index_name,
           bounds = bounds,
@@ -806,7 +806,7 @@ local Statement = Transformer({
               "assign",
               node.names,
               {
-                list_name:index(index_name)
+                NameProxy.index(list_name, index_name)
               }
             },
             build.group(node.body)
