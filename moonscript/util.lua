@@ -119,24 +119,21 @@ dump = function(what)
 end
 local debug_posmap
 debug_posmap = function(posmap, moon_code, lua_code)
-  local tuples = (function()
-    local _accum_0 = { }
-    local _len_0 = 1
-    for k, v in pairs(posmap) do
-      _accum_0[_len_0] = {
-        k,
-        v
-      }
-      _len_0 = _len_0 + 1
-    end
-    return _accum_0
-  end)()
+  local tuples = { }
+  local _len_0 = 1
+  for k, v in pairs(posmap) do
+    tuples[_len_0] = {
+      k,
+      v
+    }
+    _len_0 = _len_0 + 1
+  end
   table.sort(tuples, function(a, b)
     return a[1] < b[1]
   end)
   local lines = (function()
     local _accum_0 = { }
-    local _len_0 = 1
+    local _len_1 = 1
     for _index_0 = 1, #tuples do
       local pair = tuples[_index_0]
       local lua_line, pos = unpack(pair)
@@ -144,8 +141,8 @@ debug_posmap = function(posmap, moon_code, lua_code)
       local lua_text = get_line(lua_code, lua_line)
       local moon_text = get_closest_line(moon_code, moon_line)
       local _value_0 = tostring(pos) .. "\t " .. tostring(lua_line) .. ":[ " .. tostring(trim(lua_text)) .. " ] >> " .. tostring(moon_line) .. ":[ " .. tostring(trim(moon_text)) .. " ]"
-      _accum_0[_len_0] = _value_0
-      _len_0 = _len_0 + 1
+      _accum_0[_len_1] = _value_0
+      _len_1 = _len_1 + 1
     end
     return _accum_0
   end)()

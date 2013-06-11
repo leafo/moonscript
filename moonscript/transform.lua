@@ -1109,17 +1109,14 @@ Statement = Transformer({
           end
           return self:set("super", function(block, chain)
             if chain then
-              local slice = (function()
-                local _accum_0 = { }
-                local _len_0 = 1
-                local _list_0 = chain
-                for _index_0 = 3, #_list_0 do
-                  local item = _list_0[_index_0]
-                  _accum_0[_len_0] = item
-                  _len_0 = _len_0 + 1
-                end
-                return _accum_0
-              end)()
+              local slice = { }
+              local _len_0 = 1
+              local _list_0 = chain
+              for _index_0 = 3, #_list_0 do
+                local item = _list_0[_index_0]
+                slice[_len_0] = item
+                _len_0 = _len_0 + 1
+              end
               local new_chain = {
                 "chain",
                 parent_cls_name

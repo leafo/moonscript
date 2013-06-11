@@ -185,16 +185,13 @@ local value_compilers = {
           }
         })
       end
-      local self_arg_values = (function()
-        local _accum_0 = { }
-        local _len_0 = 1
-        for _index_0 = 1, #self_args do
-          local arg = self_args[_index_0]
-          _accum_0[_len_0] = arg[2]
-          _len_0 = _len_0 + 1
-        end
-        return _accum_0
-      end)()
+      local self_arg_values = { }
+      local _len_0 = 1
+      for _index_0 = 1, #self_args do
+        local arg = self_args[_index_0]
+        self_arg_values[_len_0] = arg[2]
+        _len_0 = _len_0 + 1
+      end
       if #self_args > 0 then
         _with_0:stm({
           "assign",
@@ -204,16 +201,13 @@ local value_compilers = {
       end
       _with_0:stms(block)
       if #args > #arg_names then
-        arg_names = (function()
-          local _accum_0 = { }
-          local _len_0 = 1
-          for _index_0 = 1, #args do
-            local arg = args[_index_0]
-            _accum_0[_len_0] = arg[1]
-            _len_0 = _len_0 + 1
-          end
-          return _accum_0
-        end)()
+        arg_names = { }
+        local _len_1 = 1
+        for _index_0 = 1, #args do
+          local arg = args[_index_0]
+          arg_names[_len_1] = arg[1]
+          _len_1 = _len_1 + 1
+        end
       end
       _with_0.header = "function(" .. concat(arg_names, ", ") .. ")"
       return _with_0
