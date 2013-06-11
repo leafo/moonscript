@@ -2,9 +2,8 @@ local concat, remove, insert = table.concat, table.remove, table.insert
 local Set
 Set = function(items)
   local self = { }
-  local _list_0 = items
-  for _index_0 = 1, #_list_0 do
-    local key = _list_0[_index_0]
+  for _index_0 = 1, #items do
+    local key = items[_index_0]
     self[key] = true
   end
   return self

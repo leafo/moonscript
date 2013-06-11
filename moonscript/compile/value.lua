@@ -126,9 +126,8 @@ local value_compilers = {
     local arg_names = (function()
       local _accum_0 = { }
       local _len_0 = 1
-      local _list_0 = args
-      for _index_0 = 1, #_list_0 do
-        local arg = _list_0[_index_0]
+      for _index_0 = 1, #args do
+        local arg = args[_index_0]
         local name, default_value = unpack(arg)
         if type(name) == "string" then
           name = name
@@ -155,14 +154,12 @@ local value_compilers = {
       if #whitelist > 0 then
         _with_0:whitelist_names(whitelist)
       end
-      local _list_0 = arg_names
-      for _index_0 = 1, #_list_0 do
-        local name = _list_0[_index_0]
+      for _index_0 = 1, #arg_names do
+        local name = arg_names[_index_0]
         _with_0:put_name(name)
       end
-      local _list_1 = default_args
-      for _index_0 = 1, #_list_1 do
-        local default = _list_1[_index_0]
+      for _index_0 = 1, #default_args do
+        local default = default_args[_index_0]
         local name, value = unpack(default)
         if type(name) == "table" then
           name = name[2]
@@ -191,9 +188,8 @@ local value_compilers = {
       local self_arg_values = (function()
         local _accum_0 = { }
         local _len_0 = 1
-        local _list_2 = self_args
-        for _index_0 = 1, #_list_2 do
-          local arg = _list_2[_index_0]
+        for _index_0 = 1, #self_args do
+          local arg = self_args[_index_0]
           _accum_0[_len_0] = arg[2]
           _len_0 = _len_0 + 1
         end
@@ -211,9 +207,8 @@ local value_compilers = {
         arg_names = (function()
           local _accum_0 = { }
           local _len_0 = 1
-          local _list_2 = args
-          for _index_0 = 1, #_list_2 do
-            local arg = _list_2[_index_0]
+          for _index_0 = 1, #args do
+            local arg = args[_index_0]
             _accum_0[_len_0] = arg[1]
             _len_0 = _len_0 + 1
           end

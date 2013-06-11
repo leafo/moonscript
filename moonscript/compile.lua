@@ -118,9 +118,8 @@ do
           return (function()
             local _accum_0 = { }
             local _len_0 = 1
-            local _list_0 = t
-            for _index_0 = 1, #_list_0 do
-              local v = _list_0[_index_0]
+            for _index_0 = 1, #t do
+              local v = t[_index_0]
               _accum_0[_len_0] = strip(v)
               _len_0 = _len_0 + 1
             end
@@ -174,9 +173,8 @@ do
         if not (self.pos) then
           self.pos = item.pos
         end
-        local _list_0 = item
-        for _index_0 = 1, #_list_0 do
-          local value = _list_0[_index_0]
+        for _index_0 = 1, #item do
+          local value = item[_index_0]
           self:_append_single(value)
         end
       else
@@ -210,14 +208,13 @@ do
         buffer:add(concat(current))
         return buffer:mark_pos(self.pos)
       end
-      local _list_0 = self
-      for _index_0 = 1, #_list_0 do
-        local chunk = _list_0[_index_0]
+      for _index_0 = 1, #self do
+        local chunk = self[_index_0]
         local _exp_0 = mtype(chunk)
         if Block == _exp_0 then
-          local _list_1 = chunk:render(Lines())
-          for _index_1 = 1, #_list_1 do
-            local block_chunk = _list_1[_index_1]
+          local _list_0 = chunk:render(Lines())
+          for _index_1 = 1, #_list_0 do
+            local block_chunk = _list_0[_index_1]
             if "string" == type(block_chunk) then
               insert(current, block_chunk)
             else
@@ -357,11 +354,10 @@ do
       local undeclared = (function()
         local _accum_0 = { }
         local _len_0 = 1
-        local _list_0 = names
-        for _index_0 = 1, #_list_0 do
+        for _index_0 = 1, #names do
           local _continue_0 = false
           repeat
-            local name = _list_0[_index_0]
+            local name = names[_index_0]
             local is_local = false
             local real_name
             local _exp_0 = mtype(name)
@@ -543,9 +539,8 @@ do
         _with_0:append_list((function()
           local _accum_0 = { }
           local _len_0 = 1
-          local _list_0 = values
-          for _index_0 = 1, #_list_0 do
-            local v = _list_0[_index_0]
+          for _index_0 = 1, #values do
+            local v = values[_index_0]
             _accum_0[_len_0] = self:value(v)
             _len_0 = _len_0 + 1
           end

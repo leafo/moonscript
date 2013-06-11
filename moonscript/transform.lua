@@ -352,11 +352,10 @@ local Statement = Transformer({
       names = (function()
         local _accum_0 = { }
         local _len_0 = 1
-        local _list_0 = names
-        for _index_0 = 1, #_list_0 do
+        for _index_0 = 1, #names do
           local _continue_0 = false
           repeat
-            local name = _list_0[_index_0]
+            local name = names[_index_0]
             if not (name:match("^%u")) then
               _continue_0 = true
               break
@@ -480,9 +479,8 @@ local Statement = Transformer({
     local stubs = (function()
       local _accum_0 = { }
       local _len_0 = 1
-      local _list_0 = names
-      for _index_0 = 1, #_list_0 do
-        local name = _list_0[_index_0]
+      for _index_0 = 1, #names do
+        local name = names[_index_0]
         if type(name) == "table" then
           _accum_0[_len_0] = name
         else
@@ -498,9 +496,8 @@ local Statement = Transformer({
     local real_names = (function()
       local _accum_0 = { }
       local _len_0 = 1
-      local _list_0 = names
-      for _index_0 = 1, #_list_0 do
-        local name = _list_0[_index_0]
+      for _index_0 = 1, #names do
+        local name = names[_index_0]
         _accum_0[_len_0] = type(name) == "table" and name[2] or name
         _len_0 = _len_0 + 1
       end
@@ -512,9 +509,8 @@ local Statement = Transformer({
         values = (function()
           local _accum_0 = { }
           local _len_0 = 1
-          local _list_0 = stubs
-          for _index_0 = 1, #_list_0 do
-            local stub = _list_0[_index_0]
+          for _index_0 = 1, #stubs do
+            local stub = stubs[_index_0]
             _accum_0[_len_0] = build.chain({
               base = source,
               stub
@@ -538,9 +534,8 @@ local Statement = Transformer({
             values = (function()
               local _accum_0 = { }
               local _len_0 = 1
-              local _list_0 = stubs
-              for _index_0 = 1, #_list_0 do
-                local stub = _list_0[_index_0]
+              for _index_0 = 1, #stubs do
+                local stub = stubs[_index_0]
                 _accum_0[_len_0] = build.chain({
                   base = source_name,
                   stub
@@ -867,9 +862,8 @@ local Statement = Transformer({
     local if_stm = {
       "if"
     }
-    local _list_0 = conds
-    for _index_0 = 1, #_list_0 do
-      local cond = _list_0[_index_0]
+    for _index_0 = 1, #conds do
+      local cond = conds[_index_0]
       local if_cond = convert_cond(cond)
       if first then
         first = false
@@ -888,16 +882,15 @@ local Statement = Transformer({
     local _, name, parent_val, body = unpack(node)
     local statements = { }
     local properties = { }
-    local _list_0 = body
-    for _index_0 = 1, #_list_0 do
-      local item = _list_0[_index_0]
+    for _index_0 = 1, #body do
+      local item = body[_index_0]
       local _exp_0 = item[1]
       if "stm" == _exp_0 then
         insert(statements, item[2])
       elseif "props" == _exp_0 then
-        local _list_1 = item
-        for _index_1 = 2, #_list_1 do
-          local tuple = _list_1[_index_1]
+        local _list_0 = item
+        for _index_1 = 2, #_list_0 do
+          local tuple = _list_0[_index_1]
           if ntype(tuple[1]) == "self" then
             insert(statements, build.assign_one(unpack(tuple)))
           else
@@ -910,11 +903,10 @@ local Statement = Transformer({
     properties = (function()
       local _accum_0 = { }
       local _len_0 = 1
-      local _list_1 = properties
-      for _index_0 = 1, #_list_1 do
+      for _index_0 = 1, #properties do
         local _continue_0 = false
         repeat
-          local tuple = _list_1[_index_0]
+          local tuple = properties[_index_0]
           local key = tuple[1]
           local _value_0
           if key[1] == "key_literal" and key[2] == constructor_name then
@@ -1112,9 +1104,9 @@ local Statement = Transformer({
               local slice = (function()
                 local _accum_0 = { }
                 local _len_0 = 1
-                local _list_1 = chain
-                for _index_0 = 3, #_list_1 do
-                  local item = _list_1[_index_0]
+                local _list_0 = chain
+                for _index_0 = 3, #_list_0 do
+                  local item = _list_0[_index_0]
                   _accum_0[_len_0] = item
                   _len_0 = _len_0 + 1
                 end
@@ -1163,9 +1155,8 @@ local Statement = Transformer({
                   }
                 }
               end
-              local _list_1 = slice
-              for _index_0 = 1, #_list_1 do
-                local item = _list_1[_index_0]
+              for _index_0 = 1, #slice do
+                local item = slice[_index_0]
                 insert(new_chain, item)
               end
               return new_chain

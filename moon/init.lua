@@ -125,9 +125,8 @@ mixin = function(self, cls, ...)
   return cls.__init(self, ...)
 end
 mixin_object = function(self, object, methods)
-  local _list_0 = methods
-  for _index_0 = 1, #_list_0 do
-    local name = _list_0[_index_0]
+  for _index_0 = 1, #methods do
+    local name = methods[_index_0]
     self[name] = function(parent, ...)
       return object[name](object, ...)
     end
@@ -135,9 +134,8 @@ mixin_object = function(self, object, methods)
 end
 mixin_table = function(self, tbl, keys)
   if keys then
-    local _list_0 = keys
-    for _index_0 = 1, #_list_0 do
-      local key = _list_0[_index_0]
+    for _index_0 = 1, #keys do
+      local key = keys[_index_0]
       self[key] = tbl[key]
     end
   else

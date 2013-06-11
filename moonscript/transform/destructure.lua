@@ -29,9 +29,8 @@ join = function(...)
     }
     for _index_0 = 1, #_list_0 do
       local tbl = _list_0[_index_0]
-      local _list_1 = tbl
-      for _index_1 = 1, #_list_1 do
-        local v = _list_1[_index_1]
+      for _index_1 = 1, #tbl do
+        local v = tbl[_index_1]
         out[i] = v
         i = i + 1
       end
@@ -41,9 +40,8 @@ join = function(...)
 end
 local has_destructure
 has_destructure = function(names)
-  local _list_0 = names
-  for _index_0 = 1, #_list_0 do
-    local n = _list_0[_index_0]
+  for _index_0 = 1, #names do
+    local n = names[_index_0]
     if ntype(n) == "table" then
       return true
     end
@@ -133,9 +131,8 @@ build_assign = function(scope, destruct_literal, receiver)
       obj = obj
     end
   end
-  local _list_0 = extracted_names
-  for _index_0 = 1, #_list_0 do
-    local tuple = _list_0[_index_0]
+  for _index_0 = 1, #extracted_names do
+    local tuple = extracted_names[_index_0]
     insert(names, tuple[1])
     insert(values, NameProxy.chain(obj, unpack(tuple[2])))
   end

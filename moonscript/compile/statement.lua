@@ -27,9 +27,8 @@ local statement_compilers = {
         _with_0:append_list((function()
           local _accum_0 = { }
           local _len_0 = 1
-          local _list_0 = undeclared
-          for _index_0 = 1, #_list_0 do
-            local name = _list_0[_index_0]
+          for _index_0 = 1, #undeclared do
+            local name = undeclared[_index_0]
             _accum_0[_len_0] = self:name(name)
             _len_0 = _len_0 + 1
           end
@@ -47,9 +46,8 @@ local statement_compilers = {
       _with_0:append_list((function()
         local _accum_0 = { }
         local _len_0 = 1
-        local _list_0 = names
-        for _index_0 = 1, #_list_0 do
-          local name = _list_0[_index_0]
+        for _index_0 = 1, #names do
+          local name = names[_index_0]
           _accum_0[_len_0] = self:name(name)
           _len_0 = _len_0 + 1
         end
@@ -81,9 +79,8 @@ local statement_compilers = {
         _with_0:append_list((function()
           local _accum_0 = { }
           local _len_0 = 1
-          local _list_0 = names
-          for _index_0 = 1, #_list_0 do
-            local name = _list_0[_index_0]
+          for _index_0 = 1, #names do
+            local name = names[_index_0]
             _accum_0[_len_0] = self:value(name)
             _len_0 = _len_0 + 1
           end
@@ -94,9 +91,8 @@ local statement_compilers = {
       _with_0:append_list((function()
         local _accum_0 = { }
         local _len_0 = 1
-        local _list_0 = values
-        for _index_0 = 1, #_list_0 do
-          local v = _list_0[_index_0]
+        for _index_0 = 1, #values do
+          local v = values[_index_0]
           _accum_0[_len_0] = self:value(v)
           _len_0 = _len_0 + 1
         end
@@ -190,9 +186,8 @@ local statement_compilers = {
       loop:append_list((function()
         local _accum_0 = { }
         local _len_0 = 1
-        local _list_0 = names
-        for _index_0 = 1, #_list_0 do
-          local name = _list_0[_index_0]
+        for _index_0 = 1, #names do
+          local name = names[_index_0]
           _accum_0[_len_0] = _with_0:name(name, false)
           _len_0 = _len_0 + 1
         end
@@ -202,9 +197,8 @@ local statement_compilers = {
       loop:append_list((function()
         local _accum_0 = { }
         local _len_0 = 1
-        local _list_0 = exps
-        for _index_0 = 1, #_list_0 do
-          local exp = _list_0[_index_0]
+        for _index_0 = 1, #exps do
+          local exp = exps[_index_0]
           _accum_0[_len_0] = self:value(exp)
           _len_0 = _len_0 + 1
         end
