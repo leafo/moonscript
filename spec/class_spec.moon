@@ -96,3 +96,42 @@ describe "class", ->
     assert.same Thing.__name, "Thing"
     assert.is_true Thing.__parent == Base
 
+    assert.is_true instance.__class == Thing
+
+  it "should have name when assigned", ->
+    Thing = class
+    assert.same Thing.__name, "Thing"
+
+
+  it "should not expose class properties on instance", ->
+    class Thing
+      @height: 10
+
+    Thing.color = "blue"
+
+    instance = Thing!
+    assert.same instance.color, nil
+    assert.same instance.height, nil
+
+  it "should expose new things added to __base", ->
+    class Thing
+
+    instance = Thing!
+    Thing.__base.color = "green"
+
+    assert.same instance.color, "green"
+
+  it "should call with correct receiver", ->
+    local instance
+
+    class Thing
+      is_class: => assert.is_true @ == Thing
+      is_instance: => assert.is_true @ == instance
+
+      go: =>
+        @@is_class!
+        @is_instance!
+
+    instance = Thing!
+    instance\go!
+
