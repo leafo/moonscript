@@ -35,3 +35,10 @@ describe "comprehension", ->
     assert.same input, {1,2,3,4}
     assert.same output, {2,4,6,8}
 
+
+  it "should copy table", ->
+    input = { 1,2,3, hello: "world", thing: true }
+    output = {k,v for k,v in pairs input }
+
+    assert.is_true input != output
+    assert.same input, output
