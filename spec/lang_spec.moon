@@ -72,6 +72,7 @@ diff_str = (expected, got) ->
 string_assert = (expected, got) ->
   if expected != got
     diff = diff_str expected, got
+    error "string equality assert failed" if os.getenv "HIDE_DIFF"
     error "string equality assert failed:\n" .. diff
 
 input_fname = (base) ->
