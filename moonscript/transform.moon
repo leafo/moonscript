@@ -502,6 +502,7 @@ Statement = Transformer {
 
   class: (node, ret, parent_assign) =>
     _, name, parent_val, body = unpack node
+    parent_val = nil if parent_val == ""
 
     -- split apart properties and statements
     statements = {}
@@ -533,18 +534,16 @@ Statement = Transformer {
     cls_name = NameProxy "class"
 
     unless constructor
-      constructor = build.fndef {
-        args: {{"..."}}
-        arrow: "fat"
-        body: {
-          build["if"] {
-            cond: parent_cls_name
-            then: {
-              build.chain { base: "super", {"call", {"..."}} }
-            }
+      constructor = if parent_val
+        build.fndef {
+          args: {{"..."}}
+          arrow: "fat"
+          body: {
+            build.chain { base: "super", {"call", {"..."}} }
           }
         }
-      }
+      else
+        build.fndef!
 
     real_name = name or parent_assign and parent_assign[2][1]
     real_name = switch ntype real_name
@@ -566,20 +565,20 @@ Statement = Transformer {
       {"__init", constructor}
       {"__base", base_name}
       {"__name", real_name} -- "quote the string"
-      {"__parent", parent_cls_name}
+      parent_val and {"__parent", parent_cls_name} or nil
     }
 
-    -- look up a name in the class object
-    class_lookup = build["if"] {
-      cond: {"exp", "val", "==", "nil", "and", parent_cls_name}
-      then: {
-        parent_cls_name\index"name"
+    -- looking up a name in the class object
+    class_index = if parent_val
+      class_lookup = build["if"] {
+        cond: { "exp", "val", "==", "nil" }
+        then: {
+          parent_cls_name\index"name"
+        }
       }
-    }
-    insert class_lookup, {"else", {"val"}}
+      insert class_lookup, {"else", {"val"}}
 
-    cls_mt = build.table {
-      {"__index", build.fndef {
+      build.fndef {
         args: {{"cls"}, {"name"}}
         body: {
           build.assign_one LocalName"val", build.chain {
@@ -587,7 +586,12 @@ Statement = Transformer {
           }
           class_lookup
         }
-      }}
+      }
+    else
+      base_name
+
+    cls_mt = build.table {
+      {"__index", class_index}
       {"__call", build.fndef {
         args: {{"cls"}, {"..."}}
         body: {
@@ -651,22 +655,18 @@ Statement = Transformer {
 
         {"declare_glob", "*"}
 
-        .assign_one parent_cls_name, parent_val == "" and "nil" or parent_val
+        parent_val and .assign_one(parent_cls_name, parent_val) or NOOP
+
         .assign_one base_name, {"table", properties}
         .assign_one base_name\chain"__index", base_name
 
-        .if {
-          cond: parent_cls_name
-          then: {
-            .chain {
-              base: "setmetatable"
-              {"call", {
-                base_name,
-                .chain { base: parent_cls_name,  {"dot", "__base"}}
-              }}
-            }
-          }
-        }
+        parent_val and .chain({
+          base: "setmetatable"
+          {"call", {
+            base_name,
+            .chain { base: parent_cls_name,  {"dot", "__base"}}
+          }}
+        }) or NOOP
 
         .assign_one cls_name, cls
         .assign_one base_name\chain"__class", cls_name
@@ -677,16 +677,14 @@ Statement = Transformer {
         }
 
         -- run the inherited callback
-        .if {
-          cond: {"exp",
-            parent_cls_name, "and", parent_cls_name\chain "__inherited"
-          }
+        parent_val and .if({
+          cond: {"exp", parent_cls_name\chain "__inherited" }
           then: {
             parent_cls_name\chain "__inherited", {"call", {
               parent_cls_name, cls_name
             }}
           }
-        }
+        }) or NOOP
 
         .group if name then {
           .assign_one name, cls_name

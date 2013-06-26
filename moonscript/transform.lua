@@ -888,6 +888,9 @@ Statement = Transformer({
   end,
   class = function(self, node, ret, parent_assign)
     local _, name, parent_val, body = unpack(node)
+    if parent_val == "" then
+      parent_val = nil
+    end
     local statements = { }
     local properties = { }
     for _index_0 = 1, #body do
@@ -939,30 +942,29 @@ Statement = Transformer({
     local self_name = NameProxy("self")
     local cls_name = NameProxy("class")
     if not (constructor) then
-      constructor = build.fndef({
-        args = {
-          {
-            "..."
-          }
-        },
-        arrow = "fat",
-        body = {
-          build["if"]({
-            cond = parent_cls_name,
-            ["then"] = {
-              build.chain({
-                base = "super",
-                {
-                  "call",
-                  {
-                    "..."
-                  }
-                }
-              })
+      if parent_val then
+        constructor = build.fndef({
+          args = {
+            {
+              "..."
             }
-          })
-        }
-      })
+          },
+          arrow = "fat",
+          body = {
+            build.chain({
+              base = "super",
+              {
+                "call",
+                {
+                  "..."
+                }
+              }
+            })
+          }
+        })
+      else
+        constructor = build.fndef()
+      end
     end
     local real_name = name or parent_assign and parent_assign[2][1]
     local _exp_0 = ntype(real_name)
@@ -1002,56 +1004,60 @@ Statement = Transformer({
         "__name",
         real_name
       },
-      {
+      parent_val and {
         "__parent",
         parent_cls_name
-      }
+      } or nil
     })
-    local class_lookup = build["if"]({
-      cond = {
-        "exp",
-        "val",
-        "==",
-        "nil",
-        "and",
-        parent_cls_name
-      },
-      ["then"] = {
-        parent_cls_name:index("name")
-      }
-    })
-    insert(class_lookup, {
-      "else",
-      {
-        "val"
-      }
-    })
+    local class_index
+    if parent_val then
+      local class_lookup = build["if"]({
+        cond = {
+          "exp",
+          "val",
+          "==",
+          "nil"
+        },
+        ["then"] = {
+          parent_cls_name:index("name")
+        }
+      })
+      insert(class_lookup, {
+        "else",
+        {
+          "val"
+        }
+      })
+      class_index = build.fndef({
+        args = {
+          {
+            "cls"
+          },
+          {
+            "name"
+          }
+        },
+        body = {
+          build.assign_one(LocalName("val"), build.chain({
+            base = "rawget",
+            {
+              "call",
+              {
+                base_name,
+                "name"
+              }
+            }
+          })),
+          class_lookup
+        }
+      })
+    else
+      class_index = base_name
+    end
     local cls_mt = build.table({
       {
         "__index",
-        build.fndef({
-          args = {
-            {
-              "cls"
-            },
-            {
-              "name"
-            }
-          },
-          body = {
-            build.assign_one(LocalName("val"), build.chain({
-              base = "rawget",
-              {
-                "call",
-                {
-                  base_name,
-                  "name"
-                }
-              }
-            })),
-            class_lookup
-          }
-        })
+        class_index
       },
       {
         "__call",
@@ -1174,33 +1180,28 @@ Statement = Transformer({
           "declare_glob",
           "*"
         },
-        build.assign_one(parent_cls_name, parent_val == "" and "nil" or parent_val),
+        parent_val and build.assign_one(parent_cls_name, parent_val) or NOOP,
         build.assign_one(base_name, {
           "table",
           properties
         }),
         build.assign_one(base_name:chain("__index"), base_name),
-        build["if"]({
-          cond = parent_cls_name,
-          ["then"] = {
-            build.chain({
-              base = "setmetatable",
-              {
-                "call",
+        parent_val and build.chain({
+          base = "setmetatable",
+          {
+            "call",
+            {
+              base_name,
+              build.chain({
+                base = parent_cls_name,
                 {
-                  base_name,
-                  build.chain({
-                    base = parent_cls_name,
-                    {
-                      "dot",
-                      "__base"
-                    }
-                  })
+                  "dot",
+                  "__base"
                 }
-              }
-            })
+              })
+            }
           }
-        }),
+        }) or NOOP,
         build.assign_one(cls_name, cls),
         build.assign_one(base_name:chain("__class"), cls_name),
         build.group((function()
@@ -1211,11 +1212,9 @@ Statement = Transformer({
             }
           end
         end)()),
-        build["if"]({
+        parent_val and build["if"]({
           cond = {
             "exp",
-            parent_cls_name,
-            "and",
             parent_cls_name:chain("__inherited")
           },
           ["then"] = {
@@ -1227,7 +1226,7 @@ Statement = Transformer({
               }
             })
           }
-        }),
+        }) or NOOP,
         build.group((function()
           if name then
             return {
