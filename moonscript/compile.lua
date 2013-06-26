@@ -32,7 +32,6 @@ local mtype = util.moon.type
 local indent_char = "  "
 local Line, DelayedLine, Lines, Block, RootBlock
 do
-  local _parent_0 = nil
   local _base_0 = {
     mark_pos = function(self, pos, line)
       if line == nil then
@@ -133,25 +132,14 @@ do
     end
   }
   _base_0.__index = _base_0
-  if _parent_0 then
-    setmetatable(_base_0, _parent_0.__base)
-  end
   local _class_0 = setmetatable({
     __init = function(self)
       self.posmap = { }
     end,
     __base = _base_0,
-    __name = "Lines",
-    __parent = _parent_0
+    __name = "Lines"
   }, {
-    __index = function(cls, name)
-      local val = rawget(_base_0, name)
-      if val == nil and _parent_0 then
-        return _parent_0[name]
-      else
-        return val
-      end
-    end,
+    __index = _base_0,
     __call = function(cls, ...)
       local _self_0 = setmetatable({}, _base_0)
       cls.__init(_self_0, ...)
@@ -159,13 +147,9 @@ do
     end
   })
   _base_0.__class = _class_0
-  if _parent_0 and _parent_0.__inherited then
-    _parent_0.__inherited(_parent_0, _class_0)
-  end
   Lines = _class_0
 end
 do
-  local _parent_0 = nil
   local _base_0 = {
     pos = nil,
     _append_single = function(self, item)
@@ -237,27 +221,12 @@ do
     end
   }
   _base_0.__index = _base_0
-  if _parent_0 then
-    setmetatable(_base_0, _parent_0.__base)
-  end
   local _class_0 = setmetatable({
-    __init = function(self, ...)
-      if _parent_0 then
-        return _parent_0.__init(self, ...)
-      end
-    end,
+    __init = function() end,
     __base = _base_0,
-    __name = "Line",
-    __parent = _parent_0
+    __name = "Line"
   }, {
-    __index = function(cls, name)
-      local val = rawget(_base_0, name)
-      if val == nil and _parent_0 then
-        return _parent_0[name]
-      else
-        return val
-      end
-    end,
+    __index = _base_0,
     __call = function(cls, ...)
       local _self_0 = setmetatable({}, _base_0)
       cls.__init(_self_0, ...)
@@ -265,13 +234,9 @@ do
     end
   })
   _base_0.__class = _class_0
-  if _parent_0 and _parent_0.__inherited then
-    _parent_0.__inherited(_parent_0, _class_0)
-  end
   Line = _class_0
 end
 do
-  local _parent_0 = nil
   local _base_0 = {
     prepare = function() end,
     render = function(self)
@@ -280,25 +245,14 @@ do
     end
   }
   _base_0.__index = _base_0
-  if _parent_0 then
-    setmetatable(_base_0, _parent_0.__base)
-  end
   local _class_0 = setmetatable({
     __init = function(self, fn)
       self.prepare = fn
     end,
     __base = _base_0,
-    __name = "DelayedLine",
-    __parent = _parent_0
+    __name = "DelayedLine"
   }, {
-    __index = function(cls, name)
-      local val = rawget(_base_0, name)
-      if val == nil and _parent_0 then
-        return _parent_0[name]
-      else
-        return val
-      end
-    end,
+    __index = _base_0,
     __call = function(cls, ...)
       local _self_0 = setmetatable({}, _base_0)
       cls.__init(_self_0, ...)
@@ -306,13 +260,9 @@ do
     end
   })
   _base_0.__class = _class_0
-  if _parent_0 and _parent_0.__inherited then
-    _parent_0.__inherited(_parent_0, _class_0)
-  end
   DelayedLine = _class_0
 end
 do
-  local _parent_0 = nil
   local _base_0 = {
     header = "do",
     footer = "end",
@@ -608,9 +558,6 @@ do
     end
   }
   _base_0.__index = _base_0
-  if _parent_0 then
-    setmetatable(_base_0, _parent_0.__base)
-  end
   local _class_0 = setmetatable({
     __init = function(self, parent, header, footer)
       self.parent, self.header, self.footer = parent, header, footer
@@ -638,17 +585,9 @@ do
       end
     end,
     __base = _base_0,
-    __name = "Block",
-    __parent = _parent_0
+    __name = "Block"
   }, {
-    __index = function(cls, name)
-      local val = rawget(_base_0, name)
-      if val == nil and _parent_0 then
-        return _parent_0[name]
-      else
-        return val
-      end
-    end,
+    __index = _base_0,
     __call = function(cls, ...)
       local _self_0 = setmetatable({}, _base_0)
       cls.__init(_self_0, ...)
@@ -656,9 +595,6 @@ do
     end
   })
   _base_0.__class = _class_0
-  if _parent_0 and _parent_0.__inherited then
-    _parent_0.__inherited(_parent_0, _class_0)
-  end
   Block = _class_0
 end
 do
@@ -682,9 +618,7 @@ do
     end
   }
   _base_0.__index = _base_0
-  if _parent_0 then
-    setmetatable(_base_0, _parent_0.__base)
-  end
+  setmetatable(_base_0, _parent_0.__base)
   local _class_0 = setmetatable({
     __init = function(self, options)
       self.options = options
@@ -697,7 +631,7 @@ do
   }, {
     __index = function(cls, name)
       local val = rawget(_base_0, name)
-      if val == nil and _parent_0 then
+      if val == nil then
         return _parent_0[name]
       else
         return val
@@ -710,7 +644,7 @@ do
     end
   })
   _base_0.__class = _class_0
-  if _parent_0 and _parent_0.__inherited then
+  if _parent_0.__inherited then
     _parent_0.__inherited(_parent_0, _class_0)
   end
   RootBlock = _class_0

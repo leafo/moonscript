@@ -15,33 +15,21 @@ local NOOP = {
 }
 local Run, apply_to_last, is_singular, extract_declarations, expand_elseif_assign, constructor_name, with_continue_listener, Transformer, construct_comprehension, Statement, Accumulator, default_accumulator, implicitly_return, Value
 do
-  local _parent_0 = nil
   local _base_0 = {
     call = function(self, state)
       return self.fn(state)
     end
   }
   _base_0.__index = _base_0
-  if _parent_0 then
-    setmetatable(_base_0, _parent_0.__base)
-  end
   local _class_0 = setmetatable({
     __init = function(self, fn)
       self.fn = fn
       self[1] = "run"
     end,
     __base = _base_0,
-    __name = "Run",
-    __parent = _parent_0
+    __name = "Run"
   }, {
-    __index = function(cls, name)
-      local val = rawget(_base_0, name)
-      if val == nil and _parent_0 then
-        return _parent_0[name]
-      else
-        return val
-      end
-    end,
+    __index = _base_0,
     __call = function(cls, ...)
       local _self_0 = setmetatable({}, _base_0)
       cls.__init(_self_0, ...)
@@ -49,9 +37,6 @@ do
     end
   })
   _base_0.__class = _class_0
-  if _parent_0 and _parent_0.__inherited then
-    _parent_0.__inherited(_parent_0, _class_0)
-  end
   Run = _class_0
 end
 apply_to_last = function(stms, fn)
@@ -218,7 +203,6 @@ with_continue_listener = function(body)
   }
 end
 do
-  local _parent_0 = nil
   local _base_0 = {
     transform = function(self, scope, node, ...)
       if self.seen_nodes[node] then
@@ -253,9 +237,6 @@ do
     end
   }
   _base_0.__index = _base_0
-  if _parent_0 then
-    setmetatable(_base_0, _parent_0.__base)
-  end
   local _class_0 = setmetatable({
     __init = function(self, transformers)
       self.transformers = transformers
@@ -264,17 +245,9 @@ do
       })
     end,
     __base = _base_0,
-    __name = "Transformer",
-    __parent = _parent_0
+    __name = "Transformer"
   }, {
-    __index = function(cls, name)
-      local val = rawget(_base_0, name)
-      if val == nil and _parent_0 then
-        return _parent_0[name]
-      else
-        return val
-      end
-    end,
+    __index = _base_0,
     __call = function(cls, ...)
       local _self_0 = setmetatable({}, _base_0)
       cls.__init(_self_0, ...)
@@ -282,9 +255,6 @@ do
     end
   })
   _base_0.__class = _class_0
-  if _parent_0 and _parent_0.__inherited then
-    _parent_0.__inherited(_parent_0, _class_0)
-  end
   Transformer = _class_0
 end
 construct_comprehension = function(inner, clauses)
@@ -1259,7 +1229,6 @@ Statement = Transformer({
   end
 })
 do
-  local _parent_0 = nil
   local _base_0 = {
     body_idx = {
       ["for"] = 4,
@@ -1320,9 +1289,6 @@ do
     end
   }
   _base_0.__index = _base_0
-  if _parent_0 then
-    setmetatable(_base_0, _parent_0.__base)
-  end
   local _class_0 = setmetatable({
     __init = function(self, accum_name)
       self.accum_name = accum_name or NameProxy("accum")
@@ -1330,17 +1296,9 @@ do
       self.len_name = NameProxy("len")
     end,
     __base = _base_0,
-    __name = "Accumulator",
-    __parent = _parent_0
+    __name = "Accumulator"
   }, {
-    __index = function(cls, name)
-      local val = rawget(_base_0, name)
-      if val == nil and _parent_0 then
-        return _parent_0[name]
-      else
-        return val
-      end
-    end,
+    __index = _base_0,
     __call = function(cls, ...)
       local _self_0 = setmetatable({}, _base_0)
       cls.__init(_self_0, ...)
@@ -1348,9 +1306,6 @@ do
     end
   })
   _base_0.__class = _class_0
-  if _parent_0 and _parent_0.__inherited then
-    _parent_0.__inherited(_parent_0, _class_0)
-  end
   Accumulator = _class_0
 end
 default_accumulator = function(self, node)
