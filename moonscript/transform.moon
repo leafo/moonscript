@@ -251,33 +251,16 @@ Statement = Transformer {
 
   import: (node) =>
     _, names, source = unpack node
-
-    stubs = for name in *names
-      if type(name) == "table"
-        name
+    table_values = for name in *names
+      dest_val = if ntype(name) == "colon_stub"
+        name[2]
       else
-        {"dot", name}
+        name
 
-    real_names = for name in *names
-      type(name) == "table" and name[2] or name
+      {{"key_literal", name}, dest_val}
 
-    if type(source) == "string"
-      build.assign {
-        names: real_names
-        values: [build.chain { base: source, stub} for stub in *stubs]
-      }
-    else
-      source_name = NameProxy "table"
-      build.group {
-        {"declare", real_names}
-        build["do"] {
-          build.assign_one source_name, source
-          build.assign {
-            names: real_names
-            values: [build.chain { base: source_name, stub} for stub in *stubs]
-          }
-        }
-      }
+    dest = { "table", table_values }
+    { "assign", {dest}, {source}, [-1]: node[-1] }
 
   comprehension: (node, action) =>
     _, exp, clauses = unpack node

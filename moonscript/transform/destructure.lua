@@ -19,6 +19,7 @@ do
   local _table_0 = require("moonscript.errors")
   user_error = _table_0.user_error
 end
+local util = require("moonscript.util")
 local join
 join = function(...)
   do
@@ -75,10 +76,15 @@ extract_assign_names = function(name, accum, prefix)
       local key = tuple[1]
       local s
       if ntype(key) == "key_literal" then
-        s = {
-          "dot",
-          key[2]
-        }
+        local key_name = key[2]
+        if ntype(key_name) == "colon_stub" then
+          s = key_name
+        else
+          s = {
+            "dot",
+            key_name
+          }
+        end
       else
         s = {
           "index",

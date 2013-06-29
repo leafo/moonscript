@@ -456,78 +456,43 @@ Statement = Transformer({
   end,
   import = function(self, node)
     local _, names, source = unpack(node)
-    local stubs = (function()
+    local table_values = (function()
       local _accum_0 = { }
       local _len_0 = 1
       for _index_0 = 1, #names do
         local name = names[_index_0]
-        if type(name) == "table" then
-          _accum_0[_len_0] = name
+        local dest_val
+        if ntype(name) == "colon_stub" then
+          dest_val = name[2]
         else
-          _accum_0[_len_0] = {
-            "dot",
-            name
-          }
+          dest_val = name
         end
+        local _value_0 = {
+          {
+            "key_literal",
+            name
+          },
+          dest_val
+        }
+        _accum_0[_len_0] = _value_0
         _len_0 = _len_0 + 1
       end
       return _accum_0
     end)()
-    local real_names = (function()
-      local _accum_0 = { }
-      local _len_0 = 1
-      for _index_0 = 1, #names do
-        local name = names[_index_0]
-        _accum_0[_len_0] = type(name) == "table" and name[2] or name
-        _len_0 = _len_0 + 1
-      end
-      return _accum_0
-    end)()
-    if type(source) == "string" then
-      return build.assign({
-        names = real_names,
-        values = (function()
-          local _accum_0 = { }
-          local _len_0 = 1
-          for _index_0 = 1, #stubs do
-            local stub = stubs[_index_0]
-            _accum_0[_len_0] = build.chain({
-              base = source,
-              stub
-            })
-            _len_0 = _len_0 + 1
-          end
-          return _accum_0
-        end)()
-      })
-    else
-      local source_name = NameProxy("table")
-      return build.group({
-        {
-          "declare",
-          real_names
-        },
-        build["do"]({
-          build.assign_one(source_name, source),
-          build.assign({
-            names = real_names,
-            values = (function()
-              local _accum_0 = { }
-              local _len_0 = 1
-              for _index_0 = 1, #stubs do
-                local stub = stubs[_index_0]
-                _accum_0[_len_0] = build.chain({
-                  base = source_name,
-                  stub
-                })
-                _len_0 = _len_0 + 1
-              end
-              return _accum_0
-            end)()
-          })
-        })
-      })
-    end
+    local dest = {
+      "table",
+      table_values
+    }
+    return {
+      "assign",
+      {
+        dest
+      },
+      {
+        source
+      },
+      [-1] = node[-1]
+    }
   end,
   comprehension = function(self, node, action)
     local _, exp, clauses = unpack(node)

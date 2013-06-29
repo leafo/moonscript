@@ -6,6 +6,8 @@ import unpack from require "moonscript.util"
 
 import user_error from require "moonscript.errors"
 
+util = require "moonscript.util"
+
 join = (...) ->
   with out = {}
     i = 1
@@ -29,7 +31,11 @@ extract_assign_names = (name, accum={}, prefix={}) ->
     else
       key = tuple[1]
       s = if ntype(key) == "key_literal"
-        {"dot", key[2]}
+        key_name = key[2]
+        if ntype(key_name) == "colon_stub"
+          key_name
+        else
+          {"dot", key_name}
       else
         {"index", key}
 
@@ -67,7 +73,6 @@ build_assign = (scope, destruct_literal, receiver) ->
   for tuple in *extracted_names
     insert names, tuple[1]
     insert values, NameProxy.chain obj, unpack tuple[2]
-    -- insert values, obj\chain unpack tuple[2]
 
   build.group {
     {"declare", names}
