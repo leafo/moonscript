@@ -1,12 +1,12 @@
 local build
 do
-  local _table_0 = require("moonscript.types")
-  build = _table_0.build
+  local _obj_0 = require("moonscript.types")
+  build = _obj_0.build
 end
 local unpack
 do
-  local _table_0 = require("moonscript.util")
-  unpack = _table_0.unpack
+  local _obj_0 = require("moonscript.util")
+  unpack = _obj_0.unpack
 end
 local LocalName
 do

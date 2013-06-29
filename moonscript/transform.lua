@@ -1,13 +1,19 @@
 local types = require("moonscript.types")
 local util = require("moonscript.util")
 local data = require("moonscript.data")
-local reversed, unpack = util.reversed, util.unpack
-local ntype, mtype, build, smart_node, is_slice, value_is_singular = types.ntype, types.mtype, types.build, types.smart_node, types.is_slice, types.value_is_singular
-local insert = table.insert
+local reversed, unpack
+reversed, unpack = util.reversed, util.unpack
+local ntype, mtype, build, smart_node, is_slice, value_is_singular
+ntype, mtype, build, smart_node, is_slice, value_is_singular = types.ntype, types.mtype, types.build, types.smart_node, types.is_slice, types.value_is_singular
+local insert
+do
+  local _obj_0 = table
+  insert = _obj_0.insert
+end
 local NameProxy, LocalName
 do
-  local _table_0 = require("moonscript.transform.names")
-  NameProxy, LocalName = _table_0.NameProxy, _table_0.LocalName
+  local _obj_0 = require("moonscript.transform.names")
+  NameProxy, LocalName = _obj_0.NameProxy, _obj_0.LocalName
 end
 local destructure = require("moonscript.transform.destructure")
 local NOOP = {

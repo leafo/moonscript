@@ -3,31 +3,36 @@ local dump = require("moonscript.dump")
 local transform = require("moonscript.transform")
 local NameProxy, LocalName
 do
-  local _table_0 = require("moonscript.transform.names")
-  NameProxy, LocalName = _table_0.NameProxy, _table_0.LocalName
+  local _obj_0 = require("moonscript.transform.names")
+  NameProxy, LocalName = _obj_0.NameProxy, _obj_0.LocalName
 end
 local Set
 do
-  local _table_0 = require("moonscript.data")
-  Set = _table_0.Set
+  local _obj_0 = require("moonscript.data")
+  Set = _obj_0.Set
 end
 local ntype, has_value
 do
-  local _table_0 = require("moonscript.types")
-  ntype, has_value = _table_0.ntype, _table_0.has_value
+  local _obj_0 = require("moonscript.types")
+  ntype, has_value = _obj_0.ntype, _obj_0.has_value
 end
 local statement_compilers
 do
-  local _table_0 = require("moonscript.compile.statement")
-  statement_compilers = _table_0.statement_compilers
+  local _obj_0 = require("moonscript.compile.statement")
+  statement_compilers = _obj_0.statement_compilers
 end
 local value_compilers
 do
-  local _table_0 = require("moonscript.compile.value")
-  value_compilers = _table_0.value_compilers
+  local _obj_0 = require("moonscript.compile.value")
+  value_compilers = _obj_0.value_compilers
 end
-local concat, insert = table.concat, table.insert
-local pos_to_line, get_closest_line, trim, unpack = util.pos_to_line, util.get_closest_line, util.trim, util.unpack
+local concat, insert
+do
+  local _obj_0 = table
+  concat, insert = _obj_0.concat, _obj_0.insert
+end
+local pos_to_line, get_closest_line, trim, unpack
+pos_to_line, get_closest_line, trim, unpack = util.pos_to_line, util.get_closest_line, util.trim, util.unpack
 local mtype = util.moon.type
 local indent_char = "  "
 local Line, DelayedLine, Lines, Block, RootBlock

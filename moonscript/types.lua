@@ -1,11 +1,16 @@
 local util = require("moonscript.util")
 local Set
 do
-  local _table_0 = require("moonscript.data")
-  Set = _table_0.Set
+  local _obj_0 = require("moonscript.data")
+  Set = _obj_0.Set
 end
-local insert = table.insert
-local unpack = util.unpack
+local insert
+do
+  local _obj_0 = table
+  insert = _obj_0.insert
+end
+local unpack
+unpack = util.unpack
 local manual_return = Set({
   "foreach",
   "for",

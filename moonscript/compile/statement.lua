@@ -1,12 +1,17 @@
 local util = require("moonscript.util")
 local data = require("moonscript.data")
-local reversed, unpack = util.reversed, util.unpack
+local reversed, unpack
+reversed, unpack = util.reversed, util.unpack
 local ntype
 do
-  local _table_0 = require("moonscript.types")
-  ntype = _table_0.ntype
+  local _obj_0 = require("moonscript.types")
+  ntype = _obj_0.ntype
 end
-local concat, insert = table.concat, table.insert
+local concat, insert
+do
+  local _obj_0 = table
+  concat, insert = _obj_0.concat, _obj_0.insert
+end
 local statement_compilers = {
   raw = function(self, node)
     return self:add(node[2])

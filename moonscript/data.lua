@@ -1,4 +1,8 @@
-local concat, remove, insert = table.concat, table.remove, table.insert
+local concat, remove, insert
+do
+  local _obj_0 = table
+  concat, remove, insert = _obj_0.concat, _obj_0.remove, _obj_0.insert
+end
 local Set
 Set = function(items)
   local self = { }

@@ -1,7 +1,12 @@
 local util = require("moonscript.util")
 local lpeg = require("lpeg")
-local concat, insert = table.concat, table.insert
-local split, pos_to_line = util.split, util.pos_to_line
+local concat, insert
+do
+  local _obj_0 = table
+  concat, insert = _obj_0.concat, _obj_0.insert
+end
+local split, pos_to_line
+split, pos_to_line = util.split, util.pos_to_line
 local user_error
 user_error = function(...)
   return error({
@@ -58,7 +63,8 @@ end
 local rewrite_traceback
 rewrite_traceback = function(text, err)
   local line_tables = require("moonscript.line_tables")
-  local V, S, Ct, C = lpeg.V, lpeg.S, lpeg.Ct, lpeg.C
+  local V, S, Ct, C
+  V, S, Ct, C = lpeg.V, lpeg.S, lpeg.Ct, lpeg.C
   local header_text = "stack traceback:"
   local Header, Line = V("Header"), V("Line")
   local Break = lpeg.S("\n")

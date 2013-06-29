@@ -1,23 +1,27 @@
 local ntype, mtype, build
 do
-  local _table_0 = require("moonscript.types")
-  ntype, mtype, build = _table_0.ntype, _table_0.mtype, _table_0.build
+  local _obj_0 = require("moonscript.types")
+  ntype, mtype, build = _obj_0.ntype, _obj_0.mtype, _obj_0.build
 end
 local NameProxy
 do
-  local _table_0 = require("moonscript.transform.names")
-  NameProxy = _table_0.NameProxy
+  local _obj_0 = require("moonscript.transform.names")
+  NameProxy = _obj_0.NameProxy
 end
-local insert = table.insert
+local insert
+do
+  local _obj_0 = table
+  insert = _obj_0.insert
+end
 local unpack
 do
-  local _table_0 = require("moonscript.util")
-  unpack = _table_0.unpack
+  local _obj_0 = require("moonscript.util")
+  unpack = _obj_0.unpack
 end
 local user_error
 do
-  local _table_0 = require("moonscript.errors")
-  user_error = _table_0.user_error
+  local _obj_0 = require("moonscript.errors")
+  user_error = _obj_0.user_error
 end
 local util = require("moonscript.util")
 local join

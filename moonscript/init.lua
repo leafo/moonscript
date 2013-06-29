@@ -1,10 +1,14 @@
 local compile = require("moonscript.compile")
 local parse = require("moonscript.parse")
-local concat, insert = table.concat, table.insert
+local concat, insert
+do
+  local _obj_0 = table
+  concat, insert = _obj_0.concat, _obj_0.insert
+end
 local split, dump, get_options, unpack
 do
-  local _table_0 = require("moonscript.util")
-  split, dump, get_options, unpack = _table_0.split, _table_0.dump, _table_0.get_options, _table_0.unpack
+  local _obj_0 = require("moonscript.util")
+  split, dump, get_options, unpack = _obj_0.split, _obj_0.dump, _obj_0.get_options, _obj_0.unpack
 end
 local lua = {
   loadstring = loadstring,
