@@ -1,17 +1,17 @@
 
 util = require "moonscript.util"
-data = require "moonscript.data"
+import Set from require "moonscript.data"
 
 import insert from table
 import unpack from util
 
 -- implicit return does not work on these statements
-manual_return = data.Set{"foreach", "for", "while", "return"}
+manual_return = Set{"foreach", "for", "while", "return"}
 
 -- Assigns and returns are bubbled into their bodies.
 -- All cascading statement transform functions accept a second arugment that
 -- is the transformation to apply to the last statement in their body
-cascading = data.Set{ "if", "unless", "with", "switch", "class", "do" }
+cascading = Set{ "if", "unless", "with", "switch", "class", "do" }
 
 -- type of node as string
 ntype = (node) ->

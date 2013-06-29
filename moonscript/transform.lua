@@ -349,11 +349,13 @@ Statement = Transformer({
       if "comprehension" == _exp_0 then
         local first_name = names[1]
         local a = Accumulator(first_name)
-        node = self.transform.statement(first_value, function(exp)
+        local action
+        action = function(exp)
           return a:mutate_body({
             exp
           })
-        end)
+        end
+        node = self.transform.statement(first_value, action, node)
         return a:wrap(node, "group")
       end
     end
@@ -585,9 +587,9 @@ Statement = Transformer({
       wrapped = build.group({
         build.declare({
           names = (function()
+            local _list_0 = stm[2]
             local _accum_0 = { }
             local _len_0 = 1
-            local _list_0 = stm[2]
             for _index_0 = 1, #_list_0 do
               local name = _list_0[_index_0]
               if type(name) == "string" then
@@ -699,7 +701,7 @@ Statement = Transformer({
       end)()
     })
   end,
-  foreach = function(self, node)
+  foreach = function(self, node, _, parent_assign)
     smart_node(node)
     local source = unpack(node.iter)
     local destructures = { }
@@ -727,7 +729,11 @@ Statement = Transformer({
     if ntype(source) == "unpack" then
       local list = source[2]
       local index_name = NameProxy("index")
-      local list_name = self:is_local(list) and list or NameProxy("list")
+      local assign_name
+      if parent_assign then
+        assign_name = parent_assign[2][1]
+      end
+      local list_name = assign_name ~= list and self:is_local(list) and list or NameProxy("list")
       local slice_var = nil
       local bounds
       if is_slice(list) then
@@ -768,7 +774,7 @@ Statement = Transformer({
           }
         }
       end
-      return build.group({
+      local out = build.group({
         list_name ~= list and build.assign_one(list_name, list) or NOOP,
         slice_var or NOOP,
         build["for"]({
@@ -786,6 +792,8 @@ Statement = Transformer({
           }
         })
       })
+      out.has_unpack_copy = true
+      return out
     end
     node.body = with_continue_listener(node.body)
   end,
@@ -1085,9 +1093,9 @@ Statement = Transformer({
           end
           return self:set("super", function(block, chain)
             if chain then
+              local _list_0 = chain
               local slice = { }
               local _len_0 = 1
-              local _list_0 = chain
               for _index_0 = 3, #_list_0 do
                 local item = _list_0[_index_0]
                 slice[_len_0] = item
@@ -1244,7 +1252,16 @@ do
       if group_type == nil then
         group_type = "block_exp"
       end
+      local copy_list
+      if rawget(node, "has_unpack_copy") then
+        do
+          local _with_0 = node[2][1]
+          node[2][1] = NOOP
+          copy_list = _with_0
+        end
+      end
       return build[group_type]({
+        copy_list or NOOP,
         build.assign_one(self.accum_name, build.table()),
         build.assign_one(self.len_name, 1),
         node,

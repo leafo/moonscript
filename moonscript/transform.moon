@@ -181,8 +181,8 @@ Statement = Transformer {
           first_name = names[1]
 
           a = Accumulator first_name
-          node = @transform.statement first_value, (exp) ->
-            a\mutate_body { exp }
+          action = (exp) -> a\mutate_body { exp }
+          node = @transform.statement first_value, action, node
 
           return a\wrap node, "group"
 
@@ -389,7 +389,7 @@ Statement = Transformer {
         ret scope_name
     }
 
-  foreach: (node) =>
+  foreach: (node, _, parent_assign) =>
     smart_node node
     source = unpack node.iter
 
@@ -409,7 +409,8 @@ Statement = Transformer {
       list = source[2]
 
       index_name = NameProxy "index"
-      list_name = @is_local(list) and list or NameProxy "list"
+      assign_name = parent_assign[2][1] if parent_assign
+      list_name = assign_name != list and @is_local(list) and list or NameProxy "list"
 
       slice_var = nil
       bounds = if is_slice list
@@ -430,7 +431,7 @@ Statement = Transformer {
       else
         {1, {"length", list_name}}
 
-      return build.group {
+      out = build.group {
         list_name != list and build.assign_one(list_name, list) or NOOP
         slice_var or NOOP
         build["for"] {
@@ -442,6 +443,9 @@ Statement = Transformer {
           }
         }
       }
+
+      out.has_unpack_copy = true
+      return out
 
     node.body = with_continue_listener node.body
 
@@ -721,7 +725,12 @@ class Accumulator
 
   -- wrap the node into a block_exp
   wrap: (node, group_type="block_exp") =>
+    copy_list = if rawget node, "has_unpack_copy"
+      with node[2][1]
+        node[2][1] = NOOP
+
     build[group_type] {
+      copy_list or NOOP
       build.assign_one @accum_name, build.table!
       build.assign_one @len_name, 1
       node

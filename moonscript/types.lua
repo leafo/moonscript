@@ -1,14 +1,18 @@
 local util = require("moonscript.util")
-local data = require("moonscript.data")
+local Set
+do
+  local _table_0 = require("moonscript.data")
+  Set = _table_0.Set
+end
 local insert = table.insert
 local unpack = util.unpack
-local manual_return = data.Set({
+local manual_return = Set({
   "foreach",
   "for",
   "while",
   "return"
 })
-local cascading = data.Set({
+local cascading = Set({
   "if",
   "unless",
   "with",

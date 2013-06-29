@@ -37,4 +37,5 @@ x = for thing in *things
 	if is_important thing
 		break thing 
 
+-- all function literals have a string that is their function definition
 

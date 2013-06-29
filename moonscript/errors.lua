@@ -42,9 +42,9 @@ truncate_traceback = function(traceback, chunk_func)
     end
     stop = stop - 1
   end
+  local _list_0 = traceback
   traceback = { }
   local _len_0 = 1
-  local _list_0 = traceback
   local _max_0 = stop
   for _index_0 = 1, _max_0 < 0 and #_list_0 + _max_0 or _max_0 do
     local t = _list_0[_index_0]

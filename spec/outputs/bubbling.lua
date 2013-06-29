@@ -40,11 +40,11 @@ end)()
 local m
 m = function(...)
   return (function(...)
-    local _accum_0 = { }
-    local _len_1 = 1
     local _list_0 = {
       ...
     }
+    local _accum_0 = { }
+    local _len_1 = 1
     for _index_0 = 1, #_list_0 do
       local x = _list_0[_index_0]
       if f(...) > 4 then
@@ -68,11 +68,11 @@ local x = (function(...)
   end
   return _accum_0
 end)(...)
-local y = { }
-local _len_1 = 1
 local _list_0 = {
   ...
 }
+local y = { }
+local _len_1 = 1
 for _index_0 = 1, #_list_0 do
   x = _list_0[_index_0]
   y[_len_1] = x
