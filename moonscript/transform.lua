@@ -369,16 +369,8 @@ Statement = Transformer({
             block_body
           }
         })
-      elseif "comprehension" == _exp_0 then
-        local a = Accumulator()
-        local action
-        action = function(exp)
-          return a:mutate_body({
-            exp
-          })
-        end
-        node = self.transform.statement(first_value, action, node)
-        return build.assign_one(first_name, a:wrap(node))
+      elseif "comprehension" == _exp_0 or "tblcomprehension" == _exp_0 then
+        return build.assign_one(first_name, Value.transformers[first_value[1]](self, first_value))
       end
     end
     local transformed

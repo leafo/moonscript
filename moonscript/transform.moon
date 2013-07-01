@@ -190,11 +190,9 @@ Statement = Transformer {
             {"do", block_body}
           }
 
-        when "comprehension"
-          a = Accumulator!
-          action = (exp) -> a\mutate_body { exp }
-          node = @transform.statement first_value, action, node
-          return build.assign_one first_name, a\wrap node
+        when "comprehension", "tblcomprehension"
+          return build.assign_one first_name,
+            Value.transformers[first_value[1]] @, first_value
 
     -- bubble cascading assigns
     transformed = if num_values == 1
