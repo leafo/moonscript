@@ -119,16 +119,14 @@ do
       local strip
       strip = function(t)
         if "table" == type(t) then
-          return (function()
-            local _accum_0 = { }
-            local _len_0 = 1
-            for _index_0 = 1, #t do
-              local v = t[_index_0]
-              _accum_0[_len_0] = strip(v)
-              _len_0 = _len_0 + 1
-            end
-            return _accum_0
-          end)()
+          local _accum_0 = { }
+          local _len_0 = 1
+          for _index_0 = 1, #t do
+            local v = t[_index_0]
+            _accum_0[_len_0] = strip(v)
+            _len_0 = _len_0 + 1
+          end
+          return _accum_0
         else
           return t
         end

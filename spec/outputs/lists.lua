@@ -251,15 +251,13 @@ for _index_0 = a, _max_2 < 0 and #x + _max_2 or _max_2, c do
 end
 local normal
 normal = function(hello)
-  return (function()
-    local _accum_0 = { }
-    local _len_0 = 1
-    for x in yeah do
-      _accum_0[_len_0] = x
-      _len_0 = _len_0 + 1
-    end
-    return _accum_0
-  end)()
+  local _accum_0 = { }
+  local _len_0 = 1
+  for x in yeah do
+    _accum_0[_len_0] = x
+    _len_0 = _len_0 + 1
+  end
+  return _accum_0
 end
 local test = x(1, 2, 3, 4, 5)
 for _index_0 = 1, #test do
@@ -281,14 +279,12 @@ _ = function()
   end
 end
 return function()
-  return (function()
-    local _accum_0 = { }
-    local _len_0 = 1
-    for _index_0 = 1, #things do
-      x = things[_index_0]
-      _accum_0[_len_0] = x
-      _len_0 = _len_0 + 1
-    end
-    return _accum_0
-  end)()
+  local _accum_0 = { }
+  local _len_0 = 1
+  for _index_0 = 1, #things do
+    x = things[_index_0]
+    _accum_0[_len_0] = x
+    _len_0 = _len_0 + 1
+  end
+  return _accum_0
 end

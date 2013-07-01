@@ -108,6 +108,16 @@ class Transformer
   new: (@transformers) =>
     @seen_nodes = setmetatable {}, __mode: "k"
 
+  transform_once: (scope, node, ...) =>
+    return node if @seen_nodes[node]
+    @seen_nodes[node] = true
+
+    transformer = @transformers[ntype node]
+    if transformer
+      transformer(scope, node, ...) or node
+    else
+      node
+
   transform: (scope, node, ...) =>
     return node if @seen_nodes[node]
     @seen_nodes[node] = true
@@ -158,6 +168,20 @@ Statement = Transformer {
   root_stms: (body) =>
     apply_to_last body, implicitly_return @
 
+  return: (node) =>
+    node[2] = Value\transform_once @, node[2]
+
+    if "block_exp" == ntype node[2]
+      block_exp = node[2]
+      block_body = block_exp[2]
+
+      idx = #block_body
+      node[2] = block_body[idx]
+      block_body[idx] = node
+      return build.group block_body
+
+    node
+
   declare_glob: (node) =>
     names = extract_declarations @
 
@@ -191,8 +215,7 @@ Statement = Transformer {
           }
 
         when "comprehension", "tblcomprehension", "foreach", "for", "while"
-          return build.assign_one first_name,
-            Value.transformers[first_value[1]] @, first_value
+          return build.assign_one first_name, Value\transform_once @, first_value
 
     -- bubble cascading assigns
     transformed = if num_values == 1

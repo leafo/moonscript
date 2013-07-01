@@ -108,13 +108,11 @@ extend = function(...)
   return tbls[1]
 end
 copy = function(self)
-  return (function()
-    local _tbl_0 = { }
-    for key, val in pairs(self) do
-      _tbl_0[key] = val
-    end
-    return _tbl_0
-  end)()
+  local _tbl_0 = { }
+  for key, val in pairs(self) do
+    _tbl_0[key] = val
+  end
+  return _tbl_0
 end
 mixin = function(self, cls, ...)
   for key, val in pairs(cls.__base) do

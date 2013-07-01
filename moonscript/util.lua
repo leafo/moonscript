@@ -77,15 +77,13 @@ split = function(str, delim)
     return { }
   end
   str = str .. delim
-  return (function()
-    local _accum_0 = { }
-    local _len_0 = 1
-    for m in str:gmatch("(.-)" .. delim) do
-      _accum_0[_len_0] = m
-      _len_0 = _len_0 + 1
-    end
-    return _accum_0
-  end)()
+  local _accum_0 = { }
+  local _len_0 = 1
+  for m in str:gmatch("(.-)" .. delim) do
+    _accum_0[_len_0] = m
+    _len_0 = _len_0 + 1
+  end
+  return _accum_0
 end
 local dump
 dump = function(what)

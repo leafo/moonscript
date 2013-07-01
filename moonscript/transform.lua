@@ -210,6 +210,18 @@ with_continue_listener = function(body)
 end
 do
   local _base_0 = {
+    transform_once = function(self, scope, node, ...)
+      if self.seen_nodes[node] then
+        return node
+      end
+      self.seen_nodes[node] = true
+      local transformer = self.transformers[ntype(node)]
+      if transformer then
+        return transformer(scope, node, ...) or node
+      else
+        return node
+      end
+    end,
     transform = function(self, scope, node, ...)
       if self.seen_nodes[node] then
         return node
@@ -314,6 +326,18 @@ Statement = Transformer({
   root_stms = function(self, body)
     return apply_to_last(body, implicitly_return(self))
   end,
+  ["return"] = function(self, node)
+    node[2] = Value:transform_once(self, node[2])
+    if "block_exp" == ntype(node[2]) then
+      local block_exp = node[2]
+      local block_body = block_exp[2]
+      local idx = #block_body
+      node[2] = block_body[idx]
+      block_body[idx] = node
+      return build.group(block_body)
+    end
+    return node
+  end,
   declare_glob = function(self, node)
     local names = extract_declarations(self)
     if node[2] == "^" then
@@ -370,7 +394,7 @@ Statement = Transformer({
           }
         })
       elseif "comprehension" == _exp_0 or "tblcomprehension" == _exp_0 or "foreach" == _exp_0 or "for" == _exp_0 or "while" == _exp_0 then
-        return build.assign_one(first_name, Value.transformers[first_value[1]](self, first_value))
+        return build.assign_one(first_name, Value:transform_once(self, first_value))
       end
     end
     local transformed

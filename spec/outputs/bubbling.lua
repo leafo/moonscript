@@ -6,17 +6,15 @@ f = function(...)
 end
 local dont_bubble
 dont_bubble = function()
-  return (function()
-    local _accum_0 = { }
-    local _len_0 = 1
-    for x in (function(...)
-      return print(...)
-    end)("hello") do
-      _accum_0[_len_0] = x
-      _len_0 = _len_0 + 1
-    end
-    return _accum_0
-  end)()
+  local _accum_0 = { }
+  local _len_0 = 1
+  for x in (function(...)
+    return print(...)
+  end)("hello") do
+    _accum_0[_len_0] = x
+    _len_0 = _len_0 + 1
+  end
+  return _accum_0
 end
 local k
 do
@@ -44,21 +42,19 @@ do
 end
 local m
 m = function(...)
-  return (function(...)
-    local _accum_0 = { }
-    local _len_0 = 1
-    local _list_0 = {
-      ...
-    }
-    for _index_0 = 1, #_list_0 do
-      local x = _list_0[_index_0]
-      if f(...) > 4 then
-        _accum_0[_len_0] = x
-        _len_0 = _len_0 + 1
-      end
+  local _accum_0 = { }
+  local _len_0 = 1
+  local _list_0 = {
+    ...
+  }
+  for _index_0 = 1, #_list_0 do
+    local x = _list_0[_index_0]
+    if f(...) > 4 then
+      _accum_0[_len_0] = x
+      _len_0 = _len_0 + 1
     end
-    return _accum_0
-  end)(...)
+  end
+  return _accum_0
 end
 local x
 do
