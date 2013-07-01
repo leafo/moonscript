@@ -400,6 +400,7 @@ Statement = Transformer {
       list = source[2]
 
       index_name = NameProxy "index"
+
       list_name = @is_local(list) and list or NameProxy "list"
 
       slice_var = nil
@@ -407,6 +408,8 @@ Statement = Transformer {
         slice = list[#list]
         table.remove list
         table.remove slice, 1
+
+        list_name = list if @is_local list
 
         slice[2] = if slice[2] and slice[2] != ""
           max_tmp_name = NameProxy "max"

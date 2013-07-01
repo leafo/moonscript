@@ -389,6 +389,9 @@ do
       if t == NameProxy or t == LocalName then
         return true
       end
+      if t == "table" and node[1] == "chain" and #node == 2 then
+        return self:is_local(node[2])
+      end
       return false
     end,
     free_name = function(self, prefix, dont_put)

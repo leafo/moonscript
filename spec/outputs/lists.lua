@@ -221,38 +221,32 @@ x = {
   6,
   7
 }
-local _list_0 = x
 local _max_0 = -5
-for _index_0 = 2, _max_0 < 0 and #_list_0 + _max_0 or _max_0, 2 do
-  local y = _list_0[_index_0]
+for _index_0 = 2, _max_0 < 0 and #x + _max_0 or _max_0, 2 do
+  local y = x[_index_0]
   print(y)
 end
-local _list_1 = x
 local _max_1 = 3
-for _index_0 = 1, _max_1 < 0 and #_list_1 + _max_1 or _max_1 do
-  local y = _list_1[_index_0]
+for _index_0 = 1, _max_1 < 0 and #x + _max_1 or _max_1 do
+  local y = x[_index_0]
   print(y)
 end
-local _list_2 = x
-for _index_0 = 2, #_list_2 do
-  local y = _list_2[_index_0]
+for _index_0 = 2, #x do
+  local y = x[_index_0]
   print(y)
 end
-local _list_3 = x
-for _index_0 = 1, #_list_3, 2 do
-  local y = _list_3[_index_0]
+for _index_0 = 1, #x, 2 do
+  local y = x[_index_0]
   print(y)
 end
-local _list_4 = x
-for _index_0 = 2, #_list_4, 2 do
-  local y = _list_4[_index_0]
+for _index_0 = 2, #x, 2 do
+  local y = x[_index_0]
   print(y)
 end
 local a, b, c = 1, 5, 2
-local _list_5 = x
 local _max_2 = b
-for _index_0 = a, _max_2 < 0 and #_list_5 + _max_2 or _max_2, c do
-  local y = _list_5[_index_0]
+for _index_0 = a, _max_2 < 0 and #x + _max_2 or _max_2, c do
+  local y = x[_index_0]
   print(y)
 end
 local normal
@@ -274,9 +268,9 @@ for _index_0 = 1, #test do
 end
 local _
 _ = function()
-  local _list_6 = rows
-  for _index_0 = 1, #_list_6 do
-    local row = _list_6[_index_0]
+  local _list_0 = rows
+  for _index_0 = 1, #_list_0 do
+    local row = _list_0[_index_0]
     a = b
   end
 end

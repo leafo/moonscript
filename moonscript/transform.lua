@@ -716,6 +716,9 @@ Statement = Transformer({
         local slice = list[#list]
         table.remove(list)
         table.remove(slice, 1)
+        if self:is_local(list) then
+          list_name = list
+        end
         if slice[2] and slice[2] ~= "" then
           local max_tmp_name = NameProxy("max")
           slice_var = build.assign_one(max_tmp_name, slice[2])

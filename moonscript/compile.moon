@@ -257,6 +257,10 @@ class Block
     t = mtype node
     return @has_name(node, false) if t == "string"
     return true if t == NameProxy or t == LocalName
+
+    if t == "table" and node[1] == "chain" and #node == 2
+      return @is_local node[2]
+
     false
 
   free_name: (prefix, dont_put) =>
