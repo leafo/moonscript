@@ -174,23 +174,29 @@ Statement = Transformer {
     num_values = #values
     num_names = #values
 
+    -- special code simplifications for single assigns
     if num_names == 1 and num_values == 1
       first_value = values[1]
-      switch ntype first_value
-        when "comprehension"
-          first_name = names[1]
+      first_name = names[1]
 
+      switch ntype first_value
+        when "block_exp"
+          block_body = first_value[2]
+          idx = #block_body
+          block_body[idx] = build.assign_one first_name, block_body[idx]
+
+          return build.group {
+            {"declare", {first_name}}
+            {"do", block_body}
+          }
+
+        when "comprehension"
           a = Accumulator!
           action = (exp) -> a\mutate_body { exp }
           node = @transform.statement first_value, action, node
 
-          wrapped = a\wrap node, "do"
-          insert wrapped[2], build.assign_one first_name, a.accum_name
-
-          return build.group {
-            {"declare", {first_name}}
-            wrapped
-          }
+          wrapped = a\wrap node
+          return build.assign_one first_name, wrapped
 
     -- bubble cascading assigns
     transformed = if num_values == 1

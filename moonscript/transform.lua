@@ -351,9 +351,25 @@ Statement = Transformer({
     local num_names = #values
     if num_names == 1 and num_values == 1 then
       local first_value = values[1]
+      local first_name = names[1]
       local _exp_0 = ntype(first_value)
-      if "comprehension" == _exp_0 then
-        local first_name = names[1]
+      if "block_exp" == _exp_0 then
+        local block_body = first_value[2]
+        local idx = #block_body
+        block_body[idx] = build.assign_one(first_name, block_body[idx])
+        return build.group({
+          {
+            "declare",
+            {
+              first_name
+            }
+          },
+          {
+            "do",
+            block_body
+          }
+        })
+      elseif "comprehension" == _exp_0 then
         local a = Accumulator()
         local action
         action = function(exp)
@@ -362,17 +378,8 @@ Statement = Transformer({
           })
         end
         node = self.transform.statement(first_value, action, node)
-        local wrapped = a:wrap(node, "do")
-        insert(wrapped[2], build.assign_one(first_name, a.accum_name))
-        return build.group({
-          {
-            "declare",
-            {
-              first_name
-            }
-          },
-          wrapped
-        })
+        local wrapped = a:wrap(node)
+        return build.assign_one(first_name, wrapped)
       end
     end
     local transformed
