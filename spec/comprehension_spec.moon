@@ -42,9 +42,34 @@ describe "comprehension", ->
     assert.same output, {2,4,6,8}
 
 
+describe "table comprehension", ->
   it "should copy table", ->
     input = { 1,2,3, hello: "world", thing: true }
     output = {k,v for k,v in pairs input }
 
     assert.is_true input != output
     assert.same input, output
+
+  it "should support when", ->
+    input = {
+      color: "red"
+      name: "fast"
+      width: 123
+    }
+
+    output = { k,v for k,v in pairs input when k != "color" }
+
+    assert.same output, { name: "fast", width: 123 }
+
+  it "should do unpack", ->
+    input = {4,9,16,25}
+    output = {i, math.sqrt i for i in *input}
+
+    assert.same output, { [4]: 2, [9]: 3, [16]: 4, [25]: 5 }
+
+  it "should use multiple return values", ->
+    input = { {"hello", "world"}, {"foo", "bar"} }
+    output = { unpack tuple for tuple in *input }
+
+    assert.same output, { foo: "bar", hello: "world" }
+
