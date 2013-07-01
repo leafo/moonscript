@@ -140,9 +140,8 @@ local statement_compilers = {
       current.next = next
       current = next
     end
-    local _list_0 = node
-    for _index_0 = 4, #_list_0 do
-      cond = _list_0[_index_0]
+    for _index_0 = 4, #node do
+      cond = node[_index_0]
       add_clause(cond)
     end
     return root

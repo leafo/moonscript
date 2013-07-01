@@ -53,9 +53,8 @@ local value_compilers = {
       _with_0:append_list((function()
         local _accum_0 = { }
         local _len_0 = 1
-        local _list_0 = node
-        for _index_0 = 2, #_list_0 do
-          local v = _list_0[_index_0]
+        for _index_0 = 2, #node do
+          local v = node[_index_0]
           _accum_0[_len_0] = self:value(v)
           _len_0 = _len_0 + 1
         end
@@ -115,9 +114,8 @@ local value_compilers = {
     local actions
     do
       local _with_0 = self:line()
-      local _list_0 = node
-      for _index_0 = 3, #_list_0 do
-        local action = _list_0[_index_0]
+      for _index_0 = 3, #node do
+        local action = node[_index_0]
         _with_0:append(chain_item(action))
       end
       actions = _with_0

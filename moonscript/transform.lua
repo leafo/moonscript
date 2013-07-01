@@ -854,9 +854,8 @@ Statement = Transformer({
       if "stm" == _exp_0 then
         insert(statements, item[2])
       elseif "props" == _exp_0 then
-        local _list_0 = item
-        for _index_1 = 2, #_list_0 do
-          local tuple = _list_0[_index_1]
+        for _index_1 = 2, #item do
+          local tuple = item[_index_1]
           if ntype(tuple[1]) == "self" then
             insert(statements, build.assign_one(unpack(tuple)))
           else
@@ -1074,9 +1073,8 @@ Statement = Transformer({
               do
                 local _accum_0 = { }
                 local _len_0 = 1
-                local _list_0 = chain
-                for _index_0 = 3, #_list_0 do
-                  local item = _list_0[_index_0]
+                for _index_0 = 3, #chain do
+                  local item = chain[_index_0]
                   _accum_0[_len_0] = item
                   _len_0 = _len_0 + 1
                 end
