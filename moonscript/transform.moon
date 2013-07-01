@@ -194,9 +194,7 @@ Statement = Transformer {
           a = Accumulator!
           action = (exp) -> a\mutate_body { exp }
           node = @transform.statement first_value, action, node
-
-          wrapped = a\wrap node
-          return build.assign_one first_name, wrapped
+          return build.assign_one first_name, a\wrap node
 
     -- bubble cascading assigns
     transformed = if num_values == 1
@@ -384,7 +382,7 @@ Statement = Transformer {
         ret scope_name
     }
 
-  foreach: (node, _, parent_assign) =>
+  foreach: (node, _) =>
     smart_node node
     source = unpack node.iter
 
@@ -404,8 +402,7 @@ Statement = Transformer {
       list = source[2]
 
       index_name = NameProxy "index"
-      assign_name = parent_assign[2][1] if parent_assign
-      list_name = assign_name != list and @is_local(list) and list or NameProxy "list"
+      list_name = @is_local(list) and list or NameProxy "list"
 
       slice_var = nil
       bounds = if is_slice list

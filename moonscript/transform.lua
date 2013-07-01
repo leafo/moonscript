@@ -378,8 +378,7 @@ Statement = Transformer({
           })
         end
         node = self.transform.statement(first_value, action, node)
-        local wrapped = a:wrap(node)
-        return build.assign_one(first_name, wrapped)
+        return build.assign_one(first_name, a:wrap(node))
       end
     end
     local transformed
@@ -689,7 +688,7 @@ Statement = Transformer({
       end)()
     })
   end,
-  foreach = function(self, node, _, parent_assign)
+  foreach = function(self, node, _)
     smart_node(node)
     local source = unpack(node.iter)
     local destructures = { }
@@ -717,11 +716,7 @@ Statement = Transformer({
     if ntype(source) == "unpack" then
       local list = source[2]
       local index_name = NameProxy("index")
-      local assign_name
-      if parent_assign then
-        assign_name = parent_assign[2][1]
-      end
-      local list_name = assign_name ~= list and self:is_local(list) and list or NameProxy("list")
+      local list_name = self:is_local(list) and list or NameProxy("list")
       local slice_var = nil
       local bounds
       if is_slice(list) then
