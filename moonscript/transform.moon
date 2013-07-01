@@ -180,11 +180,17 @@ Statement = Transformer {
         when "comprehension"
           first_name = names[1]
 
-          a = Accumulator first_name
+          a = Accumulator!
           action = (exp) -> a\mutate_body { exp }
           node = @transform.statement first_value, action, node
 
-          return a\wrap node, "group"
+          wrapped = a\wrap node, "do"
+          insert wrapped[2], build.assign_one first_name, a.accum_name
+
+          return build.group {
+            {"declare", {first_name}}
+            wrapped
+          }
 
     -- bubble cascading assigns
     transformed = if num_values == 1
@@ -414,7 +420,7 @@ Statement = Transformer {
       else
         {1, {"length", list_name}}
 
-      out = build.group {
+      return build.group {
         list_name != list and build.assign_one(list_name, list) or NOOP
         slice_var or NOOP
         build["for"] {
@@ -426,9 +432,6 @@ Statement = Transformer {
           }
         }
       }
-
-      out.has_unpack_copy = true
-      return out
 
     node.body = with_continue_listener node.body
 
@@ -696,7 +699,7 @@ class Accumulator
   body_idx: { for: 4, while: 3, foreach: 4 }
 
   new: (accum_name) =>
-    @accum_name = accum_name or NameProxy "accum"
+    @accum_name = NameProxy "accum"
     @value_name = NameProxy "value"
     @len_name = NameProxy "len"
 
@@ -708,12 +711,7 @@ class Accumulator
 
   -- wrap the node into a block_exp
   wrap: (node, group_type="block_exp") =>
-    copy_list = if rawget node, "has_unpack_copy"
-      with node[2][1]
-        node[2][1] = NOOP
-
     build[group_type] {
-      copy_list or NOOP
       build.assign_one @accum_name, build.table!
       build.assign_one @len_name, 1
       node

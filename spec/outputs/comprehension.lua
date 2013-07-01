@@ -79,60 +79,84 @@ _ = (function()
   end
   return _tbl_0
 end)()
-local n1 = { }
-local _len_0 = 1
-for i = 1, 10 do
-  n1[_len_0] = i
-  _len_0 = _len_0 + 1
-end
-local n2 = { }
-local _len_1 = 1
-for i = 1, 10 do
-  if i % 2 == 1 then
-    n2[_len_1] = i
-    _len_1 = _len_1 + 1
-  end
-end
-local aa = { }
-local _len_2 = 1
-for x = 1, 10 do
-  for y = 5, 14 do
-    aa[_len_2] = {
-      x,
-      y
-    }
-    _len_2 = _len_2 + 1
-  end
-end
-local bb = { }
-local _len_3 = 1
-for thing in y do
+local n1
+do
+  local _accum_0 = { }
+  local _len_0 = 1
   for i = 1, 10 do
-    bb[_len_3] = y
-    _len_3 = _len_3 + 1
+    _accum_0[_len_0] = i
+    _len_0 = _len_0 + 1
   end
+  n1 = _accum_0
 end
-local cc = { }
-local _len_4 = 1
-for i = 1, 10 do
+local n2
+do
+  local _accum_0 = { }
+  local _len_0 = 1
+  for i = 1, 10 do
+    if i % 2 == 1 then
+      _accum_0[_len_0] = i
+      _len_0 = _len_0 + 1
+    end
+  end
+  n2 = _accum_0
+end
+local aa
+do
+  local _accum_0 = { }
+  local _len_0 = 1
+  for x = 1, 10 do
+    for y = 5, 14 do
+      _accum_0[_len_0] = {
+        x,
+        y
+      }
+      _len_0 = _len_0 + 1
+    end
+  end
+  aa = _accum_0
+end
+local bb
+do
+  local _accum_0 = { }
+  local _len_0 = 1
   for thing in y do
-    cc[_len_4] = y
-    _len_4 = _len_4 + 1
+    for i = 1, 10 do
+      _accum_0[_len_0] = y
+      _len_0 = _len_0 + 1
+    end
   end
+  bb = _accum_0
 end
-local dd = { }
-local _len_5 = 1
-for i = 1, 10 do
-  if cool then
+local cc
+do
+  local _accum_0 = { }
+  local _len_0 = 1
+  for i = 1, 10 do
     for thing in y do
-      if x > 3 then
-        if c + 3 then
-          dd[_len_5] = y
-          _len_5 = _len_5 + 1
+      _accum_0[_len_0] = y
+      _len_0 = _len_0 + 1
+    end
+  end
+  cc = _accum_0
+end
+local dd
+do
+  local _accum_0 = { }
+  local _len_0 = 1
+  for i = 1, 10 do
+    if cool then
+      for thing in y do
+        if x > 3 then
+          if c + 3 then
+            _accum_0[_len_0] = y
+            _len_0 = _len_0 + 1
+          end
         end
       end
     end
   end
+  dd = _accum_0
 end
 _ = (function()
   local _tbl_0 = { }

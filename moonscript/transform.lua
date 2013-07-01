@@ -354,7 +354,7 @@ Statement = Transformer({
       local _exp_0 = ntype(first_value)
       if "comprehension" == _exp_0 then
         local first_name = names[1]
-        local a = Accumulator(first_name)
+        local a = Accumulator()
         local action
         action = function(exp)
           return a:mutate_body({
@@ -362,7 +362,17 @@ Statement = Transformer({
           })
         end
         node = self.transform.statement(first_value, action, node)
-        return a:wrap(node, "group")
+        local wrapped = a:wrap(node, "do")
+        insert(wrapped[2], build.assign_one(first_name, a.accum_name))
+        return build.group({
+          {
+            "declare",
+            {
+              first_name
+            }
+          },
+          wrapped
+        })
       end
     end
     local transformed
@@ -745,7 +755,7 @@ Statement = Transformer({
           }
         }
       end
-      local out = build.group({
+      return build.group({
         list_name ~= list and build.assign_one(list_name, list) or NOOP,
         slice_var or NOOP,
         build["for"]({
@@ -763,8 +773,6 @@ Statement = Transformer({
           }
         })
       })
-      out.has_unpack_copy = true
-      return out
     end
     node.body = with_continue_listener(node.body)
   end,
@@ -1223,16 +1231,7 @@ do
       if group_type == nil then
         group_type = "block_exp"
       end
-      local copy_list
-      if rawget(node, "has_unpack_copy") then
-        do
-          local _with_0 = node[2][1]
-          node[2][1] = NOOP
-          copy_list = _with_0
-        end
-      end
       return build[group_type]({
-        copy_list or NOOP,
         build.assign_one(self.accum_name, build.table()),
         build.assign_one(self.len_name, 1),
         node,
@@ -1279,7 +1278,7 @@ do
   _base_0.__index = _base_0
   local _class_0 = setmetatable({
     __init = function(self, accum_name)
-      self.accum_name = accum_name or NameProxy("accum")
+      self.accum_name = NameProxy("accum")
       self.value_name = NameProxy("value")
       self.len_name = NameProxy("len")
     end,

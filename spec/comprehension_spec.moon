@@ -35,6 +35,12 @@ describe "comprehension", ->
     assert.same input, {1,2,3,4}
     assert.same output, {2,4,6,8}
 
+    output = input
+    output = [i * 2 for _,i in ipairs input]
+
+    assert.same input, {1,2,3,4}
+    assert.same output, {2,4,6,8}
+
 
   it "should copy table", ->
     input = { 1,2,3, hello: "world", thing: true }
