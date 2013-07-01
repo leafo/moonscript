@@ -198,15 +198,15 @@ split_assign = function(scope, assign)
         "_"
       }
     else
-      name_slice = (function()
+      do
         local _accum_0 = { }
         local _len_0 = 1
         for i = start, total_names do
           _accum_0[_len_0] = names[i]
           _len_0 = _len_0 + 1
         end
-        return _accum_0
-      end)()
+        name_slice = _accum_0
+      end
     end
     local value_slice
     if total_values < start then
@@ -214,15 +214,15 @@ split_assign = function(scope, assign)
         "nil"
       }
     else
-      value_slice = (function()
+      do
         local _accum_0 = { }
         local _len_0 = 1
         for i = start, total_values do
           _accum_0[_len_0] = values[i]
           _len_0 = _len_0 + 1
         end
-        return _accum_0
-      end)()
+        value_slice = _accum_0
+      end
     end
     insert(g, {
       "assign",

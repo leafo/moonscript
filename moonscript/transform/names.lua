@@ -47,7 +47,8 @@ do
       return self.name
     end,
     chain = function(self, ...)
-      local items = (function(...)
+      local items
+      do
         local _accum_0 = { }
         local _len_0 = 1
         local _list_0 = {
@@ -65,8 +66,8 @@ do
           end
           _len_0 = _len_0 + 1
         end
-        return _accum_0
-      end)(...)
+        items = _accum_0
+      end
       return build.chain({
         base = self,
         unpack(items)

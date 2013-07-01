@@ -51,9 +51,9 @@ local value_compilers = {
     do
       local _with_0 = self:line()
       _with_0:append_list((function()
-        local _list_0 = node
         local _accum_0 = { }
         local _len_0 = 1
+        local _list_0 = node
         for _index_0 = 2, #_list_0 do
           local v = _list_0[_index_0]
           _accum_0[_len_0] = self:value(v)
@@ -128,7 +128,8 @@ local value_compilers = {
     local _, args, whitelist, arrow, block = unpack(node)
     local default_args = { }
     local self_args = { }
-    local arg_names = (function()
+    local arg_names
+    do
       local _accum_0 = { }
       local _len_0 = 1
       for _index_0 = 1, #args do
@@ -149,8 +150,8 @@ local value_compilers = {
         _accum_0[_len_0] = _value_0
         _len_0 = _len_0 + 1
       end
-      return _accum_0
-    end)()
+      arg_names = _accum_0
+    end
     if arrow == "fat" then
       insert(arg_names, 1, "self")
     end
@@ -190,12 +191,16 @@ local value_compilers = {
           }
         })
       end
-      local self_arg_values = { }
-      local _len_0 = 1
-      for _index_0 = 1, #self_args do
-        local arg = self_args[_index_0]
-        self_arg_values[_len_0] = arg[2]
-        _len_0 = _len_0 + 1
+      local self_arg_values
+      do
+        local _accum_0 = { }
+        local _len_0 = 1
+        for _index_0 = 1, #self_args do
+          local arg = self_args[_index_0]
+          _accum_0[_len_0] = arg[2]
+          _len_0 = _len_0 + 1
+        end
+        self_arg_values = _accum_0
       end
       if #self_args > 0 then
         _with_0:stm({
@@ -206,12 +211,15 @@ local value_compilers = {
       end
       _with_0:stms(block)
       if #args > #arg_names then
-        arg_names = { }
-        local _len_1 = 1
-        for _index_0 = 1, #args do
-          local arg = args[_index_0]
-          arg_names[_len_1] = arg[1]
-          _len_1 = _len_1 + 1
+        do
+          local _accum_0 = { }
+          local _len_0 = 1
+          for _index_0 = 1, #args do
+            local arg = args[_index_0]
+            _accum_0[_len_0] = arg[1]
+            _len_0 = _len_0 + 1
+          end
+          arg_names = _accum_0
         end
       end
       _with_0.header = "function(" .. concat(arg_names, ", ") .. ")"

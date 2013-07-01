@@ -306,7 +306,8 @@ do
       end
     end,
     declare = function(self, names)
-      local undeclared = (function()
+      local undeclared
+      do
         local _accum_0 = { }
         local _len_0 = 1
         for _index_0 = 1, #names do
@@ -342,8 +343,8 @@ do
             break
           end
         end
-        return _accum_0
-      end)()
+        undeclared = _accum_0
+      end
       return undeclared
     end,
     whitelist_names = function(self, names)

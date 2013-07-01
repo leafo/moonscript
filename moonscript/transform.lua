@@ -317,7 +317,7 @@ Statement = Transformer({
   declare_glob = function(self, node)
     local names = extract_declarations(self)
     if node[2] == "^" then
-      names = (function()
+      do
         local _accum_0 = { }
         local _len_0 = 1
         for _index_0 = 1, #names do
@@ -337,8 +337,8 @@ Statement = Transformer({
             break
           end
         end
-        return _accum_0
-      end)()
+        names = _accum_0
+      end
     end
     return {
       "declare",
@@ -470,7 +470,8 @@ Statement = Transformer({
   end,
   import = function(self, node)
     local _, names, source = unpack(node)
-    local table_values = (function()
+    local table_values
+    do
       local _accum_0 = { }
       local _len_0 = 1
       for _index_0 = 1, #names do
@@ -491,8 +492,8 @@ Statement = Transformer({
         _accum_0[_len_0] = _value_0
         _len_0 = _len_0 + 1
       end
-      return _accum_0
-    end)()
+      table_values = _accum_0
+    end
     local dest = {
       "table",
       table_values
@@ -566,9 +567,9 @@ Statement = Transformer({
       wrapped = build.group({
         build.declare({
           names = (function()
-            local _list_0 = stm[2]
             local _accum_0 = { }
             local _len_0 = 1
+            local _list_0 = stm[2]
             for _index_0 = 1, #_list_0 do
               local name = _list_0[_index_0]
               if type(name) == "string" then
@@ -684,7 +685,7 @@ Statement = Transformer({
     smart_node(node)
     local source = unpack(node.iter)
     local destructures = { }
-    node.names = (function()
+    do
       local _accum_0 = { }
       local _len_0 = 1
       for i, name in ipairs(node.names) do
@@ -699,8 +700,8 @@ Statement = Transformer({
         end
         _len_0 = _len_0 + 1
       end
-      return _accum_0
-    end)()
+      node.names = _accum_0
+    end
     if next(destructures) then
       insert(destructures, build.group(node.body))
       node.body = destructures
@@ -862,7 +863,7 @@ Statement = Transformer({
       end
     end
     local constructor
-    properties = (function()
+    do
       local _accum_0 = { }
       local _len_0 = 1
       for _index_0 = 1, #properties do
@@ -886,8 +887,8 @@ Statement = Transformer({
           break
         end
       end
-      return _accum_0
-    end)()
+      properties = _accum_0
+    end
     local parent_cls_name = NameProxy("parent")
     local base_name = NameProxy("base")
     local self_name = NameProxy("self")
@@ -1066,13 +1067,17 @@ Statement = Transformer({
           end
           return self:set("super", function(block, chain)
             if chain then
-              local _list_0 = chain
-              local slice = { }
-              local _len_0 = 1
-              for _index_0 = 3, #_list_0 do
-                local item = _list_0[_index_0]
-                slice[_len_0] = item
-                _len_0 = _len_0 + 1
+              local slice
+              do
+                local _accum_0 = { }
+                local _len_0 = 1
+                local _list_0 = chain
+                for _index_0 = 3, #_list_0 do
+                  local item = _list_0[_index_0]
+                  _accum_0[_len_0] = item
+                  _len_0 = _len_0 + 1
+                end
+                slice = _accum_0
               end
               local new_chain = {
                 "chain",
