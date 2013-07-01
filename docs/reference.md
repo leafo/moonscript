@@ -18,6 +18,21 @@ homepage are located at <http://moonscript.org>.
 
 # The Language
 
+## Whitespace
+
+MoonScript is a whitespace sensitive language. This means that
+instead of using `do` and `end` (or `{` and `}`) to delimit sections of code we
+use line-breaks and indentation.
+
+This means that how you indent you code is important. Luckily MoonScript
+doesn't care how you do it but it's important to be consistent.
+
+An indent must be at least 1 space or 1 tab, but you can use as many as you
+like. All the code snippets on this page will use two spaces.
+
+> Should you happen to mix tabs and spaces, a tab is equivalent to 4 spaces. I
+> shouldn't be telling you this though because you should never do it.
+
 ## Assignment
 
 Assigning to an undeclared name will cause it to be declared as a new local
@@ -598,7 +613,7 @@ A `continue` statement can be used to skip the current iteration in a loop.
 ```moon
 i = 0
 while i < 10
-  continue if i % 2 ==0
+  continue if i % 2 == 0
   print i
 ```
 `continue` can also be used with loop expressions to prevent that iteration
@@ -1689,7 +1704,7 @@ A full list of flags can be seen by passing the `-h` or `--help` flag.
 
 # License (MIT)
 
-    Copyright (C) 2011 by Leaf Corcoran
+    Copyright (C) 2013 by Leaf Corcoran
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
