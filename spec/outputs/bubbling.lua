@@ -30,7 +30,8 @@ do
   end
   k = _accum_0
 end
-local j = (function()
+local j
+do
   local _accum_0 = { }
   local _len_0 = 1
   for i = 1, 10 do
@@ -39,8 +40,8 @@ local j = (function()
     end
     _len_0 = _len_0 + 1
   end
-  return _accum_0
-end)()
+  j = _accum_0
+end
 local m
 m = function(...)
   return (function(...)
@@ -59,7 +60,8 @@ m = function(...)
     return _accum_0
   end)(...)
 end
-local x = (function(...)
+local x
+do
   local _accum_0 = { }
   local _len_0 = 1
   local _list_0 = {
@@ -70,8 +72,8 @@ local x = (function(...)
     _accum_0[_len_0] = i
     _len_0 = _len_0 + 1
   end
-  return _accum_0
-end)(...)
+  x = _accum_0
+end
 local y
 do
   local _accum_0 = { }
@@ -98,16 +100,18 @@ do
   end
   z = _accum_0
 end
-local a = (function(...)
+local a
+do
   local _accum_0 = { }
   local _len_0 = 1
   for i = 1, 10 do
     _accum_0[_len_0] = ...
     _len_0 = _len_0 + 1
   end
-  return _accum_0
-end)(...)
-local b = (function()
+  a = _accum_0
+end
+local b
+do
   local _accum_0 = { }
   local _len_0 = 1
   for i = 1, 10 do
@@ -116,5 +120,5 @@ local b = (function()
     end
     _len_0 = _len_0 + 1
   end
-  return _accum_0
-end)()
+  b = _accum_0
+end

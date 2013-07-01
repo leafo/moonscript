@@ -190,7 +190,7 @@ Statement = Transformer {
             {"do", block_body}
           }
 
-        when "comprehension", "tblcomprehension"
+        when "comprehension", "tblcomprehension", "foreach", "for", "while"
           return build.assign_one first_name,
             Value.transformers[first_value[1]] @, first_value
 

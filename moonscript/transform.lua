@@ -369,7 +369,7 @@ Statement = Transformer({
             block_body
           }
         })
-      elseif "comprehension" == _exp_0 or "tblcomprehension" == _exp_0 then
+      elseif "comprehension" == _exp_0 or "tblcomprehension" == _exp_0 or "foreach" == _exp_0 or "for" == _exp_0 or "while" == _exp_0 then
         return build.assign_one(first_name, Value.transformers[first_value[1]](self, first_value))
       end
     end

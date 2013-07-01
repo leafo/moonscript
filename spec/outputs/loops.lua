@@ -48,7 +48,7 @@ local hello = {
   4,
   5
 }
-x = (function()
+do
   local _accum_0 = { }
   local _len_0 = 1
   for _index_0 = 1, #hello do
@@ -58,25 +58,27 @@ x = (function()
     end
     _len_0 = _len_0 + 1
   end
-  return _accum_0
-end)()
+  x = _accum_0
+end
 x = function()
   for _index_0 = 1, #hello do
     x = hello[_index_0]
     local _ = y
   end
 end
-local t = (function()
+local t
+do
   local _accum_0 = { }
   local _len_0 = 1
   for i = 10, 20 do
     _accum_0[_len_0] = i * 2
     _len_0 = _len_0 + 1
   end
-  return _accum_0
-end)()
+  t = _accum_0
+end
 local hmm = 0
-local y = (function()
+local y
+do
   local _accum_0 = { }
   local _len_0 = 1
   for j = 3, 30, 8 do
@@ -85,8 +87,8 @@ local y = (function()
     _accum_0[_len_0] = _value_0
     _len_0 = _len_0 + 1
   end
-  return _accum_0
-end)()
+  y = _accum_0
+end
 local _
 _ = function()
   for k = 10, 40 do
@@ -116,7 +118,7 @@ while also do
   _ = "okay"
 end
 local i = 0
-x = (function()
+do
   local _accum_0 = { }
   local _len_0 = 1
   while i < 10 do
@@ -125,9 +127,9 @@ x = (function()
     _accum_0[_len_0] = _value_0
     _len_0 = _len_0 + 1
   end
-  return _accum_0
-end)()
-x = (function()
+  x = _accum_0
+end
+do
   local _accum_0 = { }
   local _len_0 = 1
   local _list_1 = 3
@@ -138,9 +140,9 @@ x = (function()
     _accum_0[_len_0] = _value_0
     _len_0 = _len_0 + 1
   end
-  return _accum_0
-end)()
-x = (function()
+  x = _accum_0
+end
+do
   local _accum_0 = { }
   local _len_0 = 1
   for x = 1, 2 do
@@ -149,8 +151,8 @@ x = (function()
     _accum_0[_len_0] = _value_0
     _len_0 = _len_0 + 1
   end
-  return _accum_0
-end)()
+  x = _accum_0
+end
 while true do
   local _continue_0 = false
   repeat
@@ -183,7 +185,8 @@ for x = 1, 10 do
     break
   end
 end
-local list = (function()
+local list
+do
   local _accum_0 = { }
   local _len_0 = 1
   for x = 1, 10 do
@@ -202,8 +205,8 @@ local list = (function()
       break
     end
   end
-  return _accum_0
-end)()
+  list = _accum_0
+end
 local _list_1 = {
   1,
   2,
