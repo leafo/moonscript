@@ -668,6 +668,17 @@ else
 print message -- prints: I am very tall
 ```
 
+The opposite of `if` is `unless`:
+
+```moon
+unless os.date("%A") == "Monday"
+  print "it is not Monday!"
+```
+
+```moon
+print "You're lucky!" unless math.random! > 0.1
+```
+
 ### With Assignment
 
 `if` and `elseif` blocks can take an assignment in place of a conditional
