@@ -263,8 +263,9 @@ Statement = Transformer {
           cls
         }
       else
+        -- pull out vawlues and assign them after the export
         build.group {
-          node
+          { "export", node[2] }
           build.assign {
             names: node[2]
             values: node[3]
