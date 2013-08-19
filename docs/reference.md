@@ -1439,7 +1439,7 @@ my_object = {
   write: => print "the value:", @value
 }
 
-run_callback (func) ->
+run_callback = (func) ->
   print "running callback..."
   func!
 
