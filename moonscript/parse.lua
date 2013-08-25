@@ -3,13 +3,7 @@ local util = require"moonscript.util"
 
 local lpeg = require"lpeg"
 
-local L
-if not lpeg.luversion then
-	function L(val)
-		return #val
-	end
-end
-
+local L = lpeg.luversion and lpeg.L or function(val) return #val end
 local debug_grammar = false
 
 local data = require"moonscript.data"
