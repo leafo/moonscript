@@ -81,7 +81,7 @@ values when a missing key is looked up.
 ### `extend(arg1, arg2, [rest...])`
 
 Chains together a series of tables by their metatable's `__index` property.
-Overwrites the metatable of all objects exept for the last with a new table
+Overwrites the metatable of all objects except for the last with a new table
 whose `__index` is set to the next table.
 
 Returns the first argument.
