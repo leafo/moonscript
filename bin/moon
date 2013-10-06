@@ -1,7 +1,7 @@
 #!/usr/bin/env lua
 
 require "alt_getopt"
-local moonscript = require "moonscript"
+local moonscript = require "moonscript.base"
 
 local util = require "moonscript.util"
 local errors = require "moonscript.errors"
@@ -70,10 +70,17 @@ end
 
 util.getfenv(moonscript_chunk).arg = new_arg
 
+local function run_chunk()
+	moonscript.insert_loader()
+	moonscript_chunk(unpack(new_arg))
+	moonscript.remove_loader()
+end
+
 if not opts.d then
 	local err, trace
 
 	xpcall(function() moonscript_chunk(unpack(new_arg)) end, function(_err)
+	xpcall(run_chunk, function(_err)
 		err = _err
 		trace = debug.traceback("", 2)
 	end)
@@ -93,5 +100,5 @@ if not opts.d then
 		end
 	end
 else
-	moonscript_chunk(unpack(new_arg))
+	run_chunk()
 end
