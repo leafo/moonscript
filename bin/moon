@@ -79,7 +79,6 @@ end
 if not opts.d then
 	local err, trace
 
-	xpcall(function() moonscript_chunk(unpack(new_arg)) end, function(_err)
 	xpcall(run_chunk, function(_err)
 		err = _err
 		trace = debug.traceback("", 2)
