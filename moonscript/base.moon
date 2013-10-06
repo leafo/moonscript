@@ -1,7 +1,7 @@
 compile = require "moonscript.compile"
 parse = require "moonscript.parse"
 
-import concat, insert from table
+import concat, insert, remove from table
 import split, dump, get_options, unpack from require "moonscript.util"
 
 lua = :loadstring, :load
@@ -75,15 +75,30 @@ dofile = (...) ->
   f = assert loadfile ...
   f!
 
-insert_loader = ->
+insert_loader = (pos=2) ->
   if not package.moonpath
     package.moonpath = create_moonpath package.path
 
-  insert package.loaders or package.searchers, 2, moon_loader
+  loaders = package.loaders or package.searchers
+  for loader in *loaders
+    return false if loader == moon_loader
+
+  insert loaders, pos, moon_loader
+  true
+
+remove_loader = ->
+  loaders = package.loaders or package.searchers
+
+  for i, loader in ipairs loaders
+    if loader == moon_loader
+      remove loaders, i
+      return true
+
+  false
 
 {
   _NAME: "moonscript"
-  :insert_loader, :to_lua, :moon_chunk, :moon_loader, :dirsep, :dofile,
-  :loadfile, :loadstring
+  :insert_loader, :remove_loader, :to_lua, :moon_chunk, :moon_loader, :dirsep,
+  :dofile, :loadfile, :loadstring
 }
 

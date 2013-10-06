@@ -1,9 +1,9 @@
 local compile = require("moonscript.compile")
 local parse = require("moonscript.parse")
-local concat, insert
+local concat, insert, remove
 do
   local _obj_0 = table
-  concat, insert = _obj_0.concat, _obj_0.insert
+  concat, insert, remove = _obj_0.concat, _obj_0.insert, _obj_0.remove
 end
 local split, dump, get_options, unpack
 do
@@ -14,7 +14,7 @@ local lua = {
   loadstring = loadstring,
   load = load
 }
-local dirsep, line_tables, create_moonpath, to_lua, moon_loader, loadstring, loadfile, dofile, insert_loader
+local dirsep, line_tables, create_moonpath, to_lua, moon_loader, loadstring, loadfile, dofile, insert_loader, remove_loader
 dirsep = "/"
 line_tables = require("moonscript.line_tables")
 create_moonpath = function(package_path)
@@ -93,15 +93,37 @@ dofile = function(...)
   local f = assert(loadfile(...))
   return f()
 end
-insert_loader = function()
+insert_loader = function(pos)
+  if pos == nil then
+    pos = 2
+  end
   if not package.moonpath then
     package.moonpath = create_moonpath(package.path)
   end
-  return insert(package.loaders or package.searchers, 2, moon_loader)
+  local loaders = package.loaders or package.searchers
+  for _index_0 = 1, #loaders do
+    local loader = loaders[_index_0]
+    if loader == moon_loader then
+      return false
+    end
+  end
+  insert(loaders, pos, moon_loader)
+  return true
+end
+remove_loader = function()
+  local loaders = package.loaders or package.searchers
+  for i, loader in ipairs(loaders) do
+    if loader == moon_loader then
+      remove(loaders, i)
+      return true
+    end
+  end
+  return false
 end
 return {
   _NAME = "moonscript",
   insert_loader = insert_loader,
+  remove_loader = remove_loader,
   to_lua = to_lua,
   moon_chunk = moon_chunk,
   moon_loader = moon_loader,
