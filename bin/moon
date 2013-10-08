@@ -15,6 +15,7 @@ local help = [=[Usage: %s [options] [script [args]]
 
     -h          Print this message
     -d          Disable stack trace rewriting
+    -c          Collect and print code coverage
     -v          Print version
 ]=]
 
@@ -78,6 +79,13 @@ end
 
 if not opts.d then
 	local err, trace
+	local cov
+
+	if opts.c then
+		local coverage = require "moonscript.cmd.coverage"
+		cov = coverage.CodeCoverage()
+		cov:start()
+	end
 
 	xpcall(run_chunk, function(_err)
 		err = _err
@@ -96,6 +104,10 @@ if not opts.d then
 				err,
 				util.trim(trace)
 			}, "\n"))
+		end
+	else
+		if cov then
+			cov:stop()
 		end
 	end
 else
