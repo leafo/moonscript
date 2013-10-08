@@ -1,6 +1,4 @@
 
-moon = require "moon"
-
 log = (str="") ->
   io.stderr\write str .. "\n"
 

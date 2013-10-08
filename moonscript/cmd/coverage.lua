@@ -1,4 +1,3 @@
-local moon = require("moon")
 local log
 log = function(str)
   if str == nil then
