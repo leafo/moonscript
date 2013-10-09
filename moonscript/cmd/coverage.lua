@@ -59,8 +59,10 @@ end
 local CodeCoverage
 do
   local _base_0 = {
-    start = function(self)
+    reset = function(self)
       self.line_counts = create_counter()
+    end,
+    start = function(self)
       return debug.sethook((function()
         local _base_1 = self
         local _fn_0 = _base_1.process_line
@@ -70,8 +72,9 @@ do
       end)(), "l")
     end,
     stop = function(self)
-      debug.sethook()
-      local line_table = require("moonscript.line_tables")
+      return debug.sethook()
+    end,
+    print_results = function(self)
       return self:format_results()
     end,
     process_line = function(self, _, line_no)
@@ -118,7 +121,9 @@ do
   }
   _base_0.__index = _base_0
   local _class_0 = setmetatable({
-    __init = function() end,
+    __init = function(self)
+      return self:reset()
+    end,
     __base = _base_0,
     __name = "CodeCoverage"
   }, {

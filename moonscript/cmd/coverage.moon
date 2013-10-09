@@ -40,14 +40,19 @@ format_file = (fname, positions) ->
 
 
 class CodeCoverage
-  start: =>
+  new: =>
+    @reset!
+
+  reset: =>
     @line_counts = create_counter!
+
+  start: =>
     debug.sethook @\process_line, "l"
 
   stop: =>
     debug.sethook!
-    line_table = require "moonscript.line_tables"
 
+  print_results: =>
     @format_results!
 
   process_line: (_, line_no) =>

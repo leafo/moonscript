@@ -108,6 +108,7 @@ if not opts.d then
 	else
 		if cov then
 			cov:stop()
+			cov:print_results()
 		end
 	end
 else
