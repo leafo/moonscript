@@ -8,7 +8,7 @@ MoonScript is a programming language that compiles to
 familiarity with Lua. For each code snippet below, the MoonScript is on the
 left and the compiled Lua is on right right.
 
-This is the offical language reference manual, installation directions and the
+This is the official language reference manual, installation directions and the
 homepage are located at <http://moonscript.org>.
 
 <div class="github-buttons">
@@ -130,7 +130,7 @@ argument names in parentheses:
 sum = (x, y) -> print "sum", x + y
 ```
 
-Functions can be called by listing the arguments after the name of an expresion
+Functions can be called by listing the arguments after the name of an expression
 that evaluates to a function. When chaining together function calls, the
 arguments are applied to the closest function to the left.
 
@@ -727,7 +727,7 @@ is done with the `==` operator.
 name = "Dan"
 switch name
   when "Robert"
-    print "You are robert"
+    print "You are Robert"
   when "Dan", "Daniel"
     print "Your name, it's Dan"
   else
