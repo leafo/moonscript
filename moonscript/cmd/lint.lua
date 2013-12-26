@@ -14,7 +14,43 @@ do
   Block = _obj_0.Block
 end
 local whitelist_globals = Set({
-  "print"
+  'loadstring',
+  'select',
+  '_VERSION',
+  'pcall',
+  'package',
+  'error',
+  'rawget',
+  'pairs',
+  'xpcall',
+  'rawlen',
+  'io',
+  'loadfile',
+  'ipairs',
+  'table',
+  'require',
+  'os',
+  'module',
+  'debug',
+  'type',
+  'getmetatable',
+  'rawequal',
+  'dofile',
+  'unpack',
+  'math',
+  'load',
+  'bit32',
+  'string',
+  'rawset',
+  'tostring',
+  'print',
+  'assert',
+  '_G',
+  'next',
+  'setmetatable',
+  'tonumber',
+  'collectgarbage',
+  'coroutine'
 })
 local LinterBlock
 do
