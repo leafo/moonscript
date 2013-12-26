@@ -271,6 +271,7 @@ do
     footer = "end",
     export_all = false,
     export_proper = false,
+    value_compilers = value_compilers,
     __tostring = function(self)
       local h
       if "string" == type(self.header) then
@@ -459,7 +460,7 @@ do
     end,
     is_value = function(self, node)
       local t = ntype(node)
-      return value_compilers[t] ~= nil or t == "value"
+      return self.value_compilers[t] ~= nil or t == "value"
     end,
     name = function(self, node, ...)
       return self:value(node, ...)
@@ -472,7 +473,7 @@ do
       else
         action = node[1]
       end
-      local fn = value_compilers[action]
+      local fn = self.value_compilers[action]
       if not fn then
         error("Failed to compile value: " .. dump.value(node))
       end

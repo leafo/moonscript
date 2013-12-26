@@ -161,6 +161,8 @@ class Block
   export_all: false
   export_proper: false
 
+  value_compilers: value_compilers
+
   __tostring: =>
     h = if "string" == type @header
       @header
@@ -316,7 +318,7 @@ class Block
 
   is_value: (node) =>
     t = ntype node
-    value_compilers[t] != nil or t == "value"
+    @value_compilers[t] != nil or t == "value"
 
   -- line wise compile functions
   name: (node, ...) => @value node, ...
@@ -328,7 +330,7 @@ class Block
     else
       node[1]
 
-    fn = value_compilers[action]
+    fn = @value_compilers[action]
     error "Failed to compile value: "..dump.value node if not fn
 
     out = fn self, node, ...
