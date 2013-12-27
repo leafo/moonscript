@@ -40,9 +40,12 @@ if opts.v then
 end
 
 function print_help(err)
-	if err then print("Error: "..err) end
-	print(help:format(arg[0]))
-	os.exit()
+	if err then
+		io.stderr:write("Error: ".. err .. "\n")
+	end
+
+	io.stderr:write(help:format(arg[0]) .. "\n")
+	os.exit(1)
 end
 
 function mkdir(path)
@@ -70,9 +73,9 @@ function convert_path(path)
 	return (path:gsub("%.moon$", ".lua"))
 end
 
-function msg(...)
+function log_msg(...)
 	if not opts.p then
-		print(...)
+		io.stderr:write(table.concat({...}, " ") .. "\n")
 	end
 end
 
@@ -302,7 +305,7 @@ function create_watcher(files)
 		dirs = remove_dups(dirs)
 
 		return coroutine.wrap(function()
-			print(("%s with inotify [%s]"):format(msg, plural(#dirs, "dir")))
+			io.stderr:write(("%s with inotify [%s]"):format(msg, plural(#dirs, "dir")) .. "\n")
 
 			local wd_table = {}
 			local handle = inotify.init()
@@ -329,7 +332,7 @@ function create_watcher(files)
 		-- poll the filesystem instead
 		local sleep = get_sleep_func()
 		return coroutine.wrap(function()
-			print(("%s with polling [%s]"):format(msg, plural(#files, "file")))
+			io.stderr:write(("%s with polling [%s]"):format(msg, plural(#files, "file")) .. "\n")
 
 			local mod_time = {}
 			while true do
@@ -368,33 +371,34 @@ if opts.w then
 		local target = target_dir..convert_path(fname)
 		local success, err = compile_and_write(fname, target)
 		if not success then
-			print()
-			print("Error:", fname)
-			print(err)
-			print()
+			io.stderr:write(table.concat({
+				"",
+				"Error: " .. fname,
+				err,
+				"\n",
+			}, "\n"))
 		else
-			msg("Built:", fname, "->", target)
+			log_msg("Built:", fname, "->", target)
 		end
 	end
 
-	print "\nQuitting..."
+	io.stderr:write("\nQuitting...\n")
 elseif opts.l then
 	for _, fname in pairs(files) do
 		lint = require "moonscript.cmd.lint"
 		local res = lint.lint_file(fname)
 		if res then
-			print(res)
-			print()
+			io.stderr:write(res .. "\n\n")
 		end
 	end
 else
 	for _, fname in ipairs(files) do
 		local success, err = compile_and_write(fname, target_dir..convert_path(fname))
 		if not success then
-			print(fname, err)
+			io.stderr:write(fname .. "\t" .. err .. "\n")
 			os.exit(1)
 		else
-			msg("Built", fname)
+			log_msg("Built", fname)
 		end
 	end
 end
