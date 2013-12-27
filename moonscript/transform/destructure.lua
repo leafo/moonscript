@@ -100,13 +100,13 @@ extract_assign_names = function(name, accum, prefix)
     suffix = join(prefix, {
       suffix
     })
-    local t = ntype(value)
-    if t == "value" or t == "chain" or t == "self" then
+    local _exp_0 = ntype(value)
+    if "value" == _exp_0 or "ref" == _exp_0 or "chain" == _exp_0 or "self" == _exp_0 then
       insert(accum, {
         value,
         suffix
       })
-    elseif t == "table" then
+    elseif "table" == _exp_0 then
       extract_assign_names(value, accum, suffix)
     else
       user_error("Can't destructure value of type: " .. tostring(ntype(value)))

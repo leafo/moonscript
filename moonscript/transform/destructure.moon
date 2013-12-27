@@ -43,13 +43,13 @@ extract_assign_names = (name, accum={}, prefix={}) ->
 
     suffix = join prefix, {suffix}
 
-    t = ntype value
-    if t == "value" or t == "chain" or t == "self"
-      insert accum, {value, suffix}
-    elseif t == "table"
-      extract_assign_names value, accum, suffix
-    else
-      user_error "Can't destructure value of type: #{ntype value}"
+    switch ntype value
+      when "value", "ref", "chain", "self"
+        insert accum, {value, suffix}
+      when "table"
+        extract_assign_names value, accum, suffix
+      else
+        user_error "Can't destructure value of type: #{ntype value}"
 
   accum
 

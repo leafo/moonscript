@@ -175,7 +175,7 @@ local _chain_assignable = { index = true, dot = true, slice = true }
 
 local function is_assignable(node)
 	local t = ntype(node)
-	return t == "self" or t == "value" or t == "self_class" or
+	return t == "ref" or t == "self" or t == "value" or t == "self_class" or
 		t == "chain" and _chain_assignable[ntype(node[#node])] or
 		t == "table"
 end
@@ -511,7 +511,7 @@ local build_grammar = wrap_env(function()
 		LuaStringOpen = sym"[" * P"="^0 * "[" / trim,
 		LuaStringClose = "]" * P"="^0 * "]",
 
-		Callable = Name + Parens / mark"parens",
+		Callable = Name / mark"ref" + Parens / mark"parens",
 		Parens = sym"(" * Exp * sym")",
 
 		FnArgs = symx"(" * Ct(ExpList^-1) * sym")" + sym"!" * -P"=" * Ct"",

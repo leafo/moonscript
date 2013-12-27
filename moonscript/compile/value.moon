@@ -183,6 +183,10 @@ value_compilers =
   self_class_colon: (node) =>
     "self.__class:"..@value node[2]
 
+  -- a variable reference
+  ref: (value) =>
+    tostring value[2]
+
   -- catch all pure string values
   raw_value: (value) =>
     sup = @get"super"

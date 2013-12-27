@@ -293,6 +293,9 @@ local value_compilers = {
   self_class_colon = function(self, node)
     return "self.__class:" .. self:value(node[2])
   end,
+  ref = function(self, value)
+    return tostring(value[2])
+  end,
   raw_value = function(self, value)
     local sup = self:get("super")
     if value == "super" and sup then
