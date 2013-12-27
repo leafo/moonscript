@@ -21,16 +21,6 @@ local items = {
   5,
   6
 }
-local mm
-do
-  local _accum_0 = { }
-  local _len_0 = 1
-  for self.x in ipairs(items) do
-    _accum_0[_len_0] = self.x
-    _len_0 = _len_0 + 1
-  end
-  mm = _accum_0
-end
 for z in ipairs(items) do
   if z > 4 then
     local _ = z
