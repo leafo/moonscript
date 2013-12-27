@@ -50,7 +50,10 @@ local whitelist_globals = Set({
   'setmetatable',
   'tonumber',
   'collectgarbage',
-  'coroutine'
+  'coroutine',
+  "nil",
+  "true",
+  "false"
 })
 local LinterBlock
 do
@@ -75,15 +78,16 @@ do
       _parent_0.__init(self, ...)
       local vc = self.value_compilers
       self.value_compilers = setmetatable({
-        raw_value = function(block, name)
-          if name:match("^[%w_]+$") and not block:has_name(name) and not whitelist_globals[name] then
+        ref = function(block, val)
+          local name = val[2]
+          if not (block:has_name(name) or whitelist_globals[name]) then
             local stm = block.current_stms[block.current_stm_i]
             insert(self.lint_errors, {
               "accessing global " .. tostring(name),
               stm[-1]
             })
           end
-          return vc.raw_value(block, name)
+          return vc.raw_value(block, val)
         end
       }, {
         __index = vc

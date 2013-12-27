@@ -42,6 +42,10 @@ whitelist_globals = Set {
   'tonumber'
   'collectgarbage'
   'coroutine'
+
+  "nil"
+  "true"
+  "false"
 }
 
 class LinterBlock extends Block
@@ -50,16 +54,16 @@ class LinterBlock extends Block
 
     vc = @value_compilers
     @value_compilers = setmetatable {
-      raw_value: (block, name) ->
-
-        if name\match("^[%w_]+$") and not block\has_name(name) and not whitelist_globals[name]
+      ref: (block, val) ->
+        name = val[2]
+        unless block\has_name(name) or whitelist_globals[name]
           stm = block.current_stms[block.current_stm_i]
           insert @lint_errors, {
             "accessing global #{name}"
             stm[-1]
           }
 
-        vc.raw_value block, name
+        vc.raw_value block, val
     }, __index: vc
 
   block: (...) =>
