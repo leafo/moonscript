@@ -13,7 +13,7 @@ do
   local _obj_0 = require("moonscript.compile")
   Block = _obj_0.Block
 end
-local whitelist_globals = Set({
+local default_whitelist = Set({
   'loadstring',
   'select',
   '_VERSION',
@@ -71,12 +71,12 @@ do
   _base_0.__index = _base_0
   setmetatable(_base_0, _parent_0.__base)
   local _class_0 = setmetatable({
-    __init = function(self, lint_errors, ...)
-      if lint_errors == nil then
-        lint_errors = { }
+    __init = function(self, whitelist_globals, ...)
+      if whitelist_globals == nil then
+        whitelist_globals = default_whitelist
       end
-      self.lint_errors = lint_errors
       _parent_0.__init(self, ...)
+      self.lint_errors = { }
       local vc = self.value_compilers
       self.value_compilers = setmetatable({
         ref = function(block, val)
@@ -157,8 +157,35 @@ format_lint = function(errors, code, header)
   end
   return table.concat(formatted, "\n\n")
 end
+local whitelist_for_file
+do
+  local lint_config
+  whitelist_for_file = function(fname)
+    if not (lint_config) then
+      lint_config = { }
+      pcall(function()
+        lint_config = require("lint_config")
+      end)
+    end
+    if not (lint_config.whitelist_globals) then
+      return default_whitelist
+    end
+    local final_list = { }
+    for pattern, list in pairs(lint_config.whitelist_globals) do
+      if fname:match(pattern) then
+        for _index_0 = 1, #list do
+          local item = list[_index_0]
+          insert(final_list, item)
+        end
+      end
+    end
+    return setmetatable(Set(final_list), {
+      __index = default_whitelist
+    })
+  end
+end
 local lint_code
-lint_code = function(code, name)
+lint_code = function(code, name, whitelist_globals)
   if name == nil then
     name = "string input"
   end
@@ -167,7 +194,7 @@ lint_code = function(code, name)
   if not (tree) then
     return nil, err
   end
-  local scope = LinterBlock()
+  local scope = LinterBlock(whitelist_globals)
   scope:stms(tree)
   return format_lint(scope.lint_errors, code, name)
 end
@@ -177,7 +204,7 @@ lint_file = function(fname)
   if not (f) then
     return nil, err
   end
-  return lint_code(f:read("*a"), fname)
+  return lint_code(f:read("*a"), fname, whitelist_for_file(fname))
 end
 return {
   lint_code = lint_code,

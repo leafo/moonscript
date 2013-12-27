@@ -4,7 +4,7 @@ import Set from require "moonscript.data"
 import Block from require "moonscript.compile"
 
 -- globals allowed to be referenced
-whitelist_globals = Set {
+default_whitelist = Set {
   'loadstring'
   'select'
   '_VERSION'
@@ -49,8 +49,9 @@ whitelist_globals = Set {
 }
 
 class LinterBlock extends Block
-  new: (@lint_errors={}, ...) =>
+  new: (whitelist_globals=default_whitelist, ...) =>
     super ...
+    @lint_errors = {}
 
     vc = @value_compilers
     @value_compilers = setmetatable {
@@ -94,19 +95,42 @@ format_lint = (errors, code, header) ->
   table.concat formatted, "\n\n"
 
 
-lint_code = (code, name="string input") ->
+-- {
+--   whitelist_globals: {
+--     ["some_file_pattern"]: {
+--       "some_var", "another_var"
+--     }
+--   }
+-- }
+whitelist_for_file = do
+  local lint_config
+  (fname) ->
+    unless lint_config
+      lint_config = {}
+      pcall -> lint_config = require "lint_config"
+
+    return default_whitelist unless lint_config.whitelist_globals
+    final_list = {}
+    for pattern, list in pairs lint_config.whitelist_globals
+      if fname\match(pattern)
+        for item in *list
+          insert final_list, item
+
+    setmetatable Set(final_list), __index: default_whitelist
+
+lint_code = (code, name="string input", whitelist_globals) ->
   parse = require "moonscript.parse"
   tree, err = parse.string code
   return nil, err unless tree
 
-  scope = LinterBlock!
+  scope = LinterBlock whitelist_globals
   scope\stms tree
   format_lint scope.lint_errors, code, name
 
 lint_file = (fname) ->
   f, err = io.open fname
   return nil, err unless f
-  lint_code f\read("*a"), fname
+  lint_code f\read("*a"), fname, whitelist_for_file fname
 
 
 { :lint_code, :lint_file }
