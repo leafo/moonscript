@@ -43,14 +43,16 @@ value_compilers =
 
   chain: (node) =>
     callee = node[2]
+    callee_type = ntype callee
 
     if callee == -1
       callee = @get "scope_var"
       if not callee then user_error "Short-dot syntax must be called within a with block"
 
-    sup = @get "super"
-    if callee == "super" and sup
-      return @value sup self, node
+    -- TODO: don't use string literals as ref
+    if callee_type == "ref" and callee[2] == "super" or callee == "super"
+      if sup = @get "super"
+        return @value sup self, node
 
     chain_item = (node) ->
       t, arg = unpack node
@@ -66,11 +68,10 @@ value_compilers =
       elseif t == "colon_stub"
         user_error "Uncalled colon stub"
       else
-        error "Unknown chain action: "..t
+        error "Unknown chain action: #{t}"
 
-    t = ntype(callee)
-    if (t == "self" or t == "self_class") and node[3] and ntype(node[3]) == "call"
-      callee[1] = t.."_colon"
+    if (callee_type == "self" or callee_type == "self_class") and node[3] and ntype(node[3]) == "call"
+      callee[1] = callee_type.."_colon"
 
     callee_value = @value callee
     callee_value = @line "(", callee_value, ")" if ntype(callee) == "exp"
@@ -185,14 +186,13 @@ value_compilers =
 
   -- a variable reference
   ref: (value) =>
+    if sup = value[2] == "super" and @get "super"
+      return @value sup @
+
     tostring value[2]
 
   -- catch all pure string values
   raw_value: (value) =>
-    sup = @get"super"
-    if value == "super" and sup
-      return @value sup self
-
     if value == "..."
       @send "varargs"
 

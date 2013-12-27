@@ -107,7 +107,9 @@ extract_declarations = function(self, body, start, out)
         local _list_0 = stm[2]
         for _index_0 = 1, #_list_0 do
           local name = _list_0[_index_0]
-          if type(name) == "string" then
+          if ntype(name) == "ref" then
+            insert(out, name)
+          elseif type(name) == "string" then
             insert(out, name)
           end
         end
@@ -348,7 +350,7 @@ Statement = Transformer({
           local _continue_0 = false
           repeat
             local name = names[_index_0]
-            if not (name:match("^%u")) then
+            if not (name[2]:match("^%u")) then
               _continue_0 = true
               break
             end
@@ -599,7 +601,7 @@ Statement = Transformer({
             local _list_0 = stm[2]
             for _index_0 = 1, #_list_0 do
               local name = _list_0[_index_0]
-              if type(name) == "string" then
+              if ntype(name) == "ref" then
                 _accum_0[_len_0] = name
                 _len_0 = _len_0 + 1
               end
@@ -674,7 +676,7 @@ Statement = Transformer({
     if ntype(exp) == "assign" then
       local names, values = unpack(exp, 2)
       local first_name = names[1]
-      if ntype(first_name) == "value" then
+      if ntype(first_name) == "ref" then
         scope_name = first_name
         named_assign = exp
         exp = values[1]
@@ -966,10 +968,19 @@ Statement = Transformer({
     elseif "nil" == _exp_0 then
       real_name = "nil"
     else
+      local name_t = type(real_name)
+      local flattened_name
+      if name_t == "string" then
+        flattened_name = real_name
+      elseif name_t == "table" and real_name[1] == "ref" then
+        flattened_name = real_name[2]
+      else
+        flattened_name = error("don't know how to extract name from " .. tostring(name_t))
+      end
       real_name = {
         "string",
         '"',
-        real_name
+        flattened_name
       }
     end
     local cls = build.table({
@@ -1520,7 +1531,7 @@ Value = Transformer({
       table.remove(node, #node)
       local base_name = NameProxy("base")
       local fn_name = NameProxy("fn")
-      local is_super = node[2] == "super"
+      local is_super = ntype(node[2]) == "ref" and node[2][2] == "super"
       return self.transform.value(build.block_exp({
         build.assign({
           names = {

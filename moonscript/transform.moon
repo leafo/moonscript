@@ -55,7 +55,11 @@ extract_declarations = (body=@current_stms, start=@current_stm_i + 1, out={}) =>
     switch stm[1]
       when "assign", "declare"
         for name in *stm[2]
-          insert out, name if type(name) == "string"
+          if ntype(name) == "ref"
+            insert out, name
+          elseif type(name) == "string"
+            -- TODO: don't use string literal as ref
+            insert out, name
       when "group"
         extract_declarations @, stm[2], 1, out
   out
@@ -187,7 +191,7 @@ Statement = Transformer {
 
     if node[2] == "^"
       names = for name in *names
-        continue unless name\match "^%u"
+        continue unless name[2]\match "^%u"
         name
 
     {"declare", names}
@@ -321,7 +325,7 @@ Statement = Transformer {
 
     if ntype(stm) == "assign"
       wrapped = build.group {
-        build.declare names: [name for name in *stm[2] when type(name) == "string"]
+        build.declare names: [name for name in *stm[2] when ntype(name) == "ref"]
         wrapped
       }
 
@@ -373,11 +377,12 @@ Statement = Transformer {
     copy_scope = true
     local scope_name, named_assign
 
+
     if ntype(exp) == "assign"
       names, values = unpack exp, 2
       first_name = names[1]
 
-      if ntype(first_name) == "value"
+      if ntype(first_name) == "ref"
         scope_name = first_name
         named_assign = exp
         exp = values[1]
@@ -577,7 +582,16 @@ Statement = Transformer {
       when "nil"
         "nil"
       else
-        {"string", '"', real_name}
+        name_t = type real_name
+        -- TODO: don't use string literal as ref
+        flattened_name = if name_t == "string"
+          real_name
+        elseif name_t == "table" and real_name[1] == "ref"
+          real_name[2]
+        else
+          error "don't know how to extract name from #{name_t}"
+
+        {"string", '"', flattened_name}
 
     cls = build.table {
       {"__init", constructor}
@@ -907,7 +921,7 @@ Value = Transformer {
       base_name = NameProxy "base"
       fn_name = NameProxy "fn"
 
-      is_super = node[2] == "super"
+      is_super = ntype(node[2]) == "ref" and node[2][2] == "super"
       @transform.value build.block_exp {
         build.assign {
           names: {base_name}

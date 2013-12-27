@@ -321,6 +321,8 @@ do
               real_name = name:get_name(self)
             elseif NameProxy == _exp_0 then
               real_name = name:get_name(self)
+            elseif "table" == _exp_0 then
+              real_name = name[1] == "ref" and name[2]
             elseif "string" == _exp_0 then
               real_name = name
             end
@@ -388,8 +390,10 @@ do
       if t == NameProxy or t == LocalName then
         return true
       end
-      if t == "table" and node[1] == "chain" and #node == 2 then
-        return self:is_local(node[2])
+      if t == "table" then
+        if node[1] == "ref" or (node[1] == "chain" and #node == 2) then
+          return self:is_local(node[2])
+        end
       end
       return false
     end,

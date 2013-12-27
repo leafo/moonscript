@@ -76,15 +76,20 @@ local value_compilers = {
   end,
   chain = function(self, node)
     local callee = node[2]
+    local callee_type = ntype(callee)
     if callee == -1 then
       callee = self:get("scope_var")
       if not callee then
         user_error("Short-dot syntax must be called within a with block")
       end
     end
-    local sup = self:get("super")
-    if callee == "super" and sup then
-      return self:value(sup(self, node))
+    if callee_type == "ref" and callee[2] == "super" or callee == "super" then
+      do
+        local sup = self:get("super")
+        if sup then
+          return self:value(sup(self, node))
+        end
+      end
     end
     local chain_item
     chain_item = function(node)
@@ -100,12 +105,11 @@ local value_compilers = {
       elseif t == "colon_stub" then
         return user_error("Uncalled colon stub")
       else
-        return error("Unknown chain action: " .. t)
+        return error("Unknown chain action: " .. tostring(t))
       end
     end
-    local t = ntype(callee)
-    if (t == "self" or t == "self_class") and node[3] and ntype(node[3]) == "call" then
-      callee[1] = t .. "_colon"
+    if (callee_type == "self" or callee_type == "self_class") and node[3] and ntype(node[3]) == "call" then
+      callee[1] = callee_type .. "_colon"
     end
     local callee_value = self:value(callee)
     if ntype(callee) == "exp" then
@@ -294,13 +298,15 @@ local value_compilers = {
     return "self.__class:" .. self:value(node[2])
   end,
   ref = function(self, value)
+    do
+      local sup = value[2] == "super" and self:get("super")
+      if sup then
+        return self:value(sup(self))
+      end
+    end
     return tostring(value[2])
   end,
   raw_value = function(self, value)
-    local sup = self:get("super")
-    if value == "super" and sup then
-      return self:value(sup(self))
-    end
     if value == "..." then
       self:send("varargs")
     end

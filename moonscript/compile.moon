@@ -219,7 +219,11 @@ class Block
           is_local = true
           name\get_name self
         when NameProxy then name\get_name self
-        when "string" then name
+        when "table"
+          name[1] == "ref" and name[2]
+        when "string"
+          -- TODO: don't use string literal as ref
+          name
 
       continue unless is_local or real_name and not @has_name real_name, true
       -- put exported names so they can be assigned to in deeper scope
@@ -257,11 +261,13 @@ class Block
 
   is_local: (node) =>
     t = mtype node
+
     return @has_name(node, false) if t == "string"
     return true if t == NameProxy or t == LocalName
 
-    if t == "table" and node[1] == "chain" and #node == 2
-      return @is_local node[2]
+    if t == "table"
+      if node[1] == "ref" or (node[1] == "chain" and #node == 2)
+        return @is_local node[2]
 
     false
 

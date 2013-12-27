@@ -174,6 +174,10 @@ end
 local _chain_assignable = { index = true, dot = true, slice = true }
 
 local function is_assignable(node)
+	if node == "..." then
+		return false
+	end
+
 	local t = ntype(node)
 	return t == "ref" or t == "self" or t == "value" or t == "self_class" or
 		t == "chain" and _chain_assignable[ntype(node[#node])] or
@@ -378,8 +382,7 @@ local build_grammar = wrap_env(function()
 		_Name / mark"self" + Cc"self")
 
 	local KeyName = SelfName + Space * _Name / mark"key_literal"
-
-	local Name = SelfName + Name + Space * "..." / trim
+	local VarArg = Space * P"..." / trim
 
 	local g = lpeg.P{
 		File,
@@ -412,8 +415,6 @@ local build_grammar = wrap_env(function()
 		Import = key"import" * Ct(ImportNameList) * SpaceBreak^0 * key"from" * Exp / mark"import",
 		ImportName = (sym"\\" * Ct(Cc"colon_stub" * Name) + Name),
 		ImportNameList = SpaceBreak^0 * ImportName * ((SpaceBreak^1 + sym"," * SpaceBreak^0) * ImportName)^0,
-
-		NameList = Name * (sym"," * Name)^0,
 
 		BreakLoop = Ct(key"break"/trim) + Ct(key"continue"/trim),
 
@@ -461,8 +462,7 @@ local build_grammar = wrap_env(function()
 		-- we can ignore precedence for now
 		OtherOps = op"or" + op"and" + op"<=" + op">=" + op"~=" + op"!=" + op"==" + op".." + op"<" + op">",
 
-		Assignable = Cmt(DotChain + Chain, check_assignable) + Name,
-		AssignableList = Assignable * (sym"," * Assignable)^0,
+		Assignable = Cmt(DotChain + Chain, check_assignable) + Name + SelfName,
 
 		Exp = Ct(Value * ((OtherOps + FactorOp + TermOp) * Value)^0) / flatten_or_mark"exp",
 
@@ -511,7 +511,7 @@ local build_grammar = wrap_env(function()
 		LuaStringOpen = sym"[" * P"="^0 * "[" / trim,
 		LuaStringClose = "]" * P"="^0 * "]",
 
-		Callable = Name / mark"ref" + Parens / mark"parens",
+		Callable = Name / mark"ref" + SelfName + VarArg + Parens / mark"parens",
 		Parens = sym"(" * Exp * sym")",
 
 		FnArgs = symx"(" * Ct(ExpList^-1) * sym")" + sym"!" * -P"=" * Ct"",
@@ -583,8 +583,8 @@ local build_grammar = wrap_env(function()
 			(key"using" * Ct(NameList + Space * "nil") + Ct"") *
 			sym")" + Ct"" * Ct"",
 
-		FnArgDefList = FnArgDef * (sym"," * FnArgDef)^0,
-		FnArgDef = Ct(Name * (sym"=" * Exp)^-1),
+		FnArgDefList = FnArgDef * (sym"," * FnArgDef)^0 * (sym"," * Ct(VarArg))^0 + Ct(VarArg),
+		FnArgDef = Ct((Name + SelfName) * (sym"=" * Exp)^-1),
 
 		FunLit = FnArgsDef *
 			(sym"->" * Cc"slim" + sym"=>" * Cc"fat") *
