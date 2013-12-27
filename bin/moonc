@@ -40,12 +40,16 @@ if opts.v then
 end
 
 function print_help(err)
+	local help_msg = help:format(arg[0])
+
 	if err then
 		io.stderr:write("Error: ".. err .. "\n")
+		io.stderr:write(help_msg .. "\n")
+		os.exit(1)
+	else
+		print(help_msg)
+		os.exit(0)
 	end
-
-	io.stderr:write(help:format(arg[0]) .. "\n")
-	os.exit(1)
 end
 
 function mkdir(path)
