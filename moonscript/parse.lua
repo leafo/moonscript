@@ -511,7 +511,7 @@ local build_grammar = wrap_env(function()
 		LuaStringOpen = sym"[" * P"="^0 * "[" / trim,
 		LuaStringClose = "]" * P"="^0 * "]",
 
-		Callable = Name / mark"ref" + SelfName + VarArg + Parens / mark"parens",
+		Callable = pos(Name / mark"ref") + SelfName + VarArg + Parens / mark"parens",
 		Parens = sym"(" * Exp * sym")",
 
 		FnArgs = symx"(" * Ct(ExpList^-1) * sym")" + sym"!" * -P"=" * Ct"",

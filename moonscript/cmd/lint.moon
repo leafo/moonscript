@@ -56,18 +56,18 @@ class LinterBlock extends Block
     @value_compilers = setmetatable {
       ref: (block, val) ->
         name = val[2]
-        unless block\has_name(name) or whitelist_globals[name]
-          stm = block.current_stms[block.current_stm_i]
+        unless block\has_name(name) or whitelist_globals[name] or name\match "%."
           insert @lint_errors, {
             "accessing global #{name}"
-            stm[-1]
+            val[-1]
           }
 
-        vc.raw_value block, val
+        vc.ref block, val
     }, __index: vc
 
   block: (...) =>
     with super ...
+      .block = @block
       .value_compilers = @value_compilers
 
 format_lint = (errors, code, header) ->

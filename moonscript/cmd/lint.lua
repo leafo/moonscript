@@ -62,6 +62,7 @@ do
     block = function(self, ...)
       do
         local _with_0 = _parent_0.block(self, ...)
+        _with_0.block = self.block
         _with_0.value_compilers = self.value_compilers
         return _with_0
       end
@@ -80,14 +81,13 @@ do
       self.value_compilers = setmetatable({
         ref = function(block, val)
           local name = val[2]
-          if not (block:has_name(name) or whitelist_globals[name]) then
-            local stm = block.current_stms[block.current_stm_i]
+          if not (block:has_name(name) or whitelist_globals[name] or name:match("%.")) then
             insert(self.lint_errors, {
               "accessing global " .. tostring(name),
-              stm[-1]
+              val[-1]
             })
           end
-          return vc.raw_value(block, val)
+          return vc.ref(block, val)
         end
       }, {
         __index = vc
