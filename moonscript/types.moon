@@ -141,8 +141,13 @@ build = setmetatable {
     {"table", tbl}
   block_exp: (body) ->
     {"block_exp", body}
+
   chain: (parts) ->
     base = parts.base or error"expecting base property for chain"
+
+    if type(base) == "string"
+      base = {"ref", base}
+
     node = {"chain", base}
     for part in *parts
       insert node, part

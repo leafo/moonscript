@@ -110,7 +110,7 @@ value_compilers =
         name, value = unpack default
         name = name[2] if type(name) == "table"
         \stm {
-          'if', {'exp', name, '==', 'nil'}, {
+          'if', {'exp', {"ref", name}, '==', 'nil'}, {
             {'assign', {name}, {value}}
           }
         }
@@ -173,16 +173,16 @@ value_compilers =
     @line "not ", @value node[2]
 
   self: (node) =>
-    "self."..@value node[2]
+    "self."..@name node[2]
 
   self_class: (node) =>
-    "self.__class."..@value node[2]
+    "self.__class."..@name node[2]
 
   self_colon: (node) =>
-    "self:"..@value node[2]
+    "self:"..@name node[2]
 
   self_class_colon: (node) =>
-    "self.__class:"..@value node[2]
+    "self.__class:"..@name node[2]
 
   -- a variable reference
   ref: (value) =>
@@ -197,6 +197,5 @@ value_compilers =
       @send "varargs"
 
     tostring value
-
 
 { :value_compilers }

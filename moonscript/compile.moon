@@ -326,8 +326,12 @@ class Block
     t = ntype node
     @value_compilers[t] != nil or t == "value"
 
-  -- line wise compile functions
-  name: (node, ...) => @value node, ...
+  -- compile name for assign
+  name: (node, ...) =>
+    if type(node) == "string"
+      node
+    else
+      @value node, ...
 
   value: (node, ...) =>
     node = @transform.value node

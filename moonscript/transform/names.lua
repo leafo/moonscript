@@ -74,6 +74,12 @@ do
       })
     end,
     index = function(self, key)
+      if type(key) == "string" then
+        key = {
+          "ref",
+          key
+        }
+      end
       return build.chain({
         base = self,
         {

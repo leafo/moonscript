@@ -467,7 +467,11 @@ do
       return self.value_compilers[t] ~= nil or t == "value"
     end,
     name = function(self, node, ...)
-      return self:value(node, ...)
+      if type(node) == "string" then
+        return node
+      else
+        return self:value(node, ...)
+      end
     end,
     value = function(self, node, ...)
       node = self.transform.value(node)

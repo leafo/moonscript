@@ -603,7 +603,7 @@ Statement = Transformer {
     -- looking up a name in the class object
     class_index = if parent_val
       class_lookup = build["if"] {
-        cond: { "exp", "val", "==", "nil" }
+        cond: { "exp", {"ref", "val"}, "==", "nil" }
         then: {
           parent_cls_name\index"name"
         }
@@ -614,7 +614,7 @@ Statement = Transformer {
         args: {{"cls"}, {"name"}}
         body: {
           build.assign_one LocalName"val", build.chain {
-            base: "rawget", {"call", {base_name, "name"}}
+            base: "rawget", {"call", {base_name, {"ref", "name"}}}
           }
           class_lookup
         }

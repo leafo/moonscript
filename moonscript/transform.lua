@@ -1006,7 +1006,10 @@ Statement = Transformer({
       local class_lookup = build["if"]({
         cond = {
           "exp",
-          "val",
+          {
+            "ref",
+            "val"
+          },
           "==",
           "nil"
         },
@@ -1036,7 +1039,10 @@ Statement = Transformer({
               "call",
               {
                 base_name,
-                "name"
+                {
+                  "ref",
+                  "name"
+                }
               }
             }
           })),

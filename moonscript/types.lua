@@ -263,6 +263,12 @@ build = setmetatable({
   end,
   chain = function(parts)
     local base = parts.base or error("expecting base property for chain")
+    if type(base) == "string" then
+      base = {
+        "ref",
+        base
+      }
+    end
     local node = {
       "chain",
       base

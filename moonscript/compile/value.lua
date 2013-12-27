@@ -176,7 +176,10 @@ local value_compilers = {
           'if',
           {
             'exp',
-            name,
+            {
+              "ref",
+              name
+            },
             '==',
             'nil'
           },
@@ -286,16 +289,16 @@ local value_compilers = {
     return self:line("not ", self:value(node[2]))
   end,
   self = function(self, node)
-    return "self." .. self:value(node[2])
+    return "self." .. self:name(node[2])
   end,
   self_class = function(self, node)
-    return "self.__class." .. self:value(node[2])
+    return "self.__class." .. self:name(node[2])
   end,
   self_colon = function(self, node)
-    return "self:" .. self:value(node[2])
+    return "self:" .. self:name(node[2])
   end,
   self_class_colon = function(self, node)
-    return "self.__class:" .. self:value(node[2])
+    return "self.__class:" .. self:name(node[2])
   end,
   ref = function(self, value)
     do

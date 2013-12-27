@@ -30,6 +30,9 @@ class NameProxy
     }
 
   index: (key) =>
+    if type(key) == "string"
+      key = {"ref", key}
+
     build.chain {
       base: self, {"index", key}
     }
