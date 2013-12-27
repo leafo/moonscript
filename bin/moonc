@@ -390,9 +390,11 @@ if opts.w then
 elseif opts.l then
 	for _, fname in pairs(files) do
 		lint = require "moonscript.cmd.lint"
-		local res = lint.lint_file(fname)
+		local res, err = lint.lint_file(fname)
 		if res then
 			io.stderr:write(res .. "\n\n")
+		elseif err then
+			io.stderr:write(fname .. "\n" .. err.. "\n\n")
 		end
 	end
 else
