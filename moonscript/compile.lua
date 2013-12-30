@@ -16,16 +16,8 @@ do
   local _obj_0 = require("moonscript.types")
   ntype, has_value = _obj_0.ntype, _obj_0.has_value
 end
-local statement_compilers
-do
-  local _obj_0 = require("moonscript.compile.statement")
-  statement_compilers = _obj_0.statement_compilers
-end
-local value_compilers
-do
-  local _obj_0 = require("moonscript.compile.value")
-  value_compilers = _obj_0.value_compilers
-end
+local statement_compilers = require("moonscript.compile.statement")
+local value_compilers = require("moonscript.compile.value")
 local concat, insert
 do
   local _obj_0 = table

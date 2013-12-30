@@ -22,7 +22,7 @@ local string_chars = {
   ["\r"] = "\\r",
   ["\n"] = "\\n"
 }
-local value_compilers = {
+return {
   exp = function(self, node)
     local _comp
     _comp = function(i, value)
@@ -315,7 +315,4 @@ local value_compilers = {
     end
     return tostring(value)
   end
-}
-return {
-  value_compilers = value_compilers
 }

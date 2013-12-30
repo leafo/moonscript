@@ -14,7 +14,7 @@ string_chars = {
   "\n": "\\n"
 }
 
-value_compilers =
+{
   -- list of values separated by binary operators
   exp: (node) =>
     _comp = (i, value) ->
@@ -197,5 +197,4 @@ value_compilers =
       @send "varargs"
 
     tostring value
-
-{ :value_compilers }
+}

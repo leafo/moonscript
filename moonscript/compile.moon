@@ -7,8 +7,8 @@ import NameProxy, LocalName from require "moonscript.transform.names"
 import Set from require "moonscript.data"
 import ntype, has_value from require "moonscript.types"
 
-import statement_compilers from require "moonscript.compile.statement"
-import value_compilers from require "moonscript.compile.value"
+statement_compilers = require "moonscript.compile.statement"
+value_compilers = require "moonscript.compile.value"
 
 import concat, insert from table
 import pos_to_line, get_closest_line, trim, unpack from util
