@@ -47,31 +47,21 @@ do
       return self.name
     end,
     chain = function(self, ...)
-      local items
-      do
-        local _accum_0 = { }
-        local _len_0 = 1
-        local _list_0 = {
-          ...
-        }
-        for _index_0 = 1, #_list_0 do
-          local i = _list_0[_index_0]
-          if type(i) == "string" then
-            _accum_0[_len_0] = {
-              "dot",
-              i
-            }
-          else
-            _accum_0[_len_0] = i
-          end
-          _len_0 = _len_0 + 1
-        end
-        items = _accum_0
-      end
-      return build.chain({
+      local items = {
         base = self,
-        unpack(items)
-      })
+        ...
+      }
+      for k, v in ipairs(items) do
+        if type(v) == "string" then
+          items[k] = {
+            "dot",
+            v
+          }
+        else
+          items[k] = v
+        end
+      end
+      return build.chain(items)
     end,
     index = function(self, key)
       if type(key) == "string" then
