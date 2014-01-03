@@ -644,7 +644,7 @@ have_coins = false
 if have_coins then print "Got coins" else print "No coins"
 ```
 
-Because if statements can be used as expressions, this can able be written as:
+Because if statements can be used as expressions, this can also be written as:
 
 ```moon
 have_coins = false
