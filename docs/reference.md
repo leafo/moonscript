@@ -556,7 +556,7 @@ for item in *items do print item
 for j = 1,10,3 do print j
 ```
 
-A for loop can also be used an expression. The last statement in the body of
+A for loop can also be used as an expression. The last statement in the body of
 the for loop is coerced into an expression and appended to an accumulating
 array table.
 
