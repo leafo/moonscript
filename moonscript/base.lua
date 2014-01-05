@@ -60,10 +60,13 @@ moon_loader = function(name)
   if file then
     local text = file:read("*a")
     file:close()
-    return loadstring(text, file_path)
-  else
-    return nil, "Could not find moon file"
+    local res, err = loadstring(text, file_path)
+    if not res then
+      error(err)
+    end
+    return res
   end
+  return nil, "Could not find moon file"
 end
 loadstring = function(...)
   local options, str, chunk_name, mode, env = get_options(...)

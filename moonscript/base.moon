@@ -46,9 +46,13 @@ moon_loader = (name) ->
   if file
     text = file\read "*a"
     file\close!
-    loadstring text, file_path
-  else
-    nil, "Could not find moon file"
+    res, err = loadstring text, file_path
+    if not res
+        error err
+
+    return res
+
+  return nil, "Could not find moon file"
 
 
 loadstring = (...) ->
