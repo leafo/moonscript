@@ -8,9 +8,20 @@ See <http://moonscript.org>.
 
 Online demo/compiler at <http://moonscript.org/compiler>.
 
+## Running Tests
+
+Tests are written in MoonScript and use [Busted](http://olivinelabs.com/busted/).
+In order to run the tests you must have MoonScript installed.
+
+To run tests, execute from the root directory:
+
+```bash
+busted
+```
+
 ## License (MIT)
 
-Copyright (C) 2012 by Leaf Corcoran
+Copyright (C) 2013 by Leaf Corcoran
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

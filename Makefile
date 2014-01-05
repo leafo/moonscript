@@ -1,6 +1,6 @@
 
 test::
-	moonc test2.moon && TIME=1 busted test2.lua
+	busted -p "_spec.moon$$"
 
 local:
 	luarocks make --local moonscript-dev-1.rockspec
@@ -16,4 +16,4 @@ compile_global:
 	moonc moon/ moonscript/
 
 watch:
-	moonc -w moon/ moonscript/
+	moonc moon/ moonscript/ && moonc -w moon/ moonscript/

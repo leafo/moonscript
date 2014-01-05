@@ -9,8 +9,9 @@ import insert from table
 import NameProxy, LocalName from require "moonscript.transform.names"
 
 destructure = require "moonscript.transform.destructure"
+NOOP = {"noop"}
 
-local implicitly_return
+local *
 
 class Run
   new: (@fn) =>
@@ -32,7 +33,7 @@ apply_to_last = (stms, fn) ->
 
   return for i, stm in ipairs stms
     if i == last_exp_id
-      fn stm
+      {"transform", stm, fn}
     else
       stm
 
@@ -54,7 +55,11 @@ extract_declarations = (body=@current_stms, start=@current_stm_i + 1, out={}) =>
     switch stm[1]
       when "assign", "declare"
         for name in *stm[2]
-          insert out, name if type(name) == "string"
+          if ntype(name) == "ref"
+            insert out, name
+          elseif type(name) == "string"
+            -- TODO: don't use string literal as ref
+            insert out, name
       when "group"
         extract_declarations @, stm[2], 1, out
   out
@@ -107,6 +112,16 @@ class Transformer
   new: (@transformers) =>
     @seen_nodes = setmetatable {}, __mode: "k"
 
+  transform_once: (scope, node, ...) =>
+    return node if @seen_nodes[node]
+    @seen_nodes[node] = true
+
+    transformer = @transformers[ntype node]
+    if transformer
+      transformer(scope, node, ...) or node
+    else
+      node
+
   transform: (scope, node, ...) =>
     return node if @seen_nodes[node]
     @seen_nodes[node] = true
@@ -150,15 +165,33 @@ construct_comprehension = (inner, clauses) ->
   current_stms[1]
 
 Statement = Transformer {
+  transform: (tuple) =>
+    {_, node, fn} = tuple
+    fn node
+
   root_stms: (body) =>
     apply_to_last body, implicitly_return @
+
+  return: (node) =>
+    node[2] = Value\transform_once @, node[2]
+
+    if "block_exp" == ntype node[2]
+      block_exp = node[2]
+      block_body = block_exp[2]
+
+      idx = #block_body
+      node[2] = block_body[idx]
+      block_body[idx] = node
+      return build.group block_body
+
+    node
 
   declare_glob: (node) =>
     names = extract_declarations @
 
     if node[2] == "^"
       names = for name in *names
-        continue unless name\match "^%u"
+        continue unless name[2]\match "^%u"
         name
 
     {"declare", names}
@@ -166,8 +199,30 @@ Statement = Transformer {
   assign: (node) =>
     names, values = unpack node, 2
 
+    num_values = #values
+    num_names = #values
+
+    -- special code simplifications for single assigns
+    if num_names == 1 and num_values == 1
+      first_value = values[1]
+      first_name = names[1]
+
+      switch ntype first_value
+        when "block_exp"
+          block_body = first_value[2]
+          idx = #block_body
+          block_body[idx] = build.assign_one first_name, block_body[idx]
+
+          return build.group {
+            {"declare", {first_name}}
+            {"do", block_body}
+          }
+
+        when "comprehension", "tblcomprehension", "foreach", "for", "while"
+          return build.assign_one first_name, Value\transform_once @, first_value
+
     -- bubble cascading assigns
-    transformed = if #values == 1
+    transformed = if num_values == 1
       value = values[1]
       t = ntype value
 
@@ -190,9 +245,8 @@ Statement = Transformer {
     node = transformed or node
 
     if destructure.has_destructure names
-      return destructure.split_assign node
+      return destructure.split_assign @, node
 
-    -- print util.dump node
     node
 
   continue: (node) =>
@@ -213,8 +267,9 @@ Statement = Transformer {
           cls
         }
       else
+        -- pull out vawlues and assign them after the export
         build.group {
-          node
+          { "export", node[2] }
           build.assign {
             names: node[2]
             values: node[3]
@@ -232,33 +287,16 @@ Statement = Transformer {
 
   import: (node) =>
     _, names, source = unpack node
-
-    stubs = for name in *names
-      if type(name) == "table"
-        name
+    table_values = for name in *names
+      dest_val = if ntype(name) == "colon_stub"
+        name[2]
       else
-        {"dot", name}
+        name
 
-    real_names = for name in *names
-      type(name) == "table" and name[2] or name
+      {{"key_literal", name}, dest_val}
 
-    if type(source) == "string"
-      build.assign {
-        names: real_names
-        values: [build.chain { base: source, stub} for stub in *stubs]
-      }
-    else
-      source_name = NameProxy "table"
-      build.group {
-        {"declare", real_names}
-        build["do"] {
-          build.assign_one source_name, source
-          build.assign {
-            names: real_names
-            values: [build.chain { base: source_name, stub} for stub in *stubs]
-          }
-        }
-      }
+    dest = { "table", table_values }
+    { "assign", {dest}, {source}, [-1]: node[-1] }
 
   comprehension: (node, action) =>
     _, exp, clauses = unpack node
@@ -287,7 +325,7 @@ Statement = Transformer {
 
     if ntype(stm) == "assign"
       wrapped = build.group {
-        build.declare names: [name for name in *stm[2] when type(name) == "string"]
+        build.declare names: [name for name in *stm[2] when ntype(name) == "ref"]
         wrapped
       }
 
@@ -304,7 +342,7 @@ Statement = Transformer {
         name = NameProxy "des"
 
         body = {
-          destructure.build_assign assign[2][1], name
+          destructure.build_assign @, assign[2][1], name
           build.group node[3]
         }
 
@@ -334,28 +372,44 @@ Statement = Transformer {
     node
 
   with: (node, ret) =>
-    _, exp, block = unpack node
+    exp, block = unpack node, 2
 
-    scope_name = NameProxy "with"
+    copy_scope = true
+    local scope_name, named_assign
 
-    named_assign = if ntype(exp) == "assign"
+
+    if ntype(exp) == "assign"
       names, values = unpack exp, 2
-      assign_name = names[1]
-      exp = values[1]
-      values[1] = scope_name
-      {"assign", names, values}
+      first_name = names[1]
+
+      if ntype(first_name) == "ref"
+        scope_name = first_name
+        named_assign = exp
+        exp = values[1]
+        copy_scope = false
+      else
+        scope_name = NameProxy "with"
+        exp = values[1]
+        values[1] = scope_name
+        named_assign = {"assign", names, values}
+
+    elseif @is_local exp
+      scope_name = exp
+      copy_scope = false
+
+    scope_name or= NameProxy "with"
 
     build.do {
       Run => @set "scope_var", scope_name
-      build.assign_one scope_name, exp
-      build.group { named_assign }
+      copy_scope and build.assign_one(scope_name, exp) or NOOP
+      named_assign or NOOP
       build.group block
 
       if ret
         ret scope_name
     }
 
-  foreach: (node) =>
+  foreach: (node, _) =>
     smart_node node
     source = unpack node.iter
 
@@ -363,7 +417,7 @@ Statement = Transformer {
     node.names = for i, name in ipairs node.names
       if ntype(name) == "table"
         with proxy = NameProxy "des"
-          insert destructures, destructure.build_assign name, proxy
+          insert destructures, destructure.build_assign @, name, proxy
       else
         name
 
@@ -375,13 +429,16 @@ Statement = Transformer {
       list = source[2]
 
       index_name = NameProxy "index"
-      list_name = NameProxy "list"
+
+      list_name = @is_local(list) and list or NameProxy "list"
 
       slice_var = nil
       bounds = if is_slice list
         slice = list[#list]
         table.remove list
         table.remove slice, 1
+
+        list_name = list if @is_local list
 
         slice[2] = if slice[2] and slice[2] != ""
           max_tmp_name = NameProxy "max"
@@ -397,13 +454,13 @@ Statement = Transformer {
         {1, {"length", list_name}}
 
       return build.group {
-        build.assign_one list_name, list
-        slice_var
+        list_name != list and build.assign_one(list_name, list) or NOOP
+        slice_var or NOOP
         build["for"] {
           name: index_name
           bounds: bounds
           body: {
-            {"assign", node.names, {list_name\index index_name}}
+            {"assign", node.names, { NameProxy.index list_name, index_name }}
             build.group node.body
           }
         }
@@ -468,6 +525,7 @@ Statement = Transformer {
 
   class: (node, ret, parent_assign) =>
     _, name, parent_val, body = unpack node
+    parent_val = nil if parent_val == ""
 
     -- split apart properties and statements
     statements = {}
@@ -499,18 +557,16 @@ Statement = Transformer {
     cls_name = NameProxy "class"
 
     unless constructor
-      constructor = build.fndef {
-        args: {{"..."}}
-        arrow: "fat"
-        body: {
-          build["if"] {
-            cond: parent_cls_name
-            then: {
-              build.chain { base: "super", {"call", {"..."}} }
-            }
+      constructor = if parent_val
+        build.fndef {
+          args: {{"..."}}
+          arrow: "fat"
+          body: {
+            build.chain { base: "super", {"call", {"..."}} }
           }
         }
-      }
+      else
+        build.fndef!
 
     real_name = name or parent_assign and parent_assign[2][1]
     real_name = switch ntype real_name
@@ -526,34 +582,48 @@ Statement = Transformer {
       when "nil"
         "nil"
       else
-        {"string", '"', real_name}
+        name_t = type real_name
+        -- TODO: don't use string literal as ref
+        flattened_name = if name_t == "string"
+          real_name
+        elseif name_t == "table" and real_name[1] == "ref"
+          real_name[2]
+        else
+          error "don't know how to extract name from #{name_t}"
+
+        {"string", '"', flattened_name}
 
     cls = build.table {
       {"__init", constructor}
       {"__base", base_name}
       {"__name", real_name} -- "quote the string"
-      {"__parent", parent_cls_name}
+      parent_val and {"__parent", parent_cls_name} or nil
     }
 
-    -- look up a name in the class object
-    class_lookup = build["if"] {
-      cond: {"exp", "val", "==", "nil", "and", parent_cls_name}
-      then: {
-        parent_cls_name\index"name"
+    -- looking up a name in the class object
+    class_index = if parent_val
+      class_lookup = build["if"] {
+        cond: { "exp", {"ref", "val"}, "==", "nil" }
+        then: {
+          parent_cls_name\index"name"
+        }
       }
-    }
-    insert class_lookup, {"else", {"val"}}
+      insert class_lookup, {"else", {"val"}}
 
-    cls_mt = build.table {
-      {"__index", build.fndef {
+      build.fndef {
         args: {{"cls"}, {"name"}}
         body: {
           build.assign_one LocalName"val", build.chain {
-            base: "rawget", {"call", {base_name, "name"}}
+            base: "rawget", {"call", {base_name, {"ref", "name"}}}
           }
           class_lookup
         }
-      }}
+      }
+    else
+      base_name
+
+    cls_mt = build.table {
+      {"__index", class_index}
       {"__call", build.fndef {
         args: {{"cls"}, {"..."}}
         body: {
@@ -617,22 +687,18 @@ Statement = Transformer {
 
         {"declare_glob", "*"}
 
-        .assign_one parent_cls_name, parent_val == "" and "nil" or parent_val
+        parent_val and .assign_one(parent_cls_name, parent_val) or NOOP
+
         .assign_one base_name, {"table", properties}
         .assign_one base_name\chain"__index", base_name
 
-        .if {
-          cond: parent_cls_name
-          then: {
-            .chain {
-              base: "setmetatable"
-              {"call", {
-                base_name,
-                .chain { base: parent_cls_name,  {"dot", "__base"}}
-              }}
-            }
-          }
-        }
+        parent_val and .chain({
+          base: "setmetatable"
+          {"call", {
+            base_name,
+            .chain { base: parent_cls_name,  {"dot", "__base"}}
+          }}
+        }) or NOOP
 
         .assign_one cls_name, cls
         .assign_one base_name\chain"__class", cls_name
@@ -643,16 +709,14 @@ Statement = Transformer {
         }
 
         -- run the inherited callback
-        .if {
-          cond: {"exp",
-            parent_cls_name, "and", parent_cls_name\chain "__inherited"
-          }
+        parent_val and .if({
+          cond: {"exp", parent_cls_name\chain "__inherited" }
           then: {
             parent_cls_name\chain "__inherited", {"call", {
               parent_cls_name, cls_name
             }}
           }
-        }
+        }) or NOOP
 
         .group if name then {
           .assign_one name, cls_name
@@ -676,7 +740,7 @@ Statement = Transformer {
 class Accumulator
   body_idx: { for: 4, while: 3, foreach: 4 }
 
-  new: =>
+  new: (accum_name) =>
     @accum_name = NameProxy "accum"
     @value_name = NameProxy "value"
     @len_name = NameProxy "len"
@@ -688,12 +752,12 @@ class Accumulator
     @wrap node
 
   -- wrap the node into a block_exp
-  wrap: (node) =>
-    build.block_exp {
+  wrap: (node, group_type="block_exp") =>
+    build[group_type] {
       build.assign_one @accum_name, build.table!
       build.assign_one @len_name, 1
       node
-      @accum_name
+      group_type == "block_exp" and @accum_name or NOOP
     }
 
   -- mutates the body of a loop construct to save last value into accumulator
@@ -716,7 +780,7 @@ class Accumulator
       @value_name
 
     update = {
-      build.assign_one @accum_name\index(@len_name), val
+      build.assign_one NameProxy.index(@accum_name, @len_name), val
       {"update", @len_name, "+=", 1}
     }
 
@@ -742,7 +806,7 @@ implicitly_return = (scope) ->
     elseif types.manual_return[t] or not types.is_value stm
       -- remove blank return statement
       if is_top and t == "return" and stm[2] == ""
-        nil
+        NOOP
       else
         stm
     else
@@ -857,7 +921,7 @@ Value = Transformer {
       base_name = NameProxy "base"
       fn_name = NameProxy "fn"
 
-      is_super = node[2] == "super"
+      is_super = ntype(node[2]) == "ref" and node[2][2] == "super"
       @transform.value build.block_exp {
         build.assign {
           names: {base_name}

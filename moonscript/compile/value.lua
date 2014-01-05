@@ -2,22 +2,27 @@ local util = require("moonscript.util")
 local data = require("moonscript.data")
 local ntype
 do
-  local _table_0 = require("moonscript.types")
-  ntype = _table_0.ntype
+  local _obj_0 = require("moonscript.types")
+  ntype = _obj_0.ntype
 end
 local user_error
 do
-  local _table_0 = require("moonscript.errors")
-  user_error = _table_0.user_error
+  local _obj_0 = require("moonscript.errors")
+  user_error = _obj_0.user_error
 end
-local concat, insert = table.concat, table.insert
-local unpack = util.unpack
+local concat, insert
+do
+  local _obj_0 = table
+  concat, insert = _obj_0.concat, _obj_0.insert
+end
+local unpack
+unpack = util.unpack
 local table_delim = ","
 local string_chars = {
   ["\r"] = "\\r",
   ["\n"] = "\\n"
 }
-local value_compilers = {
+return {
   exp = function(self, node)
     local _comp
     _comp = function(i, value)
@@ -48,9 +53,8 @@ local value_compilers = {
       _with_0:append_list((function()
         local _accum_0 = { }
         local _len_0 = 1
-        local _list_0 = node
-        for _index_0 = 2, #_list_0 do
-          local v = _list_0[_index_0]
+        for _index_0 = 2, #node do
+          local v = node[_index_0]
           _accum_0[_len_0] = self:value(v)
           _len_0 = _len_0 + 1
         end
@@ -72,15 +76,20 @@ local value_compilers = {
   end,
   chain = function(self, node)
     local callee = node[2]
+    local callee_type = ntype(callee)
     if callee == -1 then
       callee = self:get("scope_var")
       if not callee then
         user_error("Short-dot syntax must be called within a with block")
       end
     end
-    local sup = self:get("super")
-    if callee == "super" and sup then
-      return self:value(sup(self, node))
+    if callee_type == "ref" and callee[2] == "super" or callee == "super" then
+      do
+        local sup = self:get("super")
+        if sup then
+          return self:value(sup(self, node))
+        end
+      end
     end
     local chain_item
     chain_item = function(node)
@@ -96,12 +105,11 @@ local value_compilers = {
       elseif t == "colon_stub" then
         return user_error("Uncalled colon stub")
       else
-        return error("Unknown chain action: " .. t)
+        return error("Unknown chain action: " .. tostring(t))
       end
     end
-    local t = ntype(callee)
-    if (t == "self" or t == "self_class") and node[3] and ntype(node[3]) == "call" then
-      callee[1] = t .. "_colon"
+    if (callee_type == "self" or callee_type == "self_class") and node[3] and ntype(node[3]) == "call" then
+      callee[1] = callee_type .. "_colon"
     end
     local callee_value = self:value(callee)
     if ntype(callee) == "exp" then
@@ -110,9 +118,8 @@ local value_compilers = {
     local actions
     do
       local _with_0 = self:line()
-      local _list_0 = node
-      for _index_0 = 3, #_list_0 do
-        local action = _list_0[_index_0]
+      for _index_0 = 3, #node do
+        local action = node[_index_0]
         _with_0:append(chain_item(action))
       end
       actions = _with_0
@@ -123,12 +130,12 @@ local value_compilers = {
     local _, args, whitelist, arrow, block = unpack(node)
     local default_args = { }
     local self_args = { }
-    local arg_names = (function()
+    local arg_names
+    do
       local _accum_0 = { }
       local _len_0 = 1
-      local _list_0 = args
-      for _index_0 = 1, #_list_0 do
-        local arg = _list_0[_index_0]
+      for _index_0 = 1, #args do
+        local arg = args[_index_0]
         local name, default_value = unpack(arg)
         if type(name) == "string" then
           name = name
@@ -145,8 +152,8 @@ local value_compilers = {
         _accum_0[_len_0] = _value_0
         _len_0 = _len_0 + 1
       end
-      return _accum_0
-    end)()
+      arg_names = _accum_0
+    end
     if arrow == "fat" then
       insert(arg_names, 1, "self")
     end
@@ -155,14 +162,12 @@ local value_compilers = {
       if #whitelist > 0 then
         _with_0:whitelist_names(whitelist)
       end
-      local _list_0 = arg_names
-      for _index_0 = 1, #_list_0 do
-        local name = _list_0[_index_0]
+      for _index_0 = 1, #arg_names do
+        local name = arg_names[_index_0]
         _with_0:put_name(name)
       end
-      local _list_1 = default_args
-      for _index_0 = 1, #_list_1 do
-        local default = _list_1[_index_0]
+      for _index_0 = 1, #default_args do
+        local default = default_args[_index_0]
         local name, value = unpack(default)
         if type(name) == "table" then
           name = name[2]
@@ -171,7 +176,10 @@ local value_compilers = {
           'if',
           {
             'exp',
-            name,
+            {
+              "ref",
+              name
+            },
             '==',
             'nil'
           },
@@ -188,17 +196,17 @@ local value_compilers = {
           }
         })
       end
-      local self_arg_values = (function()
+      local self_arg_values
+      do
         local _accum_0 = { }
         local _len_0 = 1
-        local _list_2 = self_args
-        for _index_0 = 1, #_list_2 do
-          local arg = _list_2[_index_0]
+        for _index_0 = 1, #self_args do
+          local arg = self_args[_index_0]
           _accum_0[_len_0] = arg[2]
           _len_0 = _len_0 + 1
         end
-        return _accum_0
-      end)()
+        self_arg_values = _accum_0
+      end
       if #self_args > 0 then
         _with_0:stm({
           "assign",
@@ -208,17 +216,16 @@ local value_compilers = {
       end
       _with_0:stms(block)
       if #args > #arg_names then
-        arg_names = (function()
+        do
           local _accum_0 = { }
           local _len_0 = 1
-          local _list_2 = args
-          for _index_0 = 1, #_list_2 do
-            local arg = _list_2[_index_0]
+          for _index_0 = 1, #args do
+            local arg = args[_index_0]
             _accum_0[_len_0] = arg[1]
             _len_0 = _len_0 + 1
           end
-          return _accum_0
-        end)()
+          arg_names = _accum_0
+        end
       end
       _with_0.header = "function(" .. concat(arg_names, ", ") .. ")"
       return _with_0
@@ -282,28 +289,30 @@ local value_compilers = {
     return self:line("not ", self:value(node[2]))
   end,
   self = function(self, node)
-    return "self." .. self:value(node[2])
+    return "self." .. self:name(node[2])
   end,
   self_class = function(self, node)
-    return "self.__class." .. self:value(node[2])
+    return "self.__class." .. self:name(node[2])
   end,
   self_colon = function(self, node)
-    return "self:" .. self:value(node[2])
+    return "self:" .. self:name(node[2])
   end,
   self_class_colon = function(self, node)
-    return "self.__class:" .. self:value(node[2])
+    return "self.__class:" .. self:name(node[2])
+  end,
+  ref = function(self, value)
+    do
+      local sup = value[2] == "super" and self:get("super")
+      if sup then
+        return self:value(sup(self))
+      end
+    end
+    return tostring(value[2])
   end,
   raw_value = function(self, value)
-    local sup = self:get("super")
-    if value == "super" and sup then
-      return self:value(sup(self))
-    end
     if value == "..." then
       self:send("varargs")
     end
     return tostring(value)
   end
-}
-return {
-  value_compilers = value_compilers
 }

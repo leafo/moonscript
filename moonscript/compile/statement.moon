@@ -6,7 +6,7 @@ import reversed, unpack from util
 import ntype from require "moonscript.types"
 import concat, insert from table
 
-statement_compilers =
+{
   raw: (node) => @add node[2]
 
   lines: (node) =>
@@ -135,5 +135,5 @@ statement_compilers =
     with @block!
       \stms node[2]
 
-
-{ :statement_compilers }
+  noop: => -- nothing!
+}

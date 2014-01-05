@@ -1,6 +1,6 @@
     target: reference/index
     template: reference
-    title: MoonScript v0.2.3 - Language Guide
+    title: MoonScript v0.2.4 - Language Guide
     short_name: lang
 --
 MoonScript is a programming language that compiles to
@@ -8,7 +8,7 @@ MoonScript is a programming language that compiles to
 familiarity with Lua. For each code snippet below, the MoonScript is on the
 left and the compiled Lua is on right right.
 
-This is the offical language reference manual, installation directions and the
+This is the official language reference manual, installation directions and the
 homepage are located at <http://moonscript.org>.
 
 <div class="github-buttons">
@@ -17,6 +17,21 @@ homepage are located at <http://moonscript.org>.
 </div>
 
 # The Language
+
+## Whitespace
+
+MoonScript is a whitespace sensitive language. This means that
+instead of using `do` and `end` (or `{` and `}`) to delimit sections of code we
+use line-breaks and indentation.
+
+This means that how you indent you code is important. Luckily MoonScript
+doesn't care how you do it but it's important to be consistent.
+
+An indent must be at least 1 space or 1 tab, but you can use as many as you
+like. All the code snippets on this page will use two spaces.
+
+> Should you happen to mix tabs and spaces, a tab is equivalent to 4 spaces. I
+> shouldn't be telling you this though because you should never do it.
 
 ## Assignment
 
@@ -115,7 +130,7 @@ argument names in parentheses:
 sum = (x, y) -> print "sum", x + y
 ```
 
-Functions can be called by listing the arguments after the name of an expresion
+Functions can be called by listing the arguments after the name of an expression
 that evaluates to a function. When chaining together function calls, the
 arguments are applied to the closest function to the left.
 
@@ -541,7 +556,7 @@ for item in *items do print item
 for j = 1,10,3 do print j
 ```
 
-A for loop can also be used an expression. The last statement in the body of
+A for loop can also be used as an expression. The last statement in the body of
 the for loop is coerced into an expression and appended to an accumulating
 array table.
 
@@ -598,7 +613,7 @@ A `continue` statement can be used to skip the current iteration in a loop.
 ```moon
 i = 0
 while i < 10
-  continue if i % 2 ==0
+  continue if i % 2 == 0
   print i
 ```
 `continue` can also be used with loop expressions to prevent that iteration
@@ -629,7 +644,7 @@ have_coins = false
 if have_coins then print "Got coins" else print "No coins"
 ```
 
-Because if statements can be used as expressions, this can able be written as:
+Because if statements can be used as expressions, this can also be written as:
 
 ```moon
 have_coins = false
@@ -651,6 +666,17 @@ else
   "I am not so tall"
 
 print message -- prints: I am very tall
+```
+
+The opposite of `if` is `unless`:
+
+```moon
+unless os.date("%A") == "Monday"
+  print "it is not Monday!"
+```
+
+```moon
+print "You're lucky!" unless math.random! > 0.1
 ```
 
 ### With Assignment
@@ -701,7 +727,7 @@ is done with the `==` operator.
 name = "Dan"
 switch name
   when "Robert"
-    print "You are robert"
+    print "You are Robert"
   when "Dan", "Daniel"
     print "Your name, it's Dan"
   else
@@ -1413,7 +1439,7 @@ my_object = {
   write: => print "the value:", @value
 }
 
-run_callback (func) ->
+run_callback = (func) ->
   print "running callback..."
   func!
 
@@ -1689,7 +1715,7 @@ A full list of flags can be seen by passing the `-h` or `--help` flag.
 
 # License (MIT)
 
-    Copyright (C) 2011 by Leaf Corcoran
+    Copyright (C) 2013 by Leaf Corcoran
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal

@@ -1,11 +1,9 @@
-if not moon or not moon.inject then
-  module("moon", package.seeall)
-end
 local util = require("moonscript.util")
 local lua = {
   debug = debug,
   type = type
 }
+local dump, p, is_object, type, debug, run_with_scope, bind_methods, defaultbl, extend, copy, mixin, mixin_object, mixin_table, fold
 dump = util.dump
 p = function(...)
   return print(dump(...))
@@ -110,17 +108,14 @@ extend = function(...)
   return tbls[1]
 end
 copy = function(self)
-  return (function()
-    local _tbl_0 = { }
-    for key, val in pairs(self) do
-      _tbl_0[key] = val
-    end
-    return _tbl_0
-  end)()
+  local _tbl_0 = { }
+  for key, val in pairs(self) do
+    _tbl_0[key] = val
+  end
+  return _tbl_0
 end
 mixin = function(self, cls, ...)
-  local meta = getmetatable(cls)
-  for key, val in pairs(meta.__index) do
+  for key, val in pairs(cls.__base) do
     if not key:match("^__") then
       self[key] = val
     end
@@ -128,9 +123,8 @@ mixin = function(self, cls, ...)
   return cls.__init(self, ...)
 end
 mixin_object = function(self, object, methods)
-  local _list_0 = methods
-  for _index_0 = 1, #_list_0 do
-    local name = _list_0[_index_0]
+  for _index_0 = 1, #methods do
+    local name = methods[_index_0]
     self[name] = function(parent, ...)
       return object[name](object, ...)
     end
@@ -138,9 +132,8 @@ mixin_object = function(self, object, methods)
 end
 mixin_table = function(self, tbl, keys)
   if keys then
-    local _list_0 = keys
-    for _index_0 = 1, #_list_0 do
-      local key = _list_0[_index_0]
+    for _index_0 = 1, #keys do
+      local key = keys[_index_0]
       self[key] = tbl[key]
     end
   else
@@ -161,4 +154,19 @@ fold = function(items, fn)
     return items[1]
   end
 end
-return nil
+return {
+  dump = dump,
+  p = p,
+  is_object = is_object,
+  type = type,
+  debug = debug,
+  run_with_scope = run_with_scope,
+  bind_methods = bind_methods,
+  defaultbl = defaultbl,
+  extend = extend,
+  copy = copy,
+  mixin = mixin,
+  mixin_object = mixin_object,
+  mixin_table = mixin_table,
+  fold = fold
+}

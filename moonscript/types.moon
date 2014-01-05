@@ -1,17 +1,17 @@
 
 util = require "moonscript.util"
-data = require "moonscript.data"
+import Set from require "moonscript.data"
 
 import insert from table
 import unpack from util
 
 -- implicit return does not work on these statements
-manual_return = data.Set{"foreach", "for", "while", "return"}
+manual_return = Set{"foreach", "for", "while", "return"}
 
 -- Assigns and returns are bubbled into their bodies.
 -- All cascading statement transform functions accept a second arugment that
 -- is the transformation to apply to the last statement in their body
-cascading = data.Set{ "if", "unless", "with", "switch", "class", "do" }
+cascading = Set{ "if", "unless", "with", "switch", "class", "do" }
 
 -- type of node as string
 ntype = (node) ->
@@ -122,8 +122,10 @@ build = nil
 build = setmetatable {
   group: (body={}) ->
     {"group", body}
+
   do: (body) ->
     {"do", body}
+
   assign_one: (name, value) ->
     build.assign {
       names: {name}
@@ -139,8 +141,13 @@ build = setmetatable {
     {"table", tbl}
   block_exp: (body) ->
     {"block_exp", body}
+
   chain: (parts) ->
     base = parts.base or error"expecting base property for chain"
+
+    if type(base) == "string"
+      base = {"ref", base}
+
     node = {"chain", base}
     for part in *parts
       insert node, part

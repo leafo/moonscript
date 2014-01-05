@@ -2,30 +2,30 @@
 
 import concat, remove, insert from table
 
-Set = (items) ->
-  self = {}
-  self[key] = true for key in *items
-  self
+Set = (items) -> {k,true for k in *items}
 
 class Stack
   __tostring: => "<Stack {"..concat(self, ", ").."}>"
 
   new: (...) =>
-    @push v for v in *{...}
+    @push ...
     nil
 
   pop: =>
-    remove self
+    remove @
 
-  push: (value) =>
-    insert self, value
-    value
+  push: (value, ...) =>
+    insert @, value
+    if ...
+      @push ...
+    else
+      value
 
   top: =>
     self[#self]
 
 
-lua_keywords = Set{
+lua_keywords = Set {
 	'and', 'break', 'do', 'else', 'elseif',
 	'end', 'false', 'for', 'function', 'if',
 	'in', 'local', 'nil', 'not', 'or',

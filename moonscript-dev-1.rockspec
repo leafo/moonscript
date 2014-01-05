@@ -14,7 +14,7 @@ description = {
 
 dependencies = {
 	"lua >= 5.1",
-	"lpeg >= 0.10",
+	"lpeg >= 0.10, ~= 0.11",
 	"alt-getopt >= 0.7",
 	"luafilesystem >= 1.5"
 }
@@ -26,6 +26,8 @@ build = {
 		["moon.all"] = "moon/all.lua",
 		["moonscript"] = "moonscript/init.lua",
 		["moonscript.base"] = "moonscript/base.lua",
+		["moonscript.cmd.coverage"] = "moonscript/cmd/coverage.lua",
+		["moonscript.cmd.lint"] = "moonscript/cmd/lint.lua",
 		["moonscript.compile"] = "moonscript/compile.lua",
 		["moonscript.compile.statement"] = "moonscript/compile/statement.lua",
 		["moonscript.compile.value"] = "moonscript/compile/value.lua",

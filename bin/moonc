@@ -9,8 +9,8 @@ local dump_tree = require"moonscript.dump".tree
 local alt_getopt = require "alt_getopt"
 local lfs = require "lfs"
 
-local opts, ind = alt_getopt.get_opts(arg, "vhwt:pTXb", {
-	print = "p", tree = "T", version = "v", help = "h"
+local opts, ind = alt_getopt.get_opts(arg, "lvhwt:pTXb", {
+	print = "p", tree = "T", version = "v", help = "h", lint = "l"
 })
 
 local read_stdin = arg[1] == "--"
@@ -25,6 +25,7 @@ local help = [[Usage: %s [options] files...
     -p          Write output to standard out
     -T          Write parse tree instead of code (to stdout)
     -X          Write line rewrite map instead of code (to stdout)
+    -l          Perform lint on the file instead of compiling
     -b          Dump parse and compile time (doesn't write output)
     -v          Print version
 
@@ -39,9 +40,16 @@ if opts.v then
 end
 
 function print_help(err)
-	if err then print("Error: "..err) end
-	print(help:format(arg[0]))
-	os.exit()
+	local help_msg = help:format(arg[0])
+
+	if err then
+		io.stderr:write("Error: ".. err .. "\n")
+		io.stderr:write(help_msg .. "\n")
+		os.exit(1)
+	else
+		print(help_msg)
+		os.exit(0)
+	end
 end
 
 function mkdir(path)
@@ -69,9 +77,9 @@ function convert_path(path)
 	return (path:gsub("%.moon$", ".lua"))
 end
 
-function msg(...)
+function log_msg(...)
 	if not opts.p then
-		print(...)
+		io.stderr:write(table.concat({...}, " ") .. "\n")
 	end
 end
 
@@ -301,12 +309,12 @@ function create_watcher(files)
 		dirs = remove_dups(dirs)
 
 		return coroutine.wrap(function()
-			print(("%s with inotify [%s]"):format(msg, plural(#dirs, "dir")))
+			io.stderr:write(("%s with inotify [%s]"):format(msg, plural(#dirs, "dir")) .. "\n")
 
 			local wd_table = {}
 			local handle = inotify.init()
 			for _, dir in ipairs(dirs) do
-				local wd = handle:addwatch(dir, inotify.IN_CLOSE_WRITE)
+				local wd = handle:addwatch(dir, inotify.IN_CLOSE_WRITE, inotify.IN_MOVED_TO)
 				wd_table[wd] = dir
 			end
 
@@ -328,7 +336,7 @@ function create_watcher(files)
 		-- poll the filesystem instead
 		local sleep = get_sleep_func()
 		return coroutine.wrap(function()
-			print(("%s with polling [%s]"):format(msg, plural(#files, "file")))
+			io.stderr:write(("%s with polling [%s]"):format(msg, plural(#files, "file")) .. "\n")
 
 			local mod_time = {}
 			while true do
@@ -367,24 +375,36 @@ if opts.w then
 		local target = target_dir..convert_path(fname)
 		local success, err = compile_and_write(fname, target)
 		if not success then
-			print()
-			print("Error:", fname)
-			print(err)
-			print()
+			io.stderr:write(table.concat({
+				"",
+				"Error: " .. fname,
+				err,
+				"\n",
+			}, "\n"))
 		else
-			msg("Built:", fname, "->", target)
+			log_msg("Built:", fname, "->", target)
 		end
 	end
 
-	print "\nQuitting..."
+	io.stderr:write("\nQuitting...\n")
+elseif opts.l then
+	for _, fname in pairs(files) do
+		lint = require "moonscript.cmd.lint"
+		local res, err = lint.lint_file(fname)
+		if res then
+			io.stderr:write(res .. "\n\n")
+		elseif err then
+			io.stderr:write(fname .. "\n" .. err.. "\n\n")
+		end
+	end
 else
 	for _, fname in ipairs(files) do
 		local success, err = compile_and_write(fname, target_dir..convert_path(fname))
 		if not success then
-			print(fname, err)
+			io.stderr:write(fname .. "\t" .. err .. "\n")
 			os.exit(1)
 		else
-			msg("Built", fname)
+			log_msg("Built", fname)
 		end
 	end
 end

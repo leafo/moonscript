@@ -1,7 +1,12 @@
 local util = require("moonscript.util")
 local lpeg = require("lpeg")
-local concat, insert = table.concat, table.insert
-local split, pos_to_line = util.split, util.pos_to_line
+local concat, insert
+do
+  local _obj_0 = table
+  concat, insert = _obj_0.concat, _obj_0.insert
+end
+local split, pos_to_line
+split, pos_to_line = util.split, util.pos_to_line
 local user_error
 user_error = function(...)
   return error({
@@ -42,18 +47,17 @@ truncate_traceback = function(traceback, chunk_func)
     end
     stop = stop - 1
   end
-  traceback = (function()
+  do
     local _accum_0 = { }
     local _len_0 = 1
-    local _list_0 = traceback
     local _max_0 = stop
-    for _index_0 = 1, _max_0 < 0 and #_list_0 + _max_0 or _max_0 do
-      local t = _list_0[_index_0]
+    for _index_0 = 1, _max_0 < 0 and #traceback + _max_0 or _max_0 do
+      local t = traceback[_index_0]
       _accum_0[_len_0] = t
       _len_0 = _len_0 + 1
     end
-    return _accum_0
-  end)()
+    traceback = _accum_0
+  end
   local rep = "function '" .. chunk_func .. "'"
   traceback[#traceback] = traceback[#traceback]:gsub(rep, "main chunk")
   return concat(traceback, "\n")
@@ -61,7 +65,8 @@ end
 local rewrite_traceback
 rewrite_traceback = function(text, err)
   local line_tables = require("moonscript.line_tables")
-  local V, S, Ct, C = lpeg.V, lpeg.S, lpeg.Ct, lpeg.C
+  local V, S, Ct, C
+  V, S, Ct, C = lpeg.V, lpeg.S, lpeg.Ct, lpeg.C
   local header_text = "stack traceback:"
   local Header, Line = V("Header"), V("Line")
   local Break = lpeg.S("\n")
@@ -107,5 +112,6 @@ end
 return {
   rewrite_traceback = rewrite_traceback,
   truncate_traceback = truncate_traceback,
-  user_error = user_error
+  user_error = user_error,
+  reverse_line_number = reverse_line_number
 }

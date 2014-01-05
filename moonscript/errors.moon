@@ -84,5 +84,5 @@ rewrite_traceback = (text, err) ->
   }, "\n"
 
 
-{ :rewrite_traceback, :truncate_traceback, :user_error }
+{ :rewrite_traceback, :truncate_traceback, :user_error, :reverse_line_number }
 

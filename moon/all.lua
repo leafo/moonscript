@@ -1,3 +1,5 @@
-moon = moon or { }
-moon.inject = true
-return require("moon.init")
+local moon = require("moon")
+for k, v in pairs(moon) do
+  _G[k] = v
+end
+return moon

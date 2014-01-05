@@ -6,19 +6,6 @@ f = function(...)
 end
 local dont_bubble
 dont_bubble = function()
-  return (function()
-    local _accum_0 = { }
-    local _len_0 = 1
-    for x in (function(...)
-      return print(...)
-    end)("hello") do
-      _accum_0[_len_0] = x
-      _len_0 = _len_0 + 1
-    end
-    return _accum_0
-  end)()
-end
-local k = (function()
   local _accum_0 = { }
   local _len_0 = 1
   for x in (function(...)
@@ -28,8 +15,21 @@ local k = (function()
     _len_0 = _len_0 + 1
   end
   return _accum_0
-end)()
-local j = (function()
+end
+local k
+do
+  local _accum_0 = { }
+  local _len_0 = 1
+  for x in (function(...)
+    return print(...)
+  end)("hello") do
+    _accum_0[_len_0] = x
+    _len_0 = _len_0 + 1
+  end
+  k = _accum_0
+end
+local j
+do
   local _accum_0 = { }
   local _len_0 = 1
   for i = 1, 10 do
@@ -38,27 +38,26 @@ local j = (function()
     end
     _len_0 = _len_0 + 1
   end
-  return _accum_0
-end)()
+  j = _accum_0
+end
 local m
 m = function(...)
-  return (function(...)
-    local _accum_0 = { }
-    local _len_0 = 1
-    local _list_0 = {
-      ...
-    }
-    for _index_0 = 1, #_list_0 do
-      local x = _list_0[_index_0]
-      if f(...) > 4 then
-        _accum_0[_len_0] = x
-        _len_0 = _len_0 + 1
-      end
+  local _accum_0 = { }
+  local _len_0 = 1
+  local _list_0 = {
+    ...
+  }
+  for _index_0 = 1, #_list_0 do
+    local x = _list_0[_index_0]
+    if f(...) > 4 then
+      _accum_0[_len_0] = x
+      _len_0 = _len_0 + 1
     end
-    return _accum_0
-  end)(...)
+  end
+  return _accum_0
 end
-local x = (function(...)
+local x
+do
   local _accum_0 = { }
   local _len_0 = 1
   local _list_0 = {
@@ -69,9 +68,10 @@ local x = (function(...)
     _accum_0[_len_0] = i
     _len_0 = _len_0 + 1
   end
-  return _accum_0
-end)(...)
-local y = (function(...)
+  x = _accum_0
+end
+local y
+do
   local _accum_0 = { }
   local _len_0 = 1
   local _list_0 = {
@@ -82,9 +82,10 @@ local y = (function(...)
     _accum_0[_len_0] = x
     _len_0 = _len_0 + 1
   end
-  return _accum_0
-end)(...)
-local z = (function(...)
+  y = _accum_0
+end
+local z
+do
   local _accum_0 = { }
   local _len_0 = 1
   for x in hallo do
@@ -93,18 +94,20 @@ local z = (function(...)
       _len_0 = _len_0 + 1
     end
   end
-  return _accum_0
-end)(...)
-local a = (function(...)
+  z = _accum_0
+end
+local a
+do
   local _accum_0 = { }
   local _len_0 = 1
   for i = 1, 10 do
     _accum_0[_len_0] = ...
     _len_0 = _len_0 + 1
   end
-  return _accum_0
-end)(...)
-local b = (function()
+  a = _accum_0
+end
+local b
+do
   local _accum_0 = { }
   local _len_0 = 1
   for i = 1, 10 do
@@ -113,5 +116,5 @@ local b = (function()
     end
     _len_0 = _len_0 + 1
   end
-  return _accum_0
-end)()
+  b = _accum_0
+end

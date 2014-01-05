@@ -6,6 +6,8 @@ import unpack from require "moonscript.util"
 
 import user_error from require "moonscript.errors"
 
+util = require "moonscript.util"
+
 join = (...) ->
   with out = {}
     i = 1
@@ -29,7 +31,11 @@ extract_assign_names = (name, accum={}, prefix={}) ->
     else
       key = tuple[1]
       s = if ntype(key) == "key_literal"
-        {"dot", key[2]}
+        key_name = key[2]
+        if ntype(key_name) == "colon_stub"
+          key_name
+        else
+          {"dot", key_name}
       else
         {"index", key}
 
@@ -37,17 +43,17 @@ extract_assign_names = (name, accum={}, prefix={}) ->
 
     suffix = join prefix, {suffix}
 
-    t = ntype value
-    if t == "value" or t == "chain" or t == "self"
-      insert accum, {value, suffix}
-    elseif t == "table"
-      extract_assign_names value, accum, suffix
-    else
-      user_error "Can't destructure value of type: #{ntype value}"
+    switch ntype value
+      when "value", "ref", "chain", "self"
+        insert accum, {value, suffix}
+      when "table"
+        extract_assign_names value, accum, suffix
+      else
+        user_error "Can't destructure value of type: #{ntype value}"
 
   accum
 
-build_assign = (destruct_literal, receiver) ->
+build_assign = (scope, destruct_literal, receiver) ->
   extracted_names = extract_assign_names destruct_literal
 
   names = {}
@@ -55,7 +61,7 @@ build_assign = (destruct_literal, receiver) ->
 
   inner = {"assign", names, values}
 
-  obj = if mtype(receiver) == NameProxy
+  obj = if scope\is_local receiver
     receiver
   else
     with obj = NameProxy "obj"
@@ -66,7 +72,7 @@ build_assign = (destruct_literal, receiver) ->
 
   for tuple in *extracted_names
     insert names, tuple[1]
-    insert values, obj\chain unpack tuple[2]
+    insert values, NameProxy.chain obj, unpack tuple[2]
 
   build.group {
     {"declare", names}
@@ -74,7 +80,7 @@ build_assign = (destruct_literal, receiver) ->
   }
 
 -- applies to destructuring to a assign node
-split_assign = (assign) ->
+split_assign = (scope, assign) ->
   names, values = unpack assign, 2
 
   g = {}
@@ -96,7 +102,7 @@ split_assign = (assign) ->
             values[i]
         }
 
-      insert g, build_assign n, values[i]
+      insert g, build_assign scope, n, values[i]
 
       start = i + 1
 

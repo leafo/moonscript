@@ -1,4 +1,5 @@
 
+print = ->
 
 if false
   true

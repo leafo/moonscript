@@ -18,18 +18,19 @@ class NameProxy
     @name
 
   chain: (...) =>
-    items = for i in *{...}
-      if type(i) == "string"
-        {"dot", i}
+    items = { base: @, ... }
+    for k,v in ipairs items
+      items[k] = if type(v) == "string"
+        {"dot", v}
       else
-        i
+        v
 
-    build.chain {
-      base: self
-      unpack items
-    }
+    build.chain items
 
   index: (key) =>
+    if type(key) == "string"
+      key = {"ref", key}
+
     build.chain {
       base: self, {"index", key}
     }

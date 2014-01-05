@@ -114,3 +114,11 @@ for x=1,10
   for y = 2,12
     continue if y % 3 == 0
 
+--
+
+do
+  xxx = {1,2,3,4}
+  for thing in *xxx
+    print thing
+
+

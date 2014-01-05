@@ -1,6 +1,6 @@
     target: reference/standard_lib
     template: reference
-    title: MoonScript v0.2.3 - Standard Library
+    title: MoonScript v0.2.4 - Standard Library
     short_name: stdlib
 --
 
@@ -81,7 +81,7 @@ values when a missing key is looked up.
 ### `extend(arg1, arg2, [rest...])`
 
 Chains together a series of tables by their metatable's `__index` property.
-Overwrites the metatable of all objects exept for the last with a new table
+Overwrites the metatable of all objects except for the last with a new table
 whose `__index` is set to the next table.
 
 Returns the first argument.
@@ -166,7 +166,7 @@ overwritten.
 
 ### `mixin_object(obj, other_obj, method_names)`
 
-Inserts into `obj` methods from `other_obj` whose names are listen in
+Inserts into `obj` methods from `other_obj` whose names are listed in
 `method_names`. The inserted methods are bound methods that will run with
 `other_obj` as the receiver.
 

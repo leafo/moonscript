@@ -1,4 +1,3 @@
-
 lfs = require "lfs"
 
 parse   = require "moonscript.parse"
@@ -10,8 +9,8 @@ pattern = ...
 import unpack from util
 
 options = {
-  in_dir: "tests/inputs",
-  out_dir: "tests/outputs",
+  in_dir: "spec/inputs",
+  out_dir: "spec/outputs",
   input_pattern: "(.*)%.moon$",
   output_ext: ".lua"
 
@@ -73,6 +72,7 @@ diff_str = (expected, got) ->
 string_assert = (expected, got) ->
   if expected != got
     diff = diff_str expected, got
+    error "string equality assert failed" if os.getenv "HIDE_DIFF"
     error "string equality assert failed:\n" .. diff
 
 input_fname = (base) ->

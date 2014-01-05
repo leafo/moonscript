@@ -9,17 +9,17 @@ flat_value = function(op, depth)
   if type(op) ~= "table" then
     return tostring(op)
   end
-  local items = (function()
+  local items
+  do
     local _accum_0 = { }
     local _len_0 = 1
-    local _list_0 = op
-    for _index_0 = 1, #_list_0 do
-      local item = _list_0[_index_0]
+    for _index_0 = 1, #op do
+      local item = op[_index_0]
       _accum_0[_len_0] = flat_value(item, depth + 1)
       _len_0 = _len_0 + 1
     end
-    return _accum_0
-  end)()
+    items = _accum_0
+  end
   local pos = op[-1]
   return "{" .. (pos and "[" .. pos .. "] " or "") .. table.concat(items, ", ") .. "}"
 end

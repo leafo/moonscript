@@ -6,35 +6,38 @@ local items = {
   5,
   6
 }
-local out = (function()
+local out
+do
   local _tbl_0 = { }
   for k in items do
     _tbl_0[k] = k * 2
   end
-  return _tbl_0
-end)()
+  out = _tbl_0
+end
 local x = {
   hello = "world",
   okay = 2323
 }
-local copy = (function()
+local copy
+do
   local _tbl_0 = { }
   for k, v in pairs(x) do
     if k ~= "okay" then
       _tbl_0[k] = v
     end
   end
-  return _tbl_0
-end)()
-local _ = (function()
+  copy = _tbl_0
+end
+local _
+do
   local _tbl_0 = { }
   for x in yes do
     local _key_0, _val_0 = unpack(x)
     _tbl_0[_key_0] = _val_0
   end
-  return _tbl_0
-end)()
-_ = (function()
+  _ = _tbl_0
+end
+do
   local _tbl_0 = { }
   local _list_0 = yes
   for _index_0 = 1, #_list_0 do
@@ -42,17 +45,17 @@ _ = (function()
     local _key_0, _val_0 = unpack(x)
     _tbl_0[_key_0] = _val_0
   end
-  return _tbl_0
-end)()
-_ = (function()
+  _ = _tbl_0
+end
+do
   local _tbl_0 = { }
   for x in yes do
     local _key_0, _val_0 = xxxx
     _tbl_0[_key_0] = _val_0
   end
-  return _tbl_0
-end)()
-_ = (function()
+  _ = _tbl_0
+end
+do
   local _tbl_0 = { }
   local _list_0 = {
     {
@@ -77,18 +80,20 @@ _ = (function()
     end)())
     _tbl_0[_key_0] = _val_0
   end
-  return _tbl_0
-end)()
-local n1 = (function()
+  _ = _tbl_0
+end
+local n1
+do
   local _accum_0 = { }
   local _len_0 = 1
   for i = 1, 10 do
     _accum_0[_len_0] = i
     _len_0 = _len_0 + 1
   end
-  return _accum_0
-end)()
-local n2 = (function()
+  n1 = _accum_0
+end
+local n2
+do
   local _accum_0 = { }
   local _len_0 = 1
   for i = 1, 10 do
@@ -97,9 +102,10 @@ local n2 = (function()
       _len_0 = _len_0 + 1
     end
   end
-  return _accum_0
-end)()
-local aa = (function()
+  n2 = _accum_0
+end
+local aa
+do
   local _accum_0 = { }
   local _len_0 = 1
   for x = 1, 10 do
@@ -111,9 +117,10 @@ local aa = (function()
       _len_0 = _len_0 + 1
     end
   end
-  return _accum_0
-end)()
-local bb = (function()
+  aa = _accum_0
+end
+local bb
+do
   local _accum_0 = { }
   local _len_0 = 1
   for thing in y do
@@ -122,9 +129,10 @@ local bb = (function()
       _len_0 = _len_0 + 1
     end
   end
-  return _accum_0
-end)()
-local cc = (function()
+  bb = _accum_0
+end
+local cc
+do
   local _accum_0 = { }
   local _len_0 = 1
   for i = 1, 10 do
@@ -133,9 +141,10 @@ local cc = (function()
       _len_0 = _len_0 + 1
     end
   end
-  return _accum_0
-end)()
-local dd = (function()
+  cc = _accum_0
+end
+local dd
+do
   local _accum_0 = { }
   local _len_0 = 1
   for i = 1, 10 do
@@ -150,13 +159,13 @@ local dd = (function()
       end
     end
   end
-  return _accum_0
-end)()
-_ = (function()
+  dd = _accum_0
+end
+do
   local _tbl_0 = { }
   for i = 1, 10 do
     _tbl_0["hello"] = "world"
   end
-  return _tbl_0
-end)()
+  _ = _tbl_0
+end
 return nil

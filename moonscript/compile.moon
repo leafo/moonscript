@@ -7,8 +7,8 @@ import NameProxy, LocalName from require "moonscript.transform.names"
 import Set from require "moonscript.data"
 import ntype, has_value from require "moonscript.types"
 
-import statement_compilers from require "moonscript.compile.statement"
-import value_compilers from require "moonscript.compile.value"
+statement_compilers = require "moonscript.compile.statement"
+value_compilers = require "moonscript.compile.value"
 
 import concat, insert from table
 import pos_to_line, get_closest_line, trim, unpack from util
@@ -161,6 +161,8 @@ class Block
   export_all: false
   export_proper: false
 
+  value_compilers: value_compilers
+
   __tostring: =>
     h = if "string" == type @header
       @header
@@ -217,7 +219,11 @@ class Block
           is_local = true
           name\get_name self
         when NameProxy then name\get_name self
-        when "string" then name
+        when "table"
+          name[1] == "ref" and name[2]
+        when "string"
+          -- TODO: don't use string literal as ref
+          name
 
       continue unless is_local or real_name and not @has_name real_name, true
       -- put exported names so they can be assigned to in deeper scope
@@ -241,6 +247,8 @@ class Block
     name = name\get_name self if NameProxy == mtype name
     @_names[name] = value
 
+  -- Check if a name is defined in the current or any enclosing scope
+  -- skip_exports: ignore names that have been exported using `export`
   has_name: (name, skip_exports) =>
     return true if not skip_exports and @name_exported name
 
@@ -250,6 +258,18 @@ class Block
         @parent\has_name name, true
     else
       yes
+
+  is_local: (node) =>
+    t = mtype node
+
+    return @has_name(node, false) if t == "string"
+    return true if t == NameProxy or t == LocalName
+
+    if t == "table"
+      if node[1] == "ref" or (node[1] == "chain" and #node == 2)
+        return @is_local node[2]
+
+    false
 
   free_name: (prefix, dont_put) =>
     prefix = prefix or "moon"
@@ -304,10 +324,14 @@ class Block
 
   is_value: (node) =>
     t = ntype node
-    value_compilers[t] != nil or t == "value"
+    @value_compilers[t] != nil or t == "value"
 
-  -- line wise compile functions
-  name: (node, ...) => @value node, ...
+  -- compile name for assign
+  name: (node, ...) =>
+    if type(node) == "string"
+      node
+    else
+      @value node, ...
 
   value: (node, ...) =>
     node = @transform.value node
@@ -316,7 +340,7 @@ class Block
     else
       node[1]
 
-    fn = value_compilers[action]
+    fn = @value_compilers[action]
     error "Failed to compile value: "..dump.value node if not fn
 
     out = fn self, node, ...

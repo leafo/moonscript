@@ -1,6 +1,8 @@
 
 hello_world = false
 
+print = ->
+
 if hello_world
   print "sackman"
   x = 5 + 5

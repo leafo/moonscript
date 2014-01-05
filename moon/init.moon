@@ -1,12 +1,8 @@
 
-if not moon or not moon.inject
-  module "moon", package.seeall
-
 util = require "moonscript.util"
-
 lua = { :debug, :type }
 
-export *
+local *
 
 dump = util.dump
 
@@ -104,8 +100,7 @@ copy = =>
 
 -- mixin class properties into self, call new
 mixin = (cls, ...) =>
-  meta = getmetatable cls
-  for key, val in pairs meta.__index
+  for key, val in pairs cls.__base
     self[key] = val if not key\match"^__"
   cls.__init self, ...
 
@@ -134,4 +129,7 @@ fold = (items, fn)->
   else
     items[1]
 
-nil
+{
+  :dump, :p, :is_object, :type, :debug, :run_with_scope, :bind_methods,
+  :defaultbl, :extend, :copy, :mixin, :mixin_object, :mixin_table, :fold
+}
