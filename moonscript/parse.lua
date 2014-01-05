@@ -51,7 +51,8 @@ local AlphaNum = R("az", "AZ", "09", "__")
 local _Name = C(R("az", "AZ", "__") * AlphaNum^0)
 local Name = Space * _Name
 
-local Num = P"0x" * R("09", "af", "AF")^1 +
+local Num = P"0x" * R("09", "af", "AF")^1 * (S"uU"^-1 * S"lL"^2)^-1 +
+    R"09"^1 * (S"uU"^-1 * S"lL"^2) +
 	(
 		R"09"^1 * (P"." * R"09"^1)^-1 +
 		P"." * R"09"^1
