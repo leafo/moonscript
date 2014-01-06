@@ -15,6 +15,14 @@
 .2323e-1
 .2323e13434
 
+
+1LL
+1ULL
+9332LL
+9332
+0x2aLL
+0x2aULL
+
 [[ hello world ]]
 
 [=[ hello world ]=]

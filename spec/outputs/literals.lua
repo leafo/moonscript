@@ -10,6 +10,12 @@ _ = 0xABCDEF
 _ = .2323
 _ = .2323e-1
 _ = .2323e13434
+_ = 1LL
+_ = 1ULL
+_ = 9332LL
+_ = 9332
+_ = 0x2aLL
+_ = 0x2aULL
 _ = [[ hello world ]]
 _ = [=[ hello world ]=]
 _ = [====[ hello world ]====]
