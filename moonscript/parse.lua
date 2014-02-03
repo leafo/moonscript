@@ -39,7 +39,7 @@ local Break = P"\r"^-1 * P"\n"
 local Stop = Break + -1
 local Indent = C(S"\t "^0) / count_indent
 
-local Comment = P"--" * (1 - S"\r\n")^0 * #Stop
+local Comment = V"Comment"
 local Space = _Space * Comment^-1
 local SomeSpace = S" \t"^1 * Comment^-1
 
@@ -392,6 +392,8 @@ local build_grammar = wrap_env(function()
 		CheckIndent = Cmt(Indent, check_indent), -- validates line is in correct indent
 		Line = (CheckIndent * Statement + Space * #Stop),
 
+		Comment = P"--" * (V"NoSpaceLuaString" / 0 * Space^-1 + (1 - S"\r\n")^0 * #Stop),
+
 		Statement = pos(
 				Import + While + With + For + ForEach + Switch + Return +
 				Local + Export + BreakLoop +
@@ -505,11 +507,12 @@ local build_grammar = wrap_env(function()
 		SingleString = simple_string("'"),
 		DoubleString = simple_string('"', true),
 
-		LuaString = Cg(LuaStringOpen, "string_open") * Cb"string_open" * Break^-1 *
+		LuaString = Space * NoSpaceLuaString,
+		NoSpaceLuaString = Cg(LuaStringOpen, "string_open") * Cb"string_open" * Break^-1 *
 			C((1 - Cmt(C(LuaStringClose) * Cb"string_open", check_lua_string))^0) *
 			LuaStringClose / mark"string",
 
-		LuaStringOpen = sym"[" * P"="^0 * "[" / trim,
+		LuaStringOpen = "[" * P"="^0 * "[" / trim,
 		LuaStringClose = "]" * P"="^0 * "]",
 
 		Callable = pos(Name / mark"ref") + SelfName + VarArg + Parens / mark"parens",
