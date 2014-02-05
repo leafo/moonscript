@@ -62,7 +62,7 @@ moon_loader = function(name)
     file:close()
     local res, err = loadstring(text, file_path)
     if not res then
-      error(err)
+      error(file_path .. ": " .. err)
     end
     return res
   end

@@ -48,7 +48,7 @@ moon_loader = (name) ->
     file\close!
     res, err = loadstring text, file_path
     if not res
-        error err
+        error file_path .. ": " .. err
 
     return res
 
