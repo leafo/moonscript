@@ -392,7 +392,7 @@ local build_grammar = wrap_env(function()
 		CheckIndent = Cmt(Indent, check_indent), -- validates line is in correct indent
 		Line = (CheckIndent * Statement + Space * #Stop),
 
-		Comment = P"--" * (V"NoSpaceLuaString" / 0 * Space^-1 + (1 - S"\r\n")^0 * #Stop),
+		Comment = P"--" * (Cmt(NoSpaceLuaString, function() return true end) * Space^-1 + (1 - S"\r\n")^0 * #Stop),
 
 		Statement = pos(
 				Import + While + With + For + ForEach + Switch + Return +
