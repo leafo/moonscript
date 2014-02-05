@@ -206,6 +206,12 @@ Statement = Transformer {
     if num_names == 1 and num_values == 1
       first_value = values[1]
       first_name = names[1]
+      first_type = ntype first_value
+
+      -- reduce colon stub chain to block exp
+      if first_type == "chain"
+        first_value = Value\transform_once @, first_value
+        first_type = ntype first_value
 
       switch ntype first_value
         when "block_exp"
@@ -220,6 +226,8 @@ Statement = Transformer {
 
         when "comprehension", "tblcomprehension", "foreach", "for", "while"
           return build.assign_one first_name, Value\transform_once @, first_value
+        else
+          values[1] = first_value
 
     -- bubble cascading assigns
     transformed = if num_values == 1
@@ -922,7 +930,7 @@ Value = Transformer {
       fn_name = NameProxy "fn"
 
       is_super = ntype(node[2]) == "ref" and node[2][2] == "super"
-      @transform.value build.block_exp {
+      build.block_exp {
         build.assign {
           names: {base_name}
           values: {node}

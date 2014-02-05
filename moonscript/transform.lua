@@ -378,6 +378,11 @@ Statement = Transformer({
     if num_names == 1 and num_values == 1 then
       local first_value = values[1]
       local first_name = names[1]
+      local first_type = ntype(first_value)
+      if first_type == "chain" then
+        first_value = Value:transform_once(self, first_value)
+        first_type = ntype(first_value)
+      end
       local _exp_0 = ntype(first_value)
       if "block_exp" == _exp_0 then
         local block_body = first_value[2]
@@ -397,6 +402,8 @@ Statement = Transformer({
         })
       elseif "comprehension" == _exp_0 or "tblcomprehension" == _exp_0 or "foreach" == _exp_0 or "for" == _exp_0 or "while" == _exp_0 then
         return build.assign_one(first_name, Value:transform_once(self, first_value))
+      else
+        values[1] = first_value
       end
     end
     local transformed
@@ -1538,7 +1545,7 @@ Value = Transformer({
       local base_name = NameProxy("base")
       local fn_name = NameProxy("fn")
       local is_super = ntype(node[2]) == "ref" and node[2][2] == "super"
-      return self.transform.value(build.block_exp({
+      return build.block_exp({
         build.assign({
           names = {
             base_name
@@ -1580,7 +1587,7 @@ Value = Transformer({
             })
           }
         })
-      }))
+      })
     end
   end,
   block_exp = function(self, node)

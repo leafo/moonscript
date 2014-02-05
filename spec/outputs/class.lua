@@ -266,13 +266,11 @@ do
   local _base_0 = {
     val = 2323,
     something = function(self)
-      return (function()
-        local _base_1 = _parent_0
-        local _fn_0 = _base_1.something
-        return function(...)
-          return _fn_0(self, ...)
-        end
-      end)()
+      local _base_1 = _parent_0
+      local _fn_0 = _base_1.something
+      return function(...)
+        return _fn_0(self, ...)
+      end
     end
   }
   _base_0.__index = _base_0
