@@ -2,13 +2,13 @@
 test::
 	busted -p "_spec.moon$$"
 
-local:
+local: compile
 	luarocks make --local moonscript-dev-1.rockspec
 
 global:
 	sudo luarocks make moonscript-dev-1.rockspec
 
-compile:
+compile::
 	bin/moonc moon/ moonscript/
 
 
