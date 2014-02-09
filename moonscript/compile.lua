@@ -474,8 +474,12 @@ do
         action = node[1]
       end
       local fn = self.value_compilers[action]
-      if not fn then
-        error("Failed to compile value: " .. dump.value(node))
+      if not (fn) then
+        error({
+          "compile-error",
+          "Failed to find value compiler for: " .. dump.value(node),
+          node[-1]
+        })
       end
       local out = fn(self, node, ...)
       if type(node) == "table" and node[-1] then
@@ -659,13 +663,17 @@ do
 end
 local format_error
 format_error = function(msg, pos, file_str)
-  local line = pos_to_line(file_str, pos)
-  local line_str
-  line_str, line = get_closest_line(file_str, line)
-  line_str = line_str or ""
+  local line_message
+  if pos then
+    local line = pos_to_line(file_str, pos)
+    local line_str
+    line_str, line = get_closest_line(file_str, line)
+    line_str = line_str or ""
+    line_message = (" [%d] >>    %s"):format(line, trim(line_str))
+  end
   return concat({
     "Compile error: " .. msg,
-    (" [%d] >>    %s"):format(line, trim(line_str))
+    line_message
   }, "\n")
 end
 local value
@@ -689,27 +697,27 @@ tree = function(tree, options)
     return scope:root_stms(tree)
   end)
   local success, err = coroutine.resume(runner)
-  if not success then
-    local error_msg
+  if not (success) then
+    local error_msg, error_pos
     if type(err) == "table" then
       local error_type = err[1]
-      if error_type == "user-error" then
-        error_msg = err[2]
+      local _exp_0 = err[1]
+      if "user-error" == _exp_0 or "compile-error" == _exp_0 then
+        error_msg, error_pos = unpack(err, 2)
       else
-        error_msg = error("Unknown error thrown", util.dump(error_msg))
+        error_msg, error_pos = error("Unknown error thrown", util.dump(error_msg))
       end
     else
-      error_msg = concat({
+      error_msg, error_pos = concat({
         err,
         debug.traceback(runner)
       }, "\n")
     end
-    return nil, error_msg, scope.last_pos
-  else
-    local lua_code = scope:render()
-    local posmap = scope._lines:flatten_posmap()
-    return lua_code, posmap
+    return nil, error_msg, error_pos or scope.last_pos
   end
+  local lua_code = scope:render()
+  local posmap = scope._lines:flatten_posmap()
+  return lua_code, posmap
 end
 do
   local data = require("moonscript.data")

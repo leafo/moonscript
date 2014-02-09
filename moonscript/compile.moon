@@ -341,7 +341,12 @@ class Block
       node[1]
 
     fn = @value_compilers[action]
-    error "Failed to compile value: "..dump.value node if not fn
+    unless fn
+      error {
+        "compile-error"
+        "Failed to find value compiler for: " .. dump.value node
+        node[-1]
+      }
 
     out = fn self, node, ...
 
@@ -416,12 +421,15 @@ class RootBlock extends Block
     table.concat buffer
 
 format_error = (msg, pos, file_str) ->
-  line = pos_to_line file_str, pos
-  line_str, line = get_closest_line file_str, line
-  line_str = line_str or ""
+  line_message = if pos
+    line = pos_to_line file_str, pos
+    line_str, line = get_closest_line file_str, line
+    line_str = line_str or ""
+    (" [%d] >>    %s")\format line, trim line_str
+
   concat {
     "Compile error: "..msg
-    (" [%d] >>    %s")\format line, trim line_str
+    line_message
   }, "\n"
 
 value = (value) ->
@@ -440,21 +448,24 @@ tree = (tree, options={}) ->
     scope\root_stms tree
 
   success, err = coroutine.resume runner
-  if not success
-    error_msg = if type(err) == "table"
+
+  unless success
+    error_msg, error_pos = if type(err) == "table"
       error_type = err[1]
-      if error_type == "user-error"
-        err[2]
-      else
-        error "Unknown error thrown", util.dump error_msg
+      switch err[1]
+        when "user-error", "compile-error"
+          unpack err, 2
+        else
+          -- unknown error, bubble it
+          error "Unknown error thrown", util.dump error_msg
     else
       concat {err, debug.traceback runner}, "\n"
 
-    nil, error_msg, scope.last_pos
-  else
-    lua_code = scope\render!
-    posmap = scope._lines\flatten_posmap!
-    lua_code, posmap
+    return nil, error_msg, error_pos or scope.last_pos
+
+  lua_code = scope\render!
+  posmap = scope._lines\flatten_posmap!
+  lua_code, posmap
 
 -- mmmm
 with data = require "moonscript.data"
