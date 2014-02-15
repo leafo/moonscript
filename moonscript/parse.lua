@@ -616,13 +616,17 @@ local build_grammar = wrap_env(function()
 			end
 
 			local tree
-			local pass, err = pcall(function(...)
-				tree = self._g:match(str, ...)
-			end, ...)
+			local parse_args = {...}
+
+			local pass, err = xpcall(function()
+				tree = self._g:match(str, unpack(parse_args))
+			end, function(err)
+				return debug.traceback(err, 2)
+			end)
 
 			-- regular error, let it bubble up
 			if type(err) == "string" then
-				error(err)
+				return nil, err
 			end
 
 			if not tree then
