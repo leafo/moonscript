@@ -1,4 +1,24 @@
 
+# MoonScript v0.2.4 (TBR)
+
+## Changes
+
+Code generation altered.
+
+* colon stub simplified
+* return's statement simplified
+
+## New Things
+
+* New code coverage tool built into `moonc`
+* New linting tool built into `moonc`, identifies global variable references that don't pass whitelist
+* Numbers can have `LL` and `ULL` suffixes for LuaJIT
+
+## Bugs Fixes
+
+* Error messages from `moonc` are written to standard error
+* Moonloader correctly throws error when moon file can't be parsed, instead of skipping the module
+
 # MoonScript v0.2.4 (2013-07-02)
 
 I'm happy to announce [MoonScript][1] version 0.2.4, the CoffeeScript inspired
