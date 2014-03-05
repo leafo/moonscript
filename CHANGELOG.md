@@ -1,5 +1,5 @@
 
-# MoonScript v0.2.4 (TBR)
+# MoonScript v0.2.5 (TBR)
 
 ## Changes
 
@@ -126,9 +126,6 @@ end
 
 # MoonScript v0.2.4 (2013-07-02)
 
-I'm happy to announce [MoonScript][1] version 0.2.4, the CoffeeScript inspired
-language that compiles to Lua. It's been about 5 months since the last release.
-
 ## Changes
 
 * The way the subtraction operator works has changed. There was always a little confusion as to the rules regarding whitespace around it and it was recommended to always add whitespace around the operator when doing subtraction. Not anymore. Hopefully it now [works how you would expect](http://moonscript.org/reference/#considerations). (`a-b` compiles to `a - b` and not `a(-b)` anymore).
@@ -175,11 +172,6 @@ Fixed bug with moonloader not loading anything
 
 # MoonScript v0.2.3 (2013-01-24)
 
-Today marks [MoonScript][1] version 0.2.3, the CoffeeScript inspired language
-that compiles to Lua. It's been about 3 months since last release. I've got a
-couple new features, fixes, Lua 5.2 support and a backwards incompatible
-change.
-
 ## Changes
 
 * For loops when used as expressions will no longer discard nil values when accumulating into an array table. **This is a backwards incompatible change**. Instead you should use the `continue` keyword to filter out iterations you don't want to keep. [Read more here](https://github.com/leafo/moonscript/issues/66).
@@ -209,11 +201,6 @@ MoonScript has [made its way into GitHub](https://github.com/github/linguist/pul
 
 
 # MoonScript v0.2.2 (2012-11-03)
-
-Today marks [MoonScript][1] version 0.2.2, the CoffeeScript inspired language
-that compiles to Lua. It's been approximately 11 months since the last release,
-and I'd like to apologize for the long gap. Hopefully we'll see more frequent
-updates in the future.
 
 ## Changes
 
@@ -264,12 +251,6 @@ updates in the future.
 
 
 # MoonScript v0.2.0 (2011-12-12)
-
-Exactly 3 months ago I released [MoonScript][1]. The CoffeeScript inspired
-language that compiles to Lua. Since then I've both written a lot of MoonScript
-and enhanced the MoonScript compiler.
-
-Today I'm proud to release v0.2.0. I've got a handful of new features and bug fixes.
 
 ## Changes
 
