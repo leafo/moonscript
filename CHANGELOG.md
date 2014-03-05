@@ -5,7 +5,113 @@
 
 Code generation altered.
 
-* colon stub simplified
+Bound functions will avoid creating an anonymous function unless necessary.
+
+```moonscript
+x = hello\world
+```
+
+**Before:**
+
+```lua
+local x = (function()
+  local _base_0 = hello
+  local _fn_0 = _base_0.world
+  return function(...)
+    return _fn_0(_base_0, ...)
+  end
+end)()
+```
+
+**After:**
+
+```lua
+local x
+do
+  local _base_0 = hello
+  local _fn_0 = _base_0.world
+  x = function(...)
+    return _fn_0(_base_0, ...)
+  end
+end
+```
+
+Explicit return statement now avoids creating anonymous function for statements
+where return can be cascaded into the body.
+
+```moon
+->
+  if test1
+    return [x for x in *y]
+
+  if test2
+    return if true
+      "yes"
+    else
+      "no"
+
+  false
+```
+
+
+**Before:**
+
+```moonscript
+local _
+_ = function()
+  if test1 then
+    return (function()
+      local _accum_0 = { }
+      local _len_0 = 1
+      local _list_0 = y
+      for _index_0 = 1, #_list_0 do
+        local x = _list_0[_index_0]
+        _accum_0[_len_0] = x
+        _len_0 = _len_0 + 1
+      end
+      return _accum_0
+    end)()
+  end
+  if test2 then
+    return (function()
+      if true then
+        return "yes"
+      else
+        return "no"
+      end
+    end)()
+  end
+  return false
+end
+```
+
+**After:**
+
+```moonscript
+local _
+_ = function()
+  if test1 then
+    local _accum_0 = { }
+    local _len_0 = 1
+    local _list_0 = y
+    for _index_0 = 1, #_list_0 do
+      local x = _list_0[_index_0]
+      _accum_0[_len_0] = x
+      _len_0 = _len_0 + 1
+    end
+    return _accum_0
+  end
+  if test2 then
+    if true then
+      return "yes"
+    else
+      return "no"
+    end
+  end
+  return false
+end
+```
+
 * return's statement simplified
 
 ## New Things
@@ -18,6 +124,7 @@ Code generation altered.
 
 * Error messages from `moonc` are written to standard error
 * Moonloader correctly throws error when moon file can't be parsed, instead of skipping the module
+* Line number rewriting is no longer incorrectly offset due to multiline strings
 
 # MoonScript v0.2.4 (2013-07-02)
 
@@ -29,7 +136,7 @@ language that compiles to Lua. It's been about 5 months since the last release.
 * The way the subtraction operator works has changed. There was always a little confusion as to the rules regarding whitespace around it and it was recommended to always add whitespace around the operator when doing subtraction. Not anymore. Hopefully it now [works how you would expect](http://moonscript.org/reference/#considerations). (`a-b` compiles to `a - b` and not `a(-b)` anymore).
 * The `moon` library is no longer sets a global variable and instead returns the module. Your code should now be:
 
-```moon
+```moonscript
 moon = require "moon"
 ```
 
@@ -42,7 +149,7 @@ moon = require "moon"
 
 * You can now put line breaks inside of string literals. It will be replaced with `\n` in the generated code.
 
-```moon
+```moonscript
 x = "hello
 world"
 ```
@@ -50,7 +157,7 @@ world"
 * Added `moonscript.base` module. It's a way of including the `moonscript` module without automatically installing the moonloader.
 * You are free to use any whitespace around the name list in an import statement. It has the same rules as an array table, meaning you can delimit names with line breaks.
 
-```moon
+```moonscript
 import a, b
   c, d from z
 ```
@@ -80,7 +187,7 @@ change.
 * For loops when used as expressions will no longer discard nil values when accumulating into an array table. **This is a backwards incompatible change**. Instead you should use the `continue` keyword to filter out iterations you don't want to keep. [Read more here](https://github.com/leafo/moonscript/issues/66).
 * The `moonscript` module no longer sets a global value for `moonscript` and instead returns it. You should update your code:
 
-```moon
+```moonscript
 moonscript = require "moonscript"
 ```
 
@@ -209,7 +316,7 @@ Today I'm proud to release v0.2.0. I've got a handful of new features and bug fi
 
 I'm now including a small set of useful functions in a single module called `moon`:
 
-```moon
+```moonscript
 require "moon"
 ```
 
