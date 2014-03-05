@@ -1235,6 +1235,19 @@ import \add from my_module
 print add 22 -- equivalent to calling my_module\get 22
 ```
 
+When handing multiple imports you can substitute the comma with a newline and
+any amount of whitespace. When working with a lot of imports you might write
+something like this:
+
+```moon
+import
+  assert_csrf
+  assert_timezone
+  not_found
+  require_login
+  from require "helpers"
+```
+
 ## With Statement
 
 A common pattern involving the creation of an object is calling a series of
@@ -1521,24 +1534,26 @@ By default, a file will also implicitly return like a function. This is useful
 for writing modules, where you can put your module's table as the last
 statement in the file so it is returned when loaded with `require`.
 
-
 ### Writing Modules
 
 Lua 5.2 has removed the `module` function for creating modules. It is
 recommended to return a table instead when defining a module.
 
-The `with` statement along with implicit return on a file provides a convenient
-way to do this:
-
+We can cleanly define modules by using the shorthand hash table key/value
+syntax:
 
 ```moonret
--- my_library.moon
-with _M = {}
-  .SOME_CONSTANT = 100
 
-  .some_function = -> print .SOME_CONSTANT
+MY_CONSTANT = "hello"
 
+my_function = -> print "the function"
+my_second_function = -> print "another function"
+
+{ :my_function, :my_second_function, :MY_CONSTANT}
 ```
+
+If you need to forward declare your values so you can access them regardless of
+their written order you can add `local *` to the top of your file.
 
 # MoonScript API
 
@@ -1714,18 +1729,16 @@ $ moon -c test.moon
 
 The following output is produced:
 
-```
-------| @cool.moon
-     1| -- test.moon
-*    2| first = ->
-*    3|   print "hello"
-     4|
-*    5| second = ->
-     6|   print "world"
-     7|
-*    8| first!
-     9|
-```
+    ------| @cool.moon
+         1| -- test.moon
+    *    2| first = ->
+    *    3|   print "hello"
+         4|
+    *    5| second = ->
+         6|   print "world"
+         7|
+    *    8| first!
+         9|
 
 The star next to the line means that it was executed. Blank lines are not
 considered when running so by default they don't get marked as executed.
@@ -1807,14 +1820,12 @@ $ moonc -l lint_example.moon
 
 Outputs:
 
-```
-./lint_example.moon
+    ./lint_example.moon
 
-line 7: accessing global my_nmuber
-==================================
-> 		my_nmuber + 10
+    line 7: accessing global my_nmuber
+    ==================================
+    > 		my_nmuber + 10
 
-```
 
 ##### Global Variable Whitelist
 
