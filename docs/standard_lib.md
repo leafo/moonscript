@@ -1,6 +1,6 @@
     target: reference/standard_lib
     template: reference
-    title: MoonScript v0.2.4 - Standard Library
+    title: MoonScript v0.2.5 - Standard Library
     short_name: stdlib
 --
 

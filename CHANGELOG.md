@@ -1,5 +1,5 @@
 
-# MoonScript v0.2.5 (TBR)
+# MoonScript v0.2.5 (2014-3-5)
 
 ## Changes
 
