@@ -112,8 +112,6 @@ _ = function()
 end
 ```
 
-* return's statement simplified
-
 ## New Things
 
 * New code coverage tool built into `moonc`
