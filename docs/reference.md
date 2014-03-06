@@ -90,7 +90,7 @@ without an escape sequence:
 
 ```moon
 some_string = "Here is a string
-	that has a line break in it."
+  that has a line break in it."
 ```
 
 ## Function Literals
@@ -1769,7 +1769,7 @@ A full list of flags can be seen by passing the `-h` or `--help` flag.
 
 ### Linter
 
-`moonc` contains a [lint](http://en.wikipedia.org/wiki/Lint_(software)) tool
+`moonc` contains a [lint][1] tool
 for statically detecting potential problems with code. The current linter only
 has one test: it detects the use of global variables.
 
@@ -1802,9 +1802,9 @@ Consider the following program with a typo: (`my_number` is spelled wrong as
 my_number = 1234
 
 some_function = ->
-	-- a contrived example with a small chance to pass
-	if math.random() < 0.01
-		my_nmuber + 10
+  -- a contrived example with a small chance to pass
+  if math.random() < 0.01
+    my_nmuber + 10
 
 some_function!
 ```
@@ -1854,12 +1854,12 @@ To create a configuration for Busted we might do something like this:
 ```moononly
 -- lint_config.moon
 {
-	whitelist_globals: {
-		["spec/"]: {
-			"it", "describe", "setup", "teardown",
-			"before_each", "after_each", "pending"
-		}
-	}
+  whitelist_globals: {
+    ["spec/"]: {
+      "it", "describe", "setup", "teardown",
+      "before_each", "after_each", "pending"
+    }
+  }
 }
 ```
 
@@ -1907,4 +1907,4 @@ the allowed globals will be used when linting that file.
     THE SOFTWARE.
 
 
-
+  [1]: http://en.wikipedia.org/wiki/Lint_(software)
