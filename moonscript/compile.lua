@@ -150,38 +150,30 @@ end
 do
   local _base_0 = {
     pos = nil,
-    _append_single = function(self, item)
-      if Line == mtype(item) then
-        if not (self.pos) then
-          self.pos = item.pos
-        end
-        for _index_0 = 1, #item do
-          local value = item[_index_0]
-          self:_append_single(value)
-        end
-      else
-        insert(self, item)
-      end
-      return nil
-    end,
     append_list = function(self, items, delim)
       for i = 1, #items do
-        self:_append_single(items[i])
+        self:append(items[i])
         if i < #items then
           insert(self, delim)
         end
       end
       return nil
     end,
-    append = function(self, ...)
-      local _list_0 = {
-        ...
-      }
-      for _index_0 = 1, #_list_0 do
-        local item = _list_0[_index_0]
-        self:_append_single(item)
+    append = function(self, first, ...)
+      if Line == mtype(first) then
+        if not (self.pos) then
+          self.pos = first.pos
+        end
+        for _index_0 = 1, #first do
+          local value = first[_index_0]
+          self:append(value)
+        end
+      else
+        insert(self, first)
       end
-      return nil
+      if ... then
+        return self:append(...)
+      end
     end,
     render = function(self, buffer)
       local current = { }
@@ -209,7 +201,7 @@ do
           insert(current, chunk)
         end
       end
-      if #current > 0 then
+      if current[1] then
         add_current()
       end
       return buffer

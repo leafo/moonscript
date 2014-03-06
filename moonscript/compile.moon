@@ -97,24 +97,22 @@ class Lines
 class Line
   pos: nil
 
-  _append_single: (item) =>
-    if Line == mtype item
-      -- print "appending line to line", item.pos, item
-      @pos = item.pos unless @pos -- bubble pos if there isn't one
-      @_append_single value for value in *item
-    else
-      insert self, item
-    nil
-
   append_list: (items, delim) =>
     for i = 1,#items
-      @_append_single items[i]
+      @append items[i]
       if i < #items then insert self, delim
     nil
 
-  append: (...) =>
-    @_append_single item for item in *{...}
-    nil
+  append: (first, ...) =>
+    if Line == mtype first
+      -- print "appending line to line", first.pos, first
+      @pos = first.pos unless @pos -- bubble pos if there isn't one
+      @append value for value in *first
+    else
+      insert self, first
+
+    if ...
+      @append ...
 
   -- todo: try to remove concats from here
   render: (buffer) =>
@@ -137,7 +135,7 @@ class Line
         else
           insert current, chunk
 
-    if #current > 0
+    if current[1]
       add_current!
 
     buffer
