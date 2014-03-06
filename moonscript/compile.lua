@@ -61,6 +61,7 @@ do
         local _exp_0 = mtype(l)
         if "string" == _exp_0 or DelayedLine == _exp_0 then
           line_no = line_no + 1
+          out[line_no] = posmap[i]
           for _ in l:gmatch("\n") do
             line_no = line_no + 1
           end
