@@ -33,7 +33,7 @@ to_lua = function(text, options)
   end
   if "string" ~= type(text) then
     local t = type(text)
-    return nil, "expecting string (got " .. t .. ")", 2
+    return nil, "expecting string (got " .. t .. ")"
   end
   local tree, err = parse.string(text)
   if not tree then
@@ -41,7 +41,7 @@ to_lua = function(text, options)
   end
   local code, ltable, pos = compile.tree(tree, options)
   if not code then
-    return nil, compile.format_error(ltable, pos, text), 2
+    return nil, compile.format_error(ltable, pos, text)
   end
   return code, ltable
 end
