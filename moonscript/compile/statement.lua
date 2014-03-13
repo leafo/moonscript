@@ -1,5 +1,4 @@
 local util = require("moonscript.util")
-local data = require("moonscript.data")
 local reversed, unpack
 reversed, unpack = util.reversed, util.unpack
 local ntype

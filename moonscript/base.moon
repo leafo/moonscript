@@ -102,7 +102,7 @@ remove_loader = ->
 
 {
   _NAME: "moonscript"
-  :insert_loader, :remove_loader, :to_lua, :moon_chunk, :moon_loader, :dirsep,
+  :insert_loader, :remove_loader, :to_lua, :moon_loader, :dirsep,
   :dofile, :loadfile, :loadstring
 }
 

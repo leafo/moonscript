@@ -6,8 +6,6 @@ import unpack from require "moonscript.util"
 
 import user_error from require "moonscript.errors"
 
-util = require "moonscript.util"
-
 join = (...) ->
   with out = {}
     i = 1

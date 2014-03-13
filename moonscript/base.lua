@@ -128,7 +128,6 @@ return {
   insert_loader = insert_loader,
   remove_loader = remove_loader,
   to_lua = to_lua,
-  moon_chunk = moon_chunk,
   moon_loader = moon_loader,
   dirsep = dirsep,
   dofile = dofile,

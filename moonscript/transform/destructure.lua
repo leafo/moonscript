@@ -23,7 +23,6 @@ do
   local _obj_0 = require("moonscript.errors")
   user_error = _obj_0.user_error
 end
-local util = require("moonscript.util")
 local join
 join = function(...)
   do

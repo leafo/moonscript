@@ -10,7 +10,6 @@ local types = require"moonscript.types"
 
 local ntype = types.ntype
 
-local dump = util.dump
 local trim = util.trim
 
 local getfenv = util.getfenv
@@ -126,7 +125,7 @@ end
 
 local function extract_line(str, start_pos)
 	str = str:sub(start_pos)
-	m = str:match"^(.-)\n"
+	local m = str:match"^(.-)\n"
 	if m then return m end
 	return str:match"^.-$"
 end
@@ -146,21 +145,6 @@ end
 
 local function pos(patt)
 	return (lpeg.Cp() * patt) / insert_pos
-end
-
-local function got(what)
-	return Cmt("", function(str, pos, ...)
-		local cap = {...}
-		print("++ got "..what, "["..extract_line(str, pos).."]")
-		return true
-	end)
-end
-
-local function flatten(tbl)
-	if #tbl == 1 then
-		return tbl[1]
-	end
-	return tbl
 end
 
 local function flatten_or_mark(name)
@@ -234,7 +218,7 @@ end
 local function simple_string(delim, allow_interpolation)
 	local inner = P('\\'..delim) + "\\\\" + (1 - P(delim))
 	if allow_interpolation then
-		inter = symx"#{" * V"Exp" * sym"}"
+		local inter = symx"#{" * V"Exp" * sym"}"
 		inner = (C((inner - inter)^1) + inter / mark"interpolate")^0
 	else
 		inner = C(inner^0)
@@ -278,16 +262,6 @@ end
 local function wrap_decorator(stm, dec)
 	if not dec then return stm end
 	return { "decorated", stm, dec }
-end
-
--- wrap if statement if there is a conditional decorator
-local function wrap_if(stm, cond)
-	if cond then
-		local pass, fail = unpack(cond)
-		if fail then fail = {"else", {fail}} end
-		return {"if", cond[2], {stm}, fail}
-	end
-	return stm
 end
 
 local function check_lua_string(str, pos, right, left)
@@ -343,18 +317,12 @@ local build_grammar = wrap_env(function()
 		return true
 	end
 
-	local function enable_do(str_pos)
-		_do_stack:push(true)
-		return true
-	end
-
 	local function pop_do(str, pos)
 		if nil == _do_stack:pop() then error("unexpected do pop") end
 		return true
 	end
 
 	local DisableDo = Cmt("", disable_do)
-	local EnableDo = Cmt("", enable_do)
 	local PopDo = Cmt("", pop_do)
 
 	local keywords = {}
