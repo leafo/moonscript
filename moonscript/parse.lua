@@ -147,6 +147,14 @@ local function pos(patt)
 	return (lpeg.Cp() * patt) / insert_pos
 end
 
+local function got(what)
+	return Cmt("", function(str, pos, ...)
+		local cap = {...}
+		print("++ got "..what, "["..extract_line(str, pos).."]")
+		return true
+	end)
+end
+
 local function flatten_or_mark(name)
 	return function(tbl)
 		if #tbl == 1 then return tbl[1] end
