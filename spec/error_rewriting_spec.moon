@@ -59,6 +59,6 @@ describe "line map", ->
 
     lua_code, posmap = assert to_lua moon_code
     -- print util.debug_posmap(posmap, moon_code, lua_code)
-    assert.same {[1]: 7, [7]: 19, [8]: 63}, posmap
+    assert.same {[1]: 7, [2]: 19, [7]: 19, [8]: 63}, posmap
 
 
