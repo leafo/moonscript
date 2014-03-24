@@ -102,7 +102,6 @@ do
             end
           end
           insert(buffer, "\n")
-          local last = l
         elseif Lines == _exp_0 then
           l:flatten(indent and indent .. indent_char or indent_char, buffer)
         else
@@ -696,7 +695,6 @@ tree = function(tree, options)
   if not (success) then
     local error_msg, error_pos
     if type(err) == "table" then
-      local error_type = err[1]
       local _exp_0 = err[1]
       if "user-error" == _exp_0 or "compile-error" == _exp_0 then
         error_msg, error_pos = unpack(err, 2)

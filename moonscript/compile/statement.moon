@@ -1,6 +1,5 @@
 
 util = require "moonscript.util"
-data = require "moonscript.data"
 
 import reversed, unpack from util
 import ntype from require "moonscript.types"

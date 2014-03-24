@@ -76,7 +76,6 @@ class Lines
               insert buffer, ";"
 
           insert buffer, "\n"
-          last = l
         when Lines
            l\flatten indent and indent .. indent_char or indent_char, buffer
         else
@@ -452,7 +451,6 @@ tree = (tree, options={}) ->
 
   unless success
     error_msg, error_pos = if type(err) == "table"
-      error_type = err[1]
       switch err[1]
         when "user-error", "compile-error"
           unpack err, 2
