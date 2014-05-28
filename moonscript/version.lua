@@ -1,5 +1,5 @@
 
-version = "0.2.5"
+local version = "0.2.5"
 
 return {
   version = version,
