@@ -1,7 +1,9 @@
 
-module("moonscript.version", package.seeall)
+local version = "0.2.5"
 
-version = "0.2.5"
-function print_version()
-	print("MoonScript version "..version)
-end
+return {
+  version = version,
+  print_version = function()
+  	print("MoonScript version "..version)
+  end
+}
