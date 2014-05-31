@@ -341,16 +341,20 @@ function create_watcher(files)
 			local mod_time = {}
 			while true do
 				for _, file in ipairs(files) do
-					local time = lfs.attributes(file, "modification")
-					if not mod_time[file] then
-						mod_time[file] = time
-					else
-						if time ~= mod_time[file] then
-							if time > mod_time[file] then
-								coroutine.yield(file)
-								mod_time[file] = time
+					if file then
+						local time = lfs.attributes(file, "modification")
+						if not mod_time[file] then
+							mod_time[file] = time
+						else
+							if time ~= mod_time[file] then
+								if time > mod_time[file] then
+									coroutine.yield(file)
+									mod_time[file] = time
+								end
 							end
 						end
+					else
+						table.remove(files, _)
 					end
 				end
 				sleep(polling_rate)
