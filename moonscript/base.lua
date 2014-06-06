@@ -60,7 +60,7 @@ moon_loader = function(name)
   if file then
     local text = file:read("*a")
     file:close()
-    local res, err = loadstring(text, file_path)
+    local res, err = loadstring(text, "@" .. tostring(file_path))
     if not res then
       error(file_path .. ": " .. err)
     end
@@ -90,7 +90,7 @@ loadfile = function(fname, ...)
   end
   local text = assert(file:read("*a"))
   file:close()
-  return loadstring(text, fname, ...)
+  return loadstring(text, "@" .. tostring(fname), ...)
 end
 dofile = function(...)
   local f = assert(loadfile(...))

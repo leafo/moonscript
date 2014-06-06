@@ -46,7 +46,7 @@ moon_loader = (name) ->
   if file
     text = file\read "*a"
     file\close!
-    res, err = loadstring text, file_path
+    res, err = loadstring text, "@#{file_path}"
     if not res
         error file_path .. ": " .. err
 
@@ -72,7 +72,7 @@ loadfile = (fname, ...) ->
   return nil, err unless file
   text = assert file\read "*a"
   file\close!
-  loadstring text, fname, ...
+  loadstring text, "@#{fname}", ...
 
 -- throws errros
 dofile = (...) ->
