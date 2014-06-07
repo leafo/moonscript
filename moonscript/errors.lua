@@ -78,8 +78,8 @@ rewrite_traceback = function(text, err)
   local cache = { }
   local rewrite_single
   rewrite_single = function(trace)
-    local fname, line, msg = trace:match('^%[string "(.-)"]:(%d+): (.*)$')
-    local tbl = line_tables[fname]
+    local fname, line, msg = trace:match('^(.-):(%d+): (.*)$')
+    local tbl = line_tables["@" .. tostring(fname)]
     if fname and tbl then
       return concat({
         fname,

@@ -56,8 +56,8 @@ rewrite_traceback = (text, err) ->
 
   cache = {} -- loaded file cache
   rewrite_single = (trace) ->
-    fname, line, msg = trace\match '^%[string "(.-)"]:(%d+): (.*)$'
-    tbl = line_tables[fname]
+    fname, line, msg = trace\match '^(.-):(%d+): (.*)$'
+    tbl = line_tables["@#{fname}"]
     if fname and tbl
       concat {
         fname, ":"

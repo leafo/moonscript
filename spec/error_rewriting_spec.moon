@@ -12,11 +12,10 @@ get_rewritten_line_no = (fname) ->
   success, err = pcall chunk
   error "`#{fname}` is supposed to have runtime error!" if success
 
-  source = tonumber err\match "]:(%d+)"
+  source = tonumber err\match "^.-:(%d+):"
 
-  line_table = require("moonscript.line_tables")[fname]
+  line_table = assert require("moonscript.line_tables")["@#{fname}"], "missing line table"
   errors.reverse_line_number fname, line_table, source, {}
-
 
 -- TODO: check entire stack trace
 describe "error rewriting", ->
