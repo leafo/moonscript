@@ -3,6 +3,6 @@ FILE=moonscript-${VERSION}.zip
 
 [ -f "$FILE" ] && rm "$FILE"
 
-zip "$FILE" *.dll *.exe LICENSE README.txt
+zip "$FILE" moonscript.dll lua51.dll *.exe LICENSE README.txt
 
 echo "Wrote $FILE"

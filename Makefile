@@ -2,10 +2,10 @@
 all: moon.exe moonc.exe moonscript.dll
 
 moon.exe: moon.c lfs.o lpeg.o moonscript.h moon.h alt_getopt.h
-	gcc -o $@ $< lfs.o lpeg.o -llua5.1 -O2
+	gcc -o $@ $< lfs.o lpeg.o -llua51 -O2
 
 moonc.exe: moonc.c lfs.o lpeg.o moonscript.h moonc.h alt_getopt.h
-	gcc -o $@ $< lfs.o lpeg.o -llua5.1 -O2
+	gcc -o $@ $< lfs.o lpeg.o -llua51 -O2
 
 moonscript.dll: lpeg.o moonscript.o
 	gcc -o $@ $+ -llua51 -O2 -shared -fpic
