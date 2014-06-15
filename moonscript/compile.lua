@@ -415,8 +415,14 @@ do
       })
       return name
     end,
-    add = function(self, item)
-      self._lines:add(item)
+    add = function(self, item, pos)
+      do
+        local _with_0 = self._lines
+        _with_0:add(item)
+        if pos then
+          _with_0:mark_pos(pos)
+        end
+      end
       return item
     end,
     render = function(self, buffer)

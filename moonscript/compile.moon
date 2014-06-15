@@ -288,9 +288,11 @@ class Block
     @stm {"assign", {name}, {value}}
     name
 
-  -- add a line object
-  add: (item) =>
-    @_lines\add item
+  -- add something to the line buffer
+  add: (item, pos) =>
+    with @_lines
+      \add item
+      \mark_pos pos if pos
     item
 
   -- todo: pass in buffer as argument

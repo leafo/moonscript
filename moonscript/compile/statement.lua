@@ -78,7 +78,7 @@ return {
         _with_0:append(declare)
       else
         if #undeclared > 0 then
-          self:add(declare)
+          self:add(declare, node[-1])
         end
         _with_0:append_list((function()
           local _accum_0 = { }
