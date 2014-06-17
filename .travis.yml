@@ -1,0 +1,8 @@
+language: c
+
+install:
+  - sudo apt-get install luarocks
+  - sudo luarocks install busted
+  - sudo luarocks make
+
+script: busted
