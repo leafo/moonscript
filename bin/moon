@@ -1,10 +1,9 @@
 #!/usr/bin/env lua
 
 require "alt_getopt"
-local moonscript = require "moonscript.base"
 
 local util = require "moonscript.util"
-local errors = require "moonscript.errors"
+
 
 local unpack = util.unpack
 
@@ -53,4 +52,4 @@ local new_arg = {
 	select(ind + 1, unpack(arg))
 }
 
-loader.load(script_fname, opts, new_arg)
+if not loader.load(script_fname, {}, new_arg) then exit(1) end

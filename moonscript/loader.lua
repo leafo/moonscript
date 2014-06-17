@@ -20,7 +20,8 @@ return {
 
         if not passed then
         	print_err(err)
-        	os.exit(1)
+            
+            return false
         end
 
         if not moonscript_chunk then
@@ -28,8 +29,9 @@ return {
         		print_err(lua_parse_error)
         	else
         		print_err("Can't find file: " .. script_fname)
-        	end
-        	os.exit(1)
+            end
+            
+        	return false
         end
 
         util.getfenv(moonscript_chunk).arg = args
@@ -50,7 +52,7 @@ return {
         		cov:start()
         	end
 
-        	xpcall(run_chunk, function(_err)
+        	 xpcall(run_chunk, function(_err)
         		err = _err
         		trace = debug.traceback("", 2)
         	end)
@@ -68,14 +70,20 @@ return {
         				util.trim(trace)
         			}, "\n"))
         		end
+                
+                return false
         	else
         		if cov then
         			cov:stop()
         			cov:print_results()
         		end
+                
+                return true
         	end
         else
-        	run_chunk()
+            if not success then return false end
+            
+        	return run_chunk()
         end
             
     end
