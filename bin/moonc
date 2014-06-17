@@ -180,7 +180,7 @@ function scan_directory(root, collected)
 	collected = collected or {}
 
 	for fname in lfs.dir(root) do
-		if not fname:match("^%.") then 
+		if not fname:match("^%.") then
 			local full_path = root..fname
 
 			if lfs.attributes(full_path, "mode") == "directory" then
@@ -285,7 +285,6 @@ function get_sleep_func()
 	return sleep
 end
 
-
 function plural(count, word)
 	if count ~= 1 then
 		word = word .. "s"
@@ -373,12 +372,12 @@ if opts.w then
 	end
 
 	for fname in protected do
-		local target 
+		local target
 		if opts.o then
-		  target = opts.o
+			target = opts.o
 		else
-  		target = target_dir..convert_path(fname)
-  	end
+			target = target_dir..convert_path(fname)
+		end
 		local success, err = compile_and_write(fname, target)
 		if not success then
 			io.stderr:write(table.concat({
@@ -405,12 +404,12 @@ elseif opts.l then
 	end
 else
 	for _, fname in ipairs(files) do
-	  local target
-	  if opts.o then
-      target = opts.o
-    else
-      target = target_dir..convert_path(fname)
-    end
+		local target
+		if opts.o then
+			target = opts.o
+		else
+			target = target_dir..convert_path(fname)
+		end
 		local success, err = compile_and_write(fname, target)
 		if not success then
 			io.stderr:write(fname .. "\t" .. err .. "\n")
