@@ -9,7 +9,7 @@ local dump_tree = require"moonscript.dump".tree
 local alt_getopt = require "alt_getopt"
 local lfs = require "lfs"
 
-local opts, ind = alt_getopt.get_opts(arg, "lvhwt:pTXb", {
+local opts, ind = alt_getopt.get_opts(arg, "lvhwt:o:pTXb", {
 	print = "p", tree = "T", version = "v", help = "h", lint = "l"
 })
 
@@ -22,6 +22,7 @@ local help = [[Usage: %s [options] files...
     -h          Print this message
     -w          Watch file/directory
     -t path     Specify where to place compiled files
+    -o file     Write output to file
     -p          Write output to standard out
     -T          Write parse tree instead of code (to stdout)
     -X          Write line rewrite map instead of code (to stdout)
@@ -372,7 +373,12 @@ if opts.w then
 	end
 
 	for fname in protected do
-		local target = target_dir..convert_path(fname)
+		local target 
+		if opts.o then
+		  target = opts.o
+		else
+  		target = target_dir..convert_path(fname)
+  	end
 		local success, err = compile_and_write(fname, target)
 		if not success then
 			io.stderr:write(table.concat({
@@ -399,7 +405,13 @@ elseif opts.l then
 	end
 else
 	for _, fname in ipairs(files) do
-		local success, err = compile_and_write(fname, target_dir..convert_path(fname))
+	  local target
+	  if opts.o then
+      target = opts.o
+    else
+      target = target_dir..convert_path(fname)
+    end
+		local success, err = compile_and_write(fname, target)
 		if not success then
 			io.stderr:write(fname .. "\t" .. err .. "\n")
 			os.exit(1)
