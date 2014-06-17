@@ -9,6 +9,8 @@ local dump_tree = require"moonscript.dump".tree
 local alt_getopt = require "alt_getopt"
 local lfs = require "lfs"
 
+local dirsep = package.config:sub(1,1)
+
 local opts, ind = alt_getopt.get_opts(arg, "lvhwt:o:pTXb", {
 	print = "p", tree = "T", version = "v", help = "h", lint = "l"
 })
@@ -54,11 +56,11 @@ function print_help(err)
 end
 
 function mkdir(path)
-	local chunks = util.split(path, "/")
+	local chunks = util.split(path, dirsep)
 	local accum
 
 	for _, dir in ipairs(chunks) do
-		accum = accum and accum.."/"..dir or dir
+		accum = accum and accum.. dirsep ..dir or dir
 		lfs.mkdir(accum)
 	end
 
@@ -66,16 +68,20 @@ function mkdir(path)
 end
 
 function normalize(path)
-	return path:match("(.-)/*$").."/"
+	return path:match("^(.-)" .. dirsep .. "*$")..dirsep
 end
 
 function get_dir(fname)
-	return fname:match("^(.-)[^/]*$")
+	return fname:match("^(.-)[^" .. dirsep .. "]*$")
 end
 
 -- convert .moon to .lua
 function convert_path(path)
-	return (path:gsub("%.moon$", ".lua"))
+	local new_path = path:gsub("%.moon$", ".lua")
+	if new_path == path then
+		new_path = path .. ".lua"
+	end
+	return new_path
 end
 
 function log_msg(...)
@@ -196,33 +202,49 @@ function scan_directory(root, collected)
 	return collected
 end
 
-function append(a, b)
-	for _, v in ipairs(b) do
-		table.insert(a, v)
-	end
-end
-
-function remove_dups(tbl)
+function remove_dups(tbl, key_fn)
 	local hash = {}
 	local final = {}
 
 	for _, v in ipairs(tbl) do
-		if not hash[v] then
+		local dup_key = key_fn and key_fn(v) or v
+		if not hash[dup_key] then
 			table.insert(final, v)
-			hash[v] = true
+			hash[dup_key] = true
 		end
 	end
 
 	return final
 end
 
+-- creates tuples of input and target
 function get_files(fname, files)
 	files = files or {}
 
 	if lfs.attributes(fname, "mode") == "directory" then
-		append(files, scan_directory(fname))
+		local head = fname:match("^(.-)[^" .. dirsep .. "]*" .. dirsep .."?$")
+		for _, sub_fname in ipairs(scan_directory(fname)) do
+			local target_fname = convert_path(sub_fname)
+			if opts.t then
+				if head then
+					local start, stop = target_fname:find(head, 1, true)
+					if start == 1 then
+						target_fname = target_fname:sub(stop + 1)
+					end
+				end
+
+				target_fname = normalize(opts.t) .. target_fname
+			end
+
+			table.insert(files, {sub_fname, target_fname})
+		end
 	else
-		table.insert(files, "./"..fname)
+		local target_fname = convert_path(fname)
+		if opts.t then
+			target_fname = normalize(opts.t) .. target_fname
+		end
+
+		table.insert(files, {fname, target_fname})
 	end
 
 	return files
@@ -268,7 +290,12 @@ for _, input in ipairs(inputs) do
 	get_files(input, files)
 end
 
+require("moon").p(files)
+
+do return end
+
 files = remove_dups(files)
+
 
 function get_sleep_func()
 	local sleep
