@@ -55,62 +55,19 @@ function print_help(err)
 	end
 end
 
-function mkdir(path)
-	local chunks = util.split(path, dirsep)
-	local accum
-
-	for _, dir in ipairs(chunks) do
-		accum = accum and accum.. dirsep ..dir or dir
-		lfs.mkdir(accum)
-	end
-
-	return lfs.attributes(path, "mode")
-end
-
-function normalize(path)
-	return path:match("^(.-)" .. dirsep .. "*$")..dirsep
-end
-
-function parse_dir(fname)
-	return fname:match("^(.-)[^" .. dirsep .. "]*$")
-end
-
-function parse_file(fname)
-	return fname:match("^.-([^" .. dirsep .. "]*)$")
-end
-
-
--- convert .moon to .lua
-function convert_path(path)
-	local new_path = path:gsub("%.moon$", ".lua")
-	if new_path == path then
-		new_path = path .. ".lua"
-	end
-	return new_path
-end
-
 function log_msg(...)
 	if not opts.p then
 		io.stderr:write(table.concat({...}, " ") .. "\n")
 	end
 end
 
-local gettime = nil
-if opts.b then
-	pcall(function()
-		require "socket"
-		gettime = socket.gettime
-	end)
-
-	function format_time(time)
-		return ("%.3fms"):format(time*1000)
-	end
-	if not gettime then
-		print_help"LuaSocket needed for benchmark"
-	end
-else
-	gettime = function() return 0 end
-end
+local moonc = require("moonscript.cmd.moonc")
+local mkdir = moonc.mkdir
+local normalize_dir = moonc.normalize_dir
+local parse_dir = moonc.parse_dir
+local parse_file = moonc.parse_file
+local convert_path = moonc.convert_path
+local compile_file_text = moonc.compile_file_text
 
 function write_file(fname, code)
 	if opts.p then
@@ -125,50 +82,8 @@ function write_file(fname, code)
 		out_f:write(code.."\n")
 		out_f:close()
 	end
-	return true
-end
 
-function compile_file(text, fname)
-	local parse_time = gettime()
-	local tree, err = parse.string(text)
-	parse_time = gettime() - parse_time
-
-	if not tree then
-		return nil, err
-	end
-
-	if opts.T then
-		opts.p = true
-		dump_tree(tree)
-		return ""
-	else
-		local compile_time = gettime()
-		local code, posmap_or_err, err_pos = compile.tree(tree)
-		compile_time = gettime() - compile_time
-
-		if not code then
-			return nil, compile.format_error(posmap_or_err, err_pos, text)
-		end
-
-		if opts.X then
-			opts.p = true
-			print("Pos", "Lua", ">>", "Moon")
-			print(util.debug_posmap(posmap_or_err, text, code))
-			return ""
-		end
-
-		if opts.b then
-			opts.p = true
-			return table.concat({
-				fname,
-				"Parse time  \t" .. format_time(parse_time),
-				"Compile time\t" .. format_time(compile_time),
-				""
-			}, "\n")
-		end
-
-		return code
-	end
+	return "built"
 end
 
 function compile_and_write(from, to)
@@ -178,16 +93,25 @@ function compile_and_write(from, to)
 	end
 	local text = f:read("*a")
 
-	local code, err = compile_file(text, from)
-	if not code then
+	local code, err = compile_file_text(text, from, {
+		benchmark = opts.b,
+		show_posmap = opts.X,
+		show_parse_tree = opts.T,
+	})
+
+	if not code and err then
 		return nil, err
 	end
+
+    if not code then
+        return true
+    end
 
 	return write_file(to, code)
 end
 
 function scan_directory(root, collected)
-	root = normalize(root)
+	root = normalize_dir(root)
 	collected = collected or {}
 
 	for fname in lfs.dir(root) do
@@ -247,7 +171,7 @@ function get_files(fname, files)
 					end
 				end
 
-				target_fname = normalize(opts.t) .. target_fname
+				target_fname = normalize_dir(opts.t) .. target_fname
 			end
 
 			table.insert(files, {sub_fname, target_fname})
@@ -255,7 +179,7 @@ function get_files(fname, files)
 	else
 		local target_fname = convert_path(fname)
 		if opts.t then
-			local prefix = normalize(opts.t)
+			local prefix = normalize_dir(opts.t)
 
 			if is_abs_path(target_fname) then
 				target_fname = parse_file(target_fname)
@@ -426,8 +350,8 @@ if opts.w then
 				err,
 				"\n",
 			}, "\n"))
-		else
-			log_msg("Built:", fname, "->", target)
+		elseif success == "build" then
+			log_msg("Built", fname, "->", target)
 		end
 	end
 
@@ -450,8 +374,8 @@ else
 		if not success then
 			io.stderr:write(fname .. "\t" .. err .. "\n")
 			os.exit(1)
-		else
-			log_msg("Built", fname, "->", target)
+		elseif success == "build" then
+			log_msg("Built", fname)
 		end
 	end
 end
