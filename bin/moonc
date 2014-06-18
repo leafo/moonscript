@@ -67,50 +67,9 @@ local normalize_dir = moonc.normalize_dir
 local parse_dir = moonc.parse_dir
 local parse_file = moonc.parse_file
 local convert_path = moonc.convert_path
-local compile_file_text = moonc.compile_file_text
+local compile_and_write = moonc.compile_and_write
 
-function write_file(fname, code)
-	if opts.p then
-		if code ~= "" then print(code) end
-	else
-		mkdir(parse_dir(fname))
-		local out_f = io.open(fname, "w")
-		if not out_f then
-			return nil, "Failed to write output: "..fname
-		end
-
-		out_f:write(code.."\n")
-		out_f:close()
-	end
-
-	return "built"
-end
-
-function compile_and_write(from, to)
-	local f = io.open(from)
-	if not f then
-		return nil, "Can't find file"
-	end
-	local text = f:read("*a")
-
-	local code, err = compile_file_text(text, from, {
-		benchmark = opts.b,
-		show_posmap = opts.X,
-		show_parse_tree = opts.T,
-	})
-
-	if not code and err then
-		return nil, err
-	end
-
-    if not code then
-        return true
-    end
-
-	return write_file(to, code)
-end
-
-function scan_directory(root, collected)
+local function scan_directory(root, collected)
 	root = normalize_dir(root)
 	collected = collected or {}
 
@@ -131,7 +90,7 @@ function scan_directory(root, collected)
 	return collected
 end
 
-function remove_dups(tbl, key_fn)
+local function remove_dups(tbl, key_fn)
 	local hash = {}
 	local final = {}
 
@@ -156,7 +115,7 @@ local function is_abs_path(path)
 end
 
 -- creates tuples of input and target
-function get_files(fname, files)
+local function get_files(fname, files)
 	files = files or {}
 
 	if lfs.attributes(fname, "mode") == "directory" then
@@ -227,7 +186,7 @@ files = remove_dups(files, function(f)
   return f[2]
 end)
 
-function get_sleep_func()
+local function get_sleep_func()
 	local sleep
 	if not pcall(function()
 		require "socket"
@@ -242,7 +201,7 @@ function get_sleep_func()
 	return sleep
 end
 
-function plural(count, word)
+local function plural(count, word)
 	if count ~= 1 then
 		word = word .. "s"
 	end
@@ -250,7 +209,7 @@ function plural(count, word)
 end
 
 -- returns an iterator that returns files that have been updated
-function create_watcher(files)
+local function create_watcher(files)
 	local msg = "Starting watch loop (Ctrl-C to exit)"
 
 	local inotify

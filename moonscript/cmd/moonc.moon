@@ -4,12 +4,13 @@ lfs = require "lfs"
 
 import split from require "moonscript.util"
 
+local *
+
 dirsep = package.config\sub 1,1
 dirsep_chars = if dirsep == "\\"
   "\\/" -- windows
 else
   dirsep
-
 
 -- similar to mkdir -p
 mkdir = (path) ->
@@ -59,9 +60,9 @@ gettime = do
     else
       nil, "LuaSocket needed for benchmark"
 
--- compiles file to lua
+-- compiles file to lua, returns lua code
 -- returns nil, error on error
--- returns just nil if some option handled the output instead
+-- returns true if some option handled the output instead
 compile_file_text = (text, fname, opts={}) ->
   parse = require "moonscript.parse"
   compile = require "moonscript.compile"
@@ -78,7 +79,7 @@ compile_file_text = (text, fname, opts={}) ->
   if opts.show_parse_tree
     dump = require "moonscript.dump"
     dump.tree tree
-    return nil
+    return true
 
   compile_time = if opts.benchmark
     gettime!
@@ -95,7 +96,7 @@ compile_file_text = (text, fname, opts={}) ->
     import debug_posmap from require "moonscript.util"
     print "Pos", "Lua", ">>", "Moon"
     print debug_posmap posmap_or_err, text, code
-    return nil
+    return true
 
   if opts.benchmark
     print table.concat {
@@ -108,6 +109,39 @@ compile_file_text = (text, fname, opts={}) ->
 
   code
 
+write_file = (fname, code) ->
+  mkdir parse_dir fname
+  f, err = io.open fname, "w"
+  unless f
+    return nil, err
+
+  assert f\write code
+  assert f\write "\n"
+  f\close!
+  "build"
+
+compile_and_write = (src, dest, opts={}) ->
+  f = io.open src
+  unless f
+    return nil, "Can't find file"
+
+  text = assert f\read("*a")
+  f\close!
+
+  code, err = compile_file_text text, opts
+
+  if not code
+    return nil, err
+
+  if code == true
+    return true
+
+  if opts.print
+    print text
+    return true
+
+  write_file dest, code
+
 {
   :dirsep
   :mkdir
@@ -118,5 +152,7 @@ compile_file_text = (text, fname, opts={}) ->
   :convert_path
   :gettime
   :format_time
+
   :compile_file_text
+  :compile_and_write
 }

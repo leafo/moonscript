@@ -4,14 +4,13 @@ do
   local _obj_0 = require("moonscript.util")
   split = _obj_0.split
 end
-local dirsep = package.config:sub(1, 1)
-local dirsep_chars
+local dirsep, dirsep_chars, mkdir, normalize_dir, parse_dir, parse_file, convert_path, format_time, gettime, compile_file_text, write_file, compile_and_write
+dirsep = package.config:sub(1, 1)
 if dirsep == "\\" then
   dirsep_chars = "\\/"
 else
   dirsep_chars = dirsep
 end
-local mkdir
 mkdir = function(path)
   local chunks = split(path, dirsep)
   local accum
@@ -22,19 +21,15 @@ mkdir = function(path)
   end
   return lfs.attributes(path, "mode")
 end
-local normalize_dir
 normalize_dir = function(path)
   return path:match("^(.-)[" .. tostring(dirsep_chars) .. "]*$") .. dirsep
 end
-local parse_dir
 parse_dir = function(path)
   return (path:match("^(.-)[^" .. tostring(dirsep_chars) .. "]*$"))
 end
-local parse_file
 parse_file = function(path)
   return (path:match("^.-([^" .. tostring(dirsep_chars) .. "]*)$"))
 end
-local convert_path
 convert_path = function(path)
   local new_path = path:gsub("%.moon$", ".lua")
   if new_path == path then
@@ -42,11 +37,9 @@ convert_path = function(path)
   end
   return new_path
 end
-local format_time
 format_time = function(time)
   return ("%.3fms"):format(time * 1000)
 end
-local gettime
 do
   local socket
   gettime = function()
@@ -65,7 +58,6 @@ do
     end
   end
 end
-local compile_file_text
 compile_file_text = function(text, fname, opts)
   if opts == nil then
     opts = { }
@@ -86,7 +78,7 @@ compile_file_text = function(text, fname, opts)
   if opts.show_parse_tree then
     local dump = require("moonscript.dump")
     dump.tree(tree)
-    return nil
+    return true
   end
   local compile_time
   if opts.benchmark then
@@ -107,7 +99,7 @@ compile_file_text = function(text, fname, opts)
     end
     print("Pos", "Lua", ">>", "Moon")
     print(debug_posmap(posmap_or_err, text, code))
-    return nil
+    return true
   end
   if opts.benchmark then
     print(table.concat({
@@ -120,6 +112,40 @@ compile_file_text = function(text, fname, opts)
   end
   return code
 end
+write_file = function(fname, code)
+  mkdir(parse_dir(fname))
+  local f, err = io.open(fname, "w")
+  if not (f) then
+    return nil, err
+  end
+  assert(f:write(code))
+  assert(f:write("\n"))
+  f:close()
+  return "build"
+end
+compile_and_write = function(src, dest, opts)
+  if opts == nil then
+    opts = { }
+  end
+  local f = io.open(src)
+  if not (f) then
+    return nil, "Can't find file"
+  end
+  local text = assert(f:read("*a"))
+  f:close()
+  local code, err = compile_file_text(text, opts)
+  if not code then
+    return nil, err
+  end
+  if code == true then
+    return true
+  end
+  if opts.print then
+    print(text)
+    return true
+  end
+  return write_file(dest, code)
+end
 return {
   dirsep = dirsep,
   mkdir = mkdir,
@@ -130,5 +156,6 @@ return {
   convert_path = convert_path,
   gettime = gettime,
   format_time = format_time,
-  compile_file_text = compile_file_text
+  compile_file_text = compile_file_text,
+  compile_and_write = compile_and_write
 }

@@ -31,7 +31,7 @@ describe "moonc", ->
     same moonc.convert_path, "/hello/file.moon", "/hello/file.lua"
     same moonc.convert_path, "/hello/world/file", "/hello/world/file.lua"
 
-  it "chould compile file text", ->
+  it "should compile file text", ->
     assert.same {
       [[return print('hello')]]
     }, {
