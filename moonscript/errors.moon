@@ -12,7 +12,7 @@ user_error = (...) ->
 -- find the line number of `pos` chars into fname
 lookup_line = (fname, pos, cache) ->
   if not cache[fname]
-    with io.open fname
+    with assert io.open(fname)
       cache[fname] = \read "*a"
       \close!
   pos_to_line cache[fname], pos

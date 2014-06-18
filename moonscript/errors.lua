@@ -18,7 +18,7 @@ local lookup_line
 lookup_line = function(fname, pos, cache)
   if not cache[fname] then
     do
-      local _with_0 = io.open(fname)
+      local _with_0 = assert(io.open(fname))
       cache[fname] = _with_0:read("*a")
       _with_0:close()
     end
