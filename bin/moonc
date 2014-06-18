@@ -1,15 +1,7 @@
 #!/usr/bin/env lua
 
-local parse = require "moonscript.parse"
-local compile = require "moonscript.compile"
-local util = require "moonscript.util"
-
-local dump_tree = require"moonscript.dump".tree
-
 local alt_getopt = require "alt_getopt"
 local lfs = require "lfs"
-
-local dirsep = package.config:sub(1,1)
 
 local opts, ind = alt_getopt.get_opts(arg, "lvhwt:o:pTXb", {
 	print = "p", tree = "T", version = "v", help = "h", lint = "l"
@@ -113,15 +105,15 @@ local function get_files(fname, files)
 	if lfs.attributes(fname, "mode") == "directory" then
 		for _, sub_fname in ipairs(scan_directory(fname)) do
 			table.insert(files, {
-                sub_fname,
-                path_to_target(sub_fname, opts.t, fname)
-            })
+				sub_fname,
+				path_to_target(sub_fname, opts.t, fname)
+			})
 		end
 	else
 		table.insert(files, {
-            fname,
-            path_to_target(fname, opts.t)
-        })
+			fname,
+			path_to_target(fname, opts.t)
+		})
 	end
 
 	return files
@@ -130,8 +122,12 @@ end
 if opts.h then print_help() end
 
 if read_stdin then
+	local parse = require "moonscript.parse"
+	local compile = require "moonscript.compile"
+
 	local text = io.stdin:read("*a")
 	local tree, err = parse.string(text)
+
 	if not tree then error(err) end
 	local code, err, pos = compile.tree(tree)
 
@@ -158,7 +154,7 @@ for _, input in ipairs(inputs) do
 end
 
 files = remove_dups(files, function(f)
-  return f[2]
+	return f[2]
 end)
 
 local function get_sleep_func()
@@ -293,7 +289,7 @@ if opts.w then
 elseif opts.l then
 	for _, tuple in pairs(files) do
 		local fname = tuple[1]
-		lint = require "moonscript.cmd.lint"
+		local lint = require "moonscript.cmd.lint"
 		local res, err = lint.lint_file(fname)
 		if res then
 			io.stderr:write(res .. "\n\n")
