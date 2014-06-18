@@ -71,9 +71,14 @@ function normalize(path)
 	return path:match("^(.-)" .. dirsep .. "*$")..dirsep
 end
 
-function get_dir(fname)
+function parse_dir(fname)
 	return fname:match("^(.-)[^" .. dirsep .. "]*$")
 end
+
+function parse_file(fname)
+	return fname:match("^.-([^" .. dirsep .. "]*)$")
+end
+
 
 -- convert .moon to .lua
 function convert_path(path)
@@ -111,7 +116,7 @@ function write_file(fname, code)
 	if opts.p then
 		if code ~= "" then print(code) end
 	else
-		mkdir(get_dir(fname))
+		mkdir(parse_dir(fname))
 		local out_f = io.open(fname, "w")
 		if not out_f then
 			return nil, "Failed to write output: "..fname
@@ -217,6 +222,15 @@ function remove_dups(tbl, key_fn)
 	return final
 end
 
+local function is_abs_path(path)
+	local first = path:sub(1, 1)
+	if dirsep == "\\" then
+		return first == "/" or first == "\\" or path:sub(2,1) == ":"
+	else
+		return first == dirsep
+	end
+end
+
 -- creates tuples of input and target
 function get_files(fname, files)
 	files = files or {}
@@ -241,7 +255,12 @@ function get_files(fname, files)
 	else
 		local target_fname = convert_path(fname)
 		if opts.t then
-			target_fname = normalize(opts.t) .. target_fname
+			local prefix = normalize(opts.t)
+
+			if is_abs_path(target_fname) then
+				target_fname = parse_file(target_fname)
+			end
+			target_fname = prefix .. target_fname
 		end
 
 		table.insert(files, {fname, target_fname})
@@ -275,27 +294,14 @@ if #inputs == 0 then
 	print_help("No files specified")
 end
 
-local target_dir = "."
-if opts.t then
-	if mkdir(opts.t) ~= "directory" then
-		print_help("Invalid target dir")
-	end
-	target_dir = opts.t
-end
-
-target_dir = target_dir.."/"
-
 local files = {}
 for _, input in ipairs(inputs) do
 	get_files(input, files)
 end
 
-require("moon").p(files)
-
-do return end
-
-files = remove_dups(files)
-
+files = remove_dups(files, function(f)
+  return f[2]
+end)
 
 function get_sleep_func()
 	local sleep
@@ -330,9 +336,15 @@ function create_watcher(files)
 
 	if inotify then
 		local dirs = {}
-		for _, fname in ipairs(files) do
-			table.insert(dirs, get_dir(fname))
+
+		for _, tuple in ipairs(files) do
+			local dir = parse_dir(tuple[1])
+			if dir == "" then
+				dir = "./"
+			end
+			table.insert(dirs, dir)
 		end
+
 		dirs = remove_dups(dirs)
 
 		return coroutine.wrap(function()
@@ -347,15 +359,20 @@ function create_watcher(files)
 
 			while true do
 				local events = handle:read()
-				if events then
-					for _, ev in ipairs(events) do
-						local fname = wd_table[ev.wd]..ev.name
-						if fname:match("%.moon$") then
-							coroutine.yield(fname)
-						end
-					end
-				else
+				if not events then
 					break
+				end
+
+				for _, ev in ipairs(events) do
+					local fname = ev.name
+					if fname:match("%.moon$") then
+						local dir = wd_table[ev.wd]
+						if dir ~= "./" then
+							fname = dir .. fname
+						end
+						-- TODO: check to make sure the file was in the original set
+						coroutine.yield(fname)
+					end
 				end
 			end
 		end)
@@ -367,7 +384,8 @@ function create_watcher(files)
 
 			local mod_time = {}
 			while true do
-				for _, file in ipairs(files) do
+				for _, tuple in ipairs(files) do
+					local file = tuple[1]
 					local time = lfs.attributes(file, "modification")
 					if not mod_time[file] then
 						mod_time[file] = time
@@ -390,7 +408,7 @@ if opts.w then
 	local watcher = create_watcher(files)
 	-- catches interrupt error for ctl-c
 	local protected = function()
-		local status, file = pcall(watcher)
+		local status, file = true, watcher()
 		if status then
 			return file
 		elseif file ~= "interrupted!" then
@@ -399,12 +417,7 @@ if opts.w then
 	end
 
 	for fname in protected do
-		local target
-		if opts.o then
-			target = opts.o
-		else
-			target = target_dir..convert_path(fname)
-		end
+		local target = convert_path(fname)
 		local success, err = compile_and_write(fname, target)
 		if not success then
 			io.stderr:write(table.concat({
@@ -420,7 +433,8 @@ if opts.w then
 
 	io.stderr:write("\nQuitting...\n")
 elseif opts.l then
-	for _, fname in pairs(files) do
+	for _, tuple in pairs(files) do
+		local fname = tuple[1]
 		lint = require "moonscript.cmd.lint"
 		local res, err = lint.lint_file(fname)
 		if res then
@@ -430,19 +444,14 @@ elseif opts.l then
 		end
 	end
 else
-	for _, fname in ipairs(files) do
-		local target
-		if opts.o then
-			target = opts.o
-		else
-			target = target_dir..convert_path(fname)
-		end
+	for _, tuple in ipairs(files) do
+		local fname, target = unpack(tuple)
 		local success, err = compile_and_write(fname, target)
 		if not success then
 			io.stderr:write(fname .. "\t" .. err .. "\n")
 			os.exit(1)
 		else
-			log_msg("Built", fname)
+			log_msg("Built", fname, "->", target)
 		end
 	end
 end
