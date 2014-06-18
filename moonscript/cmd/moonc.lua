@@ -4,7 +4,7 @@ do
   local _obj_0 = require("moonscript.util")
   split = _obj_0.split
 end
-local dirsep, dirsep_chars, mkdir, normalize_dir, parse_dir, parse_file, convert_path, format_time, gettime, compile_file_text, write_file, compile_and_write
+local dirsep, dirsep_chars, mkdir, normalize_dir, parse_dir, parse_file, convert_path, format_time, gettime, compile_file_text, write_file, compile_and_write, is_abs_path, path_to_target
 dirsep = package.config:sub(1, 1)
 if dirsep == "\\" then
   dirsep_chars = "\\/"
@@ -146,6 +146,42 @@ compile_and_write = function(src, dest, opts)
   end
   return write_file(dest, code)
 end
+is_abs_path = function(path)
+  local first = path:sub(1, 1)
+  if dirsep == "\\" then
+    return first == "/" or first == "\\" or path:sub(2, 1) == ":"
+  else
+    return first == dirsep
+  end
+end
+path_to_target = function(path, target_dir, base_dir)
+  if target_dir == nil then
+    target_dir = nil
+  end
+  if base_dir == nil then
+    base_dir = nil
+  end
+  local target = convert_path(path)
+  if target_dir then
+    target_dir = normalize_dir(target_dir)
+  end
+  if base_dir and target_dir then
+    local head = base_dir:match("^(.-)[^" .. tostring(dirsep_chars) .. "]*[" .. tostring(dirsep_chars) .. "]?$")
+    if head then
+      local start, stop = target:find(head, 1, true)
+      if start == 1 then
+        target = target:sub(stop + 1)
+      end
+    end
+  end
+  if target_dir then
+    if is_abs_path(target) then
+      target = parse_file(target)
+    end
+    target = target_dir .. target
+  end
+  return target
+end
 return {
   dirsep = dirsep,
   mkdir = mkdir,
@@ -156,6 +192,7 @@ return {
   convert_path = convert_path,
   gettime = gettime,
   format_time = format_time,
+  path_to_target = path_to_target,
   compile_file_text = compile_file_text,
   compile_and_write = compile_and_write
 }

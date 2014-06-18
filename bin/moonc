@@ -68,6 +68,7 @@ local parse_dir = moonc.parse_dir
 local parse_file = moonc.parse_file
 local convert_path = moonc.convert_path
 local compile_and_write = moonc.compile_and_write
+local path_to_target = moonc.path_to_target
 
 local function scan_directory(root, collected)
 	root = normalize_dir(root)
@@ -105,48 +106,22 @@ local function remove_dups(tbl, key_fn)
 	return final
 end
 
-local function is_abs_path(path)
-	local first = path:sub(1, 1)
-	if dirsep == "\\" then
-		return first == "/" or first == "\\" or path:sub(2,1) == ":"
-	else
-		return first == dirsep
-	end
-end
-
 -- creates tuples of input and target
 local function get_files(fname, files)
 	files = files or {}
 
 	if lfs.attributes(fname, "mode") == "directory" then
-		local head = fname:match("^(.-)[^" .. dirsep .. "]*" .. dirsep .."?$")
 		for _, sub_fname in ipairs(scan_directory(fname)) do
-			local target_fname = convert_path(sub_fname)
-			if opts.t then
-				if head then
-					local start, stop = target_fname:find(head, 1, true)
-					if start == 1 then
-						target_fname = target_fname:sub(stop + 1)
-					end
-				end
-
-				target_fname = normalize_dir(opts.t) .. target_fname
-			end
-
-			table.insert(files, {sub_fname, target_fname})
+			table.insert(files, {
+                sub_fname,
+                path_to_target(sub_fname, opts.t, fname)
+            })
 		end
 	else
-		local target_fname = convert_path(fname)
-		if opts.t then
-			local prefix = normalize_dir(opts.t)
-
-			if is_abs_path(target_fname) then
-				target_fname = parse_file(target_fname)
-			end
-			target_fname = prefix .. target_fname
-		end
-
-		table.insert(files, {fname, target_fname})
+		table.insert(files, {
+            fname,
+            path_to_target(fname, opts.t)
+        })
 	end
 
 	return files

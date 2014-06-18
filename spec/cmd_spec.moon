@@ -31,6 +31,26 @@ describe "moonc", ->
     same moonc.convert_path, "/hello/file.moon", "/hello/file.lua"
     same moonc.convert_path, "/hello/world/file", "/hello/world/file.lua"
 
+  it "calculate target", ->
+    p = moonc.path_to_target
+
+    assert.same "test.lua", p "test.moon"
+    assert.same "hello/world.lua", p "hello/world.moon"
+    assert.same "compiled/test.lua", p "test.moon", "compiled"
+
+    assert.same "/home/leafo/test.lua", p "/home/leafo/test.moon"
+    assert.same "compiled/test.lua", p "/home/leafo/test.moon", "compiled"
+    assert.same "/compiled/test.lua", p "/home/leafo/test.moon", "/compiled/"
+
+    assert.same "moonscript/hello.lua", p "moonscript/hello.moon", nil, "moonscript"
+    assert.same "out/moonscript/hello.lua", p "moonscript/hello.moon", "out", "moonscript"
+
+    assert.same "out/moonscript/package/hello.lua",
+      p "moonscript/package/hello.moon", "out", "moonscript/"
+
+    assert.same "/out/moonscript/package/hello.lua",
+      p "/home/leafo/moonscript/package/hello.moon", "/out", "/home/leafo/moonscript"
+
   it "should compile file text", ->
     assert.same {
       [[return print('hello')]]

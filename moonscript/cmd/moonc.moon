@@ -142,6 +142,40 @@ compile_and_write = (src, dest, opts={}) ->
 
   write_file dest, code
 
+is_abs_path = (path) ->
+  first = path\sub 1, 1
+  if dirsep == "\\"
+    first == "/" or first == "\\" or path\sub(2,1) == ":"
+  else
+    first == dirsep
+
+
+-- calcuate where a path should be compiled to
+-- target_dir: the directory to place the file (optional, from -t flag)
+-- base_dir: the directory where the file came from when globbing recursively
+path_to_target = (path, target_dir=nil, base_dir=nil) ->
+  target = convert_path path
+
+  if target_dir
+    target_dir = normalize_dir target_dir
+
+  if base_dir and target_dir
+    -- one directory back
+    head = base_dir\match("^(.-)[^#{dirsep_chars}]*[#{dirsep_chars}]?$")
+
+    if head
+      start, stop = target\find head, 1, true
+      if start == 1
+        target = target\sub(stop + 1)
+
+  if target_dir
+    if is_abs_path target
+      target = parse_file target
+
+    target = target_dir .. target
+
+  target
+
 {
   :dirsep
   :mkdir
@@ -152,6 +186,7 @@ compile_and_write = (src, dest, opts={}) ->
   :convert_path
   :gettime
   :format_time
+  :path_to_target
 
   :compile_file_text
   :compile_and_write
