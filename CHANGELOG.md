@@ -1,4 +1,13 @@
 
+# MoonScript v0.2.6 (2014-6-18)
+
+## Bugs Fixes
+
+* Fixes to posmap generation for multi-line mappings and variable declarations
+* Prefix file name with `@` when loading code so stack traces tread it as file
+* Fix bug where `moonc` couldn't work with absolute paths
+* Improve target file path generation for `moonc`
+
 # MoonScript v0.2.5 (2014-3-5)
 
 ## New Things
