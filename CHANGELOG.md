@@ -1,7 +1,7 @@
 
 # MoonScript v0.2.6 (2014-6-18)
 
-## Bugs Fixes
+## Bug Fixes
 
 * Fixes to posmap generation for multi-line mappings and variable declarations
 * Prefix file name with `@` when loading code so stack traces tread it as file
@@ -16,7 +16,7 @@
 * New [linting tool](http://moonscript.org/reference/#linter) built into `moonc`, identifies global variable references that don't pass whitelist
 * Numbers can have `LL` and `ULL` suffixes for LuaJIT
 
-## Bugs Fixes
+## Bug Fixes
 
 * Error messages from `moonc` are written to standard error
 * Moonloader correctly throws error when moon file can't be parsed, instead of skipping the module
