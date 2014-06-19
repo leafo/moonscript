@@ -118,7 +118,9 @@ local function get_files(fname, files)
 	return files
 end
 
-if opts.h then print_help() end
+if opts.h then
+	print_help()
+end
 
 if read_stdin then
 	local parse = require "moonscript.parse"
@@ -155,6 +157,10 @@ end
 files = remove_dups(files, function(f)
 	return f[2]
 end)
+
+if opts.o and #files > 1 then
+	print_help("-o can not be used with multiple input files")
+end
 
 local function get_sleep_func()
 	local sleep
@@ -271,6 +277,11 @@ if opts.w then
 
 	for fname in protected do
 		local target = path_to_target(fname, opts.t)
+
+		if opts.o then
+			target = opts.o
+		end
+
 		local success, err = compile_and_write(fname, target)
 		if not success then
 			io.stderr:write(table.concat({
@@ -299,6 +310,10 @@ elseif opts.l then
 else
 	for _, tuple in ipairs(files) do
 		local fname, target = unpack(tuple)
+		if opts.o then
+			target = opts.o
+		end
+
 		local success, err = compile_and_write(fname, target)
 		if not success then
 			io.stderr:write(fname .. "\t" .. err .. "\n")
