@@ -58,7 +58,6 @@ local mkdir = moonc.mkdir
 local normalize_dir = moonc.normalize_dir
 local parse_dir = moonc.parse_dir
 local parse_file = moonc.parse_file
-local convert_path = moonc.convert_path
 local compile_and_write = moonc.compile_and_write
 local path_to_target = moonc.path_to_target
 
@@ -271,7 +270,7 @@ if opts.w then
 	end
 
 	for fname in protected do
-		local target = convert_path(fname)
+		local target = path_to_target(fname, opts.t)
 		local success, err = compile_and_write(fname, target)
 		if not success then
 			io.stderr:write(table.concat({
