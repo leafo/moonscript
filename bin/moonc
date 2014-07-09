@@ -314,7 +314,9 @@ else
 			target = opts.o
 		end
 
-		local success, err = compile_and_write(fname, target)
+		local success, err = compile_and_write(fname, target, {
+			print = opts.p
+		})
 		if not success then
 			io.stderr:write(fname .. "\t" .. err .. "\n")
 			os.exit(1)
