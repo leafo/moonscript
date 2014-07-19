@@ -137,7 +137,7 @@ compile_and_write = (src, dest, opts={}) ->
     return true
 
   if opts.print
-    print text
+    print code
     return true
 
   write_file dest, code

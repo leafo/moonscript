@@ -141,7 +141,7 @@ compile_and_write = function(src, dest, opts)
     return true
   end
   if opts.print then
-    print(text)
+    print(code)
     return true
   end
   return write_file(dest, code)
