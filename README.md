@@ -1,5 +1,9 @@
 # MoonScript
 
+[![MoonScript](http://leafo.net/dump/sailormoonscript.png)](http://moonscript.org)
+
+[![Build Status](https://travis-ci.org/leafo/moonscript.svg?branch=master)](https://travis-ci.org/leafo/moonscript)
+
 MoonScript is a programmer friendly language that compiles into
 [Lua](http://www.lua.org/). It gives you the power of the fastest scripting
 language combined with a rich set of features. It runs on Lua 5.1 and 5.2.
