@@ -165,7 +165,7 @@ end
 local function get_sleep_func()
 	local sleep
 	if not pcall(function()
-		require "socket"
+		local socket = require "socket"
 		sleep = socket.sleep
 	end) then
 		-- This is set by moonc.c in windows binaries
