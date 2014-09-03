@@ -26,27 +26,15 @@ do
     local _obj_0 = yeah
     a, b, c, d = _obj_0.a, _obj_0.b, _obj_0.c, _obj_0.d
   end
-  do
-    local _obj_0 = one
-    a = _obj_0[1]
-  end
+  a = one[1]
   local _ = two
-  do
-    local _obj_0 = one
-    b = _obj_0[1]
-  end
+  b = one[1]
   c = nil
-  do
-    local _obj_0 = one
-    d = _obj_0[1]
-  end
+  d = one[1]
   local e = two
   local x = one
   local y
-  do
-    local _obj_0 = two
-    y = _obj_0[1]
-  end
+  y = two[1]
   local xx, yy = 1, 2
   do
     local _obj_0 = {
@@ -77,18 +65,12 @@ do
   name, street, city = futurists.poet.name, futurists.poet.address[1], futurists.poet.address[2]
 end
 do
-  do
-    local _obj_0 = x
-    self.world = _obj_0[1]
-  end
+  self.world = x[1]
   do
     local _obj_0 = x
     a.b, c.y, func().z = _obj_0[1], _obj_0[2], _obj_0[3]
   end
-  do
-    local _obj_0 = x
-    self.world = _obj_0.world
-  end
+  self.world = x.world
 end
 do
   local thing = {

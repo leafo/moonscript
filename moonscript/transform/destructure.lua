@@ -124,7 +124,7 @@ build_assign = function(scope, destruct_literal, receiver)
     values
   }
   local obj
-  if scope:is_local(receiver) then
+  if scope:is_local(receiver) or #extracted_names == 1 then
     obj = receiver
   else
     do
@@ -143,7 +143,13 @@ build_assign = function(scope, destruct_literal, receiver)
   for _index_0 = 1, #extracted_names do
     local tuple = extracted_names[_index_0]
     insert(names, tuple[1])
-    insert(values, NameProxy.chain(obj, unpack(tuple[2])))
+    local chain
+    if obj then
+      chain = NameProxy.chain(obj, unpack(tuple[2]))
+    else
+      chain = "nil"
+    end
+    insert(values, chain)
   end
   return build.group({
     {

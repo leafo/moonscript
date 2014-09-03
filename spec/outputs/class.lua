@@ -687,10 +687,7 @@ do
   _base_0.__class = _class_0
   local self = _class_0
   val = 23
-  do
-    local _obj_0 = table
-    insert = _obj_0.insert
-  end
+  insert = table.insert
   Something = _class_0
 end
 do

@@ -1,8 +1,5 @@
 local hello
-do
-  local _obj_0 = yeah
-  hello = _obj_0.hello
-end
+hello = yeah.hello
 local world
 do
   local _obj_0 = table["cool"]
@@ -34,10 +31,7 @@ local yumm
 a, yumm = 3434, "hello"
 local _table_0 = 232
 local something
-do
-  local _obj_0 = a(table)
-  something = _obj_0.something
-end
+something = a(table).something
 if indent then
   local okay, well
   do

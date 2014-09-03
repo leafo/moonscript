@@ -59,7 +59,7 @@ build_assign = (scope, destruct_literal, receiver) ->
 
   inner = {"assign", names, values}
 
-  obj = if scope\is_local receiver
+  obj = if scope\is_local(receiver) or #extracted_names == 1
     receiver
   else
     with obj = NameProxy "obj"
@@ -70,7 +70,11 @@ build_assign = (scope, destruct_literal, receiver) ->
 
   for tuple in *extracted_names
     insert names, tuple[1]
-    insert values, NameProxy.chain obj, unpack tuple[2]
+    chain = if obj
+      NameProxy.chain obj, unpack tuple[2]
+    else
+      "nil"
+    insert values, chain
 
   build.group {
     {"declare", names}
