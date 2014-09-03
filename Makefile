@@ -9,7 +9,7 @@ global:
 	sudo luarocks make moonscript-dev-1.rockspec
 
 compile::
-	bin/moonc moon/ moonscript/
+	lua5.1 bin/moonc moon/ moonscript/
 
 
 compile_global:

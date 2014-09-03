@@ -1,18 +1,9 @@
 local insert
-do
-  local _obj_0 = table
-  insert = _obj_0.insert
-end
+insert = table.insert
 local Set
-do
-  local _obj_0 = require("moonscript.data")
-  Set = _obj_0.Set
-end
+Set = require("moonscript.data").Set
 local Block
-do
-  local _obj_0 = require("moonscript.compile")
-  Block = _obj_0.Block
-end
+Block = require("moonscript.compile").Block
 local default_whitelist = Set({
   '_G',
   '_VERSION',

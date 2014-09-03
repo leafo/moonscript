@@ -1,8 +1,5 @@
 local concat
-do
-  local _obj_0 = table
-  concat = _obj_0.concat
-end
+concat = table.concat
 local unpack = unpack or table.unpack
 local type = type
 local moon = {

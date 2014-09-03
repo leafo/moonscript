@@ -7,10 +7,7 @@ do
   NameProxy, LocalName = _obj_0.NameProxy, _obj_0.LocalName
 end
 local Set
-do
-  local _obj_0 = require("moonscript.data")
-  Set = _obj_0.Set
-end
+Set = require("moonscript.data").Set
 local ntype, has_value
 do
   local _obj_0 = require("moonscript.types")

@@ -1,13 +1,7 @@
 local build
-do
-  local _obj_0 = require("moonscript.types")
-  build = _obj_0.build
-end
+build = require("moonscript.types").build
 local unpack
-do
-  local _obj_0 = require("moonscript.util")
-  unpack = _obj_0.unpack
-end
+unpack = require("moonscript.util").unpack
 local LocalName
 do
   local _base_0 = {

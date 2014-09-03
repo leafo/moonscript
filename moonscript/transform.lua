@@ -6,10 +6,7 @@ reversed, unpack = util.reversed, util.unpack
 local ntype, mtype, build, smart_node, is_slice, value_is_singular
 ntype, mtype, build, smart_node, is_slice, value_is_singular = types.ntype, types.mtype, types.build, types.smart_node, types.is_slice, types.value_is_singular
 local insert
-do
-  local _obj_0 = table
-  insert = _obj_0.insert
-end
+insert = table.insert
 local NameProxy, LocalName
 do
   local _obj_0 = require("moonscript.transform.names")

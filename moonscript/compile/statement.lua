@@ -2,10 +2,7 @@ local util = require("moonscript.util")
 local reversed, unpack
 reversed, unpack = util.reversed, util.unpack
 local ntype
-do
-  local _obj_0 = require("moonscript.types")
-  ntype = _obj_0.ntype
-end
+ntype = require("moonscript.types").ntype
 local concat, insert
 do
   local _obj_0 = table
