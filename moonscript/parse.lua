@@ -8,6 +8,7 @@ local util = require"moonscript.util"
 local data = require"moonscript.data"
 local types = require"moonscript.types"
 local literals = require "moonscript.parse.literals"
+local parse_util = require "moonscript.parse.util"
 
 local ntype = types.ntype
 local trim = util.trim
@@ -37,23 +38,9 @@ local Shebang = literals.Shebang
 local Name = Space * _Name
 Num = Space * (Num / function(value) return {"number", value} end)
 
-local function count_indent(str)
-	local sum = 0
-	for v in str:gmatch("[\t ]") do
-		if v == ' ' then sum = sum + 1 end
-		if v == '\t' then sum = sum + 4 end
-	end
-	return sum
-end
-
-local Indent = C(S"\t "^0) / count_indent
-
--- can't have P(false) because it causes preceding patterns not to run
-local Cut = P(function() return false end)
-
-local function ensure(patt, finally)
-	return patt * finally + finally * Cut
-end
+local Indent = parse_util.Indent
+local Cut = parse_util.Cut
+local ensure = parse_util.ensure
 
 local function extract_line(str, start_pos)
 	str = str:sub(start_pos)
