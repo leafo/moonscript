@@ -54,14 +54,34 @@ local LinterBlock
 do
   local _parent_0 = Block
   local _base_0 = {
+    lint_mark_used = function(self, name)
+      if self.lint_unused_names and self.lint_unused_names[name] then
+        self.lint_unused_names[name] = false
+        return 
+      end
+      if self.parent then
+        return self.parent:lint_mark_used(name)
+      end
+    end,
     lint_check_unused = function(self)
       if not (self.lint_unused_names and next(self.lint_unused_names)) then
         return 
       end
       local names_by_position = { }
       for name, pos in pairs(self.lint_unused_names) do
-        names_by_position[pos] = names_by_position[pos] or { }
-        insert(names_by_position[pos], name)
+        local _continue_0 = false
+        repeat
+          if not (pos) then
+            _continue_0 = true
+            break
+          end
+          names_by_position[pos] = names_by_position[pos] or { }
+          insert(names_by_position[pos], name)
+          _continue_0 = true
+        until true
+        if not _continue_0 then
+          break
+        end
       end
       local tuples
       do
@@ -109,6 +129,7 @@ do
         _with_0.render = self.render
         _with_0.get_root_block = self.get_root_block
         _with_0.lint_check_unused = self.lint_check_unused
+        _with_0.lint_mark_used = self.lint_mark_used
         _with_0.value_compilers = self.value_compilers
         _with_0.statement_compilers = self.statement_compilers
         return _with_0
@@ -137,12 +158,7 @@ do
               val[-1]
             })
           end
-          do
-            local unused = block.lint_unused_names
-            if unused then
-              unused[name] = nil
-            end
-          end
+          block:lint_mark_used(name)
           return vc.ref(block, val)
         end
       }, {

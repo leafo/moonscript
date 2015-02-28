@@ -69,9 +69,7 @@ class LinterBlock extends Block
             val[-1]
           }
 
-        if unused = block.lint_unused_names
-          unused[name] = nil
-
+        block\lint_mark_used name
         vc.ref block, val
     }, __index: vc
 
@@ -98,12 +96,20 @@ class LinterBlock extends Block
         sc.assign block, node
     }, __index: sc
 
+  lint_mark_used: (name) =>
+    if @lint_unused_names and @lint_unused_names[name]
+      @lint_unused_names[name] = false
+      return
+
+    if @parent
+      @parent\lint_mark_used name
 
   lint_check_unused: =>
     return unless @lint_unused_names and next @lint_unused_names
 
     names_by_position = {}
     for name, pos in pairs @lint_unused_names
+      continue unless pos
       names_by_position[pos] or= {}
       insert names_by_position[pos], name
 
@@ -127,6 +133,7 @@ class LinterBlock extends Block
       .render = @render
       .get_root_block = @get_root_block
       .lint_check_unused = @lint_check_unused
+      .lint_mark_used = @lint_mark_used
       .value_compilers = @value_compilers
       .statement_compilers = @statement_compilers
 
