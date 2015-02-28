@@ -1,5 +1,6 @@
+.PHONY: test local compile watch lint
 
-test::
+test:
 	busted -p "_spec.moon$$"
 
 local: compile
@@ -8,12 +9,11 @@ local: compile
 global:
 	sudo luarocks make moonscript-dev-1.rockspec
 
-compile::
+compile:
 	lua5.1 bin/moonc moon/ moonscript/
-
-
-compile_global:
-	moonc moon/ moonscript/
 
 watch:
 	moonc moon/ moonscript/ && moonc -w moon/ moonscript/
+
+lint:
+	moonc -l moonscript moon
