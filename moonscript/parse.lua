@@ -59,9 +59,6 @@ local Num = P"0x" * R("09", "af", "AF")^1 * (S"uU"^-1 * S"lL"^2)^-1 +
 
 Num = Space * (Num / function(value) return {"number", value} end)
 
-local FactorOp = Space * C(S"+-")
-local TermOp = Space * C(S"*/%^")
-
 local Shebang = P"#!" * P(1 - Stop)^0
 
 -- can't have P(false) because it causes preceding patterns not to run
@@ -436,9 +433,9 @@ local build_grammar = wrap_env(function()
 		Assign = sym"=" * (Ct(With + If + Switch) + Ct(TableBlock + ExpListLow)) / mark"assign",
 		Update = ((sym"..=" + sym"+=" + sym"-=" + sym"*=" + sym"/=" + sym"%=" + sym"or=" + sym"and=") / trim) * Exp / mark"update",
 
-		-- we don't need to parse precedence, lua will handle it for us
-		OtherOps = op"or" + op"and" + op"<=" + op">=" + op"~=" + op"!=" + op"==" + op".." + op"<" + op">",
-		BinaryOperator = (OtherOps + FactorOp + TermOp) * SpaceBreak^0,
+		CharOperators = Space * C(S"+-*/%^><"),
+		WordOperators = op"or" + op"and" + op"<=" + op">=" + op"~=" + op"!=" + op"==" + op"..",
+		BinaryOperator = (WordOperators + CharOperators) * SpaceBreak^0,
 
 		Assignable = Cmt(DotChain + Chain, check_assignable) + Name + SelfName,
 		Exp = Ct(Value * (BinaryOperator * Value)^0) / flatten_or_mark"exp",
