@@ -3,6 +3,8 @@ import insert from table
 import Set from require "moonscript.data"
 import Block from require "moonscript.compile"
 
+{type: mtype} = require("moonscript.util").moon
+
 -- globals allowed to be referenced
 default_whitelist = Set {
   '_G'
@@ -61,17 +63,55 @@ class LinterBlock extends Block
         name = val[2]
         unless block\has_name(name) or whitelist_globals[name] or name\match "%."
           insert @lint_errors, {
-            "accessing global #{name}"
+            "accessing global `#{name}`"
             val[-1]
           }
+
+        if unused = block.lint_unused_names
+          unused[name] = nil
 
         vc.ref block, val
     }, __index: vc
 
+    sc = @statement_compilers
+    @statement_compilers = setmetatable {
+      assign: (block, node) ->
+        _, names, values = unpack node
+        -- extract the names to be declared
+        for name in *names
+          real_name, is_local = block\extract_assign_name name
+          -- already defined in some other scope
+          unless is_local or real_name and not block\has_name real_name, true
+            continue
+
+          block.lint_unused_names or= {}
+          block.lint_unused_names[real_name] = node[-1] or true
+
+        sc.assign block, node
+    }, __index: sc
+
+
+  lint_check_unused: =>
+    for name, pos in pairs @lint_unused_names
+      insert @get_root_block!.lint_errors, {
+        "assigned but unused `#{name}`"
+        pos
+      }
+
+  render: (...) =>
+    @lint_check_unused!
+    super ...
+
   block: (...) =>
+    @get_root_block or= -> @
+
     with super ...
       .block = @block
+      .render = @render
+      .get_root_block = @get_root_block
+      .lint_check_unused = @lint_check_unused
       .value_compilers = @value_compilers
+      .statement_compilers = @statement_compilers
 
 format_lint = (errors, code, header) ->
   return unless next errors
@@ -127,6 +167,8 @@ lint_code = (code, name="string input", whitelist_globals) ->
 
   scope = LinterBlock whitelist_globals
   scope\stms tree
+  scope\lint_check_unused!
+
   format_lint scope.lint_errors, code, name
 
 lint_file = (fname) ->

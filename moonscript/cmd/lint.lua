@@ -4,6 +4,8 @@ local Set
 Set = require("moonscript.data").Set
 local Block
 Block = require("moonscript.compile").Block
+local mtype
+mtype = require("moonscript.util").moon.type
 local default_whitelist = Set({
   '_G',
   '_VERSION',
@@ -52,11 +54,30 @@ local LinterBlock
 do
   local _parent_0 = Block
   local _base_0 = {
+    lint_check_unused = function(self)
+      for name, pos in pairs(self.lint_unused_names) do
+        insert(self:get_root_block().lint_errors, {
+          "assigned but unused `" .. tostring(name) .. "`",
+          pos
+        })
+      end
+    end,
+    render = function(self, ...)
+      self:lint_check_unused()
+      return _parent_0.render(self, ...)
+    end,
     block = function(self, ...)
+      self.get_root_block = self.get_root_block or function()
+        return self
+      end
       do
         local _with_0 = _parent_0.block(self, ...)
         _with_0.block = self.block
+        _with_0.render = self.render
+        _with_0.get_root_block = self.get_root_block
+        _with_0.lint_check_unused = self.lint_check_unused
         _with_0.value_compilers = self.value_compilers
+        _with_0.statement_compilers = self.statement_compilers
         return _with_0
       end
     end
@@ -76,14 +97,46 @@ do
           local name = val[2]
           if not (block:has_name(name) or whitelist_globals[name] or name:match("%.")) then
             insert(self.lint_errors, {
-              "accessing global " .. tostring(name),
+              "accessing global `" .. tostring(name) .. "`",
               val[-1]
             })
+          end
+          do
+            local unused = block.lint_unused_names
+            if unused then
+              unused[name] = nil
+            end
           end
           return vc.ref(block, val)
         end
       }, {
         __index = vc
+      })
+      local sc = self.statement_compilers
+      self.statement_compilers = setmetatable({
+        assign = function(block, node)
+          local _, names, values = unpack(node)
+          for _index_0 = 1, #names do
+            local _continue_0 = false
+            repeat
+              local name = names[_index_0]
+              local real_name, is_local = block:extract_assign_name(name)
+              if not (is_local or real_name and not block:has_name(real_name, true)) then
+                _continue_0 = true
+                break
+              end
+              block.lint_unused_names = block.lint_unused_names or { }
+              block.lint_unused_names[real_name] = node[-1] or true
+              _continue_0 = true
+            until true
+            if not _continue_0 then
+              break
+            end
+          end
+          return sc.assign(block, node)
+        end
+      }, {
+        __index = sc
       })
     end,
     __base = _base_0,
@@ -189,6 +242,7 @@ lint_code = function(code, name, whitelist_globals)
   end
   local scope = LinterBlock(whitelist_globals)
   scope:stms(tree)
+  scope:lint_check_unused()
   return format_lint(scope.lint_errors, code, name)
 end
 local lint_file
