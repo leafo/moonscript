@@ -126,3 +126,35 @@ local xam = {
   ["hello"] = 12354,
   ["hello"] = 12354
 }
+local kam = {
+  hello = 12,
+  goodcheese = "mmm",
+  yeah = 12 + 232,
+  lets = keepit({
+    going = true
+  }, {
+    okay = "yeah"
+  }),
+  more = {
+    1,
+    (function()
+      local _accum_0 = { }
+      local _len_0 = 1
+      for x = 1, 10 do
+        _accum_0[_len_0] = x
+        _len_0 = _len_0 + 1
+      end
+      return _accum_0
+    end)()
+  },
+  [{
+    "one",
+    "two"
+  }] = one_thing(function(self) end)
+}
+return keepit({
+  going = true
+}, {
+  okay = "yeah",
+  workd = "okay"
+})

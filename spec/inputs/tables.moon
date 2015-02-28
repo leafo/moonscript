@@ -102,3 +102,28 @@ xam = {
 }
 
 
+kam = {
+  hello: 12
+  goodcheese:
+    "mmm"
+
+  yeah:
+    12 + 232
+
+  lets:
+    keepit going: true,
+      okay: "yeah"
+
+  more:
+    {
+      1, [x for x=1,10]
+    }
+
+  [{"one", "two"}]:
+    one_thing =>
+}
+
+keepit going: true,
+  okay: "yeah",
+  workd: "okay"
+
