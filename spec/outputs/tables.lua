@@ -152,9 +152,23 @@ local kam = {
     "two"
   }] = one_thing(function(self) end)
 }
-return keepit({
+keepit({
   going = true
 }, {
   okay = "yeah",
   workd = "okay"
 })
+thing({
+  what = "great",
+  no = "more"
+}, {
+  okay = 123
+})
+thing({
+  what = "great",
+  no = "more"
+})
+local _ = {
+  okay = 123
+}
+return nil

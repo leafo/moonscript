@@ -123,7 +123,21 @@ kam = {
     one_thing =>
 }
 
+-- TODO: both of these have undesirable output
 keepit going: true,
   okay: "yeah",
   workd: "okay"
 
+thing what:
+  "great", no:
+    "more"
+          okay: 123
+
+
+-- 
+thing what:
+  "great", no:
+    "more"
+okay: 123 -- a anon table
+
+nil
