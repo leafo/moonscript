@@ -55,6 +55,8 @@ default_whitelist = Set {
 class LinterBlock extends Block
   new: (whitelist_globals=default_whitelist, ...) =>
     super ...
+    @get_root_block = -> @
+
     @lint_errors = {}
 
     vc = @value_compilers
@@ -98,7 +100,8 @@ class LinterBlock extends Block
 
 
   lint_check_unused: =>
-    return unless @lint_unused_names
+    return unless @lint_unused_names and next @lint_unused_names
+
     names_by_position = {}
     for name, pos in pairs @lint_unused_names
       names_by_position[pos] or= {}
@@ -117,10 +120,7 @@ class LinterBlock extends Block
     @lint_check_unused!
     super ...
 
-  get_root_block: => @
-
   block: (...) =>
-    @get_root_block or= -> @
 
     with super ...
       .block = @block

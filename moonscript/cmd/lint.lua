@@ -55,7 +55,7 @@ do
   local _parent_0 = Block
   local _base_0 = {
     lint_check_unused = function(self)
-      if not (self.lint_unused_names) then
+      if not (self.lint_unused_names and next(self.lint_unused_names)) then
         return 
       end
       local names_by_position = { }
@@ -102,13 +102,7 @@ do
       self:lint_check_unused()
       return _parent_0.render(self, ...)
     end,
-    get_root_block = function(self)
-      return self
-    end,
     block = function(self, ...)
-      self.get_root_block = self.get_root_block or function()
-        return self
-      end
       do
         local _with_0 = _parent_0.block(self, ...)
         _with_0.block = self.block
@@ -129,6 +123,9 @@ do
         whitelist_globals = default_whitelist
       end
       _parent_0.__init(self, ...)
+      self.get_root_block = function()
+        return self
+      end
       self.lint_errors = { }
       local vc = self.value_compilers
       self.value_compilers = setmetatable({
