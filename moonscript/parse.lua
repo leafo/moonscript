@@ -436,16 +436,12 @@ local build_grammar = wrap_env(function()
 		Assign = sym"=" * (Ct(With + If + Switch) + Ct(TableBlock + ExpListLow)) / mark"assign",
 		Update = ((sym"..=" + sym"+=" + sym"-=" + sym"*=" + sym"/=" + sym"%=" + sym"or=" + sym"and=") / trim) * Exp / mark"update",
 
-		-- we can ignore precedence for now
+		-- we don't need to parse precedence, lua will handle it for us
 		OtherOps = op"or" + op"and" + op"<=" + op">=" + op"~=" + op"!=" + op"==" + op".." + op"<" + op">",
+		BinaryOperator = (OtherOps + FactorOp + TermOp) * SpaceBreak^0,
 
 		Assignable = Cmt(DotChain + Chain, check_assignable) + Name + SelfName,
-
-		Exp = Ct(Value * ((OtherOps + FactorOp + TermOp) * Value)^0) / flatten_or_mark"exp",
-
-		-- Exp = Ct(Factor * (OtherOps * Factor)^0) / flatten_or_mark"exp",
-		-- Factor = Ct(Term * (FactorOp * Term)^0) / flatten_or_mark"exp",
-		-- Term = Ct(Value * (TermOp * Value)^0) / flatten_or_mark"exp",
+		Exp = Ct(Value * (BinaryOperator * Value)^0) / flatten_or_mark"exp",
 
 		SimpleValue =
 			If + Unless +
