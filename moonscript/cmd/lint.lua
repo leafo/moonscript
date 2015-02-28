@@ -58,9 +58,42 @@ do
       if not (self.lint_unused_names) then
         return 
       end
+      local names_by_position = { }
       for name, pos in pairs(self.lint_unused_names) do
+        names_by_position[pos] = names_by_position[pos] or { }
+        insert(names_by_position[pos], name)
+      end
+      local tuples
+      do
+        local _accum_0 = { }
+        local _len_0 = 1
+        for pos, names in pairs(names_by_position) do
+          _accum_0[_len_0] = {
+            pos,
+            names
+          }
+          _len_0 = _len_0 + 1
+        end
+        tuples = _accum_0
+      end
+      table.sort(tuples, function(a, b)
+        return a[1] < b[1]
+      end)
+      for _index_0 = 1, #tuples do
+        local _des_0 = tuples[_index_0]
+        local pos, names
+        pos, names = _des_0[1], _des_0[2]
         insert(self:get_root_block().lint_errors, {
-          "assigned but unused `" .. tostring(name) .. "`",
+          "assigned but unused " .. tostring(table.concat((function()
+            local _accum_0 = { }
+            local _len_0 = 1
+            for _index_1 = 1, #names do
+              local n = names[_index_1]
+              _accum_0[_len_0] = "`" .. tostring(n) .. "`"
+              _len_0 = _len_0 + 1
+            end
+            return _accum_0
+          end)(), ", ")),
           pos
         })
       end
@@ -68,6 +101,9 @@ do
     render = function(self, ...)
       self:lint_check_unused()
       return _parent_0.render(self, ...)
+    end,
+    get_root_block = function(self)
+      return self
     end,
     block = function(self, ...)
       self.get_root_block = self.get_root_block or function()

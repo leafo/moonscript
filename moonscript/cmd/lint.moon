@@ -99,15 +99,25 @@ class LinterBlock extends Block
 
   lint_check_unused: =>
     return unless @lint_unused_names
+    names_by_position = {}
     for name, pos in pairs @lint_unused_names
+      names_by_position[pos] or= {}
+      insert names_by_position[pos], name
+
+    tuples = [{pos, names} for pos,names in pairs names_by_position]
+    table.sort tuples, (a,b) -> a[1] < b[1]
+
+    for {pos, names} in *tuples
       insert @get_root_block!.lint_errors, {
-        "assigned but unused `#{name}`"
+        "assigned but unused #{table.concat ["`#{n}`" for n in *names], ", "}"
         pos
       }
 
   render: (...) =>
     @lint_check_unused!
     super ...
+
+  get_root_block: => @
 
   block: (...) =>
     @get_root_block or= -> @
