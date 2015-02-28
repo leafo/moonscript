@@ -12,8 +12,8 @@ local literals = require "moonscript.parse.literals"
 local ntype = types.ntype
 local trim = util.trim
 
-local getfenv = util.getfenv
-local setfenv = util.setfenv
+local wrap_env = require("moonscript.parse.env").wrap_env
+
 local unpack = util.unpack
 
 local Stack = data.Stack
@@ -53,58 +53,6 @@ local Cut = P(function() return false end)
 
 local function ensure(patt, finally)
 	return patt * finally + finally * Cut
-end
-
--- auto declare Proper variables with lpeg.V
-local function wrap_env(fn)
-	local env = getfenv(fn)
-	local wrap_name = V
-
-	if debug_grammar then
-		local indent = 0
-		local indent_char = "  "
-
-		local function iprint(...)
-			local args = {...}
-			for i=1,#args do
-				args[i] = tostring(args[i])
-			end
-
-			io.stdout:write(indent_char:rep(indent) .. table.concat(args, ", ") .. "\n")
-		end
-
-		wrap_name = function(name)
-			local v = V(name)
-			v = Cmt("", function()
-				iprint("* " .. name)
-				indent = indent + 1
-				return true
-			end) * Cmt(v, function(str, pos, ...)
-				iprint(name, true)
-				indent = indent - 1
-				return true, ...
-			end) + Cmt("", function()
-				iprint(name, false)
-				indent = indent - 1
-				return false
-			end)
-			return v
-		end
-	end
-
-	return setfenv(fn, setmetatable({}, {
-		__index = function(self, name)
-			local value = env[name]
-			if value ~= nil then return value end
-
-			if name:match"^[A-Z][A-Za-z0-9]*$" then
-				local v = wrap_name(name)
-				rawset(self, name, v)
-				return v
-			end
-			error("unknown variable referenced: "..name)
-		end
-	}))
 end
 
 local function extract_line(str, start_pos)
@@ -268,7 +216,7 @@ end
 
 local err_msg = "Failed to parse:%s\n [%d] >>    %s"
 
-local build_grammar = wrap_env(function()
+local build_grammar = wrap_env(debug_grammar, function()
 	local _indent = Stack(0) -- current indent
 	local _do_stack = Stack(0)
 
