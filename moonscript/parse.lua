@@ -3,6 +3,7 @@ local util = require"moonscript.util"
 
 local lpeg = require"lpeg"
 
+local L = lpeg.luversion and lpeg.L or function(val) return #val end
 local debug_grammar = false
 
 local data = require"moonscript.data"
@@ -38,7 +39,7 @@ local Break = P"\r"^-1 * P"\n"
 local Stop = Break + -1
 local Indent = C(S"\t "^0) / count_indent
 
-local Comment = P"--" * (1 - S"\r\n")^0 * #Stop
+local Comment = P"--" * (1 - S"\r\n")^0 * L(Stop)
 local Space = _Space * Comment^-1
 local SomeSpace = S" \t"^1 * Comment^-1
 
@@ -366,7 +367,7 @@ local build_grammar = wrap_env(function()
 		File = Shebang^-1 * (Block + Ct""),
 		Block = Ct(Line * (Break^1 * Line)^0),
 		CheckIndent = Cmt(Indent, check_indent), -- validates line is in correct indent
-		Line = (CheckIndent * Statement + Space * #Stop),
+		Line = (CheckIndent * Statement + Space * L(Stop)),
 
 		Statement = pos(
 				Import + While + With + For + ForEach + Switch + Return +
@@ -381,7 +382,7 @@ local build_grammar = wrap_env(function()
 
 		Body = Space^-1 * Break * EmptyLine^0 * InBlock + Ct(Statement), -- either a statement, or an indented block
 
-		Advance = #Cmt(Indent, advance_indent), -- Advances the indent, gives back whitespace for CheckIndent
+		Advance = L(Cmt(Indent, advance_indent)), -- Advances the indent, gives back whitespace for CheckIndent
 		PushIndent = Cmt(Indent, push_indent),
 		PreventIndent = Cmt(Cc(-1), push_indent),
 		PopIndent = Cmt("", pop_indent),
