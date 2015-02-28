@@ -1,5 +1,5 @@
 
---
+-- binary ops
 x = 1 + 3
 
 y = 1 +
@@ -46,5 +46,27 @@ v = {
     ->
       "yeah"
     "great"
+  oksy: 3 ^
+2
 }
+
+-- parens
+
+nno = (
+  yeah + 2   )
+
+nn = (
+  yeah + 2
+)
+
+n = hello(
+  b
+) ->
+
+hello a,
+  (
+    yeah +
+      2
+  ) -
+    okay
 

@@ -216,6 +216,7 @@ local function sym(chars)
 	return Space * chars
 end
 
+-- Like sym but doesn't accept whitespace in front
 local function symx(chars)
 	return chars
 end
@@ -482,9 +483,9 @@ local build_grammar = wrap_env(function()
 		LuaStringClose = "]" * P"="^0 * "]",
 
 		Callable = pos(Name / mark"ref") + SelfName + VarArg + Parens / mark"parens",
-		Parens = sym"(" * Exp * sym")",
+		Parens = sym"(" * SpaceBreak^0 * Exp * SpaceBreak^0 * sym")",
 
-		FnArgs = symx"(" * Ct(ExpList^-1) * sym")" + sym"!" * -P"=" * Ct"",
+		FnArgs = symx"(" * SpaceBreak^0 * Ct(ExpList^-1) * SpaceBreak^0 * sym")" + sym"!" * -P"=" * Ct"",
 
 		ChainTail = ChainItem^1 * ColonSuffix^-1 + ColonSuffix,
 

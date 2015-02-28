@@ -20,5 +20,10 @@ local v = {
   color = 1 and function()
     return "yeah"
   end,
-  "great"
+  "great",
+  oksy = 3 ^ 2
 }
+local nno = (yeah + 2)
+local nn = (yeah + 2)
+local n = hello(b)(function() end)
+return hello(a, (yeah + 2) - okay)
