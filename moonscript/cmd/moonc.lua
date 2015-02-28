@@ -182,7 +182,6 @@ return {
   normalize_dir = normalize_dir,
   parse_dir = parse_dir,
   parse_file = parse_file,
-  new_path = new_path,
   convert_path = convert_path,
   gettime = gettime,
   format_time = format_time,

@@ -182,7 +182,6 @@ path_to_target = (path, target_dir=nil, base_dir=nil) ->
   :normalize_dir
   :parse_dir
   :parse_file
-  :new_path
   :convert_path
   :gettime
   :format_time
