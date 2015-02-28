@@ -6,7 +6,8 @@
 
 MoonScript is a programmer friendly language that compiles into
 [Lua](http://www.lua.org/). It gives you the power of the fastest scripting
-language combined with a rich set of features. It runs on Lua 5.1 and 5.2.
+language combined with a rich set of features. It runs on Lua 5.1 and above,
+including alternative runtimes like LuaJIT.
 
 See <http://moonscript.org>.
 
@@ -25,7 +26,7 @@ busted
 
 ## License (MIT)
 
-Copyright (C) 2013 by Leaf Corcoran
+Copyright (C) 2015 by Leaf Corcoran
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
