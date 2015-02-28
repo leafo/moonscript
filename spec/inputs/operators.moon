@@ -31,3 +31,20 @@ print "hello world"
 
 s = thing or
   -> and 234
+
+
+--
+u = {
+  color: 1 and 2 and
+    3
+    4
+  4
+}
+
+v = {
+  color: 1 and
+    ->
+      "yeah"
+    "great"
+}
+

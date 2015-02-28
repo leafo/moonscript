@@ -11,3 +11,14 @@ end
 local p = thing and function() end
 print("hello world")
 local s = thing or function() end and 234
+local u = {
+  color = 1 and 2 and 3,
+  4,
+  4
+}
+local v = {
+  color = 1 and function()
+    return "yeah"
+  end,
+  "great"
+}
