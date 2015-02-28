@@ -129,8 +129,14 @@ get_options = (...) ->
   else
     {}, ...
 
+safe_module = (name, tbl) ->
+  setmetatable tbl, {
+    __index: (key) =>
+      error "Attempted to import non-existent `#{key}` from #{name}"
+  }
+
 {
   :moon, :pos_to_line, :get_closest_line, :get_line, :reversed, :trim, :split,
-  :dump, :debug_posmap, :getfenv, :setfenv, :get_options, :unpack
+  :dump, :debug_posmap, :getfenv, :setfenv, :get_options, :unpack, :safe_module
 }
 

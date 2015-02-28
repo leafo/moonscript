@@ -196,6 +196,14 @@ get_options = function(...)
     return { }, ...
   end
 end
+local safe_module
+safe_module = function(name, tbl)
+  return setmetatable(tbl, {
+    __index = function(self, key)
+      return error("Attempted to import non-existent `" .. tostring(key) .. "` from " .. tostring(name))
+    end
+  })
+end
 return {
   moon = moon,
   pos_to_line = pos_to_line,
@@ -209,5 +217,6 @@ return {
   getfenv = getfenv,
   setfenv = setfenv,
   get_options = get_options,
-  unpack = unpack
+  unpack = unpack,
+  safe_module = safe_module
 }

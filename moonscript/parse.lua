@@ -1,15 +1,15 @@
-
-local util = require"moonscript.util"
+local debug_grammar = false
 
 local lpeg = require"lpeg"
 
-local debug_grammar = false
+lpeg.setmaxstack(10000)
 
+local util = require"moonscript.util"
 local data = require"moonscript.data"
 local types = require"moonscript.types"
+local literals = require "moonscript.parse.literals"
 
 local ntype = types.ntype
-
 local trim = util.trim
 
 local getfenv = util.getfenv
@@ -17,6 +17,25 @@ local setfenv = util.setfenv
 local unpack = util.unpack
 
 local Stack = data.Stack
+
+local R, S, V, P = lpeg.R, lpeg.S, lpeg.V, lpeg.P
+local C, Ct, Cmt, Cg, Cb, Cc = lpeg.C, lpeg.Ct, lpeg.Cmt, lpeg.Cg, lpeg.Cb, lpeg.Cc
+
+local White = literals.White
+local Break = literals.Break
+local Stop = literals.Stop
+local Comment = literals.Comment
+local Space = literals.Space
+local SomeSpace = literals.SomeSpace
+local SpaceBreak = literals.SpaceBreak
+local EmptyLine = literals.EmptyLine
+local AlphaNum = literals.AlphaNum
+local _Name = literals.Name
+local Num = literals.Num
+local Shebang = literals.Shebang
+
+local Name = Space * _Name
+Num = Space * (Num / function(value) return {"number", value} end)
 
 local function count_indent(str)
 	local sum = 0
@@ -27,39 +46,7 @@ local function count_indent(str)
 	return sum
 end
 
-local R, S, V, P = lpeg.R, lpeg.S, lpeg.V, lpeg.P
-local C, Ct, Cmt, Cg, Cb, Cc = lpeg.C, lpeg.Ct, lpeg.Cmt, lpeg.Cg, lpeg.Cb, lpeg.Cc
-
-lpeg.setmaxstack(10000)
-
-local White = S" \t\r\n"^0
-local _Space = S" \t"^0
-local Break = P"\r"^-1 * P"\n"
-local Stop = Break + -1
 local Indent = C(S"\t "^0) / count_indent
-
-local Comment = P"--" * (1 - S"\r\n")^0 * #Stop
-local Space = _Space * Comment^-1
-local SomeSpace = S" \t"^1 * Comment^-1
-
-local SpaceBreak = Space * Break
-local EmptyLine = SpaceBreak
-
-local AlphaNum = R("az", "AZ", "09", "__")
-
-local _Name = C(R("az", "AZ", "__") * AlphaNum^0)
-local Name = Space * _Name
-
-local Num = P"0x" * R("09", "af", "AF")^1 * (S"uU"^-1 * S"lL"^2)^-1 +
-    R"09"^1 * (S"uU"^-1 * S"lL"^2) +
-	(
-		R"09"^1 * (P"." * R"09"^1)^-1 +
-		P"." * R"09"^1
-	) * (S"eE" * P"-"^-1 * R"09"^1)^-1
-
-Num = Space * (Num / function(value) return {"number", value} end)
-
-local Shebang = P"#!" * P(1 - Stop)^0
 
 -- can't have P(false) because it causes preceding patterns not to run
 local Cut = P(function() return false end)

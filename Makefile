@@ -1,7 +1,10 @@
-.PHONY: test local compile watch lint
+.PHONY: test local compile watch lint test_safe
 
 test:
 	busted -p "_spec.moon$$"
+
+test_safe:
+	busted -p "_spec.lua$$"
 
 local: compile
 	luarocks make --local moonscript-dev-1.rockspec
