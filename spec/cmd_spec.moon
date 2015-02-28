@@ -55,7 +55,7 @@ describe "moonc", ->
     assert.same {
       [[return print('hello')]]
     }, {
-      moonc.compile_file_text "print'hello'", "test.moon"
+      moonc.compile_file_text "print'hello'", fname: "test.moon"
     }
 
   describe "stubbed lfs", ->

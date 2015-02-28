@@ -55,7 +55,7 @@ do
     end
   end
 end
-compile_file_text = function(text, fname, opts)
+compile_file_text = function(text, opts)
   if opts == nil then
     opts = { }
   end
@@ -97,7 +97,7 @@ compile_file_text = function(text, fname, opts)
   end
   if opts.benchmark then
     print(table.concat({
-      fname,
+      opts.fname or "stdin",
       "Parse time  \t" .. format_time(parse_time),
       "Compile time\t" .. format_time(compile_time),
       ""

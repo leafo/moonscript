@@ -315,8 +315,13 @@ else
 		end
 
 		local success, err = compile_and_write(fname, target, {
-			print = opts.p
+			print = opts.p,
+			fname = fname,
+			benchmark = opts.b,
+			show_posmap = opts.X,
+			show_parse_tree = opts.T,
 		})
+
 		if not success then
 			io.stderr:write(fname .. "\t" .. err .. "\n")
 			os.exit(1)
