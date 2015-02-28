@@ -167,7 +167,7 @@ do
       local sc = self.statement_compilers
       self.statement_compilers = setmetatable({
         assign = function(block, node)
-          local _, names, values = unpack(node)
+          local names = node[2]
           for _index_0 = 1, #names do
             local _continue_0 = false
             repeat

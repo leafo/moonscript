@@ -277,8 +277,8 @@ local function check_lua_string(str, pos, right, left)
 end
 
 -- :name in table literal
-local function self_assign(name)
-	return {{"key_literal", name}, name}
+local function self_assign(name, pos)
+	return {{"key_literal", name}, {"ref", name, [-1] = pos}}
 end
 
 local err_msg = "Failed to parse:%s\n [%d] >>    %s"
@@ -552,7 +552,7 @@ local build_grammar = wrap_env(function()
 			op"*" + op"^" +
 			Ct(NameList) * (sym"=" * Ct(ExpListLow))^-1) / mark"export",
 
-		KeyValue = (sym":" * -SomeSpace *  Name) / self_assign + Ct((KeyName + sym"[" * Exp * sym"]" + DoubleString + SingleString) * symx":" * (Exp + TableBlock)),
+		KeyValue = (sym":" * -SomeSpace *  Name * lpeg.Cp()) / self_assign + Ct((KeyName + sym"[" * Exp * sym"]" + DoubleString + SingleString) * symx":" * (Exp + TableBlock)),
 		KeyValueList = KeyValue * (sym"," * KeyValue)^0,
 		KeyValueLine = CheckIndent * KeyValueList * sym","^-1,
 
