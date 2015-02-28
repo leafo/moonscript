@@ -44,6 +44,7 @@ class Lines
       switch mtype l
         when "string", DelayedLine
           line_no += 1
+		  line_no += 1 for _ in l\gmatch"\n"
           out[line_no] = posmap[i]
 
           line_no += 1 for _ in l\gmatch"\n"
