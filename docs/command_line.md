@@ -131,9 +131,9 @@ A full list of flags can be seen by passing the `-h` or `--help` flag.
 
 ### Linter
 
-`moonc` contains a [lint][1] tool
-for statically detecting potential problems with code. The current linter only
-has one test: it detects the use of global variables.
+`moonc` contains a [lint][1] tool for statically detecting potential problems
+with code. The linter has two tests: detects accessed global variables,
+detect unused declared variables.
 
 You can execute the linter with the `-l` flag. When the linting flag is
 provided only linting takes place and no compiled code is generated.
@@ -184,7 +184,7 @@ Outputs:
 
     ./lint_example.moon
 
-    line 7: accessing global my_nmuber
+    line 7: accessing global `my_nmuber`
     ==================================
     > 		my_nmuber + 10
 
@@ -245,6 +245,44 @@ that are allowed.
 Multiple patterns in `whitelist_globals` can match a single file, the union of
 the allowed globals will be used when linting that file.
 
+#### Unused Variable Assigns
+
+Sometimes when debugging, refactoring, or just developing, you might leave
+behind stray assignments that aren't actually necessary for the execution of
+your code. It's good practice to clean them up to avoid any potential confusion
+they might cause.
+
+The unused assignment detector keeps track of any variables that are assigned,
+and if they aren't accessed in within their available scope, they are reported
+as an error.
+
+Given the following code:
+
+```moononly
+a, b = 1, 2
+print "hello", a
+```
+
+The linter will identify the problem:
+
+    ./lint_example.moon
+
+    line 1: assigned but unused `b`
+    ===============================
+    > a, b = 1, 2
+
+
+Sometimes you need a name to assign to even though you know it will never be
+accessed.  The linter will treat `_` as a special name that's allowed to be
+written to but never accessed:
+
+The following code would not produce any lint errors:
+
+```moononly
+item = {123, "shoe", "brown", 123}
+_, name, _, count = unpack item
+print name, count
+```
 
   [1]: http://en.wikipedia.org/wiki/Lint_(software)
 
