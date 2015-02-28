@@ -55,6 +55,9 @@ do
   local _parent_0 = Block
   local _base_0 = {
     lint_check_unused = function(self)
+      if not (self.lint_unused_names) then
+        return 
+      end
       for name, pos in pairs(self.lint_unused_names) do
         insert(self:get_root_block().lint_errors, {
           "assigned but unused `" .. tostring(name) .. "`",
@@ -120,13 +123,21 @@ do
             local _continue_0 = false
             repeat
               local name = names[_index_0]
+              if type(name) == "table" and name[1] == "temp_name" then
+                _continue_0 = true
+                break
+              end
               local real_name, is_local = block:extract_assign_name(name)
               if not (is_local or real_name and not block:has_name(real_name, true)) then
                 _continue_0 = true
                 break
               end
+              if real_name == "_" then
+                _continue_0 = true
+                break
+              end
               block.lint_unused_names = block.lint_unused_names or { }
-              block.lint_unused_names[real_name] = node[-1] or true
+              block.lint_unused_names[real_name] = node[-1] or 0
               _continue_0 = true
             until true
             if not _continue_0 then
