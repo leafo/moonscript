@@ -162,6 +162,7 @@ class Block
   export_proper: false
 
   value_compilers: value_compilers
+  statement_compilers: statement_compilers
 
   __tostring: =>
     h = if "string" == type @header
@@ -211,22 +212,28 @@ class Block
     if fn = @_listeners[name]
       fn self, ...
 
+  extract_assign_name: (node) =>
+    is_local = false
+    real_name = switch mtype node
+      when LocalName
+        is_local = true
+        node\get_name self
+      when NameProxy
+        node\get_name self
+      when "table"
+        node[1] == "ref" and node[2]
+      when "string"
+        -- TOOD: some legacy transfomers might use string for ref
+        node
+
+    real_name, is_local
+
   declare: (names) =>
     undeclared = for name in *names
-      is_local = false
-      real_name = switch mtype name
-        when LocalName
-          is_local = true
-          name\get_name self
-        when NameProxy then name\get_name self
-        when "table"
-          name[1] == "ref" and name[2]
-        when "string"
-          -- TODO: don't use string literal as ref
-          name
-
+      real_name, is_local = @extract_assign_name name
       continue unless is_local or real_name and not @has_name real_name, true
-      -- put exported names so they can be assigned to in deeper scope
+      -- this also puts exported names so they can be assigned a new value in
+      -- deeper scope
       @put_name real_name
       continue if @name_exported real_name
       real_name
@@ -322,7 +329,7 @@ class Block
       \append ...
 
   is_stm: (node) =>
-    statement_compilers[ntype node] != nil
+    @statement_compilers[ntype node] != nil
 
   is_value: (node) =>
     t = ntype node
@@ -369,8 +376,8 @@ class Block
     return if not node -- skip blank statements
     node = @transform.statement node
 
-    result = if fn = statement_compilers[ntype(node)]
-      fn self, node, ...
+    result = if fn = @statement_compilers[ntype(node)]
+      fn @, node, ...
     else
       -- coerce value into statement
       if has_value node

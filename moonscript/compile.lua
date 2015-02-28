@@ -256,6 +256,7 @@ do
     export_all = false,
     export_proper = false,
     value_compilers = value_compilers,
+    statement_compilers = statement_compilers,
     __tostring = function(self)
       local h
       if "string" == type(self.header) then
@@ -288,6 +289,22 @@ do
         end
       end
     end,
+    extract_assign_name = function(self, node)
+      local is_local = false
+      local real_name
+      local _exp_0 = mtype(node)
+      if LocalName == _exp_0 then
+        is_local = true
+        real_name = node:get_name(self)
+      elseif NameProxy == _exp_0 then
+        real_name = node:get_name(self)
+      elseif "table" == _exp_0 then
+        real_name = node[1] == "ref" and node[2]
+      elseif "string" == _exp_0 then
+        real_name = node
+      end
+      return real_name, is_local
+    end,
     declare = function(self, names)
       local undeclared
       do
@@ -297,19 +314,7 @@ do
           local _continue_0 = false
           repeat
             local name = names[_index_0]
-            local is_local = false
-            local real_name
-            local _exp_0 = mtype(name)
-            if LocalName == _exp_0 then
-              is_local = true
-              real_name = name:get_name(self)
-            elseif NameProxy == _exp_0 then
-              real_name = name:get_name(self)
-            elseif "table" == _exp_0 then
-              real_name = name[1] == "ref" and name[2]
-            elseif "string" == _exp_0 then
-              real_name = name
-            end
+            local real_name, is_local = self:extract_assign_name(name)
             if not (is_local or real_name and not self:has_name(real_name, true)) then
               _continue_0 = true
               break
@@ -450,7 +455,7 @@ do
       end
     end,
     is_stm = function(self, node)
-      return statement_compilers[ntype(node)] ~= nil
+      return self.statement_compilers[ntype(node)] ~= nil
     end,
     is_value = function(self, node)
       local t = ntype(node)
@@ -516,7 +521,7 @@ do
       node = self.transform.statement(node)
       local result
       do
-        local fn = statement_compilers[ntype(node)]
+        local fn = self.statement_compilers[ntype(node)]
         if fn then
           result = fn(self, node, ...)
         else
