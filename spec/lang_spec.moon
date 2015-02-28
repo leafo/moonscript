@@ -90,12 +90,7 @@ describe "input tests", ->
   
   for name in *inputs
     input = input_fname name
-    fn = if pattern and not input\match pattern
-      pending
-    else
-      it
-
-    fn input .. " #input", ->
+    it input .. " #input", ->
       file_str = read_all input_fname name
 
       parse_time, tree, err = benchmark -> parse.string file_str
