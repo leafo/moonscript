@@ -142,7 +142,7 @@ where return can be cascaded into the body.
 
 **Before:**
 
-```moonscript
+```lua
 local _
 _ = function()
   if test1 then
@@ -173,7 +173,7 @@ end
 
 **After:**
 
-```moonscript
+```lua
 local _
 _ = function()
   if test1 then
