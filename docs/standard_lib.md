@@ -11,7 +11,7 @@ The entire library is currently contained in a single object. We can bring this
 `moon` object into scope by requiring `"moon"`.
 
 ```moon
-require "moon"
+moon = require "moon"
 -- `moon.p` is the debug printer
 moon.p { hello: "world" }
 ```
