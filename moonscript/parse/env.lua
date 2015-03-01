@@ -58,7 +58,6 @@ wrap_env = function(debug, fn)
       end
       if name:match("^[A-Z][A-Za-z0-9]*$") then
         local v = wrap_name(name)
-        rawset(self, name, v)
         return v
       end
       return error("unknown variable referenced: " .. tostring(name))

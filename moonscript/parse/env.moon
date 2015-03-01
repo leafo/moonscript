@@ -41,7 +41,6 @@ wrap_env = (debug, fn) ->
 
       if name\match"^[A-Z][A-Za-z0-9]*$"
         v = wrap_name name
-        rawset @, name, v
         return v
 
       error "unknown variable referenced: #{name}"
