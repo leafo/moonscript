@@ -1,4 +1,71 @@
 
+# MoonScript v0.3.0 (2015-2-28)
+
+## New Features
+
+* New [unused assignment linter](http://moonscript.org/reference/command_line.html#unused_variable_assigns) finds assignments that are never referenced after being defined.
+
+## Parsing Updates
+
+Whitespace parsing has been relaxed in a handful of locations:
+
+* You can put unrestricted whitespace/newlines after operator in a binary operator before writing the right hand side. The following are now valid:
+
+```moonscript
+x = really_long_function! +
+  2304
+
+big_math = 123 /
+  12 -
+  43 * 17
+
+
+bool_exp = nice_shirt and cool_shoes or
+  skateboard and shades
+```
+
+* You can put unrestricted whitespace/newlines immediately after an opening parenthesis, and immediately before closing parenthesis. The following are now valid:
+
+```moonscript
+hello = 100 + (
+  var * 0.23
+) - 15
+
+
+funcall(
+  "height", "age", "weight"
+)
+
+
+takes_two_functions (->
+  print "hello"
+), ->
+  print "world"
+```
+
+* You can put unrestricted whitespace/newlines immediately after a `:` when defining a table literal. The following is now valid:
+
+```moonscript
+x = {
+  hello:
+    call_a_function "football", "hut"
+}
+```
+
+## Code Generation
+
+* Single value `import`/`destructure` compiles directly into single assignment
+
+## Bug Fixes
+
+* Some `moonc` command line flags were being ignored
+* Linter would not report global reference when inside self assign in table
+* Fixed an issue where parser would crash in Lpeg 0.12 when compiling hundreds of times per process
+
+## Misc
+
+* MoonScript parser now written in MoonScript
+
 # MoonScript v0.2.6 (2014-6-18)
 
 ## Bug Fixes
