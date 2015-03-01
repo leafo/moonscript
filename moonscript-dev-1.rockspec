@@ -7,6 +7,7 @@ source = {
 
 description = {
 	summary = "A programmer friendly language that compiles to Lua",
+	detailed = "A programmer friendly language that compiles to Lua",
 	homepage = "http://moonscript.org",
 	maintainer = "Leaf Corcoran <leafot@gmail.com>",
 	license = "MIT"
@@ -37,6 +38,9 @@ build = {
 		["moonscript.errors"] = "moonscript/errors.lua",
 		["moonscript.line_tables"] = "moonscript/line_tables.lua",
 		["moonscript.parse"] = "moonscript/parse.lua",
+		["moonscript.parse.env"] = "moonscript/parse/env.lua",
+		["moonscript.parse.literals"] = "moonscript/parse/literals.lua",
+		["moonscript.parse.util"] = "moonscript/parse/util.lua",
 		["moonscript.transform"] = "moonscript/transform.lua",
 		["moonscript.transform.destructure"] = "moonscript/transform/destructure.lua",
 		["moonscript.transform.names"] = "moonscript/transform/names.lua",
