@@ -41,165 +41,24 @@ Num = Space * (Num / function(value) return {"number", value} end)
 local Indent = parse_util.Indent
 local Cut = parse_util.Cut
 local ensure = parse_util.ensure
-
-local function extract_line(str, start_pos)
-	str = str:sub(start_pos)
-	local m = str:match"^(.-)\n"
-	if m then return m end
-	return str:match"^.-$"
-end
-
-local function mark(name)
-	return function(...)
-		return {name, ...}
-	end
-end
-
-local function insert_pos(pos, value)
-    if type(value) == "table" then
-        value[-1] = pos
-    end
-    return value
-end
-
-local function pos(patt)
-	return (lpeg.Cp() * patt) / insert_pos
-end
-
-local function got(what)
-	return Cmt("", function(str, pos, ...)
-		local cap = {...}
-		print("++ got "..what, "["..extract_line(str, pos).."]")
-		return true
-	end)
-end
-
-local function flatten_or_mark(name)
-	return function(tbl)
-		if #tbl == 1 then return tbl[1] end
-		table.insert(tbl, 1, name)
-		return tbl
-	end
-end
-
--- makes sure the last item in a chain is an index
-local _chain_assignable = { index = true, dot = true, slice = true }
-
-local function is_assignable(node)
-	if node == "..." then
-		return false
-	end
-
-	local t = ntype(node)
-	return t == "ref" or t == "self" or t == "value" or t == "self_class" or
-		t == "chain" and _chain_assignable[ntype(node[#node])] or
-		t == "table"
-end
-
-local function check_assignable(str, pos, value)
-	if is_assignable(value) then
-		return true, value
-	end
-	return false
-end
-
-local flatten_explist = flatten_or_mark"explist"
-local function format_assign(lhs_exps, assign)
-	if not assign then
-		return flatten_explist(lhs_exps)
-	end
-
-	for _, assign_exp in ipairs(lhs_exps) do
-		if not is_assignable(assign_exp) then
-			error {assign_exp, "left hand expression is not assignable"}
-		end
-	end
-
-	local t = ntype(assign)
-	if t == "assign" then
-		return {"assign", lhs_exps, unpack(assign, 2)}
-	elseif t == "update" then
-		return {"update", lhs_exps[1], unpack(assign, 2)}
-	end
-
-	error "unknown assign expression"
-end
-
--- the if statement only takes a single lhs, so we wrap in table to git to
--- "assign" tuple format
-local function format_single_assign(lhs, assign)
-	if assign then
-		return format_assign({lhs}, assign)
-	end
-	return lhs
-end
-
-local function sym(chars)
-	return Space * chars
-end
-
--- Like sym but doesn't accept whitespace in front
-local function symx(chars)
-	return chars
-end
-
-local function simple_string(delim, allow_interpolation)
-	local inner = P('\\'..delim) + "\\\\" + (1 - P(delim))
-	if allow_interpolation then
-		local inter = symx"#{" * V"Exp" * sym"}"
-		inner = (C((inner - inter)^1) + inter / mark"interpolate")^0
-	else
-		inner = C(inner^0)
-	end
-
-	return C(symx(delim)) *
-		inner * sym(delim) / mark"string"
-end
-
-local function wrap_func_arg(value)
-	return {"call", {value}}
-end
-
--- DOCME
-local function flatten_func(callee, args)
-	if #args == 0 then return callee end
-
-	args = {"call", args}
-	if ntype(callee) == "chain" then
-		-- check for colon stub that needs arguments
-		if ntype(callee[#callee]) == "colon_stub" then
-			local stub = callee[#callee]
-			stub[1] = "colon"
-			table.insert(stub, args)
-		else
-			table.insert(callee, args)
-		end
-
-		return callee
-	end
-
-	return {"chain", callee, args}
-end
-
-local function flatten_string_chain(str, chain, args)
-	if not chain then return str end
-	return flatten_func({"chain", str, unpack(chain)}, args)
-end
-
--- transforms a statement that has a line decorator
-local function wrap_decorator(stm, dec)
-	if not dec then return stm end
-	return { "decorated", stm, dec }
-end
-
-local function check_lua_string(str, pos, right, left)
-	return #left == #right
-end
-
--- :name in table literal
-local function self_assign(name, pos)
-	return {{"key_literal", name}, {"ref", name, [-1] = pos}}
-end
+local extract_line = parse_util.extract_line
+local mark = parse_util.mark
+local pos = parse_util.pos
+local got = parse_util.got
+local flatten_or_mark = parse_util.flatten_or_mark
+local is_assignable = parse_util.is_assignable
+local check_assignable = parse_util.check_assignable
+local format_assign = parse_util.format_assign
+local format_single_assign = parse_util.format_single_assign
+local sym = parse_util.sym
+local symx = parse_util.symx
+local simple_string = parse_util.simple_string
+local wrap_func_arg = parse_util.wrap_func_arg
+local flatten_func = parse_util.flatten_func
+local flatten_string_chain = parse_util.flatten_string_chain
+local wrap_decorator = parse_util.wrap_decorator
+local check_lua_string = parse_util.check_lua_string
+local self_assign = parse_util.self_assign
 
 local err_msg = "Failed to parse:%s\n [%d] >>    %s"
 
