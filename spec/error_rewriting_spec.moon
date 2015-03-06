@@ -60,4 +60,12 @@ describe "line map", ->
     -- print util.debug_posmap(posmap, moon_code, lua_code)
     assert.same {[1]: 7, [2]: 19, [7]: 19, [8]: 63}, posmap
 
+describe "error reporting", ->
+  import to_lua from require "moonscript.base"
+  it "should compile bad code twice", ->
+    code, err = to_lua "{b=5}"
+    assert.truthy err
+    code, err2 = to_lua "{b=5}"
+    assert.same err, err2
+
 

@@ -331,14 +331,14 @@ build_grammar = wrap_env debug_grammar, ->
 
       unless tree
         local msg
-        pos = last_pos
+        err_pos = last_pos
 
         if err
           node, msg = unpack err
           msg = " " .. msg if msg
-          pos = node[-1]
+          err_pos = node[-1]
 
-        line_no = pos_to_line str, pos
+        line_no = pos_to_line str, err_pos
         line_str = get_line(str, line_no) or ""
         return nil, err_msg\format msg or "", line_no, trim line_str
 

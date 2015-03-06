@@ -210,16 +210,16 @@ local build_grammar = wrap_env(debug_grammar, function()
       end
       if not (tree) then
         local msg
-        pos = last_pos
+        local err_pos = last_pos
         if err then
           local node
           node, msg = unpack(err)
           if msg then
             msg = " " .. msg
           end
-          pos = node[-1]
+          err_pos = node[-1]
         end
-        local line_no = pos_to_line(str, pos)
+        local line_no = pos_to_line(str, err_pos)
         local line_str = get_line(str, line_no) or ""
         return nil, err_msg:format(msg or "", line_no, trim(line_str))
       end
