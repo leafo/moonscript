@@ -54,6 +54,7 @@ function log_msg(...)
 end
 
 local moonc = require("moonscript.cmd.moonc")
+local util = require "moonscript.util"
 local mkdir = moonc.mkdir
 local normalize_dir = moonc.normalize_dir
 local parse_dir = moonc.parse_dir
@@ -309,7 +310,7 @@ elseif opts.l then
 	end
 else
 	for _, tuple in ipairs(files) do
-		local fname, target = unpack(tuple)
+		local fname, target = util.unpack(tuple)
 		if opts.o then
 			target = opts.o
 		end
