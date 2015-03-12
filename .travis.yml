@@ -4,7 +4,7 @@ install:
   - sudo apt-get install luarocks
   - mkdir -p ~/.luarocks
   - echo 'rocks_servers = { "http://rocks.moonscript.org" }' > ~/.luarocks/config.lua
-  - sudo luarocks install https://rocks.moonscript.org/manifests/olivine-labs/busted-1.11.1-1.rockspec
+  - sudo luarocks install https://rocks.moonscript.org/manifests/olivine-labs/busted-2.0.rc7-0.rockspec
   - sudo luarocks make
 
 script: busted
