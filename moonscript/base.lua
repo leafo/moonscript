@@ -18,14 +18,16 @@ local dirsep, line_tables, create_moonpath, to_lua, moon_loader, loadstring, loa
 dirsep = "/"
 line_tables = require("moonscript.line_tables")
 create_moonpath = function(package_path)
-  local paths = split(package_path, ";")
-  for i, path in ipairs(paths) do
+  local moonpaths = { }
+  local _list_0 = split(package.path, ";")
+  for _index_0 = 1, #_list_0 do
+    local path = _list_0[_index_0]
     local p = path:match("^(.-)%.lua$")
     if p then
-      paths[i] = p .. ".moon"
+      insert(moonpaths, p .. ".moon")
     end
   end
-  return concat(paths, ";")
+  return concat(moonpaths, ";")
 end
 to_lua = function(text, options)
   if options == nil then

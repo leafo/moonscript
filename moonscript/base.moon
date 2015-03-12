@@ -13,11 +13,11 @@ line_tables = require "moonscript.line_tables"
 
 -- create moon path package from lua package path
 create_moonpath = (package_path) ->
-  paths = split package_path, ";"
-  for i, path in ipairs paths
+  moonpaths = {}
+  for path in *split package.path, ";"
     p = path\match "^(.-)%.lua$"
-    if p then paths[i] = p..".moon"
-  concat paths, ";"
+    if p then insert moonpaths, p..".moon"
+  concat moonpaths, ";"
 
 to_lua = (text, options={}) ->
   if "string" != type text
