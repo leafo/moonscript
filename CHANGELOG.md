@@ -1,4 +1,10 @@
 
+# MoonScript v0.3.1 (2015-3-07)
+
+## Bug Fixes
+
+* Fixed a bug where an error from a previous compile would prevent the compiler from running again
+
 # MoonScript v0.3.0 (2015-2-28)
 
 ## New Features
