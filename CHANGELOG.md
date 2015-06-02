@@ -1,4 +1,10 @@
 
+# MoonScript v0.3.2 (2015-6-01)
+
+## Bug Fixes
+
+* `package.moonpath` geneator does not use paths that don't end in `lua`
+
 # MoonScript v0.3.1 (2015-3-07)
 
 ## Bug Fixes
