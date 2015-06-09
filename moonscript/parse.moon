@@ -36,10 +36,13 @@ build_grammar = wrap_env debug_grammar, (root) ->
   _indent = Stack 0
   _do_stack = Stack 0
 
-  last_pos = 0 -- last pos we saw, used to report error location
+  state = {
+    -- last pos we saw, used to report error location
+    last_pos: 0
+  }
 
   check_indent = (str, pos, indent) ->
-    last_pos = pos
+    state.last_pos = pos
     _indent\top! == indent
 
   advance_indent = (str, pos, indent) ->
@@ -101,7 +104,7 @@ build_grammar = wrap_env debug_grammar, (root) ->
   KeyName = SelfName + Space * _Name / mark"key_literal"
   VarArg = Space * P"..." / trim
 
-  P {
+  g = P {
     root or File
     File: Shebang^-1 * (Block + Ct"")
     Block: Ct(Line * (Break^1 * Line)^0)
@@ -315,8 +318,10 @@ build_grammar = wrap_env debug_grammar, (root) ->
     ArgLine: CheckIndent * ExpList
   }
 
+  g, state
+
 file_parser = ->
-  g = build_grammar!
+  g, state = build_grammar!
   file_grammar = White * g * White * -1
 
   {
@@ -333,7 +338,7 @@ file_parser = ->
 
       unless tree
         local msg
-        err_pos = last_pos
+        err_pos = state.last_pos
 
         if err
           node, msg = unpack err

@@ -35,10 +35,12 @@ end
 local build_grammar = wrap_env(debug_grammar, function(root)
   local _indent = Stack(0)
   local _do_stack = Stack(0)
-  local last_pos = 0
+  local state = {
+    last_pos = 0
+  }
   local check_indent
   check_indent = function(str, pos, indent)
-    last_pos = pos
+    state.last_pos = pos
     return _indent:top() == indent
   end
   local advance_indent
@@ -103,7 +105,7 @@ local build_grammar = wrap_env(debug_grammar, function(root)
   local SelfName = Space * "@" * ("@" * (_Name / mark("self_class") + Cc("self.__class")) + _Name / mark("self") + Cc("self"))
   local KeyName = SelfName + Space * _Name / mark("key_literal")
   local VarArg = Space * P("...") / trim
-  return P({
+  local g = P({
     root or File,
     File = Shebang ^ -1 * (Block + Ct("")),
     Block = Ct(Line * (Break ^ 1 * Line) ^ 0),
@@ -196,10 +198,11 @@ local build_grammar = wrap_env(debug_grammar, function(root)
     ArgBlock = ArgLine * (sym(",") * SpaceBreak * ArgLine) ^ 0 * PopIndent,
     ArgLine = CheckIndent * ExpList
   })
+  return g, state
 end)
 local file_parser
 file_parser = function()
-  local g = build_grammar()
+  local g, state = build_grammar()
   local file_grammar = White * g * White * -1
   return {
     match = function(self, str)
@@ -214,7 +217,7 @@ file_parser = function()
       end
       if not (tree) then
         local msg
-        local err_pos = last_pos
+        local err_pos = state.last_pos
         if err then
           local node
           node, msg = unpack(err)
