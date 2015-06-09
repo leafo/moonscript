@@ -14,6 +14,9 @@ global:
 
 compile:
 	lua5.1 bin/moonc moon/ moonscript/
+	echo "#!/usr/bin/env lua" > bin/moon
+	lua5.1 bin/moonc -p bin/moon.moon >> bin/moon
+	echo "-- vim: set filetype=lua:" >> bin/moon
 
 watch:
 	moonc moon/ moonscript/ && moonc -w moon/ moonscript/

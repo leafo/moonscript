@@ -1,16 +1,13 @@
 #!/usr/bin/env lua
-
-require "alt_getopt"
-local moonscript = require "moonscript.base"
-
-local util = require "moonscript.util"
-local errors = require "moonscript.errors"
-
+require("alt_getopt")
+local moonscript = require("moonscript.base")
+local util = require("moonscript.util")
+local errors = require("moonscript.errors")
 local unpack = util.unpack
-
--- moonloader and repl
-local opts, ind = alt_getopt.get_opts(arg, "cvhd", { version = "v", help = "h" })
-
+local opts, ind = alt_getopt.get_opts(arg, "cvhd", {
+  version = "v",
+  help = "h"
+})
 local help = [=[Usage: %s [options] [script [args]]
 
     -h          Print this message
@@ -18,99 +15,108 @@ local help = [=[Usage: %s [options] [script [args]]
     -c          Collect and print code coverage
     -v          Print version
 ]=]
-
-local function print_err(...)
-	local msg = table.concat({...}, "\t")
-	io.stderr:write(msg .. "\n")
+local print_err
+print_err = function(...)
+  local msg = table.concat((function(...)
+    local _accum_0 = { }
+    local _len_0 = 1
+    local _list_0 = {
+      ...
+    }
+    for _index_0 = 1, #_list_0 do
+      local v = _list_0[_index_0]
+      _accum_0[_len_0] = tostring(v)
+      _len_0 = _len_0 + 1
+    end
+    return _accum_0
+  end)(...), "\t")
+  return io.stderr:write(msg .. "\n")
 end
-
-local function print_help(err)
-	if err then print("Error: "..err) end
-	print(help:format(arg[0]))
-	os.exit()
+local print_help
+print_help = function(err)
+  help = help:format(arg[0])
+  if err then
+    print_err(err)
+    print_err(help)
+  else
+    print(help)
+  end
+  return os.exit()
 end
-
-if opts.h then print_help() end
-
-if opts.v then
-	local v = require "moonscript.version"
-	v.print_version()
-	os.exit()
+local run
+run = function()
+  if opts.h then
+    print_help()
+  end
+  if opts.v then
+    require("moonscript.version").print_version()
+    os.exit()
+  end
+  local script_fname = arg[ind]
+  if not (script_fname) then
+    print_help("repl not yet supported")
+  end
+  local new_arg = {
+    [-1] = arg[0],
+    [0] = arg[ind],
+    select(ind + 1, unpack(arg))
+  }
+  local moonscript_chunk, lua_parse_error
+  local passed, err = pcall(function()
+    moonscript_chunk, lua_parse_error = moonscript.loadfile(script_fname, {
+      implicitly_return_root = false
+    })
+  end)
+  if not (passed) then
+    print_err(err)
+    os.exit(1)
+  end
+  if not (moonscript_chunk) then
+    if lua_parse_error then
+      print_err(lua_parse_error)
+    else
+      print_err("Can't file file: " .. tostring(script_fname))
+    end
+    os.exit(1)
+  end
+  util.getfenv(moonscript_chunk).arg = new_arg
+  local run_chunk
+  run_chunk = function()
+    moonscript.insert_loader()
+    moonscript_chunk(unpack(new_arg))
+    return moonscript.remove_loader()
+  end
+  if opts.d then
+    return run_chunk()
+  end
+  local err, trace, cov
+  if opts.c then
+    print("starting coverage")
+    local coverage = require("moonscript.cmd.coverage")
+    cov = coverage.CodeCoverage()
+    cov:start()
+  end
+  xpcall(run_chunk, function(_err)
+    err = _err
+    trace = debug.traceback("", 2)
+  end)
+  if err then
+    local truncated = errors.truncate_traceback(util.trim(trace))
+    local rewritten = errors.rewrite_traceback(truncated, err)
+    if rewritten then
+      return print_err(rewritten)
+    else
+      return print_err(table.concat({
+        err,
+        util.trim(trace)
+      }, "\n"))
+    end
+  else
+    if cov then
+      cov:stop()
+      return cov:print_results()
+    end
+  end
 end
-
-local script_fname = arg[ind]
-if not script_fname then
-	print_help("repl not yet supported")
-	return
-end
-
-local new_arg = {
-	[-1] = arg[0],
-	[0] = arg[ind],
-	select(ind + 1, unpack(arg))
-}
-
-local moonscript_chunk, lua_parse_error
-local passed, err = pcall(function()
-	moonscript_chunk, lua_parse_error = moonscript.loadfile(script_fname, { implicitly_return_root = false })
-end)
-
-if not passed then
-	print_err(err)
-	os.exit(1)
-end
-
-if not moonscript_chunk then
-	if lua_parse_error then
-		print_err(lua_parse_error)
-	else
-		print_err("Can't find file: " .. script_fname)
-	end
-	os.exit(1)
-end
-
-util.getfenv(moonscript_chunk).arg = new_arg
-
-local function run_chunk()
-	moonscript.insert_loader()
-	moonscript_chunk(unpack(new_arg))
-	moonscript.remove_loader()
-end
-
-if not opts.d then
-	local err, trace
-	local cov
-
-	if opts.c then
-		local coverage = require "moonscript.cmd.coverage"
-		cov = coverage.CodeCoverage()
-		cov:start()
-	end
-
-	xpcall(run_chunk, function(_err)
-		err = _err
-		trace = debug.traceback("", 2)
-	end)
-
-	if err then
-		local truncated = errors.truncate_traceback(util.trim(trace))
-		local rewritten = errors.rewrite_traceback(truncated, err)
-
-		if rewritten then
-			print_err(rewritten)
-		else
-			-- faield to rewrite, show original
-			print_err(table.concat({
-				err,
-				util.trim(trace)
-			}, "\n"))
-		end
-	else
-		if cov then
-			cov:stop()
-			cov:print_results()
-		end
-	end
-else
-	run_chunk()
-end
+return run()
+-- vim: set filetype=lua:
