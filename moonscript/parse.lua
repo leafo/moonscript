@@ -32,7 +32,7 @@ do
   local _obj_0 = require("moonscript.parse.util")
   Indent, Cut, ensure, extract_line, mark, pos, flatten_or_mark, is_assignable, check_assignable, format_assign, format_single_assign, sym, symx, simple_string, wrap_func_arg, flatten_func, flatten_string_chain, wrap_decorator, check_lua_string, self_assign = _obj_0.Indent, _obj_0.Cut, _obj_0.ensure, _obj_0.extract_line, _obj_0.mark, _obj_0.pos, _obj_0.flatten_or_mark, _obj_0.is_assignable, _obj_0.check_assignable, _obj_0.format_assign, _obj_0.format_single_assign, _obj_0.sym, _obj_0.symx, _obj_0.simple_string, _obj_0.wrap_func_arg, _obj_0.flatten_func, _obj_0.flatten_string_chain, _obj_0.wrap_decorator, _obj_0.check_lua_string, _obj_0.self_assign
 end
-local build_grammar = wrap_env(debug_grammar, function()
+local build_grammar = wrap_env(debug_grammar, function(root)
   local _indent = Stack(0)
   local _do_stack = Stack(0)
   local last_pos = 0
@@ -103,8 +103,8 @@ local build_grammar = wrap_env(debug_grammar, function()
   local SelfName = Space * "@" * ("@" * (_Name / mark("self_class") + Cc("self.__class")) + _Name / mark("self") + Cc("self"))
   local KeyName = SelfName + Space * _Name / mark("key_literal")
   local VarArg = Space * P("...") / trim
-  local g = P({
-    File,
+  return P({
+    root or File,
     File = Shebang ^ -1 * (Block + Ct("")),
     Block = Ct(Line * (Break ^ 1 * Line) ^ 0),
     CheckIndent = Cmt(Indent, check_indent),
@@ -196,6 +196,10 @@ local build_grammar = wrap_env(debug_grammar, function()
     ArgBlock = ArgLine * (sym(",") * SpaceBreak * ArgLine) ^ 0 * PopIndent,
     ArgLine = CheckIndent * ExpList
   })
+end)
+local file_parser
+file_parser = function()
+  local g = build_grammar()
   local file_grammar = White * g * White * -1
   return {
     match = function(self, str)
@@ -226,10 +230,11 @@ local build_grammar = wrap_env(debug_grammar, function()
       return tree
     end
   }
-end)
+end
 return {
   extract_line = extract_line,
+  build_grammar = build_grammar,
   string = function(str)
-    return build_grammar():match(str)
+    return file_parser():match(str)
   end
 }

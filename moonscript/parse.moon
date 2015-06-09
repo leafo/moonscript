@@ -32,7 +32,7 @@ Num = Space * (Num / (v) -> {"number", v})
 } = require "moonscript.parse.util"
 
 
-build_grammar = wrap_env debug_grammar, ->
+build_grammar = wrap_env debug_grammar, (root) ->
   _indent = Stack 0
   _do_stack = Stack 0
 
@@ -101,8 +101,8 @@ build_grammar = wrap_env debug_grammar, ->
   KeyName = SelfName + Space * _Name / mark"key_literal"
   VarArg = Space * P"..." / trim
 
-  g = P {
-    File
+  P {
+    root or File
     File: Shebang^-1 * (Block + Ct"")
     Block: Ct(Line * (Break^1 * Line)^0)
     CheckIndent: Cmt(Indent, check_indent), -- validates line is in correct indent
@@ -315,6 +315,8 @@ build_grammar = wrap_env debug_grammar, ->
     ArgLine: CheckIndent * ExpList
   }
 
+file_parser = ->
+  g = build_grammar!
   file_grammar = White * g * White * -1
 
   {
@@ -346,10 +348,11 @@ build_grammar = wrap_env debug_grammar, ->
   }
 
 {
-  extract_line: extract_line,
+  :extract_line
+  :build_grammar
 
-  -- parse a string
+  -- parse a string as a file
   -- returns tree, or nil and error message
-  string: (str) -> build_grammar!\match str
+  string: (str) -> file_parser!\match str
 }
 
