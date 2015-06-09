@@ -22,4 +22,4 @@ watch:
 	moonc moon/ moonscript/ && moonc -w moon/ moonscript/
 
 lint:
-	moonc -l moonscript moon
+	moonc -l moonscript moon bin
