@@ -1,5 +1,6 @@
 -- Copyright 2006-2011 Mitchell mitchell<att>caladbolg.net. See LICENSE.
 -- Moonscript lexer by leaf corcoran <http://leafo.net>
+-- 2015 update by ylixir <ylixir@gmail.com>
 
 local l = lexer
 local token, word_match = l.token, l.word_match
@@ -10,14 +11,13 @@ local M = { _NAME = 'moonscript' }
 -- Whitespace.
 local ws = token(l.WHITESPACE, l.space^1)
 
-local longstring = #('[[' + ('[' * P('=')^0 * '['))
-local longstring = longstring * P(function(input, index)
-  local level = input:match('^%[(=*)%[', index)
-  if level then
-    local _, stop = input:find(']'..level..']', index, true)
-    return stop and stop + 1 or #input + 1
-  end
-end)
+-- stolen from the scintillua lua lexer
+local longstring = lpeg.Cmt(
+						'[' * lpeg.C(P('=')^0) * '[',
+						function(input, index, eq)
+							local _, e = input:find(']'..eq..']', index, true)
+							return (e or #input) + 1
+						end)
 
 -- Comments.
 local line_comment = '--' * l.nonnewline^0
@@ -25,8 +25,9 @@ local block_comment = '--' * longstring
 local comment = token(l.COMMENT, block_comment + line_comment)
 
 -- Strings.
-local sq_str = l.delimited_range("'", '\\', true)
-local dq_str = l.delimited_range('"', '\\', true)
+-- false for single_line and false for no_escape
+local sq_str = l.delimited_range("'", false, false)
+local dq_str = l.delimited_range('"', false, false)
 local string = token(l.STRING, sq_str + dq_str + longstring)
 
 -- Numbers.
@@ -106,19 +107,22 @@ M._rules = {
   { 'fndef', fndef },
   { 'symbol', symbol },
   { 'operator', operator },
-  { 'any_char', l.any_char },
+  { 'any_char', l.any },
 }
 
-local style_special = { fore = l.colors.light_blue }
-local style_fndef = { fore = l.colors.green }
+--hardcoding colors is bad form
+local style_special = l.STYLE_NUMBER
+local style_fndef = l.STYLE_FUNCTION
 
 M._tokenstyles = {
-  { 'self_ref', style_special },
-  { 'proper_ident', l.style_class },
-  { 'fndef', style_fndef },
-  { 'symbol', style_fndef },
-  { 'special', style_special },
-  { 'tbl_key', { fore = l.colors.red } },
+  self_ref = style_special,
+  proper_ident = l.STYLE_CLASS,
+  fndef = style_fndef,
+  symbol = style_fndef,
+  special = style_special,
+  tbl_key = l.STYLE_LABEL,
 }
+
+M._FOLDBYINDENTATION = true
 
 return M
