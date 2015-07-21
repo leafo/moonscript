@@ -260,7 +260,8 @@ build_grammar = wrap_env debug_grammar, (root) ->
 
     Invoke: FnArgs/mark"call" +
       SingleString / wrap_func_arg +
-      DoubleString / wrap_func_arg
+      DoubleString / wrap_func_arg +
+      LuaString / wrap_func_arg
 
     TableValue: KeyValue + Ct(Exp)
 
