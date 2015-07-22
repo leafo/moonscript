@@ -70,7 +70,7 @@ compile_file_text = (text, opts={}) ->
   parse_time = if opts.benchmark
     assert gettime!
 
-  if string.sub(opts.fname,-8)==".litmoon"
+  if opts.fname and string.sub(opts.fname,-8)==".litmoon"
     itext=text
     text=""
     for line,_ in itext\gmatch "([^\n]+)"
