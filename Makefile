@@ -1,7 +1,7 @@
 .PHONY: test local compile watch lint test_safe
 
 test:
-	busted -p "_spec.moon$$"
+	busted -p "_spec.l?i?t?moon$$"
 
 test_safe:
 	busted -p "_spec.lua$$"
