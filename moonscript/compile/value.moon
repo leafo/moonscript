@@ -166,6 +166,9 @@ string_chars = {
   number: (node) =>
     node[2]
 
+  bitnot: (node) =>
+    @line "~", @value node[2]
+
   length: (node) =>
     @line "#", @value node[2]
 

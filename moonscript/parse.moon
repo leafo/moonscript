@@ -179,8 +179,8 @@ build_grammar = wrap_env debug_grammar, (root) ->
     Assign: sym"=" * (Ct(With + If + Switch) + Ct(TableBlock + ExpListLow)) / mark"assign"
     Update: ((sym"..=" + sym"+=" + sym"-=" + sym"*=" + sym"/=" + sym"%=" + sym"or=" + sym"and=") / trim) * Exp / mark"update"
 
-    CharOperators: Space * C(S"+-*/%^><")
-    WordOperators: op"or" + op"and" + op"<=" + op">=" + op"~=" + op"!=" + op"==" + op".."
+    CharOperators: Space * C(S"+-*/%^><|&")
+    WordOperators: op"or" + op"and" + op"<=" + op">=" + op"~=" + op"!=" + op"==" + op".." + op"<<" + op">>" + op"//"
     BinaryOperator: (WordOperators + CharOperators) * SpaceBreak^0
 
     Assignable: Cmt(DotChain + Chain, check_assignable) + Name + SelfName
@@ -195,6 +195,7 @@ build_grammar = wrap_env debug_grammar, (root) ->
       Cmt(Do, check_do) +
       sym"-" * -SomeSpace * Exp / mark"minus" +
       sym"#" * Exp / mark"length" +
+      sym"~" * Exp / mark"bitnot" +
       key"not" * Exp / mark"not" +
       TblComprehension +
       TableLit +

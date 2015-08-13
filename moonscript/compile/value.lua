@@ -276,6 +276,9 @@ return {
   number = function(self, node)
     return node[2]
   end,
+  bitnot = function(self, node)
+    return self:line("~", self:value(node[2]))
+  end,
   length = function(self, node)
     return self:line("#", self:value(node[2]))
   end,
