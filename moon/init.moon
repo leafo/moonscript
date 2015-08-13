@@ -41,7 +41,7 @@ debug = setmetatable {
 
 -- run a function with scope injected before its function environment
 run_with_scope = (fn, scope, ...) ->
-  old_env = getfenv fn
+  old_env = util.getfenv fn
   env = setmetatable {}, {
     __index: (name) =>
       val = scope[name]
@@ -50,7 +50,7 @@ run_with_scope = (fn, scope, ...) ->
       else
         old_env[name]
   }
-  setfenv fn, env
+  util.setfenv fn, env
   fn ...
 
 -- wrap obj such that calls to methods do not need a reference to self

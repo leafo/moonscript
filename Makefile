@@ -13,9 +13,9 @@ global:
 	sudo luarocks make moonscript-dev-1.rockspec
 
 compile:
-	lua5.1 bin/moonc moon/ moonscript/
+	lua bin/moonc moon/ moonscript/
 	echo "#!/usr/bin/env lua" > bin/moon
-	lua5.1 bin/moonc -p bin/moon.moon >> bin/moon
+	lua bin/moonc -p bin/moon.moon >> bin/moon
 	echo "-- vim: set filetype=lua:" >> bin/moon
 
 watch:
