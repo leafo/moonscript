@@ -291,7 +291,7 @@ build_grammar = wrap_env debug_grammar, (root) ->
       op"*" + op"^" +
       Ct(NameList) * (sym"=" * Ct(ExpListLow))^-1) / mark"export"
 
-    KeyValue: (sym":" * -SomeSpace *  Name * lpeg.Cp()) / self_assign + Ct((KeyName + sym"[" * Exp * sym"]" + DoubleString + SingleString) * symx":" * (Exp + TableBlock + SpaceBreak^1 * Exp))
+    KeyValue: (sym":" * -SomeSpace *  Name * lpeg.Cp!) / self_assign + Ct((KeyName + sym"[" * Exp * sym"]" + DoubleString + SingleString) * symx":" * (Exp + TableBlock + SpaceBreak^1 * Exp))
     KeyValueList: KeyValue * (sym"," * KeyValue)^0
     KeyValueLine: CheckIndent * KeyValueList * sym","^-1
 
