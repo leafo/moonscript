@@ -713,11 +713,11 @@ Statement = Transformer({
     end
     scope_name = scope_name or NameProxy("with")
     return build["do"]({
+      copy_scope and build.assign_one(scope_name, exp) or NOOP,
+      named_assign or NOOP,
       Run(function(self)
         return self:set("scope_var", scope_name)
       end),
-      copy_scope and build.assign_one(scope_name, exp) or NOOP,
-      named_assign or NOOP,
       build.group(block),
       (function()
         if ret then
