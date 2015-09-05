@@ -418,9 +418,9 @@ Statement = Transformer {
     scope_name or= NameProxy "with"
 
     build.do {
-      Run => @set "scope_var", scope_name
       copy_scope and build.assign_one(scope_name, exp) or NOOP
       named_assign or NOOP
+      Run => @set "scope_var", scope_name
       build.group block
 
       if ret
