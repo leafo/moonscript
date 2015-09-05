@@ -131,6 +131,26 @@ do
     local _with_0 = "jo"
     k.j = _with_0
     print(_with_0:upper())
+  end
+end
+do
+  do
+    local _with_0 = a
+    print(_with_0.b)
+    do
+      local _with_1 = _with_0.c
+      print(_with_1.d)
+    end
+  end
+end
+do
+  do
+    local _with_0 = a
+    do
+      local _with_1 = 2
+      _with_0.b = _with_1
+      print(_with_1.c)
+    end
     return _with_0
   end
 end

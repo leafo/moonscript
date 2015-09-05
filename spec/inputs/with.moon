@@ -93,6 +93,16 @@ do
   with k.j = "jo"
     print \upper!
 
+do
+  with a
+    print .b
+    -- nested `with`s should change the scope correctly
+    with .c
+      print .d
 
-
+do
+  with a
+    -- nested `with`s with assignments should change the scope correctly
+    with .b = 2
+      print .c
 
