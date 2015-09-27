@@ -1,4 +1,4 @@
-.PHONY: test local compile watch lint test_safe
+.PHONY: test local compile compile_system watch lint test_safe
 
 test:
 	busted -p "_spec.moon$$"
@@ -16,6 +16,12 @@ compile:
 	lua5.1 bin/moonc moon/ moonscript/
 	echo "#!/usr/bin/env lua" > bin/moon
 	lua5.1 bin/moonc -p bin/moon.moon >> bin/moon
+	echo "-- vim: set filetype=lua:" >> bin/moon
+
+compile_system:
+	moonc moon/ moonscript/
+	echo "#!/usr/bin/env lua" > bin/moon
+	moonc -p bin/moon.moon >> bin/moon
 	echo "-- vim: set filetype=lua:" >> bin/moon
 
 watch:
