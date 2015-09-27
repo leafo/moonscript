@@ -12,10 +12,10 @@ do
   local _obj_0 = require("moonscript.transform.names")
   NameProxy, LocalName = _obj_0.NameProxy, _obj_0.LocalName
 end
-local Run, transform_last_stm
+local Run, transform_last_stm, last_stm
 do
   local _obj_0 = require("moonscript.transform.statements")
-  Run, transform_last_stm = _obj_0.Run, _obj_0.transform_last_stm
+  Run, transform_last_stm, last_stm = _obj_0.Run, _obj_0.transform_last_stm, _obj_0.last_stm
 end
 local destructure = require("moonscript.transform.destructure")
 local NOOP = {
@@ -115,8 +115,19 @@ with_continue_listener = function(body)
       if not (continue_name) then
         return 
       end
+      local last = last_stm(body)
+      local t = last and ntype(last)
+      local enclose_lines = t == "return" or t == "break"
       self:put_name(continue_name, nil)
       return self:splice(function(lines)
+        if enclose_lines then
+          lines = {
+            "do",
+            {
+              lines
+            }
+          }
+        end
         return {
           {
             "assign",

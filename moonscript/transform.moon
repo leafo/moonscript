@@ -8,7 +8,7 @@ import ntype, mtype, build, smart_node, is_slice, value_is_singular from types
 import insert from table
 
 import NameProxy, LocalName from require "moonscript.transform.names"
-import Run, transform_last_stm from require "moonscript.transform.statements"
+import Run, transform_last_stm, last_stm from require "moonscript.transform.statements"
 
 destructure = require "moonscript.transform.destructure"
 NOOP = {"noop"}
@@ -73,8 +73,14 @@ with_continue_listener = (body) ->
 
     Run =>
       return unless continue_name
+      last = last_stm body
+      t = last and ntype(last)
+      enclose_lines = t == "return" or t == "break"
+
       @put_name continue_name, nil
       @splice (lines) ->
+        lines = {"do", {lines}} if enclose_lines
+
         {
           {"assign", {continue_name}, {"false"}}
           {"repeat", "true", {

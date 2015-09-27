@@ -114,6 +114,15 @@ for x=1,10
   for y = 2,12
     continue if y % 3 == 0
 
+
+while true
+  continue if false
+  break
+
+while true
+  continue if false
+  return 22
+
 --
 
 do

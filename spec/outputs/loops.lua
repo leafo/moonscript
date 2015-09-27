@@ -260,6 +260,38 @@ for x = 1, 10 do
     break
   end
 end
+while true do
+  local _continue_0 = false
+  repeat
+    do
+      if false then
+        _continue_0 = true
+        break
+      end
+      break
+    end
+    _continue_0 = true
+  until true
+  if not _continue_0 then
+    break
+  end
+end
+while true do
+  local _continue_0 = false
+  repeat
+    do
+      if false then
+        _continue_0 = true
+        break
+      end
+      return 22
+    end
+    _continue_0 = true
+  until true
+  if not _continue_0 then
+    break
+  end
+end
 do
   local xxx = {
     1,
