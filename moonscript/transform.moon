@@ -6,36 +6,14 @@ data = require "moonscript.data"
 import reversed, unpack from util
 import ntype, mtype, build, smart_node, is_slice, value_is_singular from types
 import insert from table
+
 import NameProxy, LocalName from require "moonscript.transform.names"
+import Run, transform_last_stm from require "moonscript.transform.statements"
 
 destructure = require "moonscript.transform.destructure"
 NOOP = {"noop"}
 
 local *
-
-class Run
-  new: (@fn) =>
-    self[1] = "run"
-
-  call: (state) =>
-    self.fn state
-
--- transform the last stm is a list of stms
--- will puke on group
-apply_to_last = (stms, fn) ->
-  -- find last (real) exp
-  last_exp_id = 0
-  for i = #stms, 1, -1
-    stm = stms[i]
-    if stm and mtype(stm) != Run
-      last_exp_id = i
-      break
-
-  return for i, stm in ipairs stms
-    if i == last_exp_id
-      {"transform", stm, fn}
-    else
-      stm
 
 -- is a body a sindle expression/statement
 is_singular = (body) ->
@@ -82,6 +60,7 @@ constructor_name = "new"
 
 with_continue_listener = (body) ->
   continue_name = nil
+
   {
     Run =>
       @listen "continue", ->
@@ -95,16 +74,17 @@ with_continue_listener = (body) ->
     Run =>
       return unless continue_name
       @put_name continue_name, nil
-      @splice (lines) -> {
-        {"assign", {continue_name}, {"false"}}
-        {"repeat", "true", {
-          lines
-          {"assign", {continue_name}, {"true"}}
-        }}
-        {"if", {"not", continue_name}, {
-          {"break"}
-        }}
-      }
+      @splice (lines) ->
+        {
+          {"assign", {continue_name}, {"false"}}
+          {"repeat", "true", {
+            lines
+            {"assign", {continue_name}, {"true"}}
+          }}
+          {"if", {"not", continue_name}, {
+            {"break"}
+          }}
+        }
   }
 
 
@@ -173,7 +153,7 @@ Statement = Transformer {
     fn node
 
   root_stms: (body) =>
-    apply_to_last body, implicitly_return @
+    transform_last_stm body, implicitly_return @
 
   return: (node) =>
     ret_val = node[2]
@@ -190,7 +170,7 @@ Statement = Transformer {
     if ret_val_type == "chain" or ret_val_type == "comprehension" or ret_val_type == "tblcomprehension"
       ret_val = Value\transform_once @, ret_val
       if ntype(ret_val) == "block_exp"
-        return build.group apply_to_last ret_val[2], (stm)->
+        return build.group transform_last_stm ret_val[2], (stm)->
             {"return", stm}
 
     node[2] = ret_val
@@ -323,7 +303,7 @@ Statement = Transformer {
     construct_comprehension action(exp), clauses
 
   do: (node, ret) =>
-    node[2] = apply_to_last node[2], ret if ret
+    node[2] = transform_last_stm node[2], ret if ret
     node
 
   decorated: (node) =>
@@ -381,11 +361,11 @@ Statement = Transformer {
     if ret
       smart_node node
       -- mutate all the bodies
-      node['then'] = apply_to_last node['then'], ret
+      node['then'] = transform_last_stm node['then'], ret
       for i = 4, #node
         case = node[i]
         body_idx = #node[i]
-        case[body_idx] = apply_to_last case[body_idx], ret
+        case[body_idx] = transform_last_stm case[body_idx], ret
 
     node
 
@@ -519,7 +499,7 @@ Statement = Transformer {
         body = case_exps
 
       if ret
-        body = apply_to_last body, ret
+        body = transform_last_stm body, ret
 
       insert out, body
 
@@ -786,7 +766,7 @@ class Accumulator
       body = {}
       single_stm
     else
-      body = apply_to_last body, (n) ->
+      body = transform_last_stm body, (n) ->
         if types.is_value n
           build.assign_one @value_name, n
         else
@@ -905,7 +885,7 @@ Value = Transformer {
 
   fndef: (node) =>
     smart_node node
-    node.body = apply_to_last node.body, implicitly_return self
+    node.body = transform_last_stm node.body, implicitly_return self
     node.body = {
       Run => @listen "varargs", -> -- capture event
       unpack node.body

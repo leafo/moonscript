@@ -12,63 +12,16 @@ do
   local _obj_0 = require("moonscript.transform.names")
   NameProxy, LocalName = _obj_0.NameProxy, _obj_0.LocalName
 end
+local Run, transform_last_stm
+do
+  local _obj_0 = require("moonscript.transform.statements")
+  Run, transform_last_stm = _obj_0.Run, _obj_0.transform_last_stm
+end
 local destructure = require("moonscript.transform.destructure")
 local NOOP = {
   "noop"
 }
-local Run, apply_to_last, is_singular, extract_declarations, expand_elseif_assign, constructor_name, with_continue_listener, Transformer, construct_comprehension, Statement, Accumulator, default_accumulator, implicitly_return, Value
-do
-  local _base_0 = {
-    call = function(self, state)
-      return self.fn(state)
-    end
-  }
-  _base_0.__index = _base_0
-  local _class_0 = setmetatable({
-    __init = function(self, fn)
-      self.fn = fn
-      self[1] = "run"
-    end,
-    __base = _base_0,
-    __name = "Run"
-  }, {
-    __index = _base_0,
-    __call = function(cls, ...)
-      local _self_0 = setmetatable({}, _base_0)
-      cls.__init(_self_0, ...)
-      return _self_0
-    end
-  })
-  _base_0.__class = _class_0
-  Run = _class_0
-end
-apply_to_last = function(stms, fn)
-  local last_exp_id = 0
-  for i = #stms, 1, -1 do
-    local stm = stms[i]
-    if stm and mtype(stm) ~= Run then
-      last_exp_id = i
-      break
-    end
-  end
-  return (function()
-    local _accum_0 = { }
-    local _len_0 = 1
-    for i, stm in ipairs(stms) do
-      if i == last_exp_id then
-        _accum_0[_len_0] = {
-          "transform",
-          stm,
-          fn
-        }
-      else
-        _accum_0[_len_0] = stm
-      end
-      _len_0 = _len_0 + 1
-    end
-    return _accum_0
-  end)()
-end
+local is_singular, extract_declarations, expand_elseif_assign, constructor_name, with_continue_listener, Transformer, construct_comprehension, Statement, Accumulator, default_accumulator, implicitly_return, Value
 is_singular = function(body)
   if #body ~= 1 then
     return false
@@ -323,7 +276,7 @@ Statement = Transformer({
     return fn(node)
   end,
   root_stms = function(self, body)
-    return apply_to_last(body, implicitly_return(self))
+    return transform_last_stm(body, implicitly_return(self))
   end,
   ["return"] = function(self, node)
     local ret_val = node[2]
@@ -338,7 +291,7 @@ Statement = Transformer({
     if ret_val_type == "chain" or ret_val_type == "comprehension" or ret_val_type == "tblcomprehension" then
       ret_val = Value:transform_once(self, ret_val)
       if ntype(ret_val) == "block_exp" then
-        return build.group(apply_to_last(ret_val[2], function(stm)
+        return build.group(transform_last_stm(ret_val[2], function(stm)
           return {
             "return",
             stm
@@ -565,7 +518,7 @@ Statement = Transformer({
   end,
   ["do"] = function(self, node, ret)
     if ret then
-      node[2] = apply_to_last(node[2], ret)
+      node[2] = transform_last_stm(node[2], ret)
     end
     return node
   end,
@@ -676,11 +629,11 @@ Statement = Transformer({
     node = expand_elseif_assign(node)
     if ret then
       smart_node(node)
-      node['then'] = apply_to_last(node['then'], ret)
+      node['then'] = transform_last_stm(node['then'], ret)
       for i = 4, #node do
         local case = node[i]
         local body_idx = #node[i]
-        case[body_idx] = apply_to_last(case[body_idx], ret)
+        case[body_idx] = transform_last_stm(case[body_idx], ret)
       end
     end
     return node
@@ -861,7 +814,7 @@ Statement = Transformer({
         body = case_exps
       end
       if ret then
-        body = apply_to_last(body, ret)
+        body = transform_last_stm(body, ret)
       end
       insert(out, body)
       return out
@@ -1305,7 +1258,7 @@ do
         body = { }
         val = single_stm
       else
-        body = apply_to_last(body, function(n)
+        body = transform_last_stm(body, function(n)
           if types.is_value(n) then
             return build.assign_one(self.value_name, n)
           else
@@ -1498,7 +1451,7 @@ Value = Transformer({
   end,
   fndef = function(self, node)
     smart_node(node)
-    node.body = apply_to_last(node.body, implicitly_return(self))
+    node.body = transform_last_stm(node.body, implicitly_return(self))
     node.body = {
       Run(function(self)
         return self:listen("varargs", function() end)
