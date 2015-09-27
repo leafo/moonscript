@@ -4,7 +4,7 @@
 unindent = (str) ->
   indent = str\match "^%s+"
   return str unless indent
-  (str\gsub("\n#{indent}", "\n")\gsub "%s+$", "")
+  (str\gsub("\n#{indent}", "\n")\gsub("%s+$", "")\gsub "^%s+", "")
 
 in_dev = false
 
@@ -26,7 +26,10 @@ with_dev = (fn) ->
     _G.require = (mod) ->
       return dev_cache[mod] if dev_cache[mod]
 
-      if mod\match("moonscript%.") or mod == "moonscript"
+      testable = mod\match("moonscript%.") or mod == "moonscript" or
+        mod\match("moon%.") or mod == "moon"
+
+      if testable
         dev_cache[mod] = assert(loadfile(assert loader mod))!
         return dev_cache[mod]
 
@@ -38,5 +41,7 @@ with_dev = (fn) ->
   teardown ->
     _G.require = old_require
     in_dev = false
+
+  dev_cache
 
 { :unindent, :with_dev }

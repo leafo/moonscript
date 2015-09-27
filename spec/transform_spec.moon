@@ -1,8 +1,13 @@
 
-describe "moonscript.transform.statements", ->
-  describe "last_stm", ->
-    import last_stm, Run from require "moonscript.transform.statements"
+import with_dev from require "spec.helpers"
 
+describe "moonscript.transform.statements", ->
+  local last_stm, transform_last_stm, Run
+
+  with_dev ->
+    { :last_stm, :transform_last_stm, :Run } = require "moonscript.transform.statements"
+
+  describe "last_stm", ->
     it "gets last statement from empty list", ->
       assert.same nil, (last_stm {})
 
@@ -46,7 +51,6 @@ describe "moonscript.transform.statements", ->
       assert t == stms[2][2], "should get correct table"
 
   describe "transform_last_stm", ->
-    import transform_last_stm, Run from require "moonscript.transform.statements"
 
     it "transforms empty stms", ->
       before = {}

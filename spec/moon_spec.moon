@@ -1,8 +1,13 @@
 -- test moon library
 
-moon = require "moon"
+import with_dev from require "spec.helpers"
 
 describe "moon", ->
+  local moon
+
+  with_dev ->
+    moon = require "moon"
+
   it "should determine correct type", ->
     class Test
 

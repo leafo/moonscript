@@ -1,9 +1,14 @@
 
-moonc = require "moonscript.cmd.moonc"
+import with_dev from require "spec.helpers"
 
 -- TODO: add specs for windows equivalents
 
 describe "moonc", ->
+  local moonc
+
+  dev_loaded = with_dev ->
+    moonc = require "moonscript.cmd.moonc"
+
   same = (fn, a, b)->
     assert.same b, fn a
 
@@ -64,7 +69,7 @@ describe "moonc", ->
     before_each ->
       dirs = {}
       package.loaded.lfs = nil
-      package.loaded["moonscript.cmd.moonc"] = nil
+      dev_loaded["moonscript.cmd.moonc"] = nil
 
       package.loaded.lfs = {
         mkdir: (dir) -> table.insert dirs, dir
@@ -75,7 +80,7 @@ describe "moonc", ->
 
     after_each ->
       package.loaded.lfs = nil
-      package.loaded["moonscript.cmd.moonc"] = nil
+      dev_loaded["moonscript.cmd.moonc"] = nil
       moonc = require "moonscript.cmd.moonc"
 
     it "should make directory", ->
