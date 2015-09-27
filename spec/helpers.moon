@@ -6,4 +6,37 @@ unindent = (str) ->
   return str unless indent
   (str\gsub("\n#{indent}", "\n")\gsub "%s+$", "")
 
-{ :unindent }
+in_dev = false
+
+-- this will ensure any moonscript modules included come from the local
+-- directory
+with_dev = (fn) ->
+  error "already in dev mode" if in_dev
+
+  -- a package loader that only looks in currect directory
+  import make_loader from require "loadkit"
+  loader = make_loader "lua", nil, "./?.lua"
+
+  import setup, teardown from require "busted"
+
+  old_require = _G.require
+  dev_cache = {}
+
+  setup ->
+    _G.require = (mod) ->
+      return dev_cache[mod] if dev_cache[mod]
+
+      if mod\match("moonscript%.") or mod == "moonscript"
+        dev_cache[mod] = assert(loadfile(assert loader mod))!
+        return dev_cache[mod]
+
+      old_require mod
+
+    if fn
+      fn!
+
+  teardown ->
+    _G.require = old_require
+    in_dev = false
+
+{ :unindent, :with_dev }

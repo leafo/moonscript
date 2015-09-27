@@ -1,12 +1,10 @@
 lfs = require "lfs"
 
-parse   = require "moonscript.parse"
-compile = require "moonscript.compile"
-util    = require "moonscript.util"
+import with_dev from require "spec.helpers"
 
 pattern = ...
 
-import unpack from util
+unpack = table.unpack or unpack
 
 options = {
   in_dir: "spec/inputs",
@@ -20,7 +18,7 @@ options = {
     tool: "git diff --no-index --color" --color-words"
     filter: (str) ->
       -- strip the first four lines
-      table.concat [line for line in *util.split(str, "\n")[5,]], "\n"
+      table.concat [l for l in *([line for line in str\gmatch("[^\n]+")])[5,]], "\n"
   }
 }
 
@@ -81,12 +79,18 @@ input_fname = (base) ->
 output_fname = (base) ->
   options.out_dir .. "/" .. base .. options.output_ext
 
-describe "input tests", ->
-  inputs = for file in lfs.dir options.in_dir
-    with match = file\match options.input_pattern
-      continue unless match
+inputs = for file in lfs.dir options.in_dir
+  with match = file\match options.input_pattern
+    continue unless match
 
-  table.sort inputs
+table.sort inputs
+
+describe "input tests", ->
+  local parse, compile
+
+  with_dev ->
+    parse = require "moonscript.parse"
+    compile = require "moonscript.compile"
   
   for name in *inputs
     input = input_fname name
