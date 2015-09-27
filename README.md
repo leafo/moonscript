@@ -24,6 +24,8 @@ To run tests, execute from the root directory:
 busted
 ```
 
+Writing specs is a bit more complicated. Check out [the spec writing guide](spec/README.md).
+
 ## License (MIT)
 
 Copyright (C) 2015 by Leaf Corcoran
