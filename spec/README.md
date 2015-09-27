@@ -1,5 +1,5 @@
 
-# MoonScript Spec guide
+# MoonScript spec guide
 
 Because MoonScript is written in MoonScript, and MoonScript specs are written
 in MoonScript, you need to be aware of which copy of MoonScript is actually
@@ -32,8 +32,6 @@ You'll use it like this:
 ```moonscript
 import with_dev from require "spec.helpers"
 describe "moonscript.base", ->
-  local moonscript
-
   with_dev!
 
   it "should load code", ->
