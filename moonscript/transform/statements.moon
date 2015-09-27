@@ -26,5 +26,20 @@ last_stm = (stms) ->
 
   stms[last_exp_id], last_exp_id, stms
 
-{:last_stm, :Run}
+-- transform the last stm is a list of stms
+-- will puke on group
+transform_last_stm = (stms, fn) ->
+  _, last_idx, _stms = last_stm stms
+
+  if _stms != stms
+    error "cannot transform last node in group"
+
+  return for i, stm in ipairs stms
+    if i == last_idx
+      {"transform", stm, fn}
+    else
+      stm
+
+
+{:Run, :last_stm, :transform_last_stm}
 

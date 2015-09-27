@@ -45,4 +45,43 @@ describe "moonscript.transform.statements", ->
       assert.same 2, idx
       assert t == stms[2][2], "should get correct table"
 
+  describe "transform_last_stm", ->
+    import transform_last_stm, Run from require "moonscript.transform.statements"
+
+    it "transforms empty stms", ->
+      before = {}
+      after = transform_last_stm before, (n) -> {"wrapped", n}
+
+      assert.same before, after
+      assert before != after
+
+    it "transforms stms", ->
+      before = {
+        {"ref", "butt_world"}
+        {"ref", "hello_world"}
+      }
+
+      transformer = (n) -> n
+      after = transform_last_stm before, transformer
+
+      assert.same {
+        {"ref", "butt_world"}
+        {"transform", {"ref", "hello_world"}, transformer}
+      }, after
+
+    it "transforms empty stms ignoring runs", ->
+      before = {
+        {"ref", "butt_world"}
+        {"ref", "hello_world"}
+        Run => print "hi"
+      }
+
+      transformer = (n) -> n
+      after = transform_last_stm before, transformer
+
+      assert.same {
+        {"ref", "butt_world"}
+        {"transform", {"ref", "hello_world"}, transformer}
+        before[3]
+      }, after
 

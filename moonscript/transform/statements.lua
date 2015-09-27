@@ -44,7 +44,32 @@ last_stm = function(stms)
   end
   return stms[last_exp_id], last_exp_id, stms
 end
+local transform_last_stm
+transform_last_stm = function(stms, fn)
+  local _, last_idx, _stms = last_stm(stms)
+  if _stms ~= stms then
+    error("cannot transform last node in group")
+  end
+  return (function()
+    local _accum_0 = { }
+    local _len_0 = 1
+    for i, stm in ipairs(stms) do
+      if i == last_idx then
+        _accum_0[_len_0] = {
+          "transform",
+          stm,
+          fn
+        }
+      else
+        _accum_0[_len_0] = stm
+      end
+      _len_0 = _len_0 + 1
+    end
+    return _accum_0
+  end)()
+end
 return {
+  Run = Run,
   last_stm = last_stm,
-  Run = Run
+  transform_last_stm = transform_last_stm
 }
