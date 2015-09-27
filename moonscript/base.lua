@@ -66,9 +66,7 @@ end
 moon_loader = function(name)
   local name_path = name:gsub("%.", dirsep)
   local file, file_path
-  local _list_0 = split(package.moonpath, ";")
-  for _index_0 = 1, #_list_0 do
-    local path = _list_0[_index_0]
+  for path in package.moonpath:gmatch("[^;]+") do
     file_path = path:gsub("?", name_path)
     file = io.open(file_path)
     if file then

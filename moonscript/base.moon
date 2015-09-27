@@ -38,7 +38,7 @@ moon_loader = (name) ->
   name_path = name\gsub "%.", dirsep
 
   local file, file_path
-  for path in *split package.moonpath, ";"
+  for path in package.moonpath\gmatch "[^;]+"
     file_path = path\gsub "?", name_path
     file = io.open file_path
     break if file

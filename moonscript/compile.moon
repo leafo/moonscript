@@ -406,6 +406,8 @@ class Block
 
     nil
 
+  -- takes the existing set of lines and replaces them with the result of
+  -- calling fn on them
   splice: (fn) =>
     lines = {"lines", @_lines}
     @_lines = Lines!
