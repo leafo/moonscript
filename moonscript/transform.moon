@@ -8,7 +8,7 @@ import ntype, mtype, build, smart_node, is_slice, value_is_singular from types
 import insert from table
 
 import NameProxy, LocalName from require "moonscript.transform.names"
-import Run, transform_last_stm, last_stm from require "moonscript.transform.statements"
+import Run, transform_last_stm, last_stm, chain_is_stub from require "moonscript.transform.statements"
 
 destructure = require "moonscript.transform.destructure"
 NOOP = {"noop"}
@@ -910,8 +910,6 @@ Value = Transformer {
 
   -- pull out colon chain
   chain: (node) =>
-    stub = node[#node]
-
     -- escape lua keywords used in dot accessors
     for i=3,#node
       part = node[i]
@@ -921,12 +919,11 @@ Value = Transformer {
     if ntype(node[2]) == "string"
       -- add parens if callee is raw string
       node[2] = {"parens", node[2] }
-    elseif type(stub) == "table" and stub[1] == "colon_stub"
-      -- convert colon stub into code
-      table.remove node, #node
 
+    if chain_is_stub node
       base_name = NameProxy "base"
       fn_name = NameProxy "fn"
+      colon = table.remove node
 
       is_super = ntype(node[2]) == "ref" and node[2][2] == "super"
       build.block_exp {
@@ -938,7 +935,7 @@ Value = Transformer {
         build.assign {
           names: {fn_name}
           values: {
-            build.chain { base: base_name, {"dot", stub[2]} }
+            build.chain { base: base_name, {"dot", colon[2]} }
           }
         }
 

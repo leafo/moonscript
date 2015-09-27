@@ -40,6 +40,9 @@ transform_last_stm = (stms, fn) ->
     else
       stm
 
+chain_is_stub = (chain) ->
+  stub = chain[#chain]
+  stub and ntype(stub) == "colon"
 
-{:Run, :last_stm, :transform_last_stm}
+{:Run, :last_stm, :transform_last_stm, :chain_is_stub}
 

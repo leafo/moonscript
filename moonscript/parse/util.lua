@@ -178,8 +178,8 @@ wrap_func_arg = function(value)
     }
   }
 end
-local flatten_func
-flatten_func = function(callee, args)
+local join_chain
+join_chain = function(callee, args)
   if #args == 0 then
     return callee
   end
@@ -188,13 +188,7 @@ flatten_func = function(callee, args)
     args
   }
   if ntype(callee) == "chain" then
-    local stub = callee[#callee]
-    if ntype(stub) == "colon_stub" then
-      stub[1] = "colon"
-      table.insert(stub, args)
-    else
-      table.insert(callee, args)
-    end
+    table.insert(callee, args)
     return callee
   end
   return {
@@ -208,7 +202,7 @@ flatten_string_chain = function(str, chain, args)
   if not (chain) then
     return str
   end
-  return flatten_func({
+  return flatten_chain({
     "chain",
     str,
     unpack(chain)
@@ -259,7 +253,7 @@ return {
   symx = symx,
   simple_string = simple_string,
   wrap_func_arg = wrap_func_arg,
-  flatten_func = flatten_func,
+  join_chain = join_chain,
   flatten_string_chain = flatten_string_chain,
   wrap_decorator = wrap_decorator,
   check_lua_string = check_lua_string,

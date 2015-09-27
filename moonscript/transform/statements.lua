@@ -68,8 +68,14 @@ transform_last_stm = function(stms, fn)
     return _accum_0
   end)()
 end
+local chain_is_stub
+chain_is_stub = function(chain)
+  local stub = chain[#chain]
+  return stub and ntype(stub) == "colon"
+end
 return {
   Run = Run,
   last_stm = last_stm,
-  transform_last_stm = transform_last_stm
+  transform_last_stm = transform_last_stm,
+  chain_is_stub = chain_is_stub
 }

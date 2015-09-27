@@ -127,27 +127,21 @@ simple_string = (delim, allow_interpolation) ->
 -- wraps a single value in format needed to be passed as function arguments
 wrap_func_arg = (value) -> {"call", {value}}
 
--- flatten out the parsed function node
-flatten_func = (callee, args) ->
+-- chains are parsed in two captures, the chain and then the open arguments
+-- if there are open arguments, then append them to the end of the chain as a call
+join_chain = (callee, args) ->
   return callee if #args == 0
   args = {"call", args}
 
   if ntype(callee) == "chain"
-    -- check for colon stub needing arguments
-    stub = callee[#callee]
-    if ntype(stub) == "colon_stub"
-      stub[1] = "colon"
-      table.insert stub, args
-    else
-      table.insert callee, args
-
+    table.insert callee, args
     return callee
 
   {"chain", callee, args}
 
 flatten_string_chain = (str, chain, args) ->
   return str unless chain
-  flatten_func {"chain", str, unpack chain}, args
+  flatten_chain {"chain", str, unpack chain}, args
 
 -- constructor for decorator node
 wrap_decorator = (stm, dec) ->
@@ -163,5 +157,5 @@ self_assign = (name, pos) ->
 
 { :Indent, :Cut, :ensure, :extract_line, :mark, :pos, :flatten_or_mark,
   :is_assignable, :check_assignable, :format_assign, :format_single_assign,
-  :sym, :symx, :simple_string, :wrap_func_arg, :flatten_func,
+  :sym, :symx, :simple_string, :wrap_func_arg, :join_chain,
   :flatten_string_chain, :wrap_decorator, :check_lua_string, :self_assign }

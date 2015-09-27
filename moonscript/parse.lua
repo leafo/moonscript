@@ -27,10 +27,10 @@ Num = Space * (Num / function(v)
     v
   }
 end)
-local Indent, Cut, ensure, extract_line, mark, pos, flatten_or_mark, is_assignable, check_assignable, format_assign, format_single_assign, sym, symx, simple_string, wrap_func_arg, flatten_func, flatten_string_chain, wrap_decorator, check_lua_string, self_assign
+local Indent, Cut, ensure, extract_line, mark, pos, flatten_or_mark, is_assignable, check_assignable, format_assign, format_single_assign, sym, symx, simple_string, wrap_func_arg, join_chain, flatten_string_chain, wrap_decorator, check_lua_string, self_assign
 do
   local _obj_0 = require("moonscript.parse.util")
-  Indent, Cut, ensure, extract_line, mark, pos, flatten_or_mark, is_assignable, check_assignable, format_assign, format_single_assign, sym, symx, simple_string, wrap_func_arg, flatten_func, flatten_string_chain, wrap_decorator, check_lua_string, self_assign = _obj_0.Indent, _obj_0.Cut, _obj_0.ensure, _obj_0.extract_line, _obj_0.mark, _obj_0.pos, _obj_0.flatten_or_mark, _obj_0.is_assignable, _obj_0.check_assignable, _obj_0.format_assign, _obj_0.format_single_assign, _obj_0.sym, _obj_0.symx, _obj_0.simple_string, _obj_0.wrap_func_arg, _obj_0.flatten_func, _obj_0.flatten_string_chain, _obj_0.wrap_decorator, _obj_0.check_lua_string, _obj_0.self_assign
+  Indent, Cut, ensure, extract_line, mark, pos, flatten_or_mark, is_assignable, check_assignable, format_assign, format_single_assign, sym, symx, simple_string, wrap_func_arg, join_chain, flatten_string_chain, wrap_decorator, check_lua_string, self_assign = _obj_0.Indent, _obj_0.Cut, _obj_0.ensure, _obj_0.extract_line, _obj_0.mark, _obj_0.pos, _obj_0.flatten_or_mark, _obj_0.is_assignable, _obj_0.check_assignable, _obj_0.format_assign, _obj_0.format_single_assign, _obj_0.sym, _obj_0.symx, _obj_0.simple_string, _obj_0.wrap_func_arg, _obj_0.join_chain, _obj_0.flatten_string_chain, _obj_0.wrap_decorator, _obj_0.check_lua_string, _obj_0.self_assign
 end
 local build_grammar = wrap_env(debug_grammar, function(root)
   local _indent = Stack(0)
@@ -148,13 +148,12 @@ local build_grammar = wrap_env(debug_grammar, function(root)
     CharOperators = Space * C(S("+-*/%^><")),
     WordOperators = op("or") + op("and") + op("<=") + op(">=") + op("~=") + op("!=") + op("==") + op(".."),
     BinaryOperator = (WordOperators + CharOperators) * SpaceBreak ^ 0,
-    Assignable = Cmt(DotChain + Chain, check_assignable) + Name + SelfName,
+    Assignable = Cmt(Chain, check_assignable) + Name + SelfName,
     Exp = Ct(Value * (BinaryOperator * Value) ^ 0) / flatten_or_mark("exp"),
     SimpleValue = If + Unless + Switch + With + ClassDecl + ForEach + For + While + Cmt(Do, check_do) + sym("-") * -SomeSpace * Exp / mark("minus") + sym("#") * Exp / mark("length") + key("not") * Exp / mark("not") + TblComprehension + TableLit + Comprehension + FunLit + Num,
-    ChainValue = StringChain + ((Chain + DotChain + Callable) * Ct(InvokeArgs ^ -1)) / flatten_func,
-    Value = pos(SimpleValue + Ct(KeyValueList) / mark("table") + ChainValue),
+    ChainValue = (Chain + Callable) * Ct(InvokeArgs ^ -1) / join_chain,
+    Value = pos(SimpleValue + Ct(KeyValueList) / mark("table") + ChainValue + String),
     SliceValue = SimpleValue + ChainValue,
-    StringChain = String * (Ct((ColonCall + ColonSuffix) * ChainTail ^ -1) * Ct(InvokeArgs ^ -1)) ^ -1 / flatten_string_chain,
     String = Space * DoubleString + Space * SingleString + LuaString,
     SingleString = simple_string("'"),
     DoubleString = simple_string('"', true),
@@ -164,13 +163,11 @@ local build_grammar = wrap_env(debug_grammar, function(root)
     Callable = pos(Name / mark("ref")) + SelfName + VarArg + Parens / mark("parens"),
     Parens = sym("(") * SpaceBreak ^ 0 * Exp * SpaceBreak ^ 0 * sym(")"),
     FnArgs = symx("(") * SpaceBreak ^ 0 * Ct(ExpList ^ -1) * SpaceBreak ^ 0 * sym(")") + sym("!") * -P("=") * Ct(""),
-    ChainTail = ChainItem ^ 1 * ColonSuffix ^ -1 + ColonSuffix,
-    Chain = Callable * ChainTail / mark("chain"),
-    DotChain = (sym(".") * Cc(-1) * (_Name / mark("dot")) * ChainTail ^ -1) / mark("chain") + (sym("\\") * Cc(-1) * ((_Name * Invoke / mark("colon")) * ChainTail ^ -1 + (_Name / mark("colon_stub")))) / mark("chain"),
-    ChainItem = Invoke + Slice + symx("[") * Exp / mark("index") * sym("]") + symx(".") * _Name / mark("dot") + ColonCall,
+    Chain = (Callable + String + -S(".\\")) * ChainItems / mark("chain"),
+    ChainItems = ChainItem ^ 1 * ColonChainItem ^ -1 + ColonChainItem,
+    ChainItem = Invoke + symx(".") * _Name / mark("dot") + Slice + symx("[") * Exp / mark("index") * sym("]"),
+    ColonChainItem = symx("\\") * _Name / mark("colon") * (Invoke * ChainItems ^ -1) ^ -1,
     Slice = symx("[") * (SliceValue + Cc(1)) * sym(",") * (SliceValue + Cc("")) * (sym(",") * SliceValue) ^ -1 * sym("]") / mark("slice"),
-    ColonCall = symx("\\") * (_Name * Invoke) / mark("colon"),
-    ColonSuffix = symx("\\") * _Name / mark("colon_stub"),
     Invoke = FnArgs / mark("call") + SingleString / wrap_func_arg + DoubleString / wrap_func_arg + #P("[") * LuaString / wrap_func_arg,
     TableValue = KeyValue + Ct(Exp),
     TableLit = sym("{") * Ct(TableValueList ^ -1 * sym(",") ^ -1 * (SpaceBreak * TableLitLine * (sym(",") ^ -1 * SpaceBreak * TableLitLine) ^ 0 * sym(",") ^ -1) ^ -1) * White * sym("}") / mark("table"),

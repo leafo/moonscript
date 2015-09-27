@@ -12,10 +12,10 @@ do
   local _obj_0 = require("moonscript.transform.names")
   NameProxy, LocalName = _obj_0.NameProxy, _obj_0.LocalName
 end
-local Run, transform_last_stm, last_stm
+local Run, transform_last_stm, last_stm, chain_is_stub
 do
   local _obj_0 = require("moonscript.transform.statements")
-  Run, transform_last_stm, last_stm = _obj_0.Run, _obj_0.transform_last_stm, _obj_0.last_stm
+  Run, transform_last_stm, last_stm, chain_is_stub = _obj_0.Run, _obj_0.transform_last_stm, _obj_0.last_stm, _obj_0.chain_is_stub
 end
 local destructure = require("moonscript.transform.destructure")
 local NOOP = {
@@ -1498,7 +1498,6 @@ Value = Transformer({
     })
   end,
   chain = function(self, node)
-    local stub = node[#node]
     for i = 3, #node do
       local part = node[i]
       if ntype(part) == "dot" and data.lua_keywords[part[2]] then
@@ -1517,10 +1516,11 @@ Value = Transformer({
         "parens",
         node[2]
       }
-    elseif type(stub) == "table" and stub[1] == "colon_stub" then
-      table.remove(node, #node)
+    end
+    if chain_is_stub(node) then
       local base_name = NameProxy("base")
       local fn_name = NameProxy("fn")
+      local colon = table.remove(node)
       local is_super = ntype(node[2]) == "ref" and node[2][2] == "super"
       return build.block_exp({
         build.assign({
@@ -1540,7 +1540,7 @@ Value = Transformer({
               base = base_name,
               {
                 "dot",
-                stub[2]
+                colon[2]
               }
             })
           }

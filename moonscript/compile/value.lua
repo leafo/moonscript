@@ -95,7 +95,7 @@ return {
       elseif t == "dot" then
         return ".", tostring(arg)
       elseif t == "colon" then
-        return ":", arg, chain_item(node[3])
+        return ":", tostring(arg)
       elseif t == "colon_stub" then
         return user_error("Uncalled colon stub")
       else

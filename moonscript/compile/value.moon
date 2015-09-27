@@ -64,7 +64,7 @@ string_chars = {
       elseif t == "dot"
         ".", tostring arg
       elseif t == "colon"
-        ":", arg, chain_item(node[3])
+        ":", tostring arg
       elseif t == "colon_stub"
         user_error "Uncalled colon stub"
       else
