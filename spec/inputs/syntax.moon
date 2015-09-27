@@ -66,6 +66,9 @@ something 'else', "ya"
 something'else'
 something"else"
 
+something[[hey]] * 2
+something[======[hey]======] * 2
+
 here(we)"go"[12123]
 
 -- this runs

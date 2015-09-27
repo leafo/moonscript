@@ -53,6 +53,8 @@ end)
 something('else', "ya")
 something('else')
 something("else")
+something([[hey]] * 2)
+something([======[hey]======] * 2)
 _ = here(we)("go")[12123]
 local something = {
   test = 12323,
