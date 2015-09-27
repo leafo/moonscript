@@ -106,3 +106,8 @@ do
     with .b = 2
       print .c
 
+do
+  ->
+    with hi
+      return .a, .b
+

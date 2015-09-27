@@ -116,8 +116,7 @@ with_continue_listener = function(body)
         return 
       end
       local last = last_stm(body)
-      local t = last and ntype(last)
-      local enclose_lines = t == "return" or t == "break"
+      local enclose_lines = types.terminating[last and ntype(last)]
       self:put_name(continue_name, nil)
       return self:splice(function(lines)
         if enclose_lines then
@@ -653,6 +652,14 @@ Statement = Transformer({
     local exp, block = unpack(node, 2)
     local copy_scope = true
     local scope_name, named_assign
+    do
+      local last = last_stm(block)
+      if last then
+        if types.terminating[ntype(last)] then
+          ret = false
+        end
+      end
+    end
     if ntype(exp) == "assign" then
       local names, values = unpack(exp, 2)
       local first_name = names[1]
@@ -676,19 +683,18 @@ Statement = Transformer({
       copy_scope = false
     end
     scope_name = scope_name or NameProxy("with")
-    return build["do"]({
+    local out = build["do"]({
       copy_scope and build.assign_one(scope_name, exp) or NOOP,
       named_assign or NOOP,
       Run(function(self)
         return self:set("scope_var", scope_name)
       end),
-      build.group(block),
-      (function()
-        if ret then
-          return ret(scope_name)
-        end
-      end)()
+      unpack(block)
     })
+    if ret then
+      table.insert(out[2], ret(scope_name))
+    end
+    return out
   end,
   foreach = function(self, node, _)
     smart_node(node)

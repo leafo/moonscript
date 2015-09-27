@@ -19,6 +19,10 @@ local cascading = Set({
   "class",
   "do"
 })
+local terminating = Set({
+  "return",
+  "break"
+})
 local ntype
 ntype = function(node)
   local _exp_0 = type(node)
@@ -317,5 +321,6 @@ return {
   value_is_singular = value_is_singular,
   comprehension_has_value = comprehension_has_value,
   has_value = has_value,
-  mtype = mtype
+  mtype = mtype,
+  terminating = terminating
 }

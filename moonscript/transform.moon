@@ -74,8 +74,7 @@ with_continue_listener = (body) ->
     Run =>
       return unless continue_name
       last = last_stm body
-      t = last and ntype(last)
-      enclose_lines = t == "return" or t == "break"
+      enclose_lines = types.terminating[last and ntype(last)]
 
       @put_name continue_name, nil
       @splice (lines) ->
@@ -381,6 +380,8 @@ Statement = Transformer {
     copy_scope = true
     local scope_name, named_assign
 
+    if last = last_stm block
+      ret = false if types.terminating[ntype(last)]
 
     if ntype(exp) == "assign"
       names, values = unpack exp, 2
@@ -403,15 +404,17 @@ Statement = Transformer {
 
     scope_name or= NameProxy "with"
 
-    build.do {
+    out = build.do {
       copy_scope and build.assign_one(scope_name, exp) or NOOP
       named_assign or NOOP
       Run => @set "scope_var", scope_name
-      build.group block
-
-      if ret
-        ret scope_name
+      unpack block
     }
+
+    if ret
+      table.insert out[2], ret scope_name
+
+    out
 
   foreach: (node, _) =>
     smart_node node

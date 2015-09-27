@@ -151,6 +151,13 @@ do
       _with_0.b = _with_1
       print(_with_1.c)
     end
-    return _with_0
+  end
+end
+do
+  return function()
+    do
+      local _with_0 = hi
+      return _with_0.a, _with_0.b
+    end
   end
 end

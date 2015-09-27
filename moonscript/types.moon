@@ -6,12 +6,20 @@ import insert from table
 import unpack from util
 
 -- implicit return does not work on these statements
-manual_return = Set{"foreach", "for", "while", "return"}
+manual_return = Set {
+  "foreach", "for", "while", "return"
+}
 
 -- Assigns and returns are bubbled into their bodies.
 -- All cascading statement transform functions accept a second arugment that
 -- is the transformation to apply to the last statement in their body
-cascading = Set{ "if", "unless", "with", "switch", "class", "do" }
+cascading = Set {
+  "if", "unless", "with", "switch", "class", "do"
+}
+
+terminating = Set {
+  "return", "break"
+}
 
 -- type of node as string
 ntype = (node) ->
@@ -185,7 +193,6 @@ smart_node = (node) ->
 
 {
   :ntype, :smart_node, :build, :is_value, :is_slice, :manual_return,
-  :cascading, :value_is_singular, :comprehension_has_value, :has_value,
-  :mtype
+  :cascading, :value_is_singular, :comprehension_has_value, :has_value, :mtype, :terminating
 }
 
