@@ -23,6 +23,7 @@ ntype = (node) ->
     else
       "value"
 
+-- gets the class of a type if possible
 mtype = do
   moon_type = util.moon.type
   -- lets us check a smart node without throwing an error
