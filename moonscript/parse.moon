@@ -15,11 +15,10 @@ import wrap_env from require "moonscript.parse.env"
 } = lpeg
 
 {
-  :White, :Break, :Stop, :Comment, :Space, :SomeSpace, :SpaceBreak, :EmptyLine,
-  :AlphaNum, :Num, :Shebang
+  :White, :Break, :Stop, :LitmoonCommentLine,
+  :AlphaNum, :Num, :Shebang,:Comment,:Space,:SomeSpace,:SpaceBreak, :mkEmptyLine
   Name: _Name
 } = require "moonscript.parse.literals"
-
 
 SpaceName = Space * _Name
 Num = Space * (Num / (v) -> {"number", v})
@@ -32,297 +31,307 @@ Num = Space * (Num / (v) -> {"number", v})
 } = require "moonscript.parse.util"
 
 
-build_grammar = wrap_env debug_grammar, (root) ->
-  _indent = Stack 0
-  _do_stack = Stack 0
+build_grammar_factory = (litmoon=false) ->
+  EmptyLine=mkEmptyLine litmoon
+  wrap_env debug_grammar, (root) ->
+    _indent = Stack (litmoon and 4 or 0)
+    _do_stack = Stack 0
 
-  state = {
-    -- last pos we saw, used to report error location
-    last_pos: 0
-  }
+    state = {
+      -- last pos we saw, used to report error location
+      last_pos: 0
+    }
 
-  check_indent = (str, pos, indent) ->
-    state.last_pos = pos
-    _indent\top! == indent
+    check_indent = (str, pos, indent) ->
+      state.last_pos = pos
+      _indent\top! == indent
 
-  advance_indent = (str, pos, indent) ->
-    top = _indent\top!
-    if top != -1 and indent > top
+    advance_indent = (str, pos, indent) ->
+      top = _indent\top!
+      if top != -1 and indent > top
+        _indent\push indent
+        true
+
+    push_indent = (str, pos, indent) ->
       _indent\push indent
       true
 
-  push_indent = (str, pos, indent) ->
-    _indent\push indent
-    true
+    pop_indent = ->
+      assert _indent\pop!, "unexpected outdent"
+      true
 
-  pop_indent = ->
-    assert _indent\pop!, "unexpected outdent"
-    true
+    check_do = (str, pos, do_node) ->
+      top = _do_stack\top!
+      if top == nil or top
+        return true, do_node
+      false
 
-  check_do = (str, pos, do_node) ->
-    top = _do_stack\top!
-    if top == nil or top
-      return true, do_node
-    false
+    disable_do = ->
+      _do_stack\push false
+      true
 
-  disable_do = ->
-    _do_stack\push false
-    true
+    pop_do = ->
+      assert _do_stack\pop! != nil, "unexpected do pop"
+      true
 
-  pop_do = ->
-    assert _do_stack\pop! != nil, "unexpected do pop"
-    true
+    DisableDo = Cmt "", disable_do
+    PopDo = Cmt "", pop_do
 
-  DisableDo = Cmt "", disable_do
-  PopDo = Cmt "", pop_do
-
-  keywords = {}
-  key = (chars) ->
-    keywords[chars] = true
-    Space * chars * -AlphaNum
-
-  op = (chars) ->
-    patt = Space * C chars
-    -- it's a word, treat like keyword
-    if chars\match "^%w*$"
+    keywords = {}
+    key = (chars) ->
       keywords[chars] = true
-      patt *= -AlphaNum
+      Space * chars * -AlphaNum
 
-    patt
+    op = (chars) ->
+      patt = Space * C chars
+      -- it's a word, treat like keyword
+      if chars\match "^%w*$"
+        keywords[chars] = true
+        patt *= -AlphaNum
 
-  Name = Cmt(SpaceName, (str, pos, name) ->
-    return false if keywords[name]
-    true
-  ) / trim
+      patt
 
-  SelfName = Space * "@" * (
-    "@" * (_Name / mark"self_class" + Cc"self.__class") +
-    _Name / mark"self" +
-    Cc"self" -- @ by itself
-  )
+    Name = Cmt(SpaceName, (str, pos, name) ->
+      return false if keywords[name]
+      true
+    ) / trim
 
-  KeyName = SelfName + Space * _Name / mark"key_literal"
-  VarArg = Space * P"..." / trim
+    SelfName = Space * "@" * (
+      "@" * (_Name / mark"self_class" + Cc"self.__class") +
+      _Name / mark"self" +
+      Cc"self" -- @ by itself
+    )
 
-  g = P {
-    root or File
-    File: Shebang^-1 * (Block + Ct"")
-    Block: Ct(Line * (Break^1 * Line)^0)
-    CheckIndent: Cmt(Indent, check_indent), -- validates line is in correct indent
-    Line: (CheckIndent * Statement + Space * #Stop)
+    KeyName = SelfName + Space * _Name / mark"key_literal"
+    VarArg = Space * P"..." / trim
 
-    Statement: pos(
-        Import + While + With + For + ForEach + Switch + Return +
-        Local + Export + BreakLoop +
-        Ct(ExpList) * (Update + Assign)^-1 / format_assign
-      ) * Space * ((
-        -- statement decorators
-        key"if" * Exp * (key"else" * Exp)^-1 * Space / mark"if" +
-        key"unless" * Exp / mark"unless" +
-        CompInner / mark"comprehension"
-      ) * Space)^-1 / wrap_decorator
+    expAnd= (a,b) -> -((-a)+(-b))
 
-    Body: Space^-1 * Break * EmptyLine^0 * InBlock + Ct(Statement), -- either a statement, or an indented block
+    g = P {
+      root or File
+      File: Shebang^-1 * (Block + Ct"")
+      Block: Ct(Line * (Break^1 * Line)^0)
+      CheckIndent: Cmt(Indent, check_indent), -- validates line is in correct indent
+      Line: (CheckIndent * Statement + Space * #Stop) + EmptyLine
 
-    Advance: #Cmt(Indent, advance_indent), -- Advances the indent, gives back whitespace for CheckIndent
-    PushIndent: Cmt(Indent, push_indent)
-    PreventIndent: Cmt(Cc(-1), push_indent)
-    PopIndent: Cmt("", pop_indent)
-    InBlock: Advance * Block * PopIndent
+      Statement: pos(
+          Import + While + With + For + ForEach + Switch + Return +
+          Local + Export + BreakLoop +
+          Ct(ExpList) * (Update + Assign)^-1 / format_assign
+        ) * Space * ((
+          -- statement decorators
+          key"if" * Exp * (key"else" * Exp)^-1 * Space / mark"if" +
+          key"unless" * Exp / mark"unless" +
+          CompInner / mark"comprehension"
+        ) * Space)^-1 / wrap_decorator
 
-    Local: key"local" * ((op"*" + op"^") / mark"declare_glob" + Ct(NameList) / mark"declare_with_shadows")
+      Body: Space^-1 * Break * EmptyLine^0 * InBlock + Ct(Statement), -- either a statement, or an indented block
 
-    Import: key"import" * Ct(ImportNameList) * SpaceBreak^0 * key"from" * Exp / mark"import"
-    ImportName: (sym"\\" * Ct(Cc"colon_stub" * Name) + Name)
-    ImportNameList: SpaceBreak^0 * ImportName * ((SpaceBreak^1 + sym"," * SpaceBreak^0) * ImportName)^0
+      Advance: #Cmt(Indent, advance_indent), -- Advances the indent, gives back whitespace for CheckIndent
+      PushIndent: Cmt(Indent, push_indent)
+      PreventIndent: Cmt(Cc(-1), push_indent)
+      PopIndent: Cmt("", pop_indent)
+      InBlock: Advance * Block * PopIndent
 
-    BreakLoop: Ct(key"break"/trim) + Ct(key"continue"/trim)
+      Local: key"local" * ((op"*" + op"^") / mark"declare_glob" + Ct(NameList) / mark"declare_with_shadows")
 
-    Return: key"return" * (ExpListLow/mark"explist" + C"") / mark"return"
+      Import: key"import" * Ct(ImportNameList) * SpaceBreak^0 * key"from" * Exp / mark"import"
+      ImportName: (sym"\\" * Ct(Cc"colon_stub" * Name) + Name)
+      ImportNameList: SpaceBreak^0 * ImportName * ((SpaceBreak^1 + sym"," * SpaceBreak^0) * ImportName)^0
 
-    WithExp: Ct(ExpList) * Assign^-1 / format_assign
-    With: key"with" * DisableDo * ensure(WithExp, PopDo) * key"do"^-1 * Body / mark"with"
+      BreakLoop: Ct(key"break"/trim) + Ct(key"continue"/trim)
 
-    Switch: key"switch" * DisableDo * ensure(Exp, PopDo) * key"do"^-1 * Space^-1 * Break * SwitchBlock / mark"switch"
+      Return: key"return" * (ExpListLow/mark"explist" + C"") / mark"return"
 
-    SwitchBlock: EmptyLine^0 * Advance * Ct(SwitchCase * (Break^1 * SwitchCase)^0 * (Break^1 * SwitchElse)^-1) * PopIndent
-    SwitchCase: key"when" * Ct(ExpList) * key"then"^-1 * Body / mark"case"
-    SwitchElse: key"else" * Body / mark"else"
+      WithExp: Ct(ExpList) * Assign^-1 / format_assign
+      With: key"with" * DisableDo * ensure(WithExp, PopDo) * key"do"^-1 * Body / mark"with"
 
-    IfCond: Exp * Assign^-1 / format_single_assign
+      Switch: key"switch" * DisableDo * ensure(Exp, PopDo) * key"do"^-1 * Space^-1 * Break * SwitchBlock / mark"switch"
 
-    If: key"if" * IfCond * key"then"^-1 * Body *
-      ((Break * CheckIndent)^-1 * EmptyLine^0 * key"elseif" * pos(IfCond) * key"then"^-1 * Body / mark"elseif")^0 *
-      ((Break * CheckIndent)^-1 * EmptyLine^0 * key"else" * Body / mark"else")^-1 / mark"if"
+      SwitchBlock: EmptyLine^0 * Advance * Ct(SwitchCase * (Break^1 * SwitchCase)^0 * (Break^1 * SwitchElse)^-1) * PopIndent
+      SwitchCase: key"when" * Ct(ExpList) * key"then"^-1 * Body / mark"case"
+      SwitchElse: key"else" * Body / mark"else"
 
-    Unless: key"unless" * IfCond * key"then"^-1 * Body *
-      ((Break * CheckIndent)^-1 * EmptyLine^0 * key"else" * Body / mark"else")^-1 / mark"unless"
+      IfCond: Exp * Assign^-1 / format_single_assign
 
-    While: key"while" * DisableDo * ensure(Exp, PopDo) * key"do"^-1 * Body / mark"while"
+      If: key"if" * IfCond * key"then"^-1 * Body *
+        ((Break * CheckIndent)^-1 * EmptyLine^0 * key"elseif" * pos(IfCond) * key"then"^-1 * Body / mark"elseif")^0 *
+        ((Break * CheckIndent)^-1 * EmptyLine^0 * key"else" * Body / mark"else")^-1 / mark"if"
 
-    For: key"for" * DisableDo * ensure(Name * sym"=" * Ct(Exp * sym"," * Exp * (sym"," * Exp)^-1), PopDo) *
-      key"do"^-1 * Body / mark"for"
+      Unless: key"unless" * IfCond * key"then"^-1 * Body *
+        ((Break * CheckIndent)^-1 * EmptyLine^0 * key"else" * Body / mark"else")^-1 / mark"unless"
 
-    ForEach: key"for" * Ct(AssignableNameList) * key"in" * DisableDo * ensure(Ct(sym"*" * Exp / mark"unpack" + ExpList), PopDo) * key"do"^-1 * Body / mark"foreach"
+      While: key"while" * DisableDo * ensure(Exp, PopDo) * key"do"^-1 * Body / mark"while"
 
-    Do: key"do" * Body / mark"do"
+      For: key"for" * DisableDo * ensure(Name * sym"=" * Ct(Exp * sym"," * Exp * (sym"," * Exp)^-1), PopDo) *
+        key"do"^-1 * Body / mark"for"
 
-    Comprehension: sym"[" * Exp * CompInner * sym"]" / mark"comprehension"
+      ForEach: key"for" * Ct(AssignableNameList) * key"in" * DisableDo * ensure(Ct(sym"*" * Exp / mark"unpack" + ExpList), PopDo) * key"do"^-1 * Body / mark"foreach"
 
-    TblComprehension: sym"{" * Ct(Exp * (sym"," * Exp)^-1) * CompInner * sym"}" / mark"tblcomprehension"
+      Do: key"do" * Body / mark"do"
 
-    CompInner: Ct((CompForEach + CompFor) * CompClause^0)
-    CompForEach: key"for" * Ct(NameList) * key"in" * (sym"*" * Exp / mark"unpack" + Exp) / mark"foreach"
-    CompFor: key "for" * Name * sym"=" * Ct(Exp * sym"," * Exp * (sym"," * Exp)^-1) / mark"for"
-    CompClause: CompFor + CompForEach + key"when" * Exp / mark"when"
+      Comprehension: sym"[" * Exp * CompInner * sym"]" / mark"comprehension"
 
-    Assign: sym"=" * (Ct(With + If + Switch) + Ct(TableBlock + ExpListLow)) / mark"assign"
-    Update: ((sym"..=" + sym"+=" + sym"-=" + sym"*=" + sym"/=" + sym"%=" + sym"or=" + sym"and=") / trim) * Exp / mark"update"
+      TblComprehension: sym"{" * Ct(Exp * (sym"," * Exp)^-1) * CompInner * sym"}" / mark"tblcomprehension"
 
-    CharOperators: Space * C(S"+-*/%^><")
-    WordOperators: op"or" + op"and" + op"<=" + op">=" + op"~=" + op"!=" + op"==" + op".."
-    BinaryOperator: (WordOperators + CharOperators) * SpaceBreak^0
+      CompInner: Ct((CompForEach + CompFor) * CompClause^0)
+      CompForEach: key"for" * Ct(NameList) * key"in" * (sym"*" * Exp / mark"unpack" + Exp) / mark"foreach"
+      CompFor: key "for" * Name * sym"=" * Ct(Exp * sym"," * Exp * (sym"," * Exp)^-1) / mark"for"
+      CompClause: CompFor + CompForEach + key"when" * Exp / mark"when"
 
-    Assignable: Cmt(DotChain + Chain, check_assignable) + Name + SelfName
-    Exp: Ct(Value * (BinaryOperator * Value)^0) / flatten_or_mark"exp"
+      Assign: sym"=" * (Ct(With + If + Switch) + Ct(TableBlock + ExpListLow)) / mark"assign"
+      Update: ((sym"..=" + sym"+=" + sym"-=" + sym"*=" + sym"/=" + sym"%=" + sym"or=" + sym"and=") / trim) * Exp / mark"update"
 
-    SimpleValue:
-      If + Unless +
-      Switch +
-      With +
-      ClassDecl +
-      ForEach + For + While +
-      Cmt(Do, check_do) +
-      sym"-" * -SomeSpace * Exp / mark"minus" +
-      sym"#" * Exp / mark"length" +
-      key"not" * Exp / mark"not" +
-      TblComprehension +
-      TableLit +
-      Comprehension +
-      FunLit +
-      Num
+      CharOperators: Space * C(S"+-*/%^><")
+      WordOperators: op"or" + op"and" + op"<=" + op">=" + op"~=" + op"!=" + op"==" + op".."
+      BinaryOperator: (WordOperators + CharOperators) * SpaceBreak^0
 
-    ChainValue: -- a function call or an object access
-      StringChain +
-      ((Chain + DotChain + Callable) * Ct(InvokeArgs^-1)) / flatten_func
+      Assignable: Cmt(DotChain + Chain, check_assignable) + Name + SelfName
+      Exp: Ct(Value * (BinaryOperator * Value)^0) / flatten_or_mark"exp"
 
-    Value: pos(
-      SimpleValue +
-      Ct(KeyValueList) / mark"table" +
-      ChainValue)
+      SimpleValue:
+        If + Unless +
+        Switch +
+        With +
+        ClassDecl +
+        ForEach + For + While +
+        Cmt(Do, check_do) +
+        sym"-" * -SomeSpace * Exp / mark"minus" +
+        sym"#" * Exp / mark"length" +
+        key"not" * Exp / mark"not" +
+        TblComprehension +
+        TableLit +
+        Comprehension +
+        FunLit +
+        Num
 
-    SliceValue: SimpleValue + ChainValue
+      ChainValue: -- a function call or an object access
+        StringChain +
+        ((Chain + DotChain + Callable) * Ct(InvokeArgs^-1)) / flatten_func
 
-    StringChain: String *
-      (Ct((ColonCall + ColonSuffix) * ChainTail^-1) * Ct(InvokeArgs^-1))^-1 / flatten_string_chain
+      Value: pos(
+        SimpleValue +
+        Ct(KeyValueList) / mark"table" +
+        ChainValue)
 
-    String: Space * DoubleString + Space * SingleString + LuaString
-    SingleString: simple_string("'")
-    DoubleString: simple_string('"', true)
+      SliceValue: SimpleValue + ChainValue
 
-    LuaString: Cg(LuaStringOpen, "string_open") * Cb"string_open" * Break^-1 *
-      C((1 - Cmt(C(LuaStringClose) * Cb"string_open", check_lua_string))^0) *
-      LuaStringClose / mark"string"
+      StringChain: String *
+        (Ct((ColonCall + ColonSuffix) * ChainTail^-1) * Ct(InvokeArgs^-1))^-1 / flatten_string_chain
 
-    LuaStringOpen: sym"[" * P"="^0 * "[" / trim
-    LuaStringClose: "]" * P"="^0 * "]"
+      String: Space * DoubleString + Space * SingleString + LuaString
+      SingleString: simple_string("'")
+      DoubleString: simple_string('"', true)
 
-    Callable: pos(Name / mark"ref") + SelfName + VarArg + Parens / mark"parens"
-    Parens: sym"(" * SpaceBreak^0 * Exp * SpaceBreak^0 * sym")"
+      LuaString: Cg(LuaStringOpen, "string_open") * Cb"string_open" * Break^-1 *
+        C((1 - Cmt(C(LuaStringClose) * Cb"string_open", check_lua_string))^0) *
+        LuaStringClose / mark"string"
 
-    FnArgs: symx"(" * SpaceBreak^0 * Ct(ExpList^-1) * SpaceBreak^0 * sym")" + sym"!" * -P"=" * Ct""
+      LuaStringOpen: sym"[" * P"="^0 * "[" / trim
+      LuaStringClose: "]" * P"="^0 * "]"
 
-    ChainTail: ChainItem^1 * ColonSuffix^-1 + ColonSuffix
+      Callable: pos(Name / mark"ref") + SelfName + VarArg + Parens / mark"parens"
+      Parens: sym"(" * SpaceBreak^0 * Exp * SpaceBreak^0 * sym")"
 
-    -- a list of funcalls and indexes on a callable
-    Chain: Callable * ChainTail / mark"chain"
+      FnArgs: symx"(" * SpaceBreak^0 * Ct(ExpList^-1) * SpaceBreak^0 * sym")" + sym"!" * -P"=" * Ct""
 
-    -- shorthand dot call for use in with statement
-    DotChain:
-      (sym"." * Cc(-1) * (_Name / mark"dot") * ChainTail^-1) / mark"chain" +
-      (sym"\\" * Cc(-1) * (
-        (_Name * Invoke / mark"colon") * ChainTail^-1 +
-        (_Name / mark"colon_stub")
-      )) / mark"chain"
+      ChainTail: ChainItem^1 * ColonSuffix^-1 + ColonSuffix
 
-    ChainItem:
-      Invoke +
-      Slice +
-      symx"[" * Exp/mark"index" * sym"]" +
-      symx"." * _Name/mark"dot" +
-      ColonCall
+      -- a list of funcalls and indexes on a callable
+      Chain: Callable * ChainTail / mark"chain"
 
-    Slice: symx"[" * (SliceValue + Cc(1)) * sym"," * (SliceValue + Cc"")  *
-      (sym"," * SliceValue)^-1 *sym"]" / mark"slice"
+      -- shorthand dot call for use in with statement
+      DotChain:
+        (sym"." * Cc(-1) * (_Name / mark"dot") * ChainTail^-1) / mark"chain" +
+        (sym"\\" * Cc(-1) * (
+          (_Name * Invoke / mark"colon") * ChainTail^-1 +
+          (_Name / mark"colon_stub")
+        )) / mark"chain"
 
-    ColonCall: symx"\\" * (_Name * Invoke) / mark"colon"
-    ColonSuffix: symx"\\" * _Name / mark"colon_stub"
+      ChainItem:
+        Invoke +
+        Slice +
+        symx"[" * Exp/mark"index" * sym"]" +
+        symx"." * _Name/mark"dot" +
+        ColonCall
 
-    Invoke: FnArgs/mark"call" +
-      SingleString / wrap_func_arg +
-      DoubleString / wrap_func_arg +
-      LuaString / wrap_func_arg
+      Slice: symx"[" * (SliceValue + Cc(1)) * sym"," * (SliceValue + Cc"")  *
+        (sym"," * SliceValue)^-1 *sym"]" / mark"slice"
 
-    TableValue: KeyValue + Ct(Exp)
+      ColonCall: symx"\\" * (_Name * Invoke) / mark"colon"
+      ColonSuffix: symx"\\" * _Name / mark"colon_stub"
 
-    TableLit: sym"{" * Ct(
-        TableValueList^-1 * sym","^-1 *
-        (SpaceBreak * TableLitLine * (sym","^-1 * SpaceBreak * TableLitLine)^0 * sym","^-1)^-1
-      ) * White * sym"}" / mark"table"
+      Invoke: FnArgs/mark"call" +
+        SingleString / wrap_func_arg +
+        DoubleString / wrap_func_arg +
+        LuaString / wrap_func_arg
 
-    TableValueList: TableValue * (sym"," * TableValue)^0
-    TableLitLine: PushIndent * ((TableValueList * PopIndent) + (PopIndent * Cut)) + Space
+      TableValue: KeyValue + Ct(Exp)
 
-    -- the unbounded table
-    TableBlockInner: Ct(KeyValueLine * (SpaceBreak^1 * KeyValueLine)^0)
-    TableBlock: SpaceBreak^1 * Advance * ensure(TableBlockInner, PopIndent) / mark"table"
+      TableLit: sym"{" * Ct(
+          TableValueList^-1 * sym","^-1 *
+          (SpaceBreak * TableLitLine * (sym","^-1 * SpaceBreak * TableLitLine)^0 * sym","^-1)^-1
+        ) * White * sym"}" / mark"table"
 
-    ClassDecl: key"class" * -P":" * (Assignable + Cc(nil)) * (key"extends" * PreventIndent * ensure(Exp, PopIndent) + C"")^-1 * (ClassBlock + Ct("")) / mark"class"
+      TableValueList: TableValue * (sym"," * TableValue)^0
+      TableLitLine: PushIndent * ((TableValueList * PopIndent) + (PopIndent * Cut)) + Space
 
-    ClassBlock: SpaceBreak^1 * Advance *
-      Ct(ClassLine * (SpaceBreak^1 * ClassLine)^0) * PopIndent
-    ClassLine: CheckIndent * ((
-        KeyValueList / mark"props" +
-        Statement / mark"stm" +
-        Exp / mark"stm"
-      ) * sym","^-1)
+      -- the unbounded table
+      TableBlockInner: Ct(KeyValueLine * (SpaceBreak^1 * KeyValueLine)^0)
+      TableBlock: SpaceBreak^1 * Advance * ensure(TableBlockInner, PopIndent) / mark"table"
 
-    Export: key"export" * (
-      Cc"class" * ClassDecl +
-      op"*" + op"^" +
-      Ct(NameList) * (sym"=" * Ct(ExpListLow))^-1) / mark"export"
+      ClassDecl: key"class" * -P":" * (Assignable + Cc(nil)) * (key"extends" * PreventIndent * ensure(Exp, PopIndent) + C"")^-1 * (ClassBlock + Ct("")) / mark"class"
 
-    KeyValue: (sym":" * -SomeSpace *  Name * lpeg.Cp()) / self_assign + Ct((KeyName + sym"[" * Exp * sym"]" + DoubleString + SingleString) * symx":" * (Exp + TableBlock + SpaceBreak^1 * Exp))
-    KeyValueList: KeyValue * (sym"," * KeyValue)^0
-    KeyValueLine: CheckIndent * KeyValueList * sym","^-1
+      ClassBlock: SpaceBreak^1 * Advance *
+        Ct(ClassLine * (SpaceBreak^1 * ClassLine)^0) * PopIndent
+      ClassLine: CheckIndent * ((
+          KeyValueList / mark"props" +
+          Statement / mark"stm" +
+          Exp / mark"stm"
+        ) * sym","^-1)
 
-    FnArgsDef: sym"(" * Ct(FnArgDefList^-1) *
-      (key"using" * Ct(NameList + Space * "nil") + Ct"") *
-      sym")" + Ct"" * Ct""
+      Export: key"export" * (
+        Cc"class" * ClassDecl +
+        op"*" + op"^" +
+        Ct(NameList) * (sym"=" * Ct(ExpListLow))^-1) / mark"export"
 
-    FnArgDefList: FnArgDef * (sym"," * FnArgDef)^0 * (sym"," * Ct(VarArg))^0 + Ct(VarArg)
-    FnArgDef: Ct((Name + SelfName) * (sym"=" * Exp)^-1)
+      KeyValue: (sym":" * -SomeSpace *  Name * lpeg.Cp()) / self_assign + Ct((KeyName + sym"[" * Exp * sym"]" + DoubleString + SingleString) * symx":" * (Exp + TableBlock + SpaceBreak^1 * Exp))
+      KeyValueList: KeyValue * (sym"," * KeyValue)^0
+      KeyValueLine: CheckIndent * KeyValueList * sym","^-1
 
-    FunLit: FnArgsDef *
-      (sym"->" * Cc"slim" + sym"=>" * Cc"fat") *
-      (Body + Ct"") / mark"fndef"
+      FnArgsDef: sym"(" * Ct(FnArgDefList^-1) *
+        (key"using" * Ct(NameList + Space * "nil") + Ct"") *
+        sym")" + Ct"" * Ct""
 
-    NameList: Name * (sym"," * Name)^0
-    NameOrDestructure: Name + TableLit
-    AssignableNameList: NameOrDestructure * (sym"," * NameOrDestructure)^0
+      FnArgDefList: FnArgDef * (sym"," * FnArgDef)^0 * (sym"," * Ct(VarArg))^0 + Ct(VarArg)
+      FnArgDef: Ct((Name + SelfName) * (sym"=" * Exp)^-1)
 
-    ExpList: Exp * (sym"," * Exp)^0
-    ExpListLow: Exp * ((sym"," + sym";") * Exp)^0
+      FunLit: FnArgsDef *
+        (sym"->" * Cc"slim" + sym"=>" * Cc"fat") *
+        (Body + Ct"") / mark"fndef"
 
-    InvokeArgs: -P"-" * (ExpList * (sym"," * (TableBlock + SpaceBreak * Advance * ArgBlock * TableBlock^-1) + TableBlock)^-1 + TableBlock)
-    ArgBlock: ArgLine * (sym"," * SpaceBreak * ArgLine)^0 * PopIndent
-    ArgLine: CheckIndent * ExpList
-  }
+      NameList: Name * (sym"," * Name)^0
+      NameOrDestructure: Name + TableLit
+      AssignableNameList: NameOrDestructure * (sym"," * NameOrDestructure)^0
 
-  g, state
+      ExpList: Exp * (sym"," * Exp)^0
+      ExpListLow: Exp * ((sym"," + sym";") * Exp)^0
 
-file_parser = ->
-  g, state = build_grammar!
+      InvokeArgs: -P"-" * (ExpList * (sym"," * (TableBlock + SpaceBreak * Advance * ArgBlock * TableBlock^-1) + TableBlock)^-1 + TableBlock)
+      ArgBlock: ArgLine * (sym"," * SpaceBreak * ArgLine)^0 * PopIndent
+      ArgLine: CheckIndent * ExpList
+    }
+
+    g, state
+
+build_grammar = build_grammar_factory!
+
+file_parser = (litmoon=false)->
+  local g,state
+  if litmoon
+    g, state = build_grammar_factory(true)!
+  else
+    g, state = build_grammar!
   file_grammar = White * g * White * -1
 
   {
@@ -359,6 +368,6 @@ file_parser = ->
 
   -- parse a string as a file
   -- returns tree, or nil and error message
-  string: (str) -> file_parser!\match str
+  string: (str,litmoon=false) -> file_parser(litmoon)\match str
 }
 

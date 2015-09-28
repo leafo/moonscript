@@ -16,15 +16,15 @@ create_moonpath = (package_path) ->
   moonpaths = for path in *split package_path, ";"
     prefix = path\match "^(.-)%.lua$"
     continue unless prefix
-    prefix .. ".moon"
+    prefix .. ".moon;"..prefix .. ".litmoon"
   concat moonpaths, ";"
 
-to_lua = (text, options={}) ->
+to_lua = (text, options={}, litmoon=false) ->
   if "string" != type text
     t = type text
     return nil, "expecting string (got ".. t ..")"
 
-  tree, err = parse.string text
+  tree, err = parse.string text, litmoon
   if not tree
     return nil, err
 
@@ -46,7 +46,7 @@ moon_loader = (name) ->
   if file
     text = file\read "*a"
     file\close!
-    res, err = loadstring text, "@#{file_path}"
+    res, err = loadstring_factory(file_path\sub(-8)==".litmoon") text, "@#{file_path}"
     if not res
         error file_path .. ": " .. err
 
@@ -55,24 +55,27 @@ moon_loader = (name) ->
   return nil, "Could not find moon file"
 
 
-loadstring = (...) ->
-  options, str, chunk_name, mode, env = get_options ...
-  chunk_name or= "=(moonscript.loadstring)"
+loadstring_factory = (litmoon=false)->
+  (...) ->
+    options, str, chunk_name, mode, env = get_options ...
+    chunk_name or= "=(moonscript.loadstring)"
 
-  code, ltable_or_err = to_lua str, options
-  unless code
-    return nil, ltable_or_err
+    code, ltable_or_err = to_lua str, options, litmoon
+    unless code
+      return nil, ltable_or_err
 
-  line_tables[chunk_name] = ltable_or_err if chunk_name
-  -- the unpack prevents us from passing nil
-  (lua.loadstring or lua.load) code, chunk_name, unpack { mode, env }
+    line_tables[chunk_name] = ltable_or_err if chunk_name
+    -- the unpack prevents us from passing nil
+    (lua.loadstring or lua.load) code, chunk_name, unpack { mode, env }
+
+loadstring = loadstring_factory!
 
 loadfile = (fname, ...) ->
   file, err = io.open fname
   return nil, err unless file
   text = assert file\read "*a"
   file\close!
-  loadstring text, "@#{fname}", ...
+  loadstring_factory(fname\sub(-8)==".litmoon") text, "@#{fname}", ...
 
 -- throws errros
 dofile = (...) ->
@@ -103,6 +106,7 @@ remove_loader = ->
 {
   _NAME: "moonscript"
   :insert_loader, :remove_loader, :to_lua, :moon_loader, :dirsep,
-  :dofile, :loadfile, :loadstring, :create_moonpath
+  :dofile, :loadfile, :loadstring, :create_moonpath,
+  loadlitstring: loadstring_factory true
 }
 

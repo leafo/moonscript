@@ -14,7 +14,7 @@ local lua = {
   loadstring = loadstring,
   load = load
 }
-local dirsep, line_tables, create_moonpath, to_lua, moon_loader, loadstring, loadfile, dofile, insert_loader, remove_loader
+local dirsep, line_tables, create_moonpath, to_lua, moon_loader, loadstring_factory, loadstring, loadfile, dofile, insert_loader, remove_loader
 dirsep = "/"
 line_tables = require("moonscript.line_tables")
 create_moonpath = function(package_path)
@@ -32,7 +32,7 @@ create_moonpath = function(package_path)
           _continue_0 = true
           break
         end
-        local _value_0 = prefix .. ".moon"
+        local _value_0 = prefix .. ".moon;" .. prefix .. ".litmoon"
         _accum_0[_len_0] = _value_0
         _len_0 = _len_0 + 1
         _continue_0 = true
@@ -45,15 +45,18 @@ create_moonpath = function(package_path)
   end
   return concat(moonpaths, ";")
 end
-to_lua = function(text, options)
+to_lua = function(text, options, litmoon)
   if options == nil then
     options = { }
+  end
+  if litmoon == nil then
+    litmoon = false
   end
   if "string" ~= type(text) then
     local t = type(text)
     return nil, "expecting string (got " .. t .. ")"
   end
-  local tree, err = parse.string(text)
+  local tree, err = parse.string(text, litmoon)
   if not tree then
     return nil, err
   end
@@ -76,7 +79,7 @@ moon_loader = function(name)
   if file then
     local text = file:read("*a")
     file:close()
-    local res, err = loadstring(text, "@" .. tostring(file_path))
+    local res, err = loadstring_factory(file_path:sub(-8) == ".litmoon")(text, "@" .. tostring(file_path))
     if not res then
       error(file_path .. ": " .. err)
     end
@@ -84,21 +87,27 @@ moon_loader = function(name)
   end
   return nil, "Could not find moon file"
 end
-loadstring = function(...)
-  local options, str, chunk_name, mode, env = get_options(...)
-  chunk_name = chunk_name or "=(moonscript.loadstring)"
-  local code, ltable_or_err = to_lua(str, options)
-  if not (code) then
-    return nil, ltable_or_err
+loadstring_factory = function(litmoon)
+  if litmoon == nil then
+    litmoon = false
   end
-  if chunk_name then
-    line_tables[chunk_name] = ltable_or_err
+  return function(...)
+    local options, str, chunk_name, mode, env = get_options(...)
+    chunk_name = chunk_name or "=(moonscript.loadstring)"
+    local code, ltable_or_err = to_lua(str, options, litmoon)
+    if not (code) then
+      return nil, ltable_or_err
+    end
+    if chunk_name then
+      line_tables[chunk_name] = ltable_or_err
+    end
+    return (lua.loadstring or lua.load)(code, chunk_name, unpack({
+      mode,
+      env
+    }))
   end
-  return (lua.loadstring or lua.load)(code, chunk_name, unpack({
-    mode,
-    env
-  }))
 end
+loadstring = loadstring_factory()
 loadfile = function(fname, ...)
   local file, err = io.open(fname)
   if not (file) then
@@ -106,7 +115,7 @@ loadfile = function(fname, ...)
   end
   local text = assert(file:read("*a"))
   file:close()
-  return loadstring(text, "@" .. tostring(fname), ...)
+  return loadstring_factory(fname:sub(-8) == ".litmoon")(text, "@" .. tostring(fname), ...)
 end
 dofile = function(...)
   local f = assert(loadfile(...))
@@ -149,5 +158,6 @@ return {
   dofile = dofile,
   loadfile = loadfile,
   loadstring = loadstring,
-  create_moonpath = create_moonpath
+  create_moonpath = create_moonpath,
+  loadlitstring = loadstring_factory(true)
 }

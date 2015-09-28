@@ -1,7 +1,7 @@
 local lfs = require("lfs")
 local split
 split = require("moonscript.util").split
-local dirsep, dirsep_chars, mkdir, normalize_dir, parse_dir, parse_file, convert_path, format_time, gettime, compile_file_text, write_file, compile_and_write, is_abs_path, path_to_target
+local dirsep, dirsep_chars, mkdir, normalize_dir, parse_dir, parse_file, convert_path, format_time, gettime, compile_file_text_factory, compile_file_text, write_file, compile_and_write, is_abs_path, path_to_target
 dirsep = package.config:sub(1, 1)
 if dirsep == "\\" then
   dirsep_chars = "\\/"
@@ -55,57 +55,63 @@ do
     end
   end
 end
-compile_file_text = function(text, opts)
-  if opts == nil then
-    opts = { }
+compile_file_text_factory = function(litmoon)
+  if litmoon == nil then
+    litmoon = false
   end
-  local parse = require("moonscript.parse")
-  local compile = require("moonscript.compile")
-  local parse_time
-  if opts.benchmark then
-    parse_time = assert(gettime())
+  return function(text, opts)
+    if opts == nil then
+      opts = { }
+    end
+    local parse = require("moonscript.parse")
+    local compile = require("moonscript.compile")
+    local parse_time
+    if opts.benchmark then
+      parse_time = assert(gettime())
+    end
+    local tree, err = parse.string(text, litmoon)
+    if not (tree) then
+      return nil, err
+    end
+    if parse_time then
+      parse_time = gettime() - parse_time
+    end
+    if opts.show_parse_tree then
+      local dump = require("moonscript.dump")
+      dump.tree(tree)
+      return true
+    end
+    local compile_time
+    if opts.benchmark then
+      compile_time = gettime()
+    end
+    local code, posmap_or_err, err_pos = compile.tree(tree)
+    if not (code) then
+      return nil, compile.format_error(posmap_or_err, err_pos, text)
+    end
+    if compile_time then
+      compile_time = gettime() - compile_time
+    end
+    if opts.show_posmap then
+      local debug_posmap
+      debug_posmap = require("moonscript.util").debug_posmap
+      print("Pos", "Lua", ">>", "Moon")
+      print(debug_posmap(posmap_or_err, text, code))
+      return true
+    end
+    if opts.benchmark then
+      print(table.concat({
+        opts.fname or "stdin",
+        "Parse time  \t" .. format_time(parse_time),
+        "Compile time\t" .. format_time(compile_time),
+        ""
+      }, "\n"))
+      return nil
+    end
+    return code
   end
-  local tree, err = parse.string(text)
-  if not (tree) then
-    return nil, err
-  end
-  if parse_time then
-    parse_time = gettime() - parse_time
-  end
-  if opts.show_parse_tree then
-    local dump = require("moonscript.dump")
-    dump.tree(tree)
-    return true
-  end
-  local compile_time
-  if opts.benchmark then
-    compile_time = gettime()
-  end
-  local code, posmap_or_err, err_pos = compile.tree(tree)
-  if not (code) then
-    return nil, compile.format_error(posmap_or_err, err_pos, text)
-  end
-  if compile_time then
-    compile_time = gettime() - compile_time
-  end
-  if opts.show_posmap then
-    local debug_posmap
-    debug_posmap = require("moonscript.util").debug_posmap
-    print("Pos", "Lua", ">>", "Moon")
-    print(debug_posmap(posmap_or_err, text, code))
-    return true
-  end
-  if opts.benchmark then
-    print(table.concat({
-      opts.fname or "stdin",
-      "Parse time  \t" .. format_time(parse_time),
-      "Compile time\t" .. format_time(compile_time),
-      ""
-    }, "\n"))
-    return nil
-  end
-  return code
 end
+compile_file_text = compile_file_text_factory()
 write_file = function(fname, code)
   mkdir(parse_dir(fname))
   local f, err = io.open(fname, "w")
@@ -127,7 +133,7 @@ compile_and_write = function(src, dest, opts)
   end
   local text = assert(f:read("*a"))
   f:close()
-  local code, err = compile_file_text(text, opts)
+  local code, err = compile_file_text_factory(src:sub(-8) == ".litmoon")(text, opts)
   if not code then
     return nil, err
   end
@@ -187,5 +193,6 @@ return {
   format_time = format_time,
   path_to_target = path_to_target,
   compile_file_text = compile_file_text,
+  compile_file_text_factory = compile_file_text_factory,
   compile_and_write = compile_and_write
 }
