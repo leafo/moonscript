@@ -112,7 +112,7 @@ build_grammar_factory = (litmoon=false) ->
       File: Shebang^-1 * (Block + Ct"")
       Block: Ct(Line * (Break^1 * Line)^0)
       CheckIndent: Cmt(Indent, check_indent), -- validates line is in correct indent
-      Line: EmptyLine + CheckIndent * Statement + Space * #Stop
+      Line: (CheckIndent * Statement + Space * #Stop) + EmptyLine
 
       Statement: pos(
           Import + While + With + For + ForEach + Switch + Return +
