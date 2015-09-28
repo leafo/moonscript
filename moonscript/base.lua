@@ -14,7 +14,7 @@ local lua = {
   loadstring = loadstring,
   load = load
 }
-local dirsep, line_tables, create_moonpath, to_lua, loadstring, moon_loader, loadfile, dofile, insert_loader, remove_loader
+local dirsep, line_tables, create_moonpath, to_lua, moon_loader, loadstring, loadfile, dofile, insert_loader, remove_loader
 dirsep = "/"
 line_tables = require("moonscript.line_tables")
 create_moonpath = function(package_path)
@@ -32,7 +32,7 @@ create_moonpath = function(package_path)
           _continue_0 = true
           break
         end
-        local _value_0 = prefix .. ".moon;" .. prefix .. ".litmoon"
+        local _value_0 = prefix .. ".moon"
         _accum_0[_len_0] = _value_0
         _len_0 = _len_0 + 1
         _continue_0 = true
@@ -63,30 +63,6 @@ to_lua = function(text, options)
   end
   return code, ltable
 end
-loadstring = function(...)
-  local options, str, chunk_name, mode, env = get_options(...)
-  chunk_name = chunk_name or "=(moonscript.loadstring)"
-  if string.sub(chunk_name, -8) == ".litmoon" then
-    local itext = str
-    str = ""
-    for line, _ in itext:gmatch("([^\n]+)") do
-      if line:sub(1, 4) == "    " then
-        str = str .. (line:sub(5) .. "\n")
-      end
-    end
-  end
-  local code, ltable_or_err = to_lua(str, options)
-  if not (code) then
-    return nil, ltable_or_err
-  end
-  if chunk_name then
-    line_tables[chunk_name] = ltable_or_err
-  end
-  return (lua.loadstring or lua.load)(code, chunk_name, unpack({
-    mode,
-    env
-  }))
-end
 moon_loader = function(name)
   local name_path = name:gsub("%.", dirsep)
   local file, file_path
@@ -107,6 +83,21 @@ moon_loader = function(name)
     return res
   end
   return nil, "Could not find moon file"
+end
+loadstring = function(...)
+  local options, str, chunk_name, mode, env = get_options(...)
+  chunk_name = chunk_name or "=(moonscript.loadstring)"
+  local code, ltable_or_err = to_lua(str, options)
+  if not (code) then
+    return nil, ltable_or_err
+  end
+  if chunk_name then
+    line_tables[chunk_name] = ltable_or_err
+  end
+  return (lua.loadstring or lua.load)(code, chunk_name, unpack({
+    mode,
+    env
+  }))
 end
 loadfile = function(fname, ...)
   local file, err = io.open(fname)

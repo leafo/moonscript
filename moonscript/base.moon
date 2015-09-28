@@ -16,7 +16,7 @@ create_moonpath = (package_path) ->
   moonpaths = for path in *split package_path, ";"
     prefix = path\match "^(.-)%.lua$"
     continue unless prefix
-    prefix .. ".moon;" .. prefix .. ".litmoon"
+    prefix .. ".moon"
   concat moonpaths, ";"
 
 to_lua = (text, options={}) ->
@@ -33,25 +33,6 @@ to_lua = (text, options={}) ->
     return nil, compile.format_error(ltable, pos, text)
 
   code, ltable
-
-loadstring = (...) ->
-  options, str, chunk_name, mode, env = get_options ...
-  chunk_name or= "=(moonscript.loadstring)"
-
-  if string.sub(chunk_name,-8)==".litmoon"
-    itext=str
-    str=""
-    for line,_ in itext\gmatch "([^\n]+)"
-      if line\sub(1,4) == "    "
-        str ..= line\sub(5).."\n"
-
-  code, ltable_or_err = to_lua str, options
-  unless code
-    return nil, ltable_or_err
-
-  line_tables[chunk_name] = ltable_or_err if chunk_name
-  -- the unpack prevents us from passing nil
-  (lua.loadstring or lua.load) code, chunk_name, unpack { mode, env }
 
 moon_loader = (name) ->
   name_path = name\gsub "%.", dirsep
@@ -72,6 +53,19 @@ moon_loader = (name) ->
     return res
 
   return nil, "Could not find moon file"
+
+
+loadstring = (...) ->
+  options, str, chunk_name, mode, env = get_options ...
+  chunk_name or= "=(moonscript.loadstring)"
+
+  code, ltable_or_err = to_lua str, options
+  unless code
+    return nil, ltable_or_err
+
+  line_tables[chunk_name] = ltable_or_err if chunk_name
+  -- the unpack prevents us from passing nil
+  (lua.loadstring or lua.load) code, chunk_name, unpack { mode, env }
 
 loadfile = (fname, ...) ->
   file, err = io.open fname

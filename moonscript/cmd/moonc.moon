@@ -37,7 +37,7 @@ parse_file = (path) ->
 
 -- converts .moon to a .lua path for calcuating compile target
 convert_path = (path) ->
-  new_path = path\gsub("%.moon$", ".lua")\gsub("%.litmoon$", ".lua")
+  new_path = path\gsub "%.moon$", ".lua"
   if new_path == path
     new_path = path .. ".lua"
   new_path
@@ -69,13 +69,6 @@ compile_file_text = (text, opts={}) ->
 
   parse_time = if opts.benchmark
     assert gettime!
-
-  if string.sub(opts.fname,-8)==".litmoon"
-    itext=text
-    text=""
-    for line,_ in itext\gmatch "([^\n]+)"
-      if line\sub(1,4) == "    "
-        text ..= line\sub(5).."\n"
 
   tree, err = parse.string text
   return nil, err unless tree

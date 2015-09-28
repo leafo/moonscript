@@ -1,6 +1,0 @@
-# This is the litmoon test.
-Literal MoonScript are markdown files AND moonscript code,
-because every indeted code block (lines starting with `    `) is handled as moonscript, while the rest are comments.
-    describe "literal", ->
-      it "should work", ->
-        assert.truthy("It does.")

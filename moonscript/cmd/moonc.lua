@@ -28,7 +28,7 @@ parse_file = function(path)
   return (path:match("^.-([^" .. tostring(dirsep_chars) .. "]*)$"))
 end
 convert_path = function(path)
-  local new_path = path:gsub("%.moon$", ".lua"):gsub("%.litmoon$", ".lua")
+  local new_path = path:gsub("%.moon$", ".lua")
   if new_path == path then
     new_path = path .. ".lua"
   end
@@ -64,15 +64,6 @@ compile_file_text = function(text, opts)
   local parse_time
   if opts.benchmark then
     parse_time = assert(gettime())
-  end
-  if string.sub(opts.fname, -8) == ".litmoon" then
-    local itext = text
-    text = ""
-    for line, _ in itext:gmatch("([^\n]+)") do
-      if line:sub(1, 4) == "    " then
-        text = text .. (line:sub(5) .. "\n")
-      end
-    end
   end
   local tree, err = parse.string(text)
   if not (tree) then
