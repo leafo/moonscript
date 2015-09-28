@@ -8,12 +8,20 @@ plain_space = S" \t"^0
 Break = P"\r"^-1 * P"\n"
 Stop = Break + -1
 
+LitmoonCommentLine = -(P" "^4 + P("\t")^1) * (1 - S"\r\n")^1 * #Stop
+
 Comment = P"--" * (1 - S"\r\n")^0 * #Stop
 Space = plain_space * Comment^-1
 SomeSpace = S" \t"^1 * Comment^-1
-
 SpaceBreak = Space * Break
-EmptyLine = SpaceBreak
+
+mkEmptyLine=(litmoon=false)->
+  if litmoon
+    return SpaceBreak + LitmoonCommentLine
+  else
+    return SpaceBreak
+
+EmptyLine=mkEmptyLine!
 
 AlphaNum = R "az", "AZ", "09", "__"
 
@@ -30,5 +38,5 @@ Shebang = P"#!" * P(1 - Stop)^0
 
 safe_module "moonscript.parse.literals", {
   :White, :Break, :Stop, :Comment, :Space, :SomeSpace, :SpaceBreak, :EmptyLine,
-  :AlphaNum, :Name, :Num, :Shebang
+  :AlphaNum, :Name, :Num, :Shebang, :LitmoonCommentLine, :mkEmptyLine
 }

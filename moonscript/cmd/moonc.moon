@@ -63,51 +63,54 @@ gettime = do
 -- compiles file to lua, returns lua code
 -- returns nil, error on error
 -- returns true if some option handled the output instead
-compile_file_text = (text, opts={}) ->
-  parse = require "moonscript.parse"
-  compile = require "moonscript.compile"
+compile_file_text_factory = (litmoon=false) ->
+  (text, opts={}) ->
+    parse = require "moonscript.parse"
+    compile = require "moonscript.compile"
 
-  parse_time = if opts.benchmark
-    assert gettime!
+    parse_time = if opts.benchmark
+      assert gettime!
 
-  tree, err = parse.string text
-  return nil, err unless tree
+    tree, err = parse.string text, litmoon
+    return nil, err unless tree
 
-  if parse_time
-    parse_time = gettime! - parse_time
+    if parse_time
+      parse_time = gettime! - parse_time
 
-  if opts.show_parse_tree
-    dump = require "moonscript.dump"
-    dump.tree tree
-    return true
+    if opts.show_parse_tree
+      dump = require "moonscript.dump"
+      dump.tree tree
+      return true
 
-  compile_time = if opts.benchmark
-    gettime!
+    compile_time = if opts.benchmark
+      gettime!
 
-  code, posmap_or_err, err_pos = compile.tree tree
+    code, posmap_or_err, err_pos = compile.tree tree
 
-  unless code
-    return nil, compile.format_error posmap_or_err, err_pos, text
+    unless code
+      return nil, compile.format_error posmap_or_err, err_pos, text
 
-  if compile_time
-    compile_time = gettime() - compile_time
+    if compile_time
+      compile_time = gettime() - compile_time
 
-  if opts.show_posmap
-    import debug_posmap from require "moonscript.util"
-    print "Pos", "Lua", ">>", "Moon"
-    print debug_posmap posmap_or_err, text, code
-    return true
+    if opts.show_posmap
+      import debug_posmap from require "moonscript.util"
+      print "Pos", "Lua", ">>", "Moon"
+      print debug_posmap posmap_or_err, text, code
+      return true
 
-  if opts.benchmark
-    print table.concat {
-      opts.fname or "stdin",
-      "Parse time  \t" .. format_time(parse_time),
-      "Compile time\t" .. format_time(compile_time),
-      ""
-    }, "\n"
-    return nil
+    if opts.benchmark
+      print table.concat {
+        opts.fname or "stdin",
+        "Parse time  \t" .. format_time(parse_time),
+        "Compile time\t" .. format_time(compile_time),
+        ""
+      }, "\n"
+      return nil
 
-  code
+    code
+
+compile_file_text=compile_file_text_factory!
 
 write_file = (fname, code) ->
   mkdir parse_dir fname
@@ -128,7 +131,7 @@ compile_and_write = (src, dest, opts={}) ->
   text = assert f\read("*a")
   f\close!
 
-  code, err = compile_file_text text, opts
+  code, err = compile_file_text_factory(src\sub(-8)==".litmoon") text, opts
 
   if not code
     return nil, err
@@ -188,5 +191,6 @@ path_to_target = (path, target_dir=nil, base_dir=nil) ->
   :path_to_target
 
   :compile_file_text
+  :compile_file_text_factory
   :compile_and_write
 }

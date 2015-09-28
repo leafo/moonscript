@@ -26,8 +26,7 @@ with_dev = (fn) ->
     _G.require = (mod) ->
       return dev_cache[mod] if dev_cache[mod]
 
-      testable = mod\match("moonscript%.") or mod == "moonscript" or
-        mod\match("moon%.") or mod == "moon"
+      testable = mod\match("moonscript%.") or mod == "moonscript" or mod\match("moon%.") or mod == "moon"
 
       if testable
         dev_cache[mod] = assert(loadfile(assert loader mod))!

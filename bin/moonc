@@ -74,7 +74,7 @@ local function scan_directory(root, collected)
 				scan_directory(full_path, collected)
 			end
 
-			if fname:match("%.moon$") then
+			if fname:match("%.moon$") or fname:match("%.litmoon$") then
 				table.insert(collected, full_path)
 			end
 		end
@@ -225,7 +225,7 @@ local function create_watcher(files)
 
 				for _, ev in ipairs(events) do
 					local fname = ev.name
-					if fname:match("%.moon$") then
+					if fname:match("%.moon$") or fname:match("%.litmoon$") then
 						local dir = wd_table[ev.wd]
 						if dir ~= "./" then
 							fname = dir .. fname
