@@ -34,8 +34,9 @@ wrap_env = function(debug, fn)
     end
     wrap_name = function(name)
       local v = V(name)
-      v = Cmt("", function()
-        iprint("* " .. name)
+      v = Cmt("", function(str, pos)
+        local rest = str:sub(pos, -1):match("^([^\n]*)")
+        iprint("* " .. tostring(name) .. " (" .. tostring(rest) .. ")")
         indent = indent + 1
         return true
       end) * Cmt(v, function(str, pos, ...)

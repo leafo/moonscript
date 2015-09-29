@@ -18,8 +18,10 @@ wrap_env = (debug, fn) ->
 
     wrap_name = (name) ->
       v = V name
-      v = Cmt("", ->
-        iprint "* " .. name
+      v = Cmt("", (str, pos) ->
+        rest = str\sub(pos, -1)\match "^([^\n]*)"
+
+        iprint "* #{name} (#{rest})"
         indent += 1
         true
       ) * Cmt(v, (str, pos, ...) ->
