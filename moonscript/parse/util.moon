@@ -109,7 +109,7 @@ format_single_assign = (lhs, assign) ->
 
 -- a symbol
 sym = (chars) -> Space * chars
--- a symbole that doesn't accept whitespace before it
+-- a symbol that doesn't accept whitespace before it
 symx = (chars) -> chars
 
 -- a constructor for quote delimited strings
