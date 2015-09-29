@@ -44,10 +44,13 @@ string_chars = {
   chain: (node) =>
     callee = node[2]
     callee_type = ntype callee
+    item_offset = 3
 
-    if callee == -1
+    if callee_type == "dot" or callee_type == "colon"
       callee = @get "scope_var"
-      if not callee then user_error "Short-dot syntax must be called within a with block"
+      unless callee
+        user_error "Short-dot syntax must be called within a with block"
+      item_offset = 2
 
     -- TODO: don't use string literals as ref
     if callee_type == "ref" and callee[2] == "super" or callee == "super"
@@ -77,7 +80,7 @@ string_chars = {
     callee_value = @line "(", callee_value, ")" if ntype(callee) == "exp"
 
     actions = with @line!
-      \append chain_item action for action in *node[3,]
+      \append chain_item action for action in *node[item_offset,]
 
     @line callee_value, actions
 

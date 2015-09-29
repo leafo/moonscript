@@ -230,18 +230,20 @@ build_grammar = wrap_env debug_grammar, (root) ->
 
     FnArgs: symx"(" * SpaceBreak^0 * Ct(ExpList^-1) * SpaceBreak^0 * sym")" + sym"!" * -P"=" * Ct""
 
-    -- a list of funcalls and indexes on a callable
-    Chain: (Callable + String + -S".\\") * ChainItems / mark"chain"
+    Chain: (Callable + String + -S".\\") * ChainItems / mark"chain" +
+      Space * (DotChainItem * ChainItems^-1 + ColonChain) / mark"chain"
 
-    ChainItems: ChainItem^1 * ColonChainItem^-1 + ColonChainItem
+    ChainItems: ChainItem^1 * ColonChain^-1 + ColonChain
 
     ChainItem:
       Invoke +
-      symx"." * _Name/mark"dot" +
+      DotChainItem +
       Slice +
       symx"[" * Exp/mark"index" * sym"]"
 
-    ColonChainItem: symx"\\" * _Name / mark"colon" * (Invoke * ChainItems^-1)^-1
+    DotChainItem: symx"." * _Name/mark"dot"
+    ColonChainItem: symx"\\" * _Name / mark"colon"
+    ColonChain: ColonChainItem * (Invoke * ChainItems^-1)^-1
 
     Slice: symx"[" * (SliceValue + Cc(1)) * sym"," * (SliceValue + Cc"")  *
       (sym"," * SliceValue)^-1 *sym"]" / mark"slice"
