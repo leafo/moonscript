@@ -661,10 +661,10 @@ Statement = Transformer {
 
           @set "super", (block, chain) ->
             if chain
-              slice = [item for item in *chain[3,]]
+              chain_tail = { unpack chain, 3 }
               new_chain = {"chain", parent_cls_name}
 
-              head = slice[1]
+              head = chain_tail[1]
 
               if head == nil
                 return parent_cls_name
@@ -673,7 +673,7 @@ Statement = Transformer {
                 -- calling super, inject calling name and self into chain
                 when "call"
                   calling_name = block\get"current_block"
-                  slice[1] = {"call", {"self", unpack head[2]}}
+                  chain_tail[1] = {"call", {"self", unpack head[2]}}
 
                   if ntype(calling_name) == "key_literal"
                     insert new_chain, {"dot", calling_name[2]}
@@ -682,11 +682,23 @@ Statement = Transformer {
 
                 -- colon call on super, replace class with self as first arg
                 when "colon"
-                  call = head[3]
-                  insert new_chain, {"dot", head[2]}
-                  slice[1] = { "call", { "self", unpack call[2] } }
+                  call = chain_tail[2]
+                  -- calling chain tail
+                  if call and call[1] == "call"
+                    chain_tail[1] = {
+                      "dot"
+                      head[2]
+                    }
 
-              insert new_chain, item for item in *slice
+                    chain_tail[2] = {
+                      "call"
+                      {
+                        "self"
+                        unpack call[2]
+                      }
+                    }
+
+              insert new_chain, item for item in *chain_tail
 
               new_chain
             else

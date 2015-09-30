@@ -1099,29 +1099,21 @@ Statement = Transformer({
           end
           return self:set("super", function(block, chain)
             if chain then
-              local slice
-              do
-                local _accum_0 = { }
-                local _len_0 = 1
-                for _index_0 = 3, #chain do
-                  local item = chain[_index_0]
-                  _accum_0[_len_0] = item
-                  _len_0 = _len_0 + 1
-                end
-                slice = _accum_0
-              end
+              local chain_tail = {
+                unpack(chain, 3)
+              }
               local new_chain = {
                 "chain",
                 parent_cls_name
               }
-              local head = slice[1]
+              local head = chain_tail[1]
               if head == nil then
                 return parent_cls_name
               end
               local _exp_1 = head[1]
               if "call" == _exp_1 then
                 local calling_name = block:get("current_block")
-                slice[1] = {
+                chain_tail[1] = {
                   "call",
                   {
                     "self",
@@ -1140,21 +1132,23 @@ Statement = Transformer({
                   })
                 end
               elseif "colon" == _exp_1 then
-                local call = head[3]
-                insert(new_chain, {
-                  "dot",
-                  head[2]
-                })
-                slice[1] = {
-                  "call",
-                  {
-                    "self",
-                    unpack(call[2])
+                local call = chain_tail[2]
+                if call and call[1] == "call" then
+                  chain_tail[1] = {
+                    "dot",
+                    head[2]
                   }
-                }
+                  chain_tail[2] = {
+                    "call",
+                    {
+                      "self",
+                      unpack(call[2])
+                    }
+                  }
+                end
               end
-              for _index_0 = 1, #slice do
-                local item = slice[_index_0]
+              for _index_0 = 1, #chain_tail do
+                local item = chain_tail[_index_0]
                 insert(new_chain, item)
               end
               return new_chain
