@@ -134,7 +134,7 @@ build_grammar = wrap_env debug_grammar, (root) ->
     Local: key"local" * ((op"*" + op"^") / mark"declare_glob" + Ct(NameList) / mark"declare_with_shadows")
 
     Import: key"import" * Ct(ImportNameList) * SpaceBreak^0 * key"from" * Exp / mark"import"
-    ImportName: (sym"\\" * Ct(Cc"colon_stub" * Name) + Name)
+    ImportName: (sym"\\" * Ct(Cc"colon" * Name) + Name)
     ImportNameList: SpaceBreak^0 * ImportName * ((SpaceBreak^1 + sym"," * SpaceBreak^0) * ImportName)^0
 
     BreakLoop: Ct(key"break"/trim) + Ct(key"continue"/trim)

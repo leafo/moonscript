@@ -20,6 +20,7 @@ has_destructure = (names) ->
   false
 
 extract_assign_names = (name, accum={}, prefix={}) ->
+
   i = 1
   for tuple in *name[2]
     value, suffix = if #tuple == 1
@@ -28,9 +29,10 @@ extract_assign_names = (name, accum={}, prefix={}) ->
       tuple[1], s
     else
       key = tuple[1]
+
       s = if ntype(key) == "key_literal"
         key_name = key[2]
-        if ntype(key_name) == "colon_stub"
+        if ntype(key_name) == "colon"
           key_name
         else
           {"dot", key_name}

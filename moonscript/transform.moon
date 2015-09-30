@@ -291,12 +291,12 @@ Statement = Transformer {
   import: (node) =>
     _, names, source = unpack node
     table_values = for name in *names
-      dest_val = if ntype(name) == "colon_stub"
+      dest_name = if ntype(name) == "colon"
         name[2]
       else
         name
 
-      {{"key_literal", name}, dest_val}
+      {{"key_literal", name}, dest_name}
 
     dest = { "table", table_values }
     { "assign", {dest}, {source}, [-1]: node[-1] }

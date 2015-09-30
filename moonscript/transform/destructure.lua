@@ -68,7 +68,7 @@ extract_assign_names = function(name, accum, prefix)
       local s
       if ntype(key) == "key_literal" then
         local key_name = key[2]
-        if ntype(key_name) == "colon_stub" then
+        if ntype(key_name) == "colon" then
           s = key_name
         else
           s = {

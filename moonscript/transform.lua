@@ -484,18 +484,18 @@ Statement = Transformer({
       local _len_0 = 1
       for _index_0 = 1, #names do
         local name = names[_index_0]
-        local dest_val
-        if ntype(name) == "colon_stub" then
-          dest_val = name[2]
+        local dest_name
+        if ntype(name) == "colon" then
+          dest_name = name[2]
         else
-          dest_val = name
+          dest_name = name
         end
         local _value_0 = {
           {
             "key_literal",
             name
           },
-          dest_val
+          dest_name
         }
         _accum_0[_len_0] = _value_0
         _len_0 = _len_0 + 1
