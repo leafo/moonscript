@@ -77,6 +77,7 @@ class CoolSuper
     super\yeah"world".okay hi, hi, hi
     something.super
     super.super.super.super
+    super\hello
     nil
 
 
