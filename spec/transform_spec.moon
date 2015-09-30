@@ -1,6 +1,55 @@
 
 import with_dev from require "spec.helpers"
 
+describe "moonscript.transform.destructure", ->
+  local extract_assign_names
+
+  with_dev ->
+    { :extract_assign_names } = require "moonscript.transform.destructure"
+
+  it "extracts names from table destructure", ->
+    des = {
+      "table"
+      {
+        {{"key_literal", "hi"}, {"ref", "hi"}}
+        {{"key_literal", "world"}, {"ref", "world"}}
+      }
+    }
+
+    assert.same {
+      {
+        {"ref", "hi"} -- target
+        {
+          {"dot", "hi"}
+        } -- chain suffix
+      }
+
+      {
+        {"ref", "world"}
+        {
+          {"dot", "world"}
+        }
+      }
+
+    }, extract_assign_names des
+
+  it "extracts names from array destructure", ->
+    des = {
+      "table"
+      {
+        {{"ref", "hi"}}
+      }
+    }
+
+    assert.same {
+      {
+        {"ref", "hi"}
+        {
+          {"index", {"number", 1}}
+        }
+      }
+    }, extract_assign_names des
+
 describe "moonscript.transform.statements", ->
   local last_stm, transform_last_stm, Run
 

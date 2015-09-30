@@ -228,5 +228,6 @@ end
 return {
   has_destructure = has_destructure,
   split_assign = split_assign,
-  build_assign = build_assign
+  build_assign = build_assign,
+  extract_assign_names = extract_assign_names
 }

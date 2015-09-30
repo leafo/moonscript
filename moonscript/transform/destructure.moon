@@ -123,4 +123,4 @@ split_assign = (scope, assign) ->
 
   build.group g
 
-{ :has_destructure, :split_assign, :build_assign }
+{ :has_destructure, :split_assign, :build_assign, :extract_assign_names }
