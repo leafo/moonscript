@@ -72,7 +72,7 @@ return {
     local callee = node[2]
     local callee_type = ntype(callee)
     local item_offset = 3
-    if callee_type == "dot" or callee_type == "colon" then
+    if callee_type == "dot" or callee_type == "colon" or callee_type == "index" then
       callee = self:get("scope_var")
       if not (callee) then
         user_error("Short-dot syntax must be called within a with block")

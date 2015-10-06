@@ -46,7 +46,7 @@ string_chars = {
     callee_type = ntype callee
     item_offset = 3
 
-    if callee_type == "dot" or callee_type == "colon"
+    if callee_type == "dot" or callee_type == "colon" or callee_type == "index"
       callee = @get "scope_var"
       unless callee
         user_error "Short-dot syntax must be called within a with block"

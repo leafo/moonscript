@@ -1492,7 +1492,7 @@ Value = Transformer({
     })
   end,
   chain = function(self, node)
-    for i = 3, #node do
+    for i = 2, #node do
       local part = node[i]
       if ntype(part) == "dot" and data.lua_keywords[part[2]] then
         node[i] = {

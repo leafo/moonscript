@@ -111,3 +111,8 @@ do
     with hi
       return .a, .b
 
+
+do
+  with dad
+    .if "yes"
+    y = .end.of.function

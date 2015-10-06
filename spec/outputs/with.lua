@@ -154,10 +154,19 @@ do
   end
 end
 do
-  return function()
+  local _
+  _ = function()
     do
       local _with_0 = hi
       return _with_0.a, _with_0.b
     end
+  end
+end
+do
+  do
+    local _with_0 = dad
+    _with_0["if"]("yes")
+    local y = _with_0["end"].of["function"]
+    return _with_0
   end
 end

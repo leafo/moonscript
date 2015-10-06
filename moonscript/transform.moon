@@ -923,7 +923,7 @@ Value = Transformer {
   -- pull out colon chain
   chain: (node) =>
     -- escape lua keywords used in dot accessors
-    for i=3,#node
+    for i=2,#node
       part = node[i]
       if ntype(part) == "dot" and data.lua_keywords[part[2]]
         node[i] = { "index", {"string", '"', part[2]} }
