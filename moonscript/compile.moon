@@ -5,7 +5,7 @@ transform = require "moonscript.transform"
 
 import NameProxy, LocalName from require "moonscript.transform.names"
 import Set from require "moonscript.data"
-import ntype, has_value from require "moonscript.types"
+import ntype, value_can_be_statement from require "moonscript.types"
 
 statement_compilers = require "moonscript.compile.statement"
 value_compilers = require "moonscript.compile.value"
@@ -379,11 +379,11 @@ class Block
     result = if fn = @statement_compilers[ntype(node)]
       fn @, node, ...
     else
-      -- coerce value into statement
-      if has_value node
-        @stm {"assign", {"_"}, {node}}
-      else
+      if value_can_be_statement node
         @value node
+      else
+        -- coerce value into statement
+        @stm {"assign", {"_"}, {node}}
 
     if result
       if type(node) == "table" and type(result) == "table" and node[-1]

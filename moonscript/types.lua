@@ -45,14 +45,12 @@ do
     return moon_type(val)
   end
 end
-local has_value
-has_value = function(node)
-  if ntype(node) == "chain" then
-    local ctype = ntype(node[#node])
-    return ctype ~= "call" and ctype ~= "colon"
-  else
-    return true
+local value_can_be_statement
+value_can_be_statement = function(node)
+  if not (ntype(node) == "chain") then
+    return false
   end
+  return ntype(node[#node]) == "call"
 end
 local is_value
 is_value = function(stm)
@@ -320,7 +318,7 @@ return {
   cascading = cascading,
   value_is_singular = value_is_singular,
   comprehension_has_value = comprehension_has_value,
-  has_value = has_value,
+  value_can_be_statement = value_can_be_statement,
   mtype = mtype,
   terminating = terminating
 }

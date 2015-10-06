@@ -8,10 +8,10 @@ do
 end
 local Set
 Set = require("moonscript.data").Set
-local ntype, has_value
+local ntype, value_can_be_statement
 do
   local _obj_0 = require("moonscript.types")
-  ntype, has_value = _obj_0.ntype, _obj_0.has_value
+  ntype, value_can_be_statement = _obj_0.ntype, _obj_0.value_can_be_statement
 end
 local statement_compilers = require("moonscript.compile.statement")
 local value_compilers = require("moonscript.compile.value")
@@ -525,7 +525,9 @@ do
         if fn then
           result = fn(self, node, ...)
         else
-          if has_value(node) then
+          if value_can_be_statement(node) then
+            result = self:value(node)
+          else
             result = self:stm({
               "assign",
               {
@@ -535,8 +537,6 @@ do
                 node
               }
             })
-          else
-            result = self:value(node)
           end
         end
       end

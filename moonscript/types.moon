@@ -40,13 +40,11 @@ mtype = do
     return "table" if mt and mt.smart_node
     moon_type val
 
--- does this always return a value
-has_value = (node) ->
-  if ntype(node) == "chain"
-    ctype = ntype(node[#node])
-    ctype != "call" and ctype != "colon"
-  else
-    true
+-- can this value be compiled in a line by itself
+value_can_be_statement = (node) ->
+  return false unless ntype(node) == "chain"
+  -- it's a function call
+  ntype(node[#node]) == "call"
 
 is_value = (stm) ->
   compile = require "moonscript.compile"
@@ -193,6 +191,7 @@ smart_node = (node) ->
 
 {
   :ntype, :smart_node, :build, :is_value, :is_slice, :manual_return,
-  :cascading, :value_is_singular, :comprehension_has_value, :has_value, :mtype, :terminating
+  :cascading, :value_is_singular, :comprehension_has_value,
+  :value_can_be_statement, :mtype, :terminating
 }
 
