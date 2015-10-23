@@ -257,8 +257,51 @@ return {
         end
       end
       if items then
-        local count = #items
+        local map, list = { }, { }
         for i, tuple in ipairs(items) do
+          local _continue_0 = false
+          repeat
+            if (#tuple ~= 2) or (ntype(tuple[1]) ~= "key_literal") then
+              table.insert(list, tuple)
+              _continue_0 = true
+              break
+            end
+            local key_node, value = unpack(tuple)
+            local key = key_node[2]
+            if list[key] then
+              if map[key] then
+                table.insert(list[list[key]][2][2], {
+                  value
+                })
+              else
+                map[key] = true
+                list[list[key]] = {
+                  key_node,
+                  {
+                    "table",
+                    {
+                      {
+                        list[list[key]][2]
+                      },
+                      {
+                        value
+                      }
+                    }
+                  }
+                }
+              end
+            else
+              list[key] = #list + 1
+              table.insert(list, tuple)
+            end
+            _continue_0 = true
+          until true
+          if not _continue_0 then
+            break
+          end
+        end
+        local count = #list
+        for i, tuple in ipairs(list) do
           local line = format_line(tuple)
           if not (count == i) then
             line:append(table_delim)

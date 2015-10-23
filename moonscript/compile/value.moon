@@ -1,4 +1,3 @@
-
 util = require "moonscript.util"
 data = require "moonscript.data"
 
@@ -154,8 +153,25 @@ string_chars = {
           @line \value tuple[1]
 
       if items
-        count = #items
+        map, list = {}, {}
         for i, tuple in ipairs items
+          if (#tuple != 2) or (ntype(tuple[1]) != "key_literal")
+            table.insert(list, tuple)
+            continue
+          key_node, value = unpack tuple
+          key = key_node[2]
+          if list[key]
+            if map[key]
+              table.insert(list[list[key]][2][2], {value})
+            else
+              map[key] = true
+              list[list[key]] = { key_node,
+                { "table", { { list[list[key]][2] }, { value } } } }
+          else
+            list[key] = #list + 1
+            table.insert(list, tuple)
+        count = #list
+        for i, tuple in ipairs list
           line = format_line tuple
           line\append table_delim unless count == i
           \add line
