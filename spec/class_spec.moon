@@ -198,3 +198,39 @@ describe "class", ->
     assert.same 10000, instance\cool!
     assert B == instance\get_super!, "expected super to be B"
 
+  it "should resolve many levels of super", ->
+    class One
+      a: =>
+        1
+
+    class Two extends One
+      a: =>
+        super! + 2
+
+    class Three extends Two
+      a: =>
+        super! + 3
+
+    i = Three!
+
+    assert.same 6, i\a!
+
+
+  it "should resolve many levels of super with a gap", ->
+    class One
+      a: =>
+        1
+
+    class Two extends One
+
+    class Three extends Two
+      a: =>
+        super! + 3
+
+    class Four extends Three
+      a: =>
+        super! + 4
+
+    i = Four!
+
+    assert.same 8, i\a!
