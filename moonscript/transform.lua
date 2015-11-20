@@ -1000,7 +1000,35 @@ Statement = Transformer({
           "nil"
         },
         ["then"] = {
-          parent_cls_name:index("name")
+          build.assign_one(LocalName("parent"), build.chain({
+            base = "rawget",
+            {
+              "call",
+              {
+                {
+                  "ref",
+                  "cls"
+                },
+                {
+                  "string",
+                  '"',
+                  "__parent"
+                }
+              }
+            }
+          })),
+          build["if"]({
+            cond = LocalName("parent"),
+            ["then"] = {
+              build.chain({
+                base = LocalName("parent"),
+                {
+                  "index",
+                  "name"
+                }
+              })
+            }
+          })
         }
       })
       insert(class_lookup, {
@@ -1098,6 +1126,18 @@ Statement = Transformer({
             self:put_name(name)
           end
           return self:set("super", function(block, chain)
+            local relative_parent = {
+              "chain",
+              "self",
+              {
+                "dot",
+                "__class"
+              },
+              {
+                "dot",
+                "__parent"
+              }
+            }
             if chain then
               local slice
               do
@@ -1110,14 +1150,11 @@ Statement = Transformer({
                 end
                 slice = _accum_0
               end
-              local new_chain = {
-                "chain",
-                parent_cls_name
-              }
               local head = slice[1]
               if head == nil then
-                return parent_cls_name
+                return relative_parent
               end
+              local new_chain = relative_parent
               local _exp_1 = head[1]
               if "call" == _exp_1 then
                 local calling_name = block:get("current_block")
@@ -1159,7 +1196,7 @@ Statement = Transformer({
               end
               return new_chain
             else
-              return parent_cls_name
+              return relative_parent
             end
           end)
         end),

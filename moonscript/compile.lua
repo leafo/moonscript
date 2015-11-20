@@ -638,7 +638,7 @@ do
     __init = function(self, options)
       self.options = options
       self.root = self
-      return _parent_0.__init(self)
+      return self.__class.__parent.__init(self)
     end,
     __base = _base_0,
     __name = "RootBlock",
@@ -647,7 +647,10 @@ do
     __index = function(cls, name)
       local val = rawget(_base_0, name)
       if val == nil then
-        return _parent_0[name]
+        local parent = rawget(cls, "__parent")
+        if parent then
+          return parent[name]
+        end
       else
         return val
       end
