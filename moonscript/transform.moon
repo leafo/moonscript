@@ -612,7 +612,25 @@ Statement = Transformer {
       class_lookup = build["if"] {
         cond: { "exp", {"ref", "val"}, "==", "nil" }
         then: {
-          parent_cls_name\index"name"
+          build.assign_one LocalName"parent", build.chain {
+            base: "rawget"
+            {
+              "call", {
+                {"ref", "cls"}
+                {"string", '"', "__parent"}
+              }
+            }
+          }
+
+          build.if {
+            cond: LocalName "parent"
+            then: {
+              build.chain {
+                base: LocalName "parent"
+                {"index", "name"}
+              }
+            }
+          }
         }
       }
       insert class_lookup, {"else", {"val"}}
@@ -660,14 +678,21 @@ Statement = Transformer {
           @put_name name if name
 
           @set "super", (block, chain) ->
+            relative_parent = {
+              "chain",
+              "self"
+              {"dot", "__class"}
+              {"dot", "__parent"}
+            }
+
             if chain
               chain_tail = { unpack chain, 3 }
-              new_chain = {"chain", parent_cls_name}
-
               head = chain_tail[1]
 
               if head == nil
-                return parent_cls_name
+                return relative_parent
+
+              new_chain = relative_parent
 
               switch head[1]
                 -- calling super, inject calling name and self into chain
@@ -702,7 +727,7 @@ Statement = Transformer {
 
               new_chain
             else
-              parent_cls_name
+              relative_parent
 
         {"declare_glob", "*"}
 
