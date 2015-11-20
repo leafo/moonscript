@@ -1,5 +1,6 @@
 local Hello
 do
+  local _class_0
   local _base_0 = {
     hello = function(self)
       return print(self.test, self.world)
@@ -9,7 +10,7 @@ do
     end
   }
   _base_0.__index = _base_0
-  local _class_0 = setmetatable({
+  _class_0 = setmetatable({
     __init = function(self, test, world)
       self.test, self.world = test, world
       return print("creating object..")
@@ -32,13 +33,14 @@ x:hello()
 print(x)
 local Simple
 do
+  local _class_0
   local _base_0 = {
     cool = function(self)
       return print("cool")
     end
   }
   _base_0.__index = _base_0
-  local _class_0 = setmetatable({
+  _class_0 = setmetatable({
     __init = function() end,
     __base = _base_0,
     __name = "Simple"
@@ -55,11 +57,12 @@ do
 end
 local Yikes
 do
+  local _class_0
   local _parent_0 = Simple
   local _base_0 = { }
   _base_0.__index = _base_0
   setmetatable(_base_0, _parent_0.__base)
-  local _class_0 = setmetatable({
+  _class_0 = setmetatable({
     __init = function(self)
       return print("created hello")
     end,
@@ -94,13 +97,14 @@ x = Yikes()
 x:cool()
 local Hi
 do
+  local _class_0
   local _base_0 = {
     cool = function(self, num)
       return print("num", num)
     end
   }
   _base_0.__index = _base_0
-  local _class_0 = setmetatable({
+  _class_0 = setmetatable({
     __init = function(self, arg)
       return print("init arg", arg)
     end,
@@ -118,17 +122,18 @@ do
   Hi = _class_0
 end
 do
+  local _class_0
   local _parent_0 = Hi
   local _base_0 = {
     cool = function(self)
-      return self.__class.__parent.cool(self, 120302)
+      return _class_0.__parent.cool(self, 120302)
     end
   }
   _base_0.__index = _base_0
   setmetatable(_base_0, _parent_0.__base)
-  local _class_0 = setmetatable({
+  _class_0 = setmetatable({
     __init = function(self)
-      return self.__class.__parent.__init(self, "man")
+      return _class_0.__parent.__init(self, "man")
     end,
     __base = _base_0,
     __name = "Simple",
@@ -162,11 +167,12 @@ x:cool()
 print(x.__class == Simple)
 local Okay
 do
+  local _class_0
   local _base_0 = {
     something = 20323
   }
   _base_0.__index = _base_0
-  local _class_0 = setmetatable({
+  _class_0 = setmetatable({
     __init = function() end,
     __base = _base_0,
     __name = "Okay"
@@ -183,19 +189,20 @@ do
 end
 local Biggie
 do
+  local _class_0
   local _parent_0 = Okay
   local _base_0 = {
     something = function(self)
-      self.__class.__parent.something(self, 1, 2, 3, 4)
-      self.__class.__parent.something(another_self, 1, 2, 3, 4)
-      return assert(self.__class.__parent == Okay)
+      _class_0.__parent.something(self, 1, 2, 3, 4)
+      _class_0.__parent.something(another_self, 1, 2, 3, 4)
+      return assert(_class_0.__parent == Okay)
     end
   }
   _base_0.__index = _base_0
   setmetatable(_base_0, _parent_0.__base)
-  local _class_0 = setmetatable({
+  _class_0 = setmetatable({
     __init = function(self, ...)
-      return self.__class.__parent.__init(self, ...)
+      return _class_0.__parent.__init(self, ...)
     end,
     __base = _base_0,
     __name = "Biggie",
@@ -226,13 +233,14 @@ do
 end
 local Yeah
 do
+  local _class_0
   local _base_0 = {
     okay = function(self)
-      return self.__class.__parent.something(self, 1, 2, 3, 4)
+      return _class_0.__parent.something(self, 1, 2, 3, 4)
     end
   }
   _base_0.__index = _base_0
-  local _class_0 = setmetatable({
+  _class_0 = setmetatable({
     __init = function() end,
     __base = _base_0,
     __name = "Yeah"
@@ -249,13 +257,14 @@ do
 end
 local What
 do
+  local _class_0
   local _base_0 = {
     something = function(self)
       return print("val:", self.val)
     end
   }
   _base_0.__index = _base_0
-  local _class_0 = setmetatable({
+  _class_0 = setmetatable({
     __init = function() end,
     __base = _base_0,
     __name = "What"
@@ -271,11 +280,12 @@ do
   What = _class_0
 end
 do
+  local _class_0
   local _parent_0 = What
   local _base_0 = {
     val = 2323,
     something = function(self)
-      local _base_1 = self.__class.__parent
+      local _base_1 = _class_0.__parent
       local _fn_0 = _base_1.something
       return function(...)
         return _fn_0(self, ...)
@@ -284,9 +294,9 @@ do
   }
   _base_0.__index = _base_0
   setmetatable(_base_0, _parent_0.__base)
-  local _class_0 = setmetatable({
+  _class_0 = setmetatable({
     __init = function(self, ...)
-      return self.__class.__parent.__init(self, ...)
+      return _class_0.__parent.__init(self, ...)
     end,
     __base = _base_0,
     __name = "Hello",
@@ -323,16 +333,17 @@ do
 end
 local CoolSuper
 do
+  local _class_0
   local _base_0 = {
     hi = function(self)
-      self.__class.__parent.hi(self, 1, 2, 3, 4)(1, 2, 3, 4)
-      self.__class.__parent.something(1, 2, 3, 4)
-      local _ = self.__class.__parent.something(1, 2, 3, 4).world
-      self.__class.__parent.yeah(self, "world").okay(hi, hi, hi)
+      _class_0.__parent.hi(self, 1, 2, 3, 4)(1, 2, 3, 4)
+      _class_0.__parent.something(1, 2, 3, 4)
+      local _ = _class_0.__parent.something(1, 2, 3, 4).world
+      _class_0.__parent.yeah(self, "world").okay(hi, hi, hi)
       _ = something.super
-      _ = self.__class.__parent.super.super.super
+      _ = _class_0.__parent.super.super.super
       do
-        local _base_1 = self.__class.__parent
+        local _base_1 = _class_0.__parent
         local _fn_0 = _base_1.hello
         _ = function(...)
           return _fn_0(self, ...)
@@ -342,7 +353,7 @@ do
     end
   }
   _base_0.__index = _base_0
-  local _class_0 = setmetatable({
+  _class_0 = setmetatable({
     __init = function() end,
     __base = _base_0,
     __name = "CoolSuper"
@@ -368,12 +379,13 @@ xx = function(hello, world, cool)
 end
 local ClassMan
 do
+  local _class_0
   local _base_0 = {
     blue = function(self) end,
     green = function(self) end
   }
   _base_0.__index = _base_0
-  local _class_0 = setmetatable({
+  _class_0 = setmetatable({
     __init = function() end,
     __base = _base_0,
     __name = "ClassMan"
@@ -403,10 +415,11 @@ self.hello(2, 3, 4)
 local _ = hello[self].world
 local Whacko
 do
+  local _class_0
   local hello
   local _base_0 = { }
   _base_0.__index = _base_0
-  local _class_0 = setmetatable({
+  _class_0 = setmetatable({
     __init = function() end,
     __base = _base_0,
     __name = "Whacko"
@@ -436,9 +449,10 @@ local yyy
 yyy = function()
   local Cool
   do
+    local _class_0
     local _base_0 = { }
     _base_0.__index = _base_0
-    local _class_0 = setmetatable({
+    _class_0 = setmetatable({
       __init = function() end,
       __base = _base_0,
       __name = "Cool"
@@ -458,9 +472,10 @@ yyy = function()
   end
 end
 do
+  local _class_0
   local _base_0 = { }
   _base_0.__index = _base_0
-  local _class_0 = setmetatable({
+  _class_0 = setmetatable({
     __init = function() end,
     __base = _base_0,
     __name = "D"
@@ -478,9 +493,10 @@ do
   a.b.c.D = _class_0
 end
 do
+  local _class_0
   local _base_0 = { }
   _base_0.__index = _base_0
-  local _class_0 = setmetatable({
+  _class_0 = setmetatable({
     __init = function() end,
     __base = _base_0,
     __name = "hello"
@@ -498,13 +514,14 @@ do
   a.b["hello"] = _class_0
 end
 do
+  local _class_0
   local _parent_0 = Hello.World
   local _base_0 = { }
   _base_0.__index = _base_0
   setmetatable(_base_0, _parent_0.__base)
-  local _class_0 = setmetatable({
+  _class_0 = setmetatable({
     __init = function(self, ...)
-      return self.__class.__parent.__init(self, ...)
+      return _class_0.__parent.__init(self, ...)
     end,
     __base = _base_0,
     __name = "Something",
@@ -539,9 +556,10 @@ do
 end
 local a
 do
+  local _class_0
   local _base_0 = { }
   _base_0.__index = _base_0
-  local _class_0 = setmetatable({
+  _class_0 = setmetatable({
     __init = function() end,
     __base = _base_0,
     __name = "a"
@@ -559,9 +577,10 @@ end
 local b
 local Something
 do
+  local _class_0
   local _base_0 = { }
   _base_0.__index = _base_0
-  local _class_0 = setmetatable({
+  _class_0 = setmetatable({
     __init = function() end,
     __base = _base_0,
     __name = "Something"
@@ -579,13 +598,14 @@ do
 end
 local c
 do
+  local _class_0
   local _parent_0 = Hello
   local _base_0 = { }
   _base_0.__index = _base_0
   setmetatable(_base_0, _parent_0.__base)
-  local _class_0 = setmetatable({
+  _class_0 = setmetatable({
     __init = function(self, ...)
-      return self.__class.__parent.__init(self, ...)
+      return _class_0.__parent.__init(self, ...)
     end,
     __base = _base_0,
     __name = "Something",
@@ -617,13 +637,14 @@ do
 end
 local d
 do
+  local _class_0
   local _parent_0 = World
   local _base_0 = { }
   _base_0.__index = _base_0
   setmetatable(_base_0, _parent_0.__base)
-  local _class_0 = setmetatable({
+  _class_0 = setmetatable({
     __init = function(self, ...)
-      return self.__class.__parent.__init(self, ...)
+      return _class_0.__parent.__init(self, ...)
     end,
     __base = _base_0,
     __name = "d",
@@ -655,9 +676,10 @@ end
 print(((function()
   local WhatsUp
   do
+    local _class_0
     local _base_0 = { }
     _base_0.__index = _base_0
-    local _class_0 = setmetatable({
+    _class_0 = setmetatable({
       __init = function() end,
       __base = _base_0,
       __name = "WhatsUp"
@@ -675,9 +697,10 @@ print(((function()
   end
 end)()).__name)
 do
+  local _class_0
   local _base_0 = { }
   _base_0.__index = _base_0
-  local _class_0 = setmetatable({
+  _class_0 = setmetatable({
     __init = function() end,
     __base = _base_0,
     __name = "Something"
@@ -695,10 +718,11 @@ do
   Something = _class_0
 end
 do
+  local _class_0
   local val, insert
   local _base_0 = { }
   _base_0.__index = _base_0
-  local _class_0 = setmetatable({
+  _class_0 = setmetatable({
     __init = function(self)
       return print(insert, val)
     end,
@@ -719,9 +743,10 @@ do
   Something = _class_0
 end
 do
+  local _class_0
   local _base_0 = { }
   _base_0.__index = _base_0
-  local _class_0 = setmetatable({
+  _class_0 = setmetatable({
     __init = hi,
     __base = _base_0,
     __name = "X"

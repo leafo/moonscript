@@ -171,6 +171,7 @@ with_continue_listener = function(body)
   }
 end
 do
+  local _class_0
   local _base_0 = {
     transform_once = function(self, scope, node, ...)
       if self.seen_nodes[node] then
@@ -217,7 +218,7 @@ do
     end
   }
   _base_0.__index = _base_0
-  local _class_0 = setmetatable({
+  _class_0 = setmetatable({
     __init = function(self, transformers)
       self.transformers = transformers
       self.seen_nodes = setmetatable({ }, {
@@ -1000,7 +1001,35 @@ Statement = Transformer({
           "nil"
         },
         ["then"] = {
-          parent_cls_name:index("name")
+          build.assign_one(LocalName("parent"), build.chain({
+            base = "rawget",
+            {
+              "call",
+              {
+                {
+                  "ref",
+                  "cls"
+                },
+                {
+                  "string",
+                  '"',
+                  "__parent"
+                }
+              }
+            }
+          })),
+          build["if"]({
+            cond = LocalName("parent"),
+            ["then"] = {
+              build.chain({
+                base = LocalName("parent"),
+                {
+                  "index",
+                  "name"
+                }
+              })
+            }
+          })
         }
       })
       insert(class_lookup, {
@@ -1098,18 +1127,23 @@ Statement = Transformer({
             self:put_name(name)
           end
           return self:set("super", function(block, chain)
+            local relative_parent = {
+              "chain",
+              cls_name,
+              {
+                "dot",
+                "__parent"
+              }
+            }
             if chain then
               local chain_tail = {
                 unpack(chain, 3)
               }
-              local new_chain = {
-                "chain",
-                parent_cls_name
-              }
               local head = chain_tail[1]
               if head == nil then
-                return parent_cls_name
+                return relative_parent
               end
+              local new_chain = relative_parent
               local _exp_1 = head[1]
               if "call" == _exp_1 then
                 local calling_name = block:get("current_block")
@@ -1153,10 +1187,16 @@ Statement = Transformer({
               end
               return new_chain
             else
-              return parent_cls_name
+              return relative_parent
             end
           end)
         end),
+        {
+          "declare",
+          {
+            cls_name
+          }
+        },
         {
           "declare_glob",
           "*"
@@ -1240,6 +1280,7 @@ Statement = Transformer({
   end
 })
 do
+  local _class_0
   local _base_0 = {
     body_idx = {
       ["for"] = 4,
@@ -1300,7 +1341,7 @@ do
     end
   }
   _base_0.__index = _base_0
-  local _class_0 = setmetatable({
+  _class_0 = setmetatable({
     __init = function(self, accum_name)
       self.accum_name = NameProxy("accum")
       self.value_name = NameProxy("value")
