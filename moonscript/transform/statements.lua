@@ -5,13 +5,14 @@ do
 end
 local Run
 do
+  local _class_0
   local _base_0 = {
     call = function(self, state)
       return self.fn(state)
     end
   }
   _base_0.__index = _base_0
-  local _class_0 = setmetatable({
+  _class_0 = setmetatable({
     __init = function(self, fn)
       self.fn = fn
       self[1] = "run"

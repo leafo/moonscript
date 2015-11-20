@@ -26,6 +26,7 @@ local mtype = util.moon.type
 local indent_char = "  "
 local Line, DelayedLine, Lines, Block, RootBlock
 do
+  local _class_0
   local _base_0 = {
     mark_pos = function(self, pos, line)
       if line == nil then
@@ -127,7 +128,7 @@ do
     end
   }
   _base_0.__index = _base_0
-  local _class_0 = setmetatable({
+  _class_0 = setmetatable({
     __init = function(self)
       self.posmap = { }
     end,
@@ -145,6 +146,7 @@ do
   Lines = _class_0
 end
 do
+  local _class_0
   local _base_0 = {
     pos = nil,
     append_list = function(self, items, delim)
@@ -208,7 +210,7 @@ do
     end
   }
   _base_0.__index = _base_0
-  local _class_0 = setmetatable({
+  _class_0 = setmetatable({
     __init = function() end,
     __base = _base_0,
     __name = "Line"
@@ -224,6 +226,7 @@ do
   Line = _class_0
 end
 do
+  local _class_0
   local _base_0 = {
     prepare = function() end,
     render = function(self)
@@ -232,7 +235,7 @@ do
     end
   }
   _base_0.__index = _base_0
-  local _class_0 = setmetatable({
+  _class_0 = setmetatable({
     __init = function(self, fn)
       self.prepare = fn
     end,
@@ -250,6 +253,7 @@ do
   DelayedLine = _class_0
 end
 do
+  local _class_0
   local _base_0 = {
     header = "do",
     footer = "end",
@@ -573,7 +577,7 @@ do
     end
   }
   _base_0.__index = _base_0
-  local _class_0 = setmetatable({
+  _class_0 = setmetatable({
     __init = function(self, parent, header, footer)
       self.parent, self.header, self.footer = parent, header, footer
       self._lines = Lines()
@@ -613,6 +617,7 @@ do
   Block = _class_0
 end
 do
+  local _class_0
   local _parent_0 = Block
   local _base_0 = {
     __tostring = function(self)
@@ -634,11 +639,11 @@ do
   }
   _base_0.__index = _base_0
   setmetatable(_base_0, _parent_0.__base)
-  local _class_0 = setmetatable({
+  _class_0 = setmetatable({
     __init = function(self, options)
       self.options = options
       self.root = self
-      return self.__class.__parent.__init(self)
+      return _class_0.__parent.__init(self)
     end,
     __base = _base_0,
     __name = "RootBlock",

@@ -680,8 +680,7 @@ Statement = Transformer {
           @set "super", (block, chain) ->
             relative_parent = {
               "chain",
-              "self"
-              {"dot", "__class"}
+              cls_name
               {"dot", "__parent"}
             }
 
@@ -729,6 +728,7 @@ Statement = Transformer {
             else
               relative_parent
 
+        {"declare", { cls_name }}
         {"declare_glob", "*"}
 
         parent_val and .assign_one(parent_cls_name, parent_val) or NOOP
