@@ -4,13 +4,14 @@ local unpack
 unpack = require("moonscript.util").unpack
 local LocalName
 do
+  local _class_0
   local _base_0 = {
     get_name = function(self)
       return self.name
     end
   }
   _base_0.__index = _base_0
-  local _class_0 = setmetatable({
+  _class_0 = setmetatable({
     __init = function(self, name)
       self.name = name
       self[1] = "temp_name"
@@ -30,6 +31,7 @@ do
 end
 local NameProxy
 do
+  local _class_0
   local _base_0 = {
     get_name = function(self, scope, dont_put)
       if dont_put == nil then
@@ -81,7 +83,7 @@ do
     end
   }
   _base_0.__index = _base_0
-  local _class_0 = setmetatable({
+  _class_0 = setmetatable({
     __init = function(self, prefix)
       self.prefix = prefix
       self[1] = "temp_name"

@@ -171,6 +171,7 @@ with_continue_listener = function(body)
   }
 end
 do
+  local _class_0
   local _base_0 = {
     transform_once = function(self, scope, node, ...)
       if self.seen_nodes[node] then
@@ -217,7 +218,7 @@ do
     end
   }
   _base_0.__index = _base_0
-  local _class_0 = setmetatable({
+  _class_0 = setmetatable({
     __init = function(self, transformers)
       self.transformers = transformers
       self.seen_nodes = setmetatable({ }, {
@@ -1128,11 +1129,7 @@ Statement = Transformer({
           return self:set("super", function(block, chain)
             local relative_parent = {
               "chain",
-              "self",
-              {
-                "dot",
-                "__class"
-              },
+              cls_name,
               {
                 "dot",
                 "__parent"
@@ -1200,6 +1197,12 @@ Statement = Transformer({
             end
           end)
         end),
+        {
+          "declare",
+          {
+            cls_name
+          }
+        },
         {
           "declare_glob",
           "*"
@@ -1283,6 +1286,7 @@ Statement = Transformer({
   end
 })
 do
+  local _class_0
   local _base_0 = {
     body_idx = {
       ["for"] = 4,
@@ -1343,7 +1347,7 @@ do
     end
   }
   _base_0.__index = _base_0
-  local _class_0 = setmetatable({
+  _class_0 = setmetatable({
     __init = function(self, accum_name)
       self.accum_name = NameProxy("accum")
       self.value_name = NameProxy("value")
