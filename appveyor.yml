@@ -3,7 +3,7 @@ branches:
     - binaries
 
 install:
-  - set PATH=C:\MinGW\bin;%PATH%
+  - set PATH=C:\MinGW\bin;C:\MinGW\msys\1.0\bin;%PATH%
 
 build_script:
   - make
