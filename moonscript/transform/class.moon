@@ -6,6 +6,19 @@ CONSTRUCTOR_NAME = "new"
 import insert from table
 import build, ntype, NOOP from require "moonscript.types"
 
+super_scope = (value, key) ->
+  local prev_method
+
+  {
+    "scoped",
+    Run =>
+      prev_method = @get "current_method"
+      @set "current_method", key
+    value
+    Run =>
+      @set "current_method", prev_method
+  }
+
 (node, ret, parent_assign) =>
   _, name, parent_val, body = unpack node
   parent_val = nil if parent_val == ""
@@ -32,7 +45,8 @@ import build, ntype, NOOP from require "moonscript.types"
       constructor = tuple[2]
       continue
     else
-      tuple
+      {key, val} = tuple
+      {key, super_scope val, key}
 
   parent_cls_name = NameProxy "parent"
   base_name = NameProxy "base"
@@ -77,7 +91,7 @@ import build, ntype, NOOP from require "moonscript.types"
       {"string", '"', flattened_name}
 
   cls = build.table {
-    {"__init", constructor}
+    {"__init", super_scope constructor, {"key_literal", "__init"}}
     {"__base", base_name}
     {"__name", real_name} -- "quote the string"
     parent_val and {"__parent", parent_cls_name} or nil
@@ -173,7 +187,7 @@ import build, ntype, NOOP from require "moonscript.types"
           switch head[1]
             -- calling super, inject calling name and self into chain
             when "call"
-              calling_name = block\get"current_block"
+              calling_name = block\get "current_method"
               assert calling_name, "missing calling name"
               chain_tail[1] = {"call", {"self", unpack head[2]}}
 

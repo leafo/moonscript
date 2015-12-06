@@ -13,6 +13,21 @@ do
   local _obj_0 = require("moonscript.types")
   build, ntype, NOOP = _obj_0.build, _obj_0.ntype, _obj_0.NOOP
 end
+local super_scope
+super_scope = function(value, key)
+  local prev_method
+  return {
+    "scoped",
+    Run(function(self)
+      prev_method = self:get("current_method")
+      return self:set("current_method", key)
+    end),
+    value,
+    Run(function(self)
+      return self:set("current_method", prev_method)
+    end)
+  }
+end
 return function(self, node, ret, parent_assign)
   local _, name, parent_val, body = unpack(node)
   if parent_val == "" then
@@ -51,7 +66,12 @@ return function(self, node, ret, parent_assign)
           _continue_0 = true
           break
         else
-          _value_0 = tuple
+          local val
+          key, val = tuple[1], tuple[2]
+          _value_0 = {
+            key,
+            super_scope(val, key)
+          }
         end
         _accum_0[_len_0] = _value_0
         _len_0 = _len_0 + 1
@@ -129,7 +149,10 @@ return function(self, node, ret, parent_assign)
   local cls = build.table({
     {
       "__init",
-      constructor
+      super_scope(constructor, {
+        "key_literal",
+        "__init"
+      })
     },
     {
       "__base",
@@ -304,7 +327,7 @@ return function(self, node, ret, parent_assign)
           local new_chain = relative_parent
           local _exp_1 = head[1]
           if "call" == _exp_1 then
-            local calling_name = block:get("current_block")
+            local calling_name = block:get("current_method")
             assert(calling_name, "missing calling name")
             chain_tail[1] = {
               "call",

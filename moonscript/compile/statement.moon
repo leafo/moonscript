@@ -27,7 +27,7 @@ import concat, insert from table
     _, names, values = unpack node
 
     undeclared = @declare names
-    declare = "local "..concat(undeclared, ", ")
+    declare = "local " .. concat(undeclared, ", ")
 
     has_fndef = false
     i = 1
