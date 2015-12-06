@@ -23,6 +23,8 @@ local construct_comprehension
 construct_comprehension = require("moonscript.transform.comprehension").construct_comprehension
 local insert
 insert = table.insert
+local unpack
+unpack = require("moonscript.util").unpack
 return Transformer({
   ["for"] = default_accumulator,
   ["while"] = default_accumulator,

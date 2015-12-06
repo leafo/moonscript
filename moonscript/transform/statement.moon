@@ -15,6 +15,8 @@ import insert from table
 destructure = require "moonscript.transform.destructure"
 import construct_comprehension from require "moonscript.transform.comprehension"
 
+import unpack from require "moonscript.util"
+
 with_continue_listener = (body) ->
   continue_name = nil
 

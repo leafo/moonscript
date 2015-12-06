@@ -2,6 +2,8 @@
 import ntype from require "moonscript.types"
 import concat, insert from table
 
+import unpack from require "moonscript.util"
+
 {
   raw: (node) => @add node[2]
 

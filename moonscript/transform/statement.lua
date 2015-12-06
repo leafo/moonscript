@@ -15,6 +15,8 @@ insert = table.insert
 local destructure = require("moonscript.transform.destructure")
 local construct_comprehension
 construct_comprehension = require("moonscript.transform.comprehension").construct_comprehension
+local unpack
+unpack = require("moonscript.util").unpack
 local with_continue_listener
 with_continue_listener = function(body)
   local continue_name = nil

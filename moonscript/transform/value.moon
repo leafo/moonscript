@@ -10,6 +10,7 @@ import Run, transform_last_stm, implicitly_return, chain_is_stub from require "m
 import construct_comprehension from require "moonscript.transform.comprehension"
 
 import insert from table
+import unpack from require "moonscript.util"
 
 Transformer {
   for: default_accumulator
