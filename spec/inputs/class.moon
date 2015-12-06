@@ -186,13 +186,28 @@ class Cool extends Thing
       world: -> super.one
     }
 
-
 -- 
 
-class Cool extends Thing
+class Whack extends Thing
   dang: do_something =>
     super!
 
+---
 
+class Wowha extends Thing
+  @butt: ->
+    super!
+    super.hello
+    super\hello!
+    super\hello
+
+
+  @butt: cool {
+    ->
+      super!
+      super.hello
+      super\hello!
+      super\hello
+  }
 
 nil
