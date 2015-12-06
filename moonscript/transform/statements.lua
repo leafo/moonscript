@@ -1,6 +1,8 @@
 local types = require("moonscript.types")
 local ntype, mtype, is_value, NOOP
 ntype, mtype, is_value, NOOP = types.ntype, types.mtype, types.is_value, types.NOOP
+local comprehension_has_value
+comprehension_has_value = require("moonscript.transform.comprehension").comprehension_has_value
 local Run
 do
   local _class_0
@@ -92,7 +94,7 @@ implicitly_return = function(scope)
         return stm
       end
     else
-      if t == "comprehension" and not types.comprehension_has_value(stm) then
+      if t == "comprehension" and not comprehension_has_value(stm) then
         return stm
       else
         return {
@@ -104,56 +106,10 @@ implicitly_return = function(scope)
   end
   return fn
 end
-local reversed
-reversed = require("moonscript.util").reversed
-local construct_comprehension
-construct_comprehension = function(inner, clauses)
-  local current_stms = inner
-  for _, clause in reversed(clauses) do
-    local t = clause[1]
-    local _exp_0 = t
-    if "for" == _exp_0 then
-      local name, bounds
-      _, name, bounds = clause[1], clause[2], clause[3]
-      current_stms = {
-        "for",
-        name,
-        bounds,
-        current_stms
-      }
-    elseif "foreach" == _exp_0 then
-      local names, iter
-      _, names, iter = clause[1], clause[2], clause[3]
-      current_stms = {
-        "foreach",
-        names,
-        {
-          iter
-        },
-        current_stms
-      }
-    elseif "when" == _exp_0 then
-      local cond
-      _, cond = clause[1], clause[2]
-      current_stms = {
-        "if",
-        cond,
-        current_stms
-      }
-    else
-      current_stms = error("Unknown comprehension clause: " .. t)
-    end
-    current_stms = {
-      current_stms
-    }
-  end
-  return current_stms[1]
-end
 return {
   Run = Run,
   last_stm = last_stm,
   transform_last_stm = transform_last_stm,
   chain_is_stub = chain_is_stub,
-  implicitly_return = implicitly_return,
-  construct_comprehension = construct_comprehension
+  implicitly_return = implicitly_return
 }

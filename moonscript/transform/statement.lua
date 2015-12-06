@@ -5,10 +5,10 @@ do
   local _obj_0 = require("moonscript.transform.names")
   NameProxy, LocalName = _obj_0.NameProxy, _obj_0.LocalName
 end
-local Run, transform_last_stm, implicitly_return, construct_comprehension, last_stm
+local Run, transform_last_stm, implicitly_return, last_stm
 do
   local _obj_0 = require("moonscript.transform.statements")
-  Run, transform_last_stm, implicitly_return, construct_comprehension, last_stm = _obj_0.Run, _obj_0.transform_last_stm, _obj_0.implicitly_return, _obj_0.construct_comprehension, _obj_0.last_stm
+  Run, transform_last_stm, implicitly_return, last_stm = _obj_0.Run, _obj_0.transform_last_stm, _obj_0.implicitly_return, _obj_0.last_stm
 end
 local types = require("moonscript.types")
 local build, ntype, is_value, smart_node, value_is_singular, is_slice, NOOP
@@ -16,6 +16,8 @@ build, ntype, is_value, smart_node, value_is_singular, is_slice, NOOP = types.bu
 local insert
 insert = table.insert
 local destructure = require("moonscript.transform.destructure")
+local construct_comprehension
+construct_comprehension = require("moonscript.transform.comprehension").construct_comprehension
 local CONSTRUCTOR_NAME = "new"
 local with_continue_listener
 with_continue_listener = function(body)

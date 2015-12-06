@@ -2,8 +2,8 @@ import Transformer from require "moonscript.transform.transformer"
 
 import NameProxy, LocalName from require "moonscript.transform.names"
 
-import Run, transform_last_stm, implicitly_return, construct_comprehension,
-  last_stm from require "moonscript.transform.statements"
+import Run, transform_last_stm, implicitly_return, last_stm
+  from require "moonscript.transform.statements"
 
 types = require "moonscript.types"
 
@@ -13,6 +13,7 @@ import build, ntype, is_value, smart_node, value_is_singular, is_slice, NOOP
 import insert from table
 
 destructure = require "moonscript.transform.destructure"
+import construct_comprehension from require "moonscript.transform.comprehension"
 
 CONSTRUCTOR_NAME = "new"
 

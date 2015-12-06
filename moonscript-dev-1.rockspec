@@ -43,6 +43,7 @@ build = {
 		["moonscript.parse.util"] = "moonscript/parse/util.lua",
 		["moonscript.transform"] = "moonscript/transform.lua",
 		["moonscript.transform.accumulator"] = "moonscript/transform/accumulator.lua",
+		["moonscript.transform.comprehension"] = "moonscript/transform/comprehension.lua",
 		["moonscript.transform.destructure"] = "moonscript/transform/destructure.lua",
 		["moonscript.transform.names"] = "moonscript/transform/names.lua",
 		["moonscript.transform.statement"] = "moonscript/transform/statement.lua",

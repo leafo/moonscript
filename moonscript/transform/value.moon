@@ -5,8 +5,9 @@ import NameProxy from require "moonscript.transform.names"
 import Accumulator, default_accumulator from require "moonscript.transform.accumulator"
 import lua_keywords from require "moonscript.data"
 
-import Run, transform_last_stm, implicitly_return, chain_is_stub,
-  construct_comprehension from require "moonscript.transform.statements"
+import Run, transform_last_stm, implicitly_return, chain_is_stub from require "moonscript.transform.statements"
+
+import construct_comprehension from require "moonscript.transform.comprehension"
 
 import insert from table
 

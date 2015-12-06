@@ -14,11 +14,13 @@ do
 end
 local lua_keywords
 lua_keywords = require("moonscript.data").lua_keywords
-local Run, transform_last_stm, implicitly_return, chain_is_stub, construct_comprehension
+local Run, transform_last_stm, implicitly_return, chain_is_stub
 do
   local _obj_0 = require("moonscript.transform.statements")
-  Run, transform_last_stm, implicitly_return, chain_is_stub, construct_comprehension = _obj_0.Run, _obj_0.transform_last_stm, _obj_0.implicitly_return, _obj_0.chain_is_stub, _obj_0.construct_comprehension
+  Run, transform_last_stm, implicitly_return, chain_is_stub = _obj_0.Run, _obj_0.transform_last_stm, _obj_0.implicitly_return, _obj_0.chain_is_stub
 end
+local construct_comprehension
+construct_comprehension = require("moonscript.transform.comprehension").construct_comprehension
 local insert
 insert = table.insert
 return Transformer({

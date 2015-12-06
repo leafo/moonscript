@@ -58,10 +58,6 @@ is_value = function(stm)
   local transform = require("moonscript.transform")
   return compile.Block:is_value(stm) or transform.Value:can_transform(stm)
 end
-local comprehension_has_value
-comprehension_has_value = function(comp)
-  return is_value(comp[2])
-end
 local value_is_singular
 value_is_singular = function(node)
   return type(node) ~= "table" or node[1] ~= "exp" or #node == 2
@@ -320,7 +316,6 @@ return {
   manual_return = manual_return,
   cascading = cascading,
   value_is_singular = value_is_singular,
-  comprehension_has_value = comprehension_has_value,
   value_can_be_statement = value_can_be_statement,
   mtype = mtype,
   terminating = terminating,
