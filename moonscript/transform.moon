@@ -10,6 +10,8 @@ import insert from table
 import NameProxy, LocalName from require "moonscript.transform.names"
 import Run, transform_last_stm, last_stm, chain_is_stub from require "moonscript.transform.statements"
 
+import Transformer from require "moonscript.transform.transformer"
+
 destructure = require "moonscript.transform.destructure"
 NOOP = {"noop"}
 
@@ -92,44 +94,6 @@ with_continue_listener = (body) ->
         }
   }
 
-
-class Transformer
-  new: (@transformers) =>
-    @seen_nodes = setmetatable {}, __mode: "k"
-
-  transform_once: (scope, node, ...) =>
-    return node if @seen_nodes[node]
-    @seen_nodes[node] = true
-
-    transformer = @transformers[ntype node]
-    if transformer
-      transformer(scope, node, ...) or node
-    else
-      node
-
-  transform: (scope, node, ...) =>
-    return node if @seen_nodes[node]
-
-    @seen_nodes[node] = true
-    while true
-      transformer = @transformers[ntype node]
-      res = if transformer
-        transformer(scope, node, ...) or node
-      else
-        node
-
-      return node if res == node
-      node = res
-
-    node
-
-  bind: (scope) =>
-    (...) -> @transform scope, ...
-
-  __call: (...) => @transform ...
-
-  can_transform: (node) =>
-    @transformers[ntype node] != nil
 
 construct_comprehension = (inner, clauses) ->
   current_stms = inner

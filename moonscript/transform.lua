@@ -17,11 +17,13 @@ do
   local _obj_0 = require("moonscript.transform.statements")
   Run, transform_last_stm, last_stm, chain_is_stub = _obj_0.Run, _obj_0.transform_last_stm, _obj_0.last_stm, _obj_0.chain_is_stub
 end
+local Transformer
+Transformer = require("moonscript.transform.transformer").Transformer
 local destructure = require("moonscript.transform.destructure")
 local NOOP = {
   "noop"
 }
-local is_singular, extract_declarations, expand_elseif_assign, constructor_name, with_continue_listener, Transformer, construct_comprehension, Statement, Accumulator, default_accumulator, implicitly_return, Value
+local is_singular, extract_declarations, expand_elseif_assign, constructor_name, with_continue_listener, construct_comprehension, Statement, Accumulator, default_accumulator, implicitly_return, Value
 is_singular = function(body)
   if #body ~= 1 then
     return false
@@ -169,74 +171,6 @@ with_continue_listener = function(body)
       end)
     end)
   }
-end
-do
-  local _class_0
-  local _base_0 = {
-    transform_once = function(self, scope, node, ...)
-      if self.seen_nodes[node] then
-        return node
-      end
-      self.seen_nodes[node] = true
-      local transformer = self.transformers[ntype(node)]
-      if transformer then
-        return transformer(scope, node, ...) or node
-      else
-        return node
-      end
-    end,
-    transform = function(self, scope, node, ...)
-      if self.seen_nodes[node] then
-        return node
-      end
-      self.seen_nodes[node] = true
-      while true do
-        local transformer = self.transformers[ntype(node)]
-        local res
-        if transformer then
-          res = transformer(scope, node, ...) or node
-        else
-          res = node
-        end
-        if res == node then
-          return node
-        end
-        node = res
-      end
-      return node
-    end,
-    bind = function(self, scope)
-      return function(...)
-        return self:transform(scope, ...)
-      end
-    end,
-    __call = function(self, ...)
-      return self:transform(...)
-    end,
-    can_transform = function(self, node)
-      return self.transformers[ntype(node)] ~= nil
-    end
-  }
-  _base_0.__index = _base_0
-  _class_0 = setmetatable({
-    __init = function(self, transformers)
-      self.transformers = transformers
-      self.seen_nodes = setmetatable({ }, {
-        __mode = "k"
-      })
-    end,
-    __base = _base_0,
-    __name = "Transformer"
-  }, {
-    __index = _base_0,
-    __call = function(cls, ...)
-      local _self_0 = setmetatable({}, _base_0)
-      cls.__init(_self_0, ...)
-      return _self_0
-    end
-  })
-  _base_0.__class = _class_0
-  Transformer = _class_0
 end
 construct_comprehension = function(inner, clauses)
   local current_stms = inner
@@ -1135,60 +1069,60 @@ Statement = Transformer({
                 "__parent"
               }
             }
-            if chain then
-              local chain_tail = {
-                unpack(chain, 3)
+            if not (chain) then
+              return relative_parent
+            end
+            local chain_tail = {
+              unpack(chain, 3)
+            }
+            local head = chain_tail[1]
+            if head == nil then
+              return relative_parent
+            end
+            local new_chain = relative_parent
+            local _exp_1 = head[1]
+            if "call" == _exp_1 then
+              local calling_name = block:get("current_block")
+              assert(calling_name, "missing calling name")
+              chain_tail[1] = {
+                "call",
+                {
+                  "self",
+                  unpack(head[2])
+                }
               }
-              local head = chain_tail[1]
-              if head == nil then
-                return relative_parent
+              if ntype(calling_name) == "key_literal" then
+                insert(new_chain, {
+                  "dot",
+                  calling_name[2]
+                })
+              else
+                insert(new_chain, {
+                  "index",
+                  calling_name
+                })
               end
-              local new_chain = relative_parent
-              local _exp_1 = head[1]
-              if "call" == _exp_1 then
-                local calling_name = block:get("current_block")
+            elseif "colon" == _exp_1 then
+              local call = chain_tail[2]
+              if call and call[1] == "call" then
                 chain_tail[1] = {
+                  "dot",
+                  head[2]
+                }
+                chain_tail[2] = {
                   "call",
                   {
                     "self",
-                    unpack(head[2])
+                    unpack(call[2])
                   }
                 }
-                if ntype(calling_name) == "key_literal" then
-                  insert(new_chain, {
-                    "dot",
-                    calling_name[2]
-                  })
-                else
-                  insert(new_chain, {
-                    "index",
-                    calling_name
-                  })
-                end
-              elseif "colon" == _exp_1 then
-                local call = chain_tail[2]
-                if call and call[1] == "call" then
-                  chain_tail[1] = {
-                    "dot",
-                    head[2]
-                  }
-                  chain_tail[2] = {
-                    "call",
-                    {
-                      "self",
-                      unpack(call[2])
-                    }
-                  }
-                end
               end
-              for _index_0 = 1, #chain_tail do
-                local item = chain_tail[_index_0]
-                insert(new_chain, item)
-              end
-              return new_chain
-            else
-              return relative_parent
             end
+            for _index_0 = 1, #chain_tail do
+              local item = chain_tail[_index_0]
+              insert(new_chain, item)
+            end
+            return new_chain
           end)
         end),
         {
