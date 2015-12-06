@@ -65,9 +65,6 @@ do
       end
     end,
     lint_check_unused = function(self)
-      do
-        return 
-      end
       if not (self.lint_unused_names and next(self.lint_unused_names)) then
         return 
       end
