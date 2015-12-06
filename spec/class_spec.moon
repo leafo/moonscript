@@ -285,6 +285,13 @@ describe "class", ->
             super! + 100
         }
 
+      class OtherSub extends Base
+        value: if true
+          => 5 + super!
+        else
+          => 2 + super!
+
       assert.same 1 + 100 + 12, Sub!\value!
+      assert.same 6, OtherSub!\value!
 
 
