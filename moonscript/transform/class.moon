@@ -5,8 +5,9 @@ CONSTRUCTOR_NAME = "new"
 
 import insert from table
 import build, ntype, NOOP from require "moonscript.types"
+import unpack from require "moonscript.util"
 
-transform_super = (cls_name, block, chain) ->
+transform_super = (cls_name, on_base=true, block, chain) ->
   relative_parent = {
     "chain",
     cls_name
@@ -26,6 +27,9 @@ transform_super = (cls_name, block, chain) ->
   switch head[1]
     -- calling super, inject calling name and self into chain
     when "call"
+      if on_base
+        insert new_chain, {"dot", "__base"}
+
       calling_name = block\get "current_method"
       assert calling_name, "missing calling name"
       chain_tail[1] = {"call", {"self", unpack head[2]}}
@@ -80,7 +84,11 @@ super_scope = (value, t, key) ->
   self_name = NameProxy "self"
   cls_name = NameProxy "class"
 
-  cls_super = (...) -> transform_super cls_name, ...
+  -- super call on instance
+  cls_instance_super = (...) -> transform_super cls_name, true, ...
+
+  -- super call on parent class
+  cls_super = (...) -> transform_super cls_name, false, ...
 
   -- split apart properties and statements
   statements = {}
@@ -107,7 +115,7 @@ super_scope = (value, t, key) ->
       continue
     else
       {key, val} = tuple
-      {key, super_scope val, cls_super, key}
+      {key, super_scope val, cls_instance_super, key}
 
 
   unless constructor

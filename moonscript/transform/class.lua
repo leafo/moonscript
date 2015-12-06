@@ -13,8 +13,13 @@ do
   local _obj_0 = require("moonscript.types")
   build, ntype, NOOP = _obj_0.build, _obj_0.ntype, _obj_0.NOOP
 end
+local unpack
+unpack = require("moonscript.util").unpack
 local transform_super
-transform_super = function(cls_name, block, chain)
+transform_super = function(cls_name, on_base, block, chain)
+  if on_base == nil then
+    on_base = true
+  end
   local relative_parent = {
     "chain",
     cls_name,
@@ -36,6 +41,12 @@ transform_super = function(cls_name, block, chain)
   local new_chain = relative_parent
   local _exp_0 = head[1]
   if "call" == _exp_0 then
+    if on_base then
+      insert(new_chain, {
+        "dot",
+        "__base"
+      })
+    end
     local calling_name = block:get("current_method")
     assert(calling_name, "missing calling name")
     chain_tail[1] = {
@@ -103,9 +114,13 @@ return function(self, node, ret, parent_assign)
   local base_name = NameProxy("base")
   local self_name = NameProxy("self")
   local cls_name = NameProxy("class")
+  local cls_instance_super
+  cls_instance_super = function(...)
+    return transform_super(cls_name, true, ...)
+  end
   local cls_super
   cls_super = function(...)
-    return transform_super(cls_name, ...)
+    return transform_super(cls_name, false, ...)
   end
   local statements = { }
   local properties = { }
@@ -150,7 +165,7 @@ return function(self, node, ret, parent_assign)
           key, val = tuple[1], tuple[2]
           _value_0 = {
             key,
-            super_scope(val, cls_super, key)
+            super_scope(val, cls_instance_super, key)
           }
         end
         _accum_0[_len_0] = _value_0
