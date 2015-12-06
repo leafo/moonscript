@@ -186,4 +186,13 @@ class Cool extends Thing
       world: -> super.one
     }
 
+
+-- 
+
+class Cool extends Thing
+  dang: do_something =>
+    super!
+
+
+
 nil
