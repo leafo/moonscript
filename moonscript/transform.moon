@@ -684,49 +684,48 @@ Statement = Transformer {
               {"dot", "__parent"}
             }
 
-            if chain
-              chain_tail = { unpack chain, 3 }
-              head = chain_tail[1]
+            return relative_parent unless chain
 
-              if head == nil
-                return relative_parent
+            chain_tail = { unpack chain, 3 }
+            head = chain_tail[1]
 
-              new_chain = relative_parent
+            if head == nil
+              return relative_parent
 
-              switch head[1]
-                -- calling super, inject calling name and self into chain
-                when "call"
-                  calling_name = block\get"current_block"
-                  chain_tail[1] = {"call", {"self", unpack head[2]}}
+            new_chain = relative_parent
 
-                  if ntype(calling_name) == "key_literal"
-                    insert new_chain, {"dot", calling_name[2]}
-                  else
-                    insert new_chain, {"index", calling_name}
+            switch head[1]
+              -- calling super, inject calling name and self into chain
+              when "call"
+                calling_name = block\get"current_block"
+                assert calling_name, "missing calling name"
+                chain_tail[1] = {"call", {"self", unpack head[2]}}
 
-                -- colon call on super, replace class with self as first arg
-                when "colon"
-                  call = chain_tail[2]
-                  -- calling chain tail
-                  if call and call[1] == "call"
-                    chain_tail[1] = {
-                      "dot"
-                      head[2]
+                if ntype(calling_name) == "key_literal"
+                  insert new_chain, {"dot", calling_name[2]}
+                else
+                  insert new_chain, {"index", calling_name}
+
+              -- colon call on super, replace class with self as first arg
+              when "colon"
+                call = chain_tail[2]
+                -- calling chain tail
+                if call and call[1] == "call"
+                  chain_tail[1] = {
+                    "dot"
+                    head[2]
+                  }
+
+                  chain_tail[2] = {
+                    "call"
+                    {
+                      "self"
+                      unpack call[2]
                     }
+                  }
 
-                    chain_tail[2] = {
-                      "call"
-                      {
-                        "self"
-                        unpack call[2]
-                      }
-                    }
-
-              insert new_chain, item for item in *chain_tail
-
-              new_chain
-            else
-              relative_parent
+            insert new_chain, item for item in *chain_tail
+            new_chain
 
         {"declare", { cls_name }}
         {"declare_glob", "*"}
@@ -939,9 +938,15 @@ Value = Transformer {
 
     node
 
-  if: (node) => build.block_exp { node }
-  unless: (node) =>build.block_exp { node }
-  with: (node) => build.block_exp { node }
+  if: (node) =>
+    build.block_exp { node }
+
+  unless: (node) =>
+    build.block_exp { node }
+
+  with: (node) =>
+    build.block_exp { node }
+
   switch: (node) =>
     build.block_exp { node }
 
