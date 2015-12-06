@@ -6,7 +6,58 @@ CONSTRUCTOR_NAME = "new"
 import insert from table
 import build, ntype, NOOP from require "moonscript.types"
 
-super_scope = (value, key) ->
+transform_super = (cls_name, block, chain) ->
+  relative_parent = {
+    "chain",
+    cls_name
+    {"dot", "__parent"}
+  }
+
+  return relative_parent unless chain
+
+  chain_tail = { unpack chain, 3 }
+  head = chain_tail[1]
+
+  if head == nil
+    return relative_parent
+
+  new_chain = relative_parent
+
+  switch head[1]
+    -- calling super, inject calling name and self into chain
+    when "call"
+      calling_name = block\get "current_method"
+      assert calling_name, "missing calling name"
+      chain_tail[1] = {"call", {"self", unpack head[2]}}
+
+      if ntype(calling_name) == "key_literal"
+        insert new_chain, {"dot", calling_name[2]}
+      else
+        insert new_chain, {"index", calling_name}
+
+    -- colon call on super, replace class with self as first arg
+    when "colon"
+      call = chain_tail[2]
+      -- calling chain tail
+      if call and call[1] == "call"
+        chain_tail[1] = {
+          "dot"
+          head[2]
+        }
+
+        chain_tail[2] = {
+          "call"
+          {
+            "self"
+            unpack call[2]
+          }
+        }
+
+  insert new_chain, item for item in *chain_tail
+  new_chain
+
+
+super_scope = (value, t, key) ->
   local prev_method
 
   {
@@ -14,6 +65,7 @@ super_scope = (value, key) ->
     Run =>
       prev_method = @get "current_method"
       @set "current_method", key
+      @set "super", t
     value
     Run =>
       @set "current_method", prev_method
@@ -22,6 +74,13 @@ super_scope = (value, key) ->
 (node, ret, parent_assign) =>
   _, name, parent_val, body = unpack node
   parent_val = nil if parent_val == ""
+
+  parent_cls_name = NameProxy "parent"
+  base_name = NameProxy "base"
+  self_name = NameProxy "self"
+  cls_name = NameProxy "class"
+
+  cls_super = (...) -> transform_super cls_name, ...
 
   -- split apart properties and statements
   statements = {}
@@ -46,12 +105,8 @@ super_scope = (value, key) ->
       continue
     else
       {key, val} = tuple
-      {key, super_scope val, key}
+      {key, super_scope val, cls_super, key}
 
-  parent_cls_name = NameProxy "parent"
-  base_name = NameProxy "base"
-  self_name = NameProxy "self"
-  cls_name = NameProxy "class"
 
   unless constructor
     constructor = if parent_val
@@ -91,7 +146,7 @@ super_scope = (value, key) ->
       {"string", '"', flattened_name}
 
   cls = build.table {
-    {"__init", super_scope constructor, {"key_literal", "__init"}}
+    {"__init", super_scope constructor, cls_super, {"key_literal", "__init"}}
     {"__base", base_name}
     {"__name", real_name} -- "quote the string"
     parent_val and {"__parent", parent_cls_name} or nil
@@ -166,56 +221,6 @@ super_scope = (value, key) ->
       Run =>
         -- make sure we don't assign the class to a local inside the do
         @put_name name if name
-
-        @set "super", (block, chain) ->
-          relative_parent = {
-            "chain",
-            cls_name
-            {"dot", "__parent"}
-          }
-
-          return relative_parent unless chain
-
-          chain_tail = { unpack chain, 3 }
-          head = chain_tail[1]
-
-          if head == nil
-            return relative_parent
-
-          new_chain = relative_parent
-
-          switch head[1]
-            -- calling super, inject calling name and self into chain
-            when "call"
-              calling_name = block\get "current_method"
-              assert calling_name, "missing calling name"
-              chain_tail[1] = {"call", {"self", unpack head[2]}}
-
-              if ntype(calling_name) == "key_literal"
-                insert new_chain, {"dot", calling_name[2]}
-              else
-                insert new_chain, {"index", calling_name}
-
-            -- colon call on super, replace class with self as first arg
-            when "colon"
-              call = chain_tail[2]
-              -- calling chain tail
-              if call and call[1] == "call"
-                chain_tail[1] = {
-                  "dot"
-                  head[2]
-                }
-
-                chain_tail[2] = {
-                  "call"
-                  {
-                    "self"
-                    unpack call[2]
-                  }
-                }
-
-          insert new_chain, item for item in *chain_tail
-          new_chain
 
       {"declare", { cls_name }}
       {"declare_glob", "*"}

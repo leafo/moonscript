@@ -13,14 +13,80 @@ do
   local _obj_0 = require("moonscript.types")
   build, ntype, NOOP = _obj_0.build, _obj_0.ntype, _obj_0.NOOP
 end
+local transform_super
+transform_super = function(cls_name, block, chain)
+  local relative_parent = {
+    "chain",
+    cls_name,
+    {
+      "dot",
+      "__parent"
+    }
+  }
+  if not (chain) then
+    return relative_parent
+  end
+  local chain_tail = {
+    unpack(chain, 3)
+  }
+  local head = chain_tail[1]
+  if head == nil then
+    return relative_parent
+  end
+  local new_chain = relative_parent
+  local _exp_0 = head[1]
+  if "call" == _exp_0 then
+    local calling_name = block:get("current_method")
+    assert(calling_name, "missing calling name")
+    chain_tail[1] = {
+      "call",
+      {
+        "self",
+        unpack(head[2])
+      }
+    }
+    if ntype(calling_name) == "key_literal" then
+      insert(new_chain, {
+        "dot",
+        calling_name[2]
+      })
+    else
+      insert(new_chain, {
+        "index",
+        calling_name
+      })
+    end
+  elseif "colon" == _exp_0 then
+    local call = chain_tail[2]
+    if call and call[1] == "call" then
+      chain_tail[1] = {
+        "dot",
+        head[2]
+      }
+      chain_tail[2] = {
+        "call",
+        {
+          "self",
+          unpack(call[2])
+        }
+      }
+    end
+  end
+  for _index_0 = 1, #chain_tail do
+    local item = chain_tail[_index_0]
+    insert(new_chain, item)
+  end
+  return new_chain
+end
 local super_scope
-super_scope = function(value, key)
+super_scope = function(value, t, key)
   local prev_method
   return {
     "scoped",
     Run(function(self)
       prev_method = self:get("current_method")
-      return self:set("current_method", key)
+      self:set("current_method", key)
+      return self:set("super", t)
     end),
     value,
     Run(function(self)
@@ -32,6 +98,14 @@ return function(self, node, ret, parent_assign)
   local _, name, parent_val, body = unpack(node)
   if parent_val == "" then
     parent_val = nil
+  end
+  local parent_cls_name = NameProxy("parent")
+  local base_name = NameProxy("base")
+  local self_name = NameProxy("self")
+  local cls_name = NameProxy("class")
+  local cls_super
+  cls_super = function(...)
+    return transform_super(cls_name, ...)
   end
   local statements = { }
   local properties = { }
@@ -70,7 +144,7 @@ return function(self, node, ret, parent_assign)
           key, val = tuple[1], tuple[2]
           _value_0 = {
             key,
-            super_scope(val, key)
+            super_scope(val, cls_super, key)
           }
         end
         _accum_0[_len_0] = _value_0
@@ -83,10 +157,6 @@ return function(self, node, ret, parent_assign)
     end
     properties = _accum_0
   end
-  local parent_cls_name = NameProxy("parent")
-  local base_name = NameProxy("base")
-  local self_name = NameProxy("self")
-  local cls_name = NameProxy("class")
   if not (constructor) then
     if parent_val then
       constructor = build.fndef({
@@ -149,7 +219,7 @@ return function(self, node, ret, parent_assign)
   local cls = build.table({
     {
       "__init",
-      super_scope(constructor, {
+      super_scope(constructor, cls_super, {
         "key_literal",
         "__init"
       })
@@ -303,72 +373,8 @@ return function(self, node, ret, parent_assign)
     local out_body = {
       Run(function(self)
         if name then
-          self:put_name(name)
+          return self:put_name(name)
         end
-        return self:set("super", function(block, chain)
-          local relative_parent = {
-            "chain",
-            cls_name,
-            {
-              "dot",
-              "__parent"
-            }
-          }
-          if not (chain) then
-            return relative_parent
-          end
-          local chain_tail = {
-            unpack(chain, 3)
-          }
-          local head = chain_tail[1]
-          if head == nil then
-            return relative_parent
-          end
-          local new_chain = relative_parent
-          local _exp_1 = head[1]
-          if "call" == _exp_1 then
-            local calling_name = block:get("current_method")
-            assert(calling_name, "missing calling name")
-            chain_tail[1] = {
-              "call",
-              {
-                "self",
-                unpack(head[2])
-              }
-            }
-            if ntype(calling_name) == "key_literal" then
-              insert(new_chain, {
-                "dot",
-                calling_name[2]
-              })
-            else
-              insert(new_chain, {
-                "index",
-                calling_name
-              })
-            end
-          elseif "colon" == _exp_1 then
-            local call = chain_tail[2]
-            if call and call[1] == "call" then
-              chain_tail[1] = {
-                "dot",
-                head[2]
-              }
-              chain_tail[2] = {
-                "call",
-                {
-                  "self",
-                  unpack(call[2])
-                }
-              }
-            end
-          end
-          for _index_0 = 1, #chain_tail do
-            local item = chain_tail[_index_0]
-            insert(new_chain, item)
-          end
-          return new_chain
-        end)
       end),
       {
         "declare",
