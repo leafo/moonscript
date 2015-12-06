@@ -1,23 +1,26 @@
+FLAGS=-Iinclude/
 
 all: moon.exe moonc.exe moonscript.dll
 
 moon.exe: moon.c lfs.o lpeg.o moonscript.h moon.h alt_getopt.h
-	gcc -o $@ $< lfs.o lpeg.o -llua51 -O2
+	gcc $(FLAGS) -o $@ $< lfs.o lpeg.o -llua51 -O2
 
 moonc.exe: moonc.c lfs.o lpeg.o moonscript.h moonc.h alt_getopt.h
-	gcc -o $@ $< lfs.o lpeg.o -llua51 -O2
+	gcc $(FLAGS) -o $@ $< lfs.o lpeg.o -llua51 -O2
 
 moonscript.dll: lpeg.o moonscript.o
-	gcc -o $@ $+ -llua51 -O2 -shared -fpic
+	gcc $(FLAGS) -o $@ $+ -llua51 -O2 -shared -fpic
 
 moon.o: moon.c moonscript.h moon.h alt_getopt.h
-	gcc -c $< -o $@ -fpic -O2
+	gcc $(FLAGS) -c $< -o $@ -fpic -O2
 
 moonc.o: moonc.c moonscript.h moon.h alt_getopt.h
-	gcc -c $< -o $@ -fpic -O2
+	gcc $(FLAGS) -c $< -o $@ -fpic -O2
 
 moonscript.o: moonscript.c moonscript.h
-	gcc -c $< -o $@ -fpic -O2
+	gcc $(FLAGS) -c $< -o $@ -fpic -O2
+
+# commited to repo:
 
 headers: moonscript.h moonc.h moon.h alt_getopt.h
 
