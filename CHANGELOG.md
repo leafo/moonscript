@@ -77,6 +77,20 @@ class Sub extends Base
 `super` will refer to the lexically closest class declaration to find the name
 of the method it should call on the parent.
 
+## Bug Fixes
+
+* Nested `with` blocks used incorrect ref (#214 by @geomaster)
+* Lua quote string literals had wrong precedence (#200 by @nonchip)
+* Returning from `with` block would generate two `return` statements (#208)
+* Including `return` or `break` in a `continue` wrapped block would generate invalid code (#215 #190 #183)
+
+## Other
+
+* Refactor transformer out into multiple files
+* `moon` command line script rewritten in MoonScript
+* `moonscript.parse.build_grammar` function for getting new instance of parser grammar
+* Chain AST updated to be simpler
+
 # MoonScript v0.3.2 (2015-6-01)
 
 ## Bug Fixes
