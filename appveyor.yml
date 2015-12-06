@@ -1,0 +1,10 @@
+branches:
+  only:
+    - binaries
+
+install:
+  - ps: Install-Product node 4.1
+  - set PATH=C:\MinGW\bin;%PATH%
+
+build_script:
+  - make
