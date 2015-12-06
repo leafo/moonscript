@@ -893,9 +893,9 @@ do
       return _fn_0(self, ...)
     end
   end
-  self.butt = cool({
+  self.zone = cool({
     function()
-      _class_0.__parent.butt(self)
+      _class_0.__parent.zone(self)
       _ = _class_0.__parent.hello
       _class_0.__parent.hello(self)
       local _base_1 = _class_0.__parent

@@ -202,7 +202,7 @@ class Wowha extends Thing
     super\hello
 
 
-  @butt: cool {
+  @zone: cool {
     ->
       super!
       super.hello

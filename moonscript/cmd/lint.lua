@@ -121,11 +121,11 @@ do
     end,
     render = function(self, ...)
       self:lint_check_unused()
-      return _class_0.__parent.render(self, ...)
+      return _class_0.__parent.__base.render(self, ...)
     end,
     block = function(self, ...)
       do
-        local _with_0 = _class_0.__parent.block(self, ...)
+        local _with_0 = _class_0.__parent.__base.block(self, ...)
         _with_0.block = self.block
         _with_0.render = self.render
         _with_0.get_root_block = self.get_root_block
