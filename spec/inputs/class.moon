@@ -176,4 +176,14 @@ class Something
 class X
   new: hi
 
+
+--
+
+class Cool extends Thing
+  dang: =>
+    {
+      hello: -> super!
+      world: -> super.one
+    }
+
 nil
