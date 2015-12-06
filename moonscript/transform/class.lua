@@ -118,7 +118,13 @@ return function(self, node, ret, parent_assign)
       for _index_1 = 2, #item do
         local tuple = item[_index_1]
         if ntype(tuple[1]) == "self" then
-          insert(statements, build.assign_one(unpack(tuple)))
+          local k, v
+          k, v = tuple[1], tuple[2]
+          v = super_scope(v, cls_super, {
+            "key_literal",
+            k[2]
+          })
+          insert(statements, build.assign_one(k, v))
         else
           insert(properties, tuple)
         end

@@ -92,7 +92,9 @@ super_scope = (value, t, key) ->
       when "props"
         for tuple in *item[2,]
           if ntype(tuple[1]) == "self"
-            insert statements, build.assign_one unpack tuple
+            {k,v} = tuple
+            v = super_scope v, cls_super, {"key_literal", k[2]}
+            insert statements, build.assign_one k, v
           else
             insert properties, tuple
 
