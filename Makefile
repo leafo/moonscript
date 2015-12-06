@@ -1,4 +1,4 @@
-.PHONY: test local compile compile_system watch lint
+.PHONY: test local compile compile_system watch lint count
 
 test:
 	busted
@@ -23,3 +23,6 @@ watch:
 
 lint:
 	moonc -l moonscript moon bin
+
+count:
+	wc -l $$(git ls-files | grep 'moon$$') | sort -n | tail
