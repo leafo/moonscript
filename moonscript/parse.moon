@@ -29,7 +29,7 @@ Num = Space * (Num / (v) -> {"number", v})
   :Indent, :Cut, :ensure, :extract_line, :mark, :pos, :flatten_or_mark,
   :is_assignable, :check_assignable, :format_assign, :format_single_assign,
   :sym, :symx, :simple_string, :wrap_func_arg, :join_chain,
-  :flatten_string_chain, :wrap_decorator, :check_lua_string, :self_assign
+  :wrap_decorator, :check_lua_string, :self_assign
 } = require "moonscript.parse.util"
 
 

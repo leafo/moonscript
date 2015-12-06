@@ -1,5 +1,6 @@
 
-import ntype, mtype from require "moonscript.types"
+types = require "moonscript.types"
+import ntype, mtype, is_value, NOOP from types
 
 -- A Run is a special statement node that lets a function run and mutate the
 -- state of the compiler
@@ -44,5 +45,56 @@ chain_is_stub = (chain) ->
   stub = chain[#chain]
   stub and ntype(stub) == "colon"
 
-{:Run, :last_stm, :transform_last_stm, :chain_is_stub}
+implicitly_return = (scope) ->
+  is_top = true
+  fn = (stm) ->
+    t = ntype stm
+
+    -- expand decorated
+    if t == "decorated"
+      stm = scope.transform.statement stm
+      t = ntype stm
+
+    if types.cascading[t]
+      is_top = false
+      scope.transform.statement stm, fn
+    elseif types.manual_return[t] or not is_value stm
+      -- remove blank return statement
+      if is_top and t == "return" and stm[2] == ""
+        NOOP
+      else
+        stm
+    else
+      if t == "comprehension" and not types.comprehension_has_value stm
+        stm
+      else
+        {"return", stm}
+
+  fn
+
+-- TODO: reversed unecessary
+import reversed from require "moonscript.util"
+construct_comprehension = (inner, clauses) ->
+  current_stms = inner
+  for _, clause in reversed clauses
+    t = clause[1]
+    current_stms = switch t
+      when "for"
+        {_, name, bounds} = clause
+        {"for", name, bounds, current_stms}
+      when "foreach"
+        {_, names, iter} = clause
+        {"foreach", names, {iter}, current_stms}
+      when "when"
+        {_, cond} = clause
+        {"if", cond, current_stms}
+      else
+        error "Unknown comprehension clause: "..t
+
+    current_stms = {current_stms}
+
+  current_stms[1]
+
+{:Run, :last_stm, :transform_last_stm, :chain_is_stub, :implicitly_return,
+  :construct_comprehension}
 

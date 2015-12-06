@@ -189,9 +189,12 @@ smart_node_mt = setmetatable {}, {
 smart_node = (node) ->
   setmetatable node, smart_node_mt[ntype node]
 
+NOOP = {"noop"}
+
 {
   :ntype, :smart_node, :build, :is_value, :is_slice, :manual_return,
   :cascading, :value_is_singular, :comprehension_has_value,
   :value_can_be_statement, :mtype, :terminating
+  :NOOP
 }
 

@@ -197,17 +197,6 @@ join_chain = function(callee, args)
     args
   }
 end
-local flatten_string_chain
-flatten_string_chain = function(str, chain, args)
-  if not (chain) then
-    return str
-  end
-  return flatten_chain({
-    "chain",
-    str,
-    unpack(chain)
-  }, args)
-end
 local wrap_decorator
 wrap_decorator = function(stm, dec)
   if not (dec) then
@@ -254,7 +243,6 @@ return {
   simple_string = simple_string,
   wrap_func_arg = wrap_func_arg,
   join_chain = join_chain,
-  flatten_string_chain = flatten_string_chain,
   wrap_decorator = wrap_decorator,
   check_lua_string = check_lua_string,
   self_assign = self_assign

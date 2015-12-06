@@ -105,6 +105,7 @@ class LinterBlock extends Block
       @parent\lint_mark_used name
 
   lint_check_unused: =>
+    do return
     return unless @lint_unused_names and next @lint_unused_names
 
     names_by_position = {}

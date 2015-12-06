@@ -308,6 +308,9 @@ local smart_node
 smart_node = function(node)
   return setmetatable(node, smart_node_mt[ntype(node)])
 end
+local NOOP = {
+  "noop"
+}
 return {
   ntype = ntype,
   smart_node = smart_node,
@@ -320,5 +323,6 @@ return {
   comprehension_has_value = comprehension_has_value,
   value_can_be_statement = value_can_be_statement,
   mtype = mtype,
-  terminating = terminating
+  terminating = terminating,
+  NOOP = NOOP
 }
