@@ -1,15 +1,14 @@
 local is_value
 is_value = require("moonscript.types").is_value
-local reversed
-reversed = require("moonscript.util").reversed
 local construct_comprehension
 construct_comprehension = function(inner, clauses)
   local current_stms = inner
-  for _, clause in reversed(clauses) do
+  for i = #clauses, 1, -1 do
+    local clause = clauses[i]
     local t = clause[1]
     local _exp_0 = t
     if "for" == _exp_0 then
-      local name, bounds
+      local _, name, bounds
       _, name, bounds = clause[1], clause[2], clause[3]
       current_stms = {
         "for",
@@ -18,7 +17,7 @@ construct_comprehension = function(inner, clauses)
         current_stms
       }
     elseif "foreach" == _exp_0 then
-      local names, iter
+      local _, names, iter
       _, names, iter = clause[1], clause[2], clause[3]
       current_stms = {
         "foreach",
@@ -29,7 +28,7 @@ construct_comprehension = function(inner, clauses)
         current_stms
       }
     elseif "when" == _exp_0 then
-      local cond
+      local _, cond
       _, cond = clause[1], clause[2]
       current_stms = {
         "if",

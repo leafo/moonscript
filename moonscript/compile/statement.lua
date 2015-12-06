@@ -1,6 +1,3 @@
-local util = require("moonscript.util")
-local reversed, unpack
-reversed, unpack = util.reversed, util.unpack
 local ntype
 ntype = require("moonscript.types").ntype
 local concat, insert

@@ -48,11 +48,6 @@ get_closest_line = (str, line_num) ->
   else
     line, line_num
 
-reversed = (seq) ->
-  coroutine.wrap ->
-    for i=#seq,1,-1
-      coroutine.yield i, seq[i]
-
 split = (str, delim) ->
   return {} if str == ""
   str ..= delim
@@ -136,7 +131,7 @@ safe_module = (name, tbl) ->
   }
 
 {
-  :moon, :pos_to_line, :get_closest_line, :get_line, :reversed, :trim, :split,
-  :dump, :debug_posmap, :getfenv, :setfenv, :get_options, :unpack, :safe_module
+  :moon, :pos_to_line, :get_closest_line, :get_line, :trim, :split, :dump,
+  :debug_posmap, :getfenv, :setfenv, :get_options, :unpack, :safe_module
 }
 

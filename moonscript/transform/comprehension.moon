@@ -1,12 +1,12 @@
 
 import is_value from require "moonscript.types"
 
--- TODO: reversed unecessary
-import reversed from require "moonscript.util"
 construct_comprehension = (inner, clauses) ->
   current_stms = inner
-  for _, clause in reversed clauses
+  for i=#clauses,1,-1
+    clause = clauses[i]
     t = clause[1]
+
     current_stms = switch t
       when "for"
         {_, name, bounds} = clause

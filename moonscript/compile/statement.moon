@@ -1,7 +1,4 @@
 
-util = require "moonscript.util"
-
-import reversed, unpack from util
 import ntype from require "moonscript.types"
 import concat, insert from table
 
