@@ -20,6 +20,12 @@ moonc.o: moonc.c moonscript.h moon.h alt_getopt.h
 moonscript.o: moonscript.c moonscript.h
 	gcc $(FLAGS) -c $< -o $@ -fpic -O2
 
+lpeg.o: lpeg/lpeg.c
+	gcc $(FLAGS) -c $< -o $@ -fpic -O2
+
+lfs.o: luafilesystem/src/lfs.c
+	gcc $(FLAGS) -c $< -o $@ -fpic -O2
+
 # commited to repo:
 
 headers: moonscript.h moonc.h moon.h alt_getopt.h
@@ -41,12 +47,6 @@ moonc.h:
 	awk 'FNR>1' moonscript/bin/moonc > moonc.lua
 	xxd -i moonc.lua > $@
 	rm moonc.lua
-
-lpeg.o: lpeg/lpeg.c
-	gcc -c $< -o $@ -fpic -O2
-
-lfs.o: luafilesystem/src/lfs.c
-	gcc -c $< -o $@ -fpic -O2
 
 clean:
 	-rm *.o
