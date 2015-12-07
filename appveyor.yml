@@ -19,14 +19,14 @@ test_script:
   - lua5.1.exe -e "assert(require('moonscript')); print(require('moonscript.version').version)"
 
 after_build:
-  - 7z a build.zip moonscript.dll lua51.dll moon.exe moonc.exe LICENSE README.txt
+  - 7z a moonscript-$(appveyor_repo_commit).zip moonscript.dll lua51.dll moon.exe moonc.exe LICENSE README.txt
 
 artifacts:
-  - path: build.zip
+  - path: moonscript-$(appveyor_repo_commit).zip
 
 deploy:
   - provider: GitHub
-    artifact: build.zip
+    artifact: /moonscript.*\.zip/
     auth_token:
       secure: ow29ymI+HSG5ZGMF0vtyPTFQsRnOvebxAI0FXChgfJ327UOnZcXImQ0LN7DW7ImF
     on:
