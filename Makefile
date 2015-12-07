@@ -1,15 +1,16 @@
 FLAGS=-Iinclude/
+LINK=-L.
 
 all: moon.exe moonc.exe moonscript.dll
 
 moon.exe: moon.c lfs.o lpeg.o moonscript.h moon.h alt_getopt.h
-	gcc $(FLAGS) -o $@ $< lfs.o lpeg.o -llua51 -O2
+	gcc $(LINK) $(FLAGS) -o $@ $< lfs.o lpeg.o -llua51 -O2
 
 moonc.exe: moonc.c lfs.o lpeg.o moonscript.h moonc.h alt_getopt.h
-	gcc $(FLAGS) -o $@ $< lfs.o lpeg.o -llua51 -O2
+	gcc $(LINK) $(FLAGS) -o $@ $< lfs.o lpeg.o -llua51 -O2
 
 moonscript.dll: lpeg.o moonscript.o
-	gcc $(FLAGS) -o $@ $+ -llua51 -O2 -shared -fpic
+	gcc $(LINK) $(FLAGS) -o $@ $+ -llua51 -O2 -shared -fpic
 
 moon.o: moon.c moonscript.h moon.h alt_getopt.h
 	gcc $(FLAGS) -c $< -o $@ -fpic -O2
