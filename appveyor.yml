@@ -16,6 +16,6 @@ build_script:
 test_script:
   - moon.exe test.moon
   - moonc.exe test.moon
-  - lua5.1.exe -e 'print(require("moonscript.version").version)'
+  - lua5.1.exe -e "print(require('moonscript.version').version)"
 
 

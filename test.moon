@@ -1,1 +1,1 @@
-print "It works!"
+print "It works! (#{require("moonscript.version").version})"
