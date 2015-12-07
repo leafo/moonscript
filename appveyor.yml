@@ -4,9 +4,18 @@ branches:
 
 install:
   - ps: Start-FileDownload 'http://leafo.net/dump/lua5_1_4_Win32_dll8_lib.zip'
+  - ps: Start-FileDownload 'http://leafo.net/dump/lua5_1_4_Win32_bin.zip'
   - 7z x lua5_1_4_Win32_dll8_lib.zip
+  - 7z x lua5_1_4_Win32_bin.zip
   - set PATH=C:\MinGW\bin;C:\MinGW\msys\1.0\bin;%PATH%
   - dir .
 
 build_script:
   - make
+
+test_script:
+  - moon.exe test.moon
+  - moonc.exe test.moon
+  - lua5.1.exe -e 'print(require("moonscript.version").version)'
+
+
