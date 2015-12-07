@@ -16,6 +16,8 @@ build_script:
 test_script:
   - moon.exe test.moon
   - moonc.exe test.moon
-  - lua5.1.exe -e "assert(require('moonscript'))"
+  - lua5.1.exe -e "assert(require('moonscript')); print(require('moonscript.version').version)"
 
+after_build:
+  - 7z a build.zip moonscript.dll lua51.dll moon.exe moonc.exe LICENSE README.txt
 
