@@ -21,3 +21,14 @@ test_script:
 after_build:
   - 7z a build.zip moonscript.dll lua51.dll moon.exe moonc.exe LICENSE README.txt
 
+artifacts:
+  - path: build.zip
+
+deploy:
+  - provider: GitHub
+    artifact: build.zip
+    draft: false
+    prerelease: false
+    on:
+      branch: binaries
+      appveyor_repo_tag: true
