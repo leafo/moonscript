@@ -27,8 +27,8 @@ artifacts:
 deploy:
   - provider: GitHub
     artifact: build.zip
-    draft: false
-    prerelease: false
+    auth_token:
+      secure: ow29ymI+HSG5ZGMF0vtyPTFQsRnOvebxAI0FXChgfJ327UOnZcXImQ0LN7DW7ImF
     on:
       branch: binaries
       appveyor_repo_tag: true
