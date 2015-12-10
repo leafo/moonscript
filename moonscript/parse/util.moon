@@ -139,10 +139,6 @@ join_chain = (callee, args) ->
 
   {"chain", callee, args}
 
-flatten_string_chain = (str, chain, args) ->
-  return str unless chain
-  flatten_chain {"chain", str, unpack chain}, args
-
 -- constructor for decorator node
 wrap_decorator = (stm, dec) ->
   return stm unless dec
@@ -157,5 +153,5 @@ self_assign = (name, pos) ->
 
 { :Indent, :Cut, :ensure, :extract_line, :mark, :pos, :flatten_or_mark,
   :is_assignable, :check_assignable, :format_assign, :format_single_assign,
-  :sym, :symx, :simple_string, :wrap_func_arg, :join_chain,
-  :flatten_string_chain, :wrap_decorator, :check_lua_string, :self_assign }
+  :sym, :symx, :simple_string, :wrap_func_arg, :join_chain, :wrap_decorator,
+  :check_lua_string, :self_assign }

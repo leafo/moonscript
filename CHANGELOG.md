@@ -1,4 +1,96 @@
 
+# MoonScript v0.4.0 (2015-12-06)
+
+## Changes to `super`
+
+`super` now looks up the parent method via the class reference, instead of a
+(fixed) closure to the parent class.
+
+Given the following code:
+
+```moonscript
+class MyThing extends OtherThing
+  the_method: =>
+    super!
+```
+
+In the past `super` would compile to something like this:
+
+```lua
+_parent_0.the_method(self)
+```
+
+Where `_parent_0` was an internal local variable that contains a reference to
+the parent class. Because the reference to parent is an internal local
+variable, you could never swap out the parent unless resorting to the debug
+library.
+
+This version will compile to:
+
+```lua
+_class_0.__parent.__base.the_method(self)
+```
+
+Where `_class_0` is an internal local variable that contains the current class (`MyThing`).
+
+Another difference is that the instance method is looked up on `__base` instead
+of the class. The old variation would trigger the metamethod for looking up on
+the instance, but a class method of the same name could conflict, take
+precedence, and be retuned instead. By referencing `__base` directly we avoid
+this issue.
+
+### Super on class methods
+
+`super` can now be used on class methods. It works exactly as you would expect.
+
+```moonscript
+class MyThing extends OtherThing
+  @static_method: =>
+    print super!
+```
+
+Calling `super` will compile to:
+
+```moonscript
+_class_0.__parent.static_method(self)
+```
+
+### Improved scoping for super
+
+The scoping of super is more intelligent. You can warp your methods in other
+code and `super` will still generate correctly. For example, syntax like this
+will now work as expected:
+
+```moonscript
+class Sub extends Base
+  value: if debugging
+    => super! + 100
+  else
+    => super! + 10
+
+  other_value: some_decorator {
+    the_func: =>
+      super!
+  }
+```
+
+`super` will refer to the lexically closest class declaration to find the name
+of the method it should call on the parent.
+
+## Bug Fixes
+
+* Nested `with` blocks used incorrect ref (#214 by @geomaster)
+* Lua quote string literals had wrong precedence (#200 by @nonchip)
+* Returning from `with` block would generate two `return` statements (#208)
+* Including `return` or `break` in a `continue` wrapped block would generate invalid code (#215 #190 #183)
+
+## Other
+
+* Refactor transformer out into multiple files
+* `moon` command line script rewritten in MoonScript
+* `moonscript.parse.build_grammar` function for getting new instance of parser grammar
+* Chain AST updated to be simpler
+
 # MoonScript v0.3.2 (2015-6-01)
 
 ## Bug Fixes

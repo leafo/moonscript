@@ -1,17 +1,18 @@
-local ntype, mtype
-do
-  local _obj_0 = require("moonscript.types")
-  ntype, mtype = _obj_0.ntype, _obj_0.mtype
-end
+local types = require("moonscript.types")
+local ntype, mtype, is_value, NOOP
+ntype, mtype, is_value, NOOP = types.ntype, types.mtype, types.is_value, types.NOOP
+local comprehension_has_value
+comprehension_has_value = require("moonscript.transform.comprehension").comprehension_has_value
 local Run
 do
+  local _class_0
   local _base_0 = {
     call = function(self, state)
       return self.fn(state)
     end
   }
   _base_0.__index = _base_0
-  local _class_0 = setmetatable({
+  _class_0 = setmetatable({
     __init = function(self, fn)
       self.fn = fn
       self[1] = "run"
@@ -73,9 +74,42 @@ chain_is_stub = function(chain)
   local stub = chain[#chain]
   return stub and ntype(stub) == "colon"
 end
+local implicitly_return
+implicitly_return = function(scope)
+  local is_top = true
+  local fn
+  fn = function(stm)
+    local t = ntype(stm)
+    if t == "decorated" then
+      stm = scope.transform.statement(stm)
+      t = ntype(stm)
+    end
+    if types.cascading[t] then
+      is_top = false
+      return scope.transform.statement(stm, fn)
+    elseif types.manual_return[t] or not is_value(stm) then
+      if is_top and t == "return" and stm[2] == "" then
+        return NOOP
+      else
+        return stm
+      end
+    else
+      if t == "comprehension" and not comprehension_has_value(stm) then
+        return stm
+      else
+        return {
+          "return",
+          stm
+        }
+      end
+    end
+  end
+  return fn
+end
 return {
   Run = Run,
   last_stm = last_stm,
   transform_last_stm = transform_last_stm,
-  chain_is_stub = chain_is_stub
+  chain_is_stub = chain_is_stub,
+  implicitly_return = implicitly_return
 }

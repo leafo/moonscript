@@ -1,4 +1,6 @@
 
+import unpack from require "moonscript.util"
+
 describe "comprehension", ->
   it "should double every number", ->
     input = {1,2,3,4,5,6}

@@ -52,6 +52,7 @@ local default_whitelist = Set({
 })
 local LinterBlock
 do
+  local _class_0
   local _parent_0 = Block
   local _base_0 = {
     lint_mark_used = function(self, name)
@@ -120,11 +121,11 @@ do
     end,
     render = function(self, ...)
       self:lint_check_unused()
-      return _parent_0.render(self, ...)
+      return _class_0.__parent.__base.render(self, ...)
     end,
     block = function(self, ...)
       do
-        local _with_0 = _parent_0.block(self, ...)
+        local _with_0 = _class_0.__parent.__base.block(self, ...)
         _with_0.block = self.block
         _with_0.render = self.render
         _with_0.get_root_block = self.get_root_block
@@ -138,12 +139,12 @@ do
   }
   _base_0.__index = _base_0
   setmetatable(_base_0, _parent_0.__base)
-  local _class_0 = setmetatable({
+  _class_0 = setmetatable({
     __init = function(self, whitelist_globals, ...)
       if whitelist_globals == nil then
         whitelist_globals = default_whitelist
       end
-      _parent_0.__init(self, ...)
+      _class_0.__parent.__init(self, ...)
       self.get_root_block = function()
         return self
       end
@@ -206,7 +207,10 @@ do
     __index = function(cls, name)
       local val = rawget(_base_0, name)
       if val == nil then
-        return _parent_0[name]
+        local parent = rawget(cls, "__parent")
+        if parent then
+          return parent[name]
+        end
       else
         return val
       end

@@ -17,6 +17,16 @@ local string_chars = {
   ["\n"] = "\\n"
 }
 return {
+  scoped = function(self, node)
+    local _, before, value, after
+    _, before, value, after = node[1], node[2], node[3], node[4]
+    _ = before and before:call(self)
+    do
+      local _with_0 = self:value(value)
+      _ = after and after:call(self)
+      return _with_0
+    end
+  end,
   exp = function(self, node)
     local _comp
     _comp = function(i, value)
@@ -248,9 +258,7 @@ return {
           else
             assign = self:line("[", _with_0:value(key), "]")
           end
-          _with_0:set("current_block", key)
           local out = self:line(assign, " = ", _with_0:value(value))
-          _with_0:set("current_block", nil)
           return out
         else
           return self:line(_with_0:value(tuple[1]))

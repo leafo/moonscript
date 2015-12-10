@@ -176,4 +176,38 @@ class Something
 class X
   new: hi
 
+
+--
+
+class Cool extends Thing
+  dang: =>
+    {
+      hello: -> super!
+      world: -> super.one
+    }
+
+-- 
+
+class Whack extends Thing
+  dang: do_something =>
+    super!
+
+---
+
+class Wowha extends Thing
+  @butt: ->
+    super!
+    super.hello
+    super\hello!
+    super\hello
+
+
+  @zone: cool {
+    ->
+      super!
+      super.hello
+      super\hello!
+      super\hello
+  }
+
 nil

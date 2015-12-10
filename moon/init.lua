@@ -1,10 +1,13 @@
-local util = require("moonscript.util")
 local lua = {
   debug = debug,
   type = type
 }
-local dump, p, is_object, type, debug, run_with_scope, bind_methods, defaultbl, extend, copy, mixin, mixin_object, mixin_table, fold
-dump = util.dump
+local getfenv, setfenv, dump
+do
+  local _obj_0 = require("moonscript.util")
+  getfenv, setfenv, dump = _obj_0.getfenv, _obj_0.setfenv, _obj_0.dump
+end
+local p, is_object, type, debug, run_with_scope, bind_methods, defaultbl, extend, copy, mixin, mixin_object, mixin_table, fold
 p = function(...)
   return print(dump(...))
 end

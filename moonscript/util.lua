@@ -60,14 +60,6 @@ get_closest_line = function(str, line_num)
     return line, line_num
   end
 end
-local reversed
-reversed = function(seq)
-  return coroutine.wrap(function()
-    for i = #seq, 1, -1 do
-      coroutine.yield(i, seq[i])
-    end
-  end)
-end
 local split
 split = function(str, delim)
   if str == "" then
@@ -209,7 +201,6 @@ return {
   pos_to_line = pos_to_line,
   get_closest_line = get_closest_line,
   get_line = get_line,
-  reversed = reversed,
   trim = trim,
   split = split,
   dump = dump,

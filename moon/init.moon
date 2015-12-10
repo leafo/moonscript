@@ -1,10 +1,8 @@
 
-util = require "moonscript.util"
 lua = { :debug, :type }
+import getfenv, setfenv, dump from require "moonscript.util"
 
 local *
-
-dump = util.dump
 
 p = (...) ->
   print dump ...

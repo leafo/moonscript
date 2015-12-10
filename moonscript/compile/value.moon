@@ -15,6 +15,12 @@ string_chars = {
 }
 
 {
+  scoped: (node) =>
+    {_, before, value, after} = node
+    before and before\call @
+    with @value value
+      after and after\call @
+
   -- list of values separated by binary operators
   exp: (node) =>
     _comp = (i, value) ->
@@ -146,9 +152,7 @@ string_chars = {
           else
             @line "[", \value(key), "]"
 
-          \set "current_block", key
           out = @line assign, " = ", \value(value)
-          \set "current_block", nil
           out
         else
           @line \value tuple[1]

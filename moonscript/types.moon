@@ -52,9 +52,6 @@ is_value = (stm) ->
 
   compile.Block\is_value(stm) or transform.Value\can_transform stm
 
-comprehension_has_value = (comp) ->
-  is_value comp[2]
-
 value_is_singular = (node) ->
   type(node) != "table" or node[1] != "exp" or #node == 2
 
@@ -189,9 +186,12 @@ smart_node_mt = setmetatable {}, {
 smart_node = (node) ->
   setmetatable node, smart_node_mt[ntype node]
 
+NOOP = {"noop"}
+
 {
   :ntype, :smart_node, :build, :is_value, :is_slice, :manual_return,
-  :cascading, :value_is_singular, :comprehension_has_value,
+  :cascading, :value_is_singular,
   :value_can_be_statement, :mtype, :terminating
+  :NOOP
 }
 

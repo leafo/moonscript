@@ -1,9 +1,8 @@
 
-util = require "moonscript.util"
-
-import reversed, unpack from util
 import ntype from require "moonscript.types"
 import concat, insert from table
+
+import unpack from require "moonscript.util"
 
 {
   raw: (node) => @add node[2]
@@ -30,7 +29,7 @@ import concat, insert from table
     _, names, values = unpack node
 
     undeclared = @declare names
-    declare = "local "..concat(undeclared, ", ")
+    declare = "local " .. concat(undeclared, ", ")
 
     has_fndef = false
     i = 1

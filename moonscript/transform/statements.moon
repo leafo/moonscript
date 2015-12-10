@@ -1,5 +1,8 @@
 
-import ntype, mtype from require "moonscript.types"
+types = require "moonscript.types"
+import ntype, mtype, is_value, NOOP from types
+
+import comprehension_has_value from require "moonscript.transform.comprehension"
 
 -- A Run is a special statement node that lets a function run and mutate the
 -- state of the compiler
@@ -44,5 +47,32 @@ chain_is_stub = (chain) ->
   stub = chain[#chain]
   stub and ntype(stub) == "colon"
 
-{:Run, :last_stm, :transform_last_stm, :chain_is_stub}
+implicitly_return = (scope) ->
+  is_top = true
+  fn = (stm) ->
+    t = ntype stm
+
+    -- expand decorated
+    if t == "decorated"
+      stm = scope.transform.statement stm
+      t = ntype stm
+
+    if types.cascading[t]
+      is_top = false
+      scope.transform.statement stm, fn
+    elseif types.manual_return[t] or not is_value stm
+      -- remove blank return statement
+      if is_top and t == "return" and stm[2] == ""
+        NOOP
+      else
+        stm
+    else
+      if t == "comprehension" and not comprehension_has_value stm
+        stm
+      else
+        {"return", stm}
+
+  fn
+
+{:Run, :last_stm, :transform_last_stm, :chain_is_stub, :implicitly_return }
 
