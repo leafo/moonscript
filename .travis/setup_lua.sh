@@ -8,7 +8,8 @@
 
 set -eufo pipefail
 
-LUAJIT_BASE="LuaJIT-2.0.4"
+LUAJIT_VERSION="2.0.4"
+LUAJIT_BASE="LuaJIT-$LUAJIT_VERSION"
 
 source .travis/platform.sh
 
@@ -39,9 +40,9 @@ mkdir -p "$LUA_HOME_DIR"
 if [ "$LUAJIT" == "yes" ]; then
 
   if [ "$LUA" == "luajit" ]; then
-    curl http://luajit.org/download/$LUAJIT_BASE.tar.gz | tar xz;
+    curl --location https://github.com/LuaJIT/LuaJIT/archive/v$LUAJIT_VERSION.tar.gz | tar xz;
   else
-    git clone http://luajit.org/git/luajit-2.0.git $LUAJIT_BASE;
+    git clone https://github.com/LuaJIT/LuaJIT.git $LUAJIT_BASE;
   fi
 
   cd $LUAJIT_BASE
