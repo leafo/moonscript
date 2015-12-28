@@ -27,6 +27,13 @@ busted
 
 Writing specs is a bit more complicated. Check out [the spec writing guide](spec/README.md).
 
+
+## Editor Support
+
+* [Vim](https://github.com/leafo/moonscript-vim)
+* [Textadept](https://github.com/leafo/moonscript-textadept)
+* [Sublime/Textmate](https://github.com/leafo/moonscript-tmbundle)
+
 ## License (MIT)
 
 Copyright (C) 2015 by Leaf Corcoran
