@@ -15,10 +15,10 @@ local wrap_env
 wrap_env = require("moonscript.parse.env").wrap_env
 local R, S, V, P, C, Ct, Cmt, Cg, Cb, Cc
 R, S, V, P, C, Ct, Cmt, Cg, Cb, Cc = lpeg.R, lpeg.S, lpeg.V, lpeg.P, lpeg.C, lpeg.Ct, lpeg.Cmt, lpeg.Cg, lpeg.Cb, lpeg.Cc
-local White, Break, Stop, Comment, Space, SomeSpace, SpaceBreak, EmptyLine, AlphaNum, Num, Shebang, _Name
+local White, Break, Stop, Comment, Space, SomeSpace, SpaceBreak, EmptyLine, AlphaNum, Num, Shebang, L, _Name
 do
   local _obj_0 = require("moonscript.parse.literals")
-  White, Break, Stop, Comment, Space, SomeSpace, SpaceBreak, EmptyLine, AlphaNum, Num, Shebang, _Name = _obj_0.White, _obj_0.Break, _obj_0.Stop, _obj_0.Comment, _obj_0.Space, _obj_0.SomeSpace, _obj_0.SpaceBreak, _obj_0.EmptyLine, _obj_0.AlphaNum, _obj_0.Num, _obj_0.Shebang, _obj_0.Name
+  White, Break, Stop, Comment, Space, SomeSpace, SpaceBreak, EmptyLine, AlphaNum, Num, Shebang, L, _Name = _obj_0.White, _obj_0.Break, _obj_0.Stop, _obj_0.Comment, _obj_0.Space, _obj_0.SomeSpace, _obj_0.SpaceBreak, _obj_0.EmptyLine, _obj_0.AlphaNum, _obj_0.Num, _obj_0.Shebang, _obj_0.L, _obj_0.Name
 end
 local SpaceName = Space * _Name
 Num = Space * (Num / function(v)
@@ -110,10 +110,10 @@ local build_grammar = wrap_env(debug_grammar, function(root)
     File = Shebang ^ -1 * (Block + Ct("")),
     Block = Ct(Line * (Break ^ 1 * Line) ^ 0),
     CheckIndent = Cmt(Indent, check_indent),
-    Line = (CheckIndent * Statement + Space * #Stop),
+    Line = (CheckIndent * Statement + Space * L(Stop)),
     Statement = pos(Import + While + With + For + ForEach + Switch + Return + Local + Export + BreakLoop + Ct(ExpList) * (Update + Assign) ^ -1 / format_assign) * Space * ((key("if") * Exp * (key("else") * Exp) ^ -1 * Space / mark("if") + key("unless") * Exp / mark("unless") + CompInner / mark("comprehension")) * Space) ^ -1 / wrap_decorator,
     Body = Space ^ -1 * Break * EmptyLine ^ 0 * InBlock + Ct(Statement),
-    Advance = #Cmt(Indent, advance_indent),
+    Advance = L(Cmt(Indent, advance_indent)),
     PushIndent = Cmt(Indent, push_indent),
     PreventIndent = Cmt(Cc(-1), push_indent),
     PopIndent = Cmt("", pop_indent),
@@ -170,7 +170,7 @@ local build_grammar = wrap_env(debug_grammar, function(root)
     ColonChainItem = symx("\\") * _Name / mark("colon"),
     ColonChain = ColonChainItem * (Invoke * ChainItems ^ -1) ^ -1,
     Slice = symx("[") * (SliceValue + Cc(1)) * sym(",") * (SliceValue + Cc("")) * (sym(",") * SliceValue) ^ -1 * sym("]") / mark("slice"),
-    Invoke = FnArgs / mark("call") + SingleString / wrap_func_arg + DoubleString / wrap_func_arg + #P("[") * LuaString / wrap_func_arg,
+    Invoke = FnArgs / mark("call") + SingleString / wrap_func_arg + DoubleString / wrap_func_arg + L(P("[")) * LuaString / wrap_func_arg,
     TableValue = KeyValue + Ct(Exp),
     TableLit = sym("{") * Ct(TableValueList ^ -1 * sym(",") ^ -1 * (SpaceBreak * TableLitLine * (sym(",") ^ -1 * SpaceBreak * TableLitLine) ^ 0 * sym(",") ^ -1) ^ -1) * White * sym("}") / mark("table"),
     TableValueList = TableValue * (sym(",") * TableValue) ^ 0,
