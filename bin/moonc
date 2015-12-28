@@ -264,16 +264,17 @@ local function create_watcher(files)
 	end
 end
 
--- build function to check for lint or compile in watch
-local check_compile_or_lint
-if opts.l then
-	local lint = require "moonscript.cmd.lint"
-	check_compile_or_lint = lint.lint_file
-else
-	check_compile_or_lint = compile_and_write
-end
 
 if opts.w then
+	-- build function to check for lint or compile in watch
+	local handle_file
+	if opts.l then
+		local lint = require "moonscript.cmd.lint"
+		handle_file = lint.lint_file
+	else
+		handle_file = compile_and_write
+	end
+
 	local watcher = create_watcher(files)
 	-- catches interrupt error for ctl-c
 	local protected = function()
@@ -292,7 +293,7 @@ if opts.w then
 			target = opts.o
 		end
 
-		local success, err = check_compile_or_lint(fname, target)
+		local success, err = handle_file(fname, target)
 		if opts.l then
 			if success then
 				io.stderr:write(success .. "\n\n")
@@ -313,9 +314,10 @@ if opts.w then
 
 	io.stderr:write("\nQuitting...\n")
 elseif opts.l then
+	local lint = require "moonscript.cmd.lint"
 	for _, tuple in pairs(files) do
 		local fname = tuple[1]
-		local res, err = check_compile_or_lint(fname)
+		local res, err = lint.lint_file(fname)
 		if res then
 			io.stderr:write(res .. "\n\n")
 		elseif err then
