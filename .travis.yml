@@ -9,6 +9,7 @@ env:
     - LUA=lua5.1
     - LUA=lua5.2
     - LUA=lua5.3
+    - LUA=lua5.3 LPEG=lulpeg
     - LUA=luajit2.1  # current head of 2.1 branch
 
 before_install:
@@ -19,4 +20,4 @@ install:
   - luarocks install loadkit
   - luarocks make
 
-script: busted
+script: busted --helper=spec/setup_lpeg.moon
