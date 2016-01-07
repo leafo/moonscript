@@ -314,15 +314,21 @@ if opts.w then
 
 	io.stderr:write("\nQuitting...\n")
 elseif opts.l then
+	local has_linted_with_error;
 	local lint = require "moonscript.cmd.lint"
 	for _, tuple in pairs(files) do
 		local fname = tuple[1]
 		local res, err = lint.lint_file(fname)
 		if res then
+			has_linted_with_error = true
 			io.stderr:write(res .. "\n\n")
 		elseif err then
+			has_linted_with_error = true
 			io.stderr:write(fname .. "\n" .. err.. "\n\n")
 		end
+	end
+	if has_linted_with_error then
+		os.exit(1)
 	end
 else
 	for _, tuple in ipairs(files) do
