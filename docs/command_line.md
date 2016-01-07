@@ -1,8 +1,9 @@
-target: reference/command_line
-template: reference
-title: Command Line Tools
-short_name: command_line
---
+{
+  target: "reference/command_line"
+  template: "reference"
+  title: "Command Line Tools"
+  short_name: "command_line"
+}
 
 # Command Line Tools
 

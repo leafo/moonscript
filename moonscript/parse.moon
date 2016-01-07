@@ -3,11 +3,10 @@ lpeg = require "lpeg"
 
 lpeg.setmaxstack 10000 -- whoa
 
-
 err_msg = "Failed to parse:%s\n [%d] >>    %s"
 
 import Stack from require "moonscript.data"
-import trim, pos_to_line, get_line from require"moonscript.util"
+import trim, pos_to_line, get_line from require "moonscript.util"
 import unpack from require "moonscript.util"
 import wrap_env from require "moonscript.parse.env"
 
@@ -17,10 +16,9 @@ import wrap_env from require "moonscript.parse.env"
 
 {
   :White, :Break, :Stop, :Comment, :Space, :SomeSpace, :SpaceBreak, :EmptyLine,
-  :AlphaNum, :Num, :Shebang
+  :AlphaNum, :Num, :Shebang, :L
   Name: _Name
 } = require "moonscript.parse.literals"
-
 
 SpaceName = Space * _Name
 Num = Space * (Num / (v) -> {"number", v})
@@ -110,7 +108,7 @@ build_grammar = wrap_env debug_grammar, (root) ->
     File: Shebang^-1 * (Block + Ct"")
     Block: Ct(Line * (Break^1 * Line)^0)
     CheckIndent: Cmt(Indent, check_indent), -- validates line is in correct indent
-    Line: (CheckIndent * Statement + Space * #Stop)
+    Line: (CheckIndent * Statement + Space * L(Stop))
 
     Statement: pos(
         Import + While + With + For + ForEach + Switch + Return +
@@ -123,9 +121,9 @@ build_grammar = wrap_env debug_grammar, (root) ->
         CompInner / mark"comprehension"
       ) * Space)^-1 / wrap_decorator
 
-    Body: Space^-1 * Break * EmptyLine^0 * InBlock + Ct(Statement), -- either a statement, or an indented block
+    Body: Space^-1 * Break * EmptyLine^0 * InBlock + Ct(Statement) -- either a statement, or an indented block
 
-    Advance: #Cmt(Indent, advance_indent), -- Advances the indent, gives back whitespace for CheckIndent
+    Advance: L Cmt(Indent, advance_indent) -- Advances the indent, gives back whitespace for CheckIndent
     PushIndent: Cmt(Indent, push_indent)
     PreventIndent: Cmt(Cc(-1), push_indent)
     PopIndent: Cmt("", pop_indent)
@@ -180,8 +178,8 @@ build_grammar = wrap_env debug_grammar, (root) ->
     Assign: sym"=" * (Ct(With + If + Switch) + Ct(TableBlock + ExpListLow)) / mark"assign"
     Update: ((sym"..=" + sym"+=" + sym"-=" + sym"*=" + sym"/=" + sym"%=" + sym"or=" + sym"and=") / trim) * Exp / mark"update"
 
-    CharOperators: Space * C(S"+-*/%^><")
-    WordOperators: op"or" + op"and" + op"<=" + op">=" + op"~=" + op"!=" + op"==" + op".."
+    CharOperators: Space * C(S"+-*/%^><|&")
+    WordOperators: op"or" + op"and" + op"<=" + op">=" + op"~=" + op"!=" + op"==" + op".." + op"<<" + op">>" + op"//"
     BinaryOperator: (WordOperators + CharOperators) * SpaceBreak^0
 
     Assignable: Cmt(Chain, check_assignable) + Name + SelfName
@@ -196,6 +194,7 @@ build_grammar = wrap_env debug_grammar, (root) ->
       Cmt(Do, check_do) +
       sym"-" * -SomeSpace * Exp / mark"minus" +
       sym"#" * Exp / mark"length" +
+      sym"~" * Exp / mark"bitnot" +
       key"not" * Exp / mark"not" +
       TblComprehension +
       TableLit +
@@ -251,7 +250,7 @@ build_grammar = wrap_env debug_grammar, (root) ->
     Invoke: FnArgs / mark"call" +
       SingleString / wrap_func_arg +
       DoubleString / wrap_func_arg +
-      #P"[" * LuaString / wrap_func_arg
+      L(P"[") * LuaString / wrap_func_arg
 
     TableValue: KeyValue + Ct(Exp)
 
@@ -282,7 +281,7 @@ build_grammar = wrap_env debug_grammar, (root) ->
       op"*" + op"^" +
       Ct(NameList) * (sym"=" * Ct(ExpListLow))^-1) / mark"export"
 
-    KeyValue: (sym":" * -SomeSpace *  Name * lpeg.Cp()) / self_assign + Ct((KeyName + sym"[" * Exp * sym"]" + DoubleString + SingleString) * symx":" * (Exp + TableBlock + SpaceBreak^1 * Exp))
+    KeyValue: (sym":" * -SomeSpace *  Name * lpeg.Cp!) / self_assign + Ct((KeyName + sym"[" * Exp * sym"]" + DoubleString + SingleString) * symx":" * (Exp + TableBlock + SpaceBreak^1 * Exp))
     KeyValueList: KeyValue * (sym"," * KeyValue)^0
     KeyValueLine: CheckIndent * KeyValueList * sym","^-1
 

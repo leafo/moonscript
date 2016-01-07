@@ -102,7 +102,7 @@ compile_file_text = function(text, opts)
       "Compile time\t" .. format_time(compile_time),
       ""
     }, "\n"))
-    return nil
+    return true
   end
   return code
 end

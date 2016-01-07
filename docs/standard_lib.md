@@ -1,8 +1,9 @@
-target: reference/standard_lib
-template: reference
-title: Standard Library
-short_name: stdlib
---
+{
+  target: "reference/standard_lib"
+  template: "reference"
+  title: "Standard Library"
+  short_name: "stdlib"
+}
 
 The MoonScript installation comes with a small kernel of functions that can be
 used to perform various common things.

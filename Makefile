@@ -1,15 +1,36 @@
-.PHONY: test local compile compile_system watch lint count
+LUA      ?= lua5.1
+LUAROCKS ?= luarocks
+
+ifneq ($(LUA),lua)
+	LUA_VERSION = $(shell echo $(LUA) | sed -e "s/lua\(.*\)/\1/")
+	LUAROCKS = luarocks-$(LUA_VERSION)
+	LUA_PATH_MAKE = $(shell echo "$$LUA_PATH" | sed -e "s/[0-9]\.[0-9]/$(LUA_VERSION)/g")
+	LUA_CPATH_MAKE = $(shell echo "$$LUA_CPATH" | sed -e "s/[0-9]\.[0-9]/$(LUA_VERSION)/g")
+endif
+
+ifeq ($(LUA),luajit)
+	LUAROCKS = luarocks-5.1
+endif
+
+.PHONY: test local compile compile_system watch lint count show
 
 test:
 	busted
 
+show:
+	# LUA $(LUA)
+	# LUA_VERSION $(LUA_VERSION)
+	# LUAROCKS $(LUAROCKS)
+	# LUA_PATH_MAKE $(LUA_PATH_MAKE)
+	# LUA_CPATH_MAKE $(LUA_CPATH_MAKE)
+
 local: compile
-	luarocks make --local moonscript-dev-1.rockspec
+	LUA_PATH='$(LUA_PATH_MAKE)' LUA_CPATH='$(LUA_CPATH_MAKE)' $(LUAROCKS) make --local moonscript-dev-1.rockspec
 
 compile:
-	lua5.1 bin/moonc moon/ moonscript/
+	LUA_PATH='$(LUA_PATH_MAKE)' LUA_CPATH='$(LUA_CPATH_MAKE)' $(LUA) bin/moonc moon/ moonscript/
 	echo "#!/usr/bin/env lua" > bin/moon
-	lua5.1 bin/moonc -p bin/moon.moon >> bin/moon
+	$(LUA) bin/moonc -p bin/moon.moon >> bin/moon
 	echo "-- vim: set filetype=lua:" >> bin/moon
 
 compile_system:

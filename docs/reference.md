@@ -1,8 +1,9 @@
-target: reference/index
-template: reference
-title: Language Guide
-short_name: lang
---
+{
+  target: "reference/index"
+  template: "reference"
+  title: "Language Guide"
+  short_name: "lang"
+}
 
 MoonScript is a programming language that compiles to
 [Lua](http://www.lua.org). This guide expects the reader to have basic

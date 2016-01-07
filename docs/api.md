@@ -1,8 +1,9 @@
-target: reference/api
-template: reference
-title: Compiler API
-short_name: api
---
+{
+  target: "reference/api"
+  template: "reference"
+  title: "Compiler API"
+  short_name: "api"
+}
 
 # MoonScript Compiler API
 
