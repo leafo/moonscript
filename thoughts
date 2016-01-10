@@ -29,3 +29,5 @@ thing.method = ->
 thing.method = function(self) do
 	self.__class:method(1,2,3)
 end
+
+* possibility of compile-time statements like #if, #define, like C
