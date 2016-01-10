@@ -134,10 +134,13 @@ A full list of flags can be seen by passing the `-h` or `--help` flag.
 
 `moonc` contains a [lint][1] tool for statically detecting potential problems
 with code. The linter has two tests: detects accessed global variables,
-detect unused declared variables.
+detect unused declared variables. If the linter detects any issues with a file,
+the program will exit with a status of `1`.
 
 You can execute the linter with the `-l` flag. When the linting flag is
 provided only linting takes place and no compiled code is generated.
+
+The linter is compatible with the watch mode (see above) for automatic linting
 
 ```bash
 moonc -l file1.moon file2.moon
