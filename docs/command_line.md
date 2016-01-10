@@ -140,7 +140,7 @@ the program will exit with a status of `1`.
 You can execute the linter with the `-l` flag. When the linting flag is
 provided only linting takes place and no compiled code is generated.
 
-The linter is compatible with the watch mode (see above) for automatic linting
+The linter is compatible with the watch mode (see above) for automatic linting.
 
 ```bash
 moonc -l file1.moon file2.moon
