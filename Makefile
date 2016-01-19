@@ -1,16 +1,8 @@
-LUA      ?= lua5.1
-LUAROCKS ?= luarocks
-
-ifneq ($(LUA),lua)
-	LUA_VERSION = $(shell echo $(LUA) | sed -e "s/lua\(.*\)/\1/")
-	LUAROCKS = luarocks-$(LUA_VERSION)
-	LUA_PATH_MAKE = $(shell echo "$$LUA_PATH" | sed -e "s/[0-9]\.[0-9]/$(LUA_VERSION)/g")
-	LUA_CPATH_MAKE = $(shell echo "$$LUA_CPATH" | sed -e "s/[0-9]\.[0-9]/$(LUA_VERSION)/g")
-endif
-
-ifeq ($(LUA),luajit)
-	LUAROCKS = luarocks-5.1
-endif
+LUA ?= lua5.1
+LUA_VERSION = $(shell $(LUA) -e 'print(_VERSION:match("%d%.%d"))')
+LUAROCKS = luarocks-$(LUA_VERSION)
+LUA_PATH_MAKE = $(shell $(LUAROCKS) path --lr-path)
+LUA_CPATH_MAKE = $(shell $(LUAROCKS) path --lr-cpath)
 
 .PHONY: test local compile compile_system watch lint count show
 
