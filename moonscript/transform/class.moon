@@ -167,7 +167,7 @@ super_scope = (value, t, key) ->
     class_lookup = build["if"] {
       cond: { "exp", {"ref", "val"}, "==", "nil" }
       then: {
-        build.assign_one LocalName"parent", build.chain {
+        build.assign_one LocalName "parent", build.chain {
           base: "rawget"
           {
             "call", {

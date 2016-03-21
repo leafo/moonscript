@@ -271,7 +271,7 @@ return function(self, node, ret, parent_assign)
         "nil"
       },
       ["then"] = {
-        build.assign_one(LocalName("parent"), build.chain({
+        build.assign_one(LocalName("parent", build.chain({
           base = "rawget",
           {
             "call",
@@ -287,7 +287,7 @@ return function(self, node, ret, parent_assign)
               }
             }
           }
-        })),
+        }))),
         build["if"]({
           cond = LocalName("parent"),
           ["then"] = {

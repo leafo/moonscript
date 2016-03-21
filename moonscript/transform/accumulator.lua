@@ -1,8 +1,11 @@
 local types = require("moonscript.types")
 local build, ntype, NOOP
 build, ntype, NOOP = types.build, types.ntype, types.NOOP
-local NameProxy
-NameProxy = require("moonscript.transform.names").NameProxy
+local NameProxy, LocalName
+do
+  local _obj_0 = require("moonscript.transform.names")
+  NameProxy, LocalName = _obj_0.NameProxy, _obj_0.LocalName
+end
 local insert
 insert = table.insert
 local is_singular
