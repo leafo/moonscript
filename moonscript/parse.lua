@@ -132,7 +132,7 @@ local build_grammar = wrap_env(debug_grammar, function(root)
     SwitchElse = key("else") * Body / mark("else"),
     IfCond = Exp * Assign ^ -1 / format_single_assign,
     If = key("if") * IfCond * key("then") ^ -1 * Body * ((Break * CheckIndent) ^ -1 * EmptyLine ^ 0 * key("elseif") * pos(IfCond) * key("then") ^ -1 * Body / mark("elseif")) ^ 0 * ((Break * CheckIndent) ^ -1 * EmptyLine ^ 0 * key("else") * Body / mark("else")) ^ -1 / mark("if"),
-    Unless = key("unless") * IfCond * key("then") ^ -1 * Body * ((Break * CheckIndent) ^ -1 * EmptyLine ^ 0 * key("else") * Body / mark("else")) ^ -1 / mark("unless"),
+    Unless = key("unless") * IfCond * key("then") ^ -1 * Body * ((Break * CheckIndent) ^ -1 * EmptyLine ^ 0 * key("elseif") * pos(IfCond) * key("then") ^ -1 * Body / mark("elseif")) ^ 0 * ((Break * CheckIndent) ^ -1 * EmptyLine ^ 0 * key("else") * Body / mark("else")) ^ -1 / mark("unless"),
     While = key("while") * DisableDo * ensure(Exp, PopDo) * key("do") ^ -1 * Body / mark("while"),
     For = key("for") * DisableDo * ensure(Name * sym("=") * Ct(Exp * sym(",") * Exp * (sym(",") * Exp) ^ -1), PopDo) * key("do") ^ -1 * Body / mark("for"),
     ForEach = key("for") * Ct(AssignableNameList) * key("in") * DisableDo * ensure(Ct(sym("*") * Exp / mark("unpack") + ExpList), PopDo) * key("do") ^ -1 * Body / mark("foreach"),
