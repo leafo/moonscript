@@ -1,7 +1,7 @@
 types = require "moonscript.types"
 
 import build, ntype, NOOP from types
-import NameProxy from require "moonscript.transform.names"
+import NameProxy, LocalName from require "moonscript.transform.names"
 
 import insert from table
 
@@ -34,6 +34,8 @@ class Accumulator
     build[group_type] {
       build.assign_one @accum_name, build.table!
       build.assign_one @len_name, 1
+      -- could be added here instead
+      -- build.assign_one (LocalName "k"), 1
       node
       group_type == "block_exp" and @accum_name or NOOP
     }

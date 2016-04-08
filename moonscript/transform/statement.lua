@@ -1,7 +1,10 @@
 local Transformer
 Transformer = require("moonscript.transform.transformer").Transformer
-local NameProxy
-NameProxy = require("moonscript.transform.names").NameProxy
+local NameProxy, LocalName
+do
+  local _obj_0 = require("moonscript.transform.names")
+  NameProxy, LocalName = _obj_0.NameProxy, _obj_0.LocalName
+end
 local Run, transform_last_stm, implicitly_return, last_stm
 do
   local _obj_0 = require("moonscript.transform.statements")
@@ -649,8 +652,21 @@ return Transformer({
           }
         }
       end
+      local local_names
+      do
+        local _accum_0 = { }
+        local _len_0 = 1
+        for _, name in ipairs(node.names) do
+          _accum_0[_len_0] = LocalName(name)
+          _len_0 = _len_0 + 1
+        end
+        local_names = _accum_0
+      end
       return build.group({
         list_name ~= list and build.assign_one(list_name, list) or NOOP,
+        build.declare({
+          names = local_names
+        }),
         slice_var or NOOP,
         build["for"]({
           name = index_name,

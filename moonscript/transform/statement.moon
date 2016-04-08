@@ -1,6 +1,6 @@
 import Transformer from require "moonscript.transform.transformer"
 
-import NameProxy from require "moonscript.transform.names"
+import NameProxy, LocalName from require "moonscript.transform.names"
 
 import Run, transform_last_stm, implicitly_return, last_stm
   from require "moonscript.transform.statements"
@@ -400,8 +400,11 @@ Transformer {
       else
         {1, {"length", list_name}}
 
+      local_names = [LocalName name for _, name in ipairs node.names]
+
       return build.group {
         list_name != list and build.assign_one(list_name, list) or NOOP
+        build.declare names: local_names
         slice_var or NOOP
         build["for"] {
           name: index_name
@@ -471,5 +474,5 @@ Transformer {
     }
 
   class: require "moonscript.transform.class"
-    
+
 }
