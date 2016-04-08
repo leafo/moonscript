@@ -155,6 +155,7 @@ build_grammar = wrap_env debug_grammar, (root) ->
       ((Break * CheckIndent)^-1 * EmptyLine^0 * key"else" * Body / mark"else")^-1 / mark"if"
 
     Unless: key"unless" * IfCond * key"then"^-1 * Body *
+      ((Break * CheckIndent)^-1 * EmptyLine^0 * key"elseif" * pos(IfCond) * key"then"^-1 * Body / mark"elseif")^0 *
       ((Break * CheckIndent)^-1 * EmptyLine^0 * key"else" * Body / mark"else")^-1 / mark"unless"
 
     While: key"while" * DisableDo * ensure(Exp, PopDo) * key"do"^-1 * Body / mark"while"
