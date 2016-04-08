@@ -150,13 +150,11 @@ build_grammar = wrap_env debug_grammar, (root) ->
 
     IfCond: Exp * Assign^-1 / format_single_assign
 
-    If: key"if" * IfCond * key"then"^-1 * Body *
-      ((Break * CheckIndent)^-1 * EmptyLine^0 * key"elseif" * pos(IfCond) * key"then"^-1 * Body / mark"elseif")^0 *
-      ((Break * CheckIndent)^-1 * EmptyLine^0 * key"else" * Body / mark"else")^-1 / mark"if"
+    IfElse: (Break * CheckIndent)^-1 * EmptyLine^0 * key"else" * Body / mark"else"
+    IfElseIf: (Break * CheckIndent)^-1 * EmptyLine^0 * key"elseif" * pos(IfCond) * key"then"^-1 * Body / mark"elseif"
 
-    Unless: key"unless" * IfCond * key"then"^-1 * Body *
-      ((Break * CheckIndent)^-1 * EmptyLine^0 * key"elseif" * pos(IfCond) * key"then"^-1 * Body / mark"elseif")^0 *
-      ((Break * CheckIndent)^-1 * EmptyLine^0 * key"else" * Body / mark"else")^-1 / mark"unless"
+    If: key"if" * IfCond * key"then"^-1 * Body * IfElseIf^0 * IfElse^-1 / mark"if"
+    Unless: key"unless" * IfCond * key"then"^-1 * Body * IfElseIf^0 * IfElse^-1 / mark"unless"
 
     While: key"while" * DisableDo * ensure(Exp, PopDo) * key"do"^-1 * Body / mark"while"
 
