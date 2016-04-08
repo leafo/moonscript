@@ -78,7 +78,7 @@ do
     ...
   }
   for _index_0 = 1, #_list_0 do
-    x = _list_0[_index_0]
+    local x = _list_0[_index_0]
     _accum_0[_len_0] = x
     _len_0 = _len_0 + 1
   end

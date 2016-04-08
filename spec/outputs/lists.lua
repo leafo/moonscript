@@ -161,14 +161,14 @@ do
   local _accum_0 = { }
   local _len_0 = 1
   for _index_0 = 1, #items do
-    x = items[_index_0]
+    local x = items[_index_0]
     _accum_0[_len_0] = x * 2
     _len_0 = _len_0 + 1
   end
   double = _accum_0
 end
 for _index_0 = 1, #double do
-  x = double[_index_0]
+  local x = double[_index_0]
   print(x)
 end
 local cut
@@ -176,7 +176,7 @@ do
   local _accum_0 = { }
   local _len_0 = 1
   for _index_0 = 1, #items do
-    x = items[_index_0]
+    local x = items[_index_0]
     if x > 3 then
       _accum_0[_len_0] = x
       _len_0 = _len_0 + 1
@@ -189,7 +189,7 @@ do
   local _accum_0 = { }
   local _len_0 = 1
   for _index_0 = 1, #items do
-    x = items[_index_0]
+    local x = items[_index_0]
     for _index_1 = 1, #items do
       local y = items[_index_1]
       _accum_0[_len_0] = x + y

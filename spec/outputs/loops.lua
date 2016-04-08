@@ -62,7 +62,7 @@ do
 end
 x = function()
   for _index_0 = 1, #hello do
-    x = hello[_index_0]
+    local x = hello[_index_0]
     local _ = y
   end
 end

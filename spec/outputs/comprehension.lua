@@ -41,7 +41,7 @@ do
   local _tbl_0 = { }
   local _list_0 = yes
   for _index_0 = 1, #_list_0 do
-    x = _list_0[_index_0]
+    local x = _list_0[_index_0]
     local _key_0, _val_0 = unpack(x)
     _tbl_0[_key_0] = _val_0
   end
@@ -68,7 +68,7 @@ do
     }
   }
   for _index_0 = 1, #_list_0 do
-    x = _list_0[_index_0]
+    local x = _list_0[_index_0]
     local _key_0, _val_0 = unpack((function()
       local _accum_0 = { }
       local _len_0 = 1
