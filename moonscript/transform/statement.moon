@@ -1,6 +1,6 @@
 import Transformer from require "moonscript.transform.transformer"
 
-import NameProxy from require "moonscript.transform.names"
+import NameProxy, LocalName, is_name_proxy from require "moonscript.transform.names"
 
 import Run, transform_last_stm, implicitly_return, last_stm
   from require "moonscript.transform.statements"
@@ -400,6 +400,8 @@ Transformer {
       else
         {1, {"length", list_name}}
 
+      names = [is_name_proxy(n) and n or LocalName(n) or n for n in *node.names]
+
       return build.group {
         list_name != list and build.assign_one(list_name, list) or NOOP
         slice_var or NOOP
@@ -407,7 +409,7 @@ Transformer {
           name: index_name
           bounds: bounds
           body: {
-            {"assign", node.names, { NameProxy.index list_name, index_name }}
+            {"assign", names, { NameProxy.index list_name, index_name }}
             build.group node.body
           }
         }

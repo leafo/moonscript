@@ -101,7 +101,18 @@ do
   _base_0.__class = _class_0
   NameProxy = _class_0
 end
+local is_name_proxy
+is_name_proxy = function(v)
+  if not (type(v) == "table") then
+    return false
+  end
+  local _exp_0 = v.__class
+  if LocalName == _exp_0 or NameProxy == _exp_0 then
+    return true
+  end
+end
 return {
   NameProxy = NameProxy,
-  LocalName = LocalName
+  LocalName = LocalName,
+  is_name_proxy = is_name_proxy
 }

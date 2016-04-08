@@ -41,5 +41,11 @@ class NameProxy
     else
       ("name<prefix(%s)>")\format @prefix
 
+is_name_proxy = (v) ->
+  return false unless type(v) == "table"
 
-{ :NameProxy, :LocalName }
+  switch v.__class
+    when LocalName, NameProxy
+      true
+
+{ :NameProxy, :LocalName, :is_name_proxy }
