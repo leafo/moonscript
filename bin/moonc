@@ -247,8 +247,10 @@ local function create_watcher(files)
 				for _, tuple in ipairs(files) do
 					local file = tuple[1]
 					local time = lfs.attributes(file, "modification")
-					if not mod_time[file] then
-						mod_time[file] = time
+					if not time then
+						mod_time[file] = nil -- file doesn't exist
+					elseif not mod_time[file] then
+						mod_time[file] = time -- new file created
 					else
 						if time ~= mod_time[file] then
 							if time > mod_time[file] then
