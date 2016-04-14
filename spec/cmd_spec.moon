@@ -65,7 +65,7 @@ describe "moonc", ->
   describe "watcher", ->
     describe "inotify watcher", ->
       it "gets dirs", ->
-        import InotifyWacher from require "moonscript.cmd.watcher"
+        import InotifyWacher from require "moonscript.cmd.watchers"
         watcher = InotifyWacher {
           {"hello.moon", "hello.lua"}
           {"cool/no.moon", "cool/no.lua"}

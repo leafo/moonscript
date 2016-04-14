@@ -54,7 +54,7 @@ class InotifyWacher extends Watcher
           fname = dir .. fname if dir != "./"
 
           -- TODO: check to make sure the file was in the original set
-          coroutine.yield(fname)
+          coroutine.yield fname
 
 class SleepWatcher extends Watcher
 
