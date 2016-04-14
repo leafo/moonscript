@@ -30,7 +30,8 @@ with_dev = (fn) ->
         mod\match("moon%.") or mod == "moon"
 
       if testable
-        dev_cache[mod] = assert(loadfile(assert loader mod))!
+        fname = assert loader(mod), "failed to find module: #{mod}"
+        dev_cache[mod] = assert(loadfile fname)!
         return dev_cache[mod]
 
       old_require mod
