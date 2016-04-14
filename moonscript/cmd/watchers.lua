@@ -39,7 +39,10 @@ local Watcher
 do
   local _class_0
   local _base_0 = {
-    start_msg = "Starting watch loop (Ctrl-C to exit)"
+    start_msg = "Starting watch loop (Ctrl-C to exit)",
+    print_start = function(self, mode, misc)
+      return io.stderr:write(tostring(self.start_msg) .. " with " .. tostring(mode) .. " [" .. tostring(misc) .. "]\n")
+    end
   }
   _base_0.__index = _base_0
   _class_0 = setmetatable({
@@ -91,7 +94,7 @@ do
     each_update = function(self)
       return coroutine.wrap(function()
         local dirs = self:get_dirs()
-        io.stderr:write(tostring(self.start_msg) .. " with inotify [" .. tostring(plural(#dirs, "dir")) .. "]\n")
+        self:print_start("inotify", plural(#dirs, "dir"))
         local wd_table = { }
         local inotify = require("inotify")
         local handle = inotify.init()
@@ -172,7 +175,60 @@ local SleepWatcher
 do
   local _class_0
   local _parent_0 = Watcher
-  local _base_0 = { }
+  local _base_0 = {
+    polling_rate = 1.0,
+    get_sleep_func = function(self)
+      local sleep
+      pcall(function()
+        sleep = require("socket").sleep
+      end)
+      sleep = sleep or require("moonscript")._sleep
+      if not (sleep) then
+        error("Missing sleep function; install LuaSocket")
+      end
+      return sleep
+    end,
+    each_update = function(self)
+      return coroutine.wrap(function()
+        local lfs = require("lfs")
+        local sleep = self:get_sleep_func()
+        self:print_start("polling", plural(#self.file_list, "files"))
+        local mod_time = { }
+        while true do
+          local _list_0 = self.file_list
+          for _index_0 = 1, #_list_0 do
+            local _continue_0 = false
+            repeat
+              local _des_0 = _list_0[_index_0]
+              local file
+              file = _des_0[1]
+              local time = lfs.attributes(file, "modification")
+              print(file, time)
+              if not (time) then
+                mod_time[file] = nil
+                _continue_0 = true
+                break
+              end
+              if not (mod_time[file]) then
+                mod_time[file] = time
+                _continue_0 = true
+                break
+              end
+              if time > mod_time[file] then
+                mod_time[file] = time
+                coroutine.yield(file)
+              end
+              _continue_0 = true
+            until true
+            if not _continue_0 then
+              break
+            end
+          end
+          sleep(self.polling_rate)
+        end
+      end)
+    end
+  }
   _base_0.__index = _base_0
   setmetatable(_base_0, _parent_0.__base)
   _class_0 = setmetatable({

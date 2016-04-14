@@ -14,6 +14,9 @@ class Watcher
   start_msg: "Starting watch loop (Ctrl-C to exit)"
   new: (@file_list) =>
 
+  print_start: (mode, misc) =>
+    io.stderr\write "#{@start_msg} with #{mode} [#{misc}]\n"
+
 class InotifyWacher extends Watcher
   @available: =>
     pcall -> require "inotify"
@@ -33,7 +36,8 @@ class InotifyWacher extends Watcher
     coroutine.wrap ->
       dirs = @get_dirs!
 
-      io.stderr\write "#{@start_msg} with inotify [#{plural #dirs, "dir"}]\n"
+      @print_start "inotify", plural #dirs, "dir"
+
       wd_table = {}
 
       inotify = require "inotify"
@@ -57,5 +61,44 @@ class InotifyWacher extends Watcher
           coroutine.yield fname
 
 class SleepWatcher extends Watcher
+  polling_rate: 1.0
+
+  -- the windows mooonscript binaries provide their own sleep function
+  get_sleep_func: =>
+    local sleep
+
+    pcall ->
+      sleep = require("socket").sleep
+
+    -- TODO: this is also loading moonloader, which isn't intentional
+    sleep or= require("moonscript")._sleep
+    error "Missing sleep function; install LuaSocket" unless sleep
+    sleep
+
+  each_update: =>
+    coroutine.wrap ->
+      lfs = require "lfs"
+      sleep = @get_sleep_func!
+
+      @print_start "polling", plural #@file_list, "files"
+      mod_time = {}
+
+      while true
+        for {file} in *@file_list
+          time = lfs.attributes file, "modification"
+          print file, time
+          unless time -- file no longer exists
+            mod_time[file] = nil
+            continue
+
+          unless mod_time[file] -- file time scanned
+            mod_time[file] = time
+            continue
+
+          if time > mod_time[file]
+            mod_time[file] = time
+            coroutine.yield file
+
+        sleep @polling_rate
 
 {:Watcher, :SleepWatcher, :InotifyWacher}

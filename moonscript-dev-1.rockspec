@@ -30,6 +30,7 @@ build = {
 		["moonscript.cmd.coverage"] = "moonscript/cmd/coverage.lua",
 		["moonscript.cmd.lint"] = "moonscript/cmd/lint.lua",
 		["moonscript.cmd.moonc"] = "moonscript/cmd/moonc.lua",
+		["moonscript.cmd.watchers"] = "moonscript/cmd/watchers.lua",
 		["moonscript.compile"] = "moonscript/compile.lua",
 		["moonscript.compile.statement"] = "moonscript/compile/statement.lua",
 		["moonscript.compile.value"] = "moonscript/compile/value.lua",

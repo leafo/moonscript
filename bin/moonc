@@ -9,8 +9,6 @@ local opts, ind = alt_getopt.get_opts(arg, "lvhwt:o:pTXb", {
 
 local read_stdin = arg[1] == "--"
 
-local polling_rate = 1.0
-
 local help = [[Usage: %s [options] files...
 
     -h          Print this message
@@ -163,71 +161,16 @@ if opts.o and #files > 1 then
 	print_help("-o can not be used with multiple input files")
 end
 
-local function get_sleep_func()
-	local sleep
-	if not pcall(function()
-		local socket = require "socket"
-		sleep = socket.sleep
-	end) then
-		-- This is set by moonc.c in windows binaries
-		sleep = require("moonscript")._sleep
-	end
-	if not sleep then
-		error("Missing sleep function; install LuaSocket")
-	end
-	return sleep
-end
-
-local function plural(count, word)
-	if count ~= 1 then
-		word = word .. "s"
-	end
-	return table.concat({count, word}, " ")
-end
-
 -- returns an iterator that returns files that have been updated
 local function create_watcher(files)
-	local msg = "Starting watch loop (Ctrl-C to exit)"
-
-	local inotify
-	pcall(function()
-		inotify = require "inotify"
-	end)
-
 	local watchers = require("moonscript.cmd.watchers")
 
 	if watchers.InotifyWacher:available() then
 		return watchers.InotifyWacher(files):each_update()
 	end
 
-	-- poll the filesystem instead
-	local sleep = get_sleep_func()
-	return coroutine.wrap(function()
-		io.stderr:write(("%s with polling [%s]"):format(msg, plural(#files, "file")) .. "\n")
-
-		local mod_time = {}
-		while true do
-			for _, tuple in ipairs(files) do
-				local file = tuple[1]
-				local time = lfs.attributes(file, "modification")
-				if not time then
-					mod_time[file] = nil -- file doesn't exist
-				elseif not mod_time[file] then
-					mod_time[file] = time -- new file created
-				else
-					if time ~= mod_time[file] then
-						if time > mod_time[file] then
-							coroutine.yield(file)
-							mod_time[file] = time
-						end
-					end
-				end
-			end
-			sleep(polling_rate)
-		end
-	end)
+	return watchers.SleepWatcher(files):each_update()
 end
-
 
 if opts.w then
 	-- build function to check for lint or compile in watch
