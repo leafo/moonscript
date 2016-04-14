@@ -194,76 +194,38 @@ local function create_watcher(files)
 		inotify = require "inotify"
 	end)
 
-	if inotify then
-		local dirs = {}
+	local watchers = require("moonscript.cmd.watchers")
 
-		for _, tuple in ipairs(files) do
-			local dir = parse_dir(tuple[1])
-			if dir == "" then
-				dir = "./"
-			end
-			table.insert(dirs, dir)
-		end
-
-		dirs = remove_dups(dirs)
-
-		return coroutine.wrap(function()
-			io.stderr:write(("%s with inotify [%s]"):format(msg, plural(#dirs, "dir")) .. "\n")
-
-			local wd_table = {}
-			local handle = inotify.init()
-			for _, dir in ipairs(dirs) do
-				local wd = handle:addwatch(dir, inotify.IN_CLOSE_WRITE, inotify.IN_MOVED_TO)
-				wd_table[wd] = dir
-			end
-
-			while true do
-				local events = handle:read()
-				if not events then
-					break
-				end
-
-				for _, ev in ipairs(events) do
-					local fname = ev.name
-					if fname:match("%.moon$") then
-						local dir = wd_table[ev.wd]
-						if dir ~= "./" then
-							fname = dir .. fname
-						end
-						-- TODO: check to make sure the file was in the original set
-						coroutine.yield(fname)
-					end
-				end
-			end
-		end)
-	else
-		-- poll the filesystem instead
-		local sleep = get_sleep_func()
-		return coroutine.wrap(function()
-			io.stderr:write(("%s with polling [%s]"):format(msg, plural(#files, "file")) .. "\n")
-
-			local mod_time = {}
-			while true do
-				for _, tuple in ipairs(files) do
-					local file = tuple[1]
-					local time = lfs.attributes(file, "modification")
-					if not time then
-						mod_time[file] = nil -- file doesn't exist
-					elseif not mod_time[file] then
-						mod_time[file] = time -- new file created
-					else
-						if time ~= mod_time[file] then
-							if time > mod_time[file] then
-								coroutine.yield(file)
-								mod_time[file] = time
-							end
-						end
-					end
-				end
-				sleep(polling_rate)
-			end
-		end)
+	if watchers.InotifyWacher:available() then
+		return watchers.InotifyWacher(files):each_update()
 	end
+
+	-- poll the filesystem instead
+	local sleep = get_sleep_func()
+	return coroutine.wrap(function()
+		io.stderr:write(("%s with polling [%s]"):format(msg, plural(#files, "file")) .. "\n")
+
+		local mod_time = {}
+		while true do
+			for _, tuple in ipairs(files) do
+				local file = tuple[1]
+				local time = lfs.attributes(file, "modification")
+				if not time then
+					mod_time[file] = nil -- file doesn't exist
+				elseif not mod_time[file] then
+					mod_time[file] = time -- new file created
+				else
+					if time ~= mod_time[file] then
+						if time > mod_time[file] then
+							coroutine.yield(file)
+							mod_time[file] = time
+						end
+					end
+				end
+			end
+			sleep(polling_rate)
+		end
+	end)
 end
 
 
