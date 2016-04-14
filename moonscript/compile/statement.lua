@@ -136,7 +136,7 @@ return {
       current = next
     end
     for _index_0 = 4, #node do
-      cond = node[_index_0]
+      local cond = node[_index_0]
       add_clause(cond)
     end
     return root
