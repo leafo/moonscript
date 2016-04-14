@@ -168,12 +168,15 @@ local function get_sleep_func()
 	if not pcall(function()
 		local socket = require "socket"
 		sleep = socket.sleep
+	end) or not pcall(function()
+		local cqueues = require "cqueues"
+		sleep = cqueues.sleep
 	end) then
 		-- This is set by moonc.c in windows binaries
 		sleep = require("moonscript")._sleep
 	end
 	if not sleep then
-		error("Missing sleep function; install LuaSocket")
+		error("Missing sleep function; install LuaSocket or cqueues")
 	end
 	return sleep
 end
