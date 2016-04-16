@@ -76,6 +76,19 @@ describe "moonc", ->
           "cool/"
         }, watcher\get_dirs!
 
+  describe "parse args", ->
+    import parse_arguments from require "moonscript.cmd.args"
+
+    it "parses arguments", ->
+      out, res = parse_arguments {
+        print: "p"
+      }, {"hello", "word", "-gap"}
+
+      assert.same {
+        g: true
+        a: true
+        p: true
+      }, out
 
   describe "stubbed lfs", ->
     local dirs
