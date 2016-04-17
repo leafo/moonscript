@@ -23,7 +23,7 @@ position_to_lines = (file_content, positions) ->
   lines
 
 format_file = (fname, positions) ->
-  file = assert io.open fname
+  file = assert io.open fname\sub 2
   content = file\read "*a"
   file\close!
 
