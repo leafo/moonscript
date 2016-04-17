@@ -1,11 +1,31 @@
 
+parse_spec = (spec) ->
+  flags, words = if type(spec) == "table"
+    unpack(spec), spec
+  else
+    spec, {}
+
+  assert "no flags for arguments"
+
+  out = {}
+  for part in flags\gmatch "%w:?"
+    if part\match ":$"
+      out[part\sub 1,1] = { value: true }
+    else
+      out[part] = {}
+
+  out
+
 parse_arguments = (spec, args) ->
+  spec = parse_spec spec
+
   out = {}
 
   remaining = {}
   last_flag = nil
 
   for arg in *args
+    group = {}
     if last_flag
       out[last_flag] = arg
       continue
@@ -24,4 +44,4 @@ parse_arguments = (spec, args) ->
 
 
 
-{:parse_arguments}
+{ :parse_arguments, :parse_spec }

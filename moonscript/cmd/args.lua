@@ -1,5 +1,27 @@
+local parse_spec
+parse_spec = function(spec)
+  local flags, words
+  if type(spec) == "table" then
+    flags, words = unpack(spec), spec
+  else
+    flags, words = spec, { }
+  end
+  assert("no flags for arguments")
+  local out = { }
+  for part in flags:gmatch("%w:?") do
+    if part:match(":$") then
+      out[part:sub(1, 1)] = {
+        value = true
+      }
+    else
+      out[part] = { }
+    end
+  end
+  return out
+end
 local parse_arguments
 parse_arguments = function(spec, args)
+  spec = parse_spec(spec)
   local out = { }
   local remaining = { }
   local last_flag = nil
@@ -7,6 +29,7 @@ parse_arguments = function(spec, args)
     local _continue_0 = false
     repeat
       local arg = args[_index_0]
+      local group = { }
       if last_flag then
         out[last_flag] = arg
         _continue_0 = true
@@ -39,5 +62,6 @@ parse_arguments = function(spec, args)
   return out, remaining
 end
 return {
-  parse_arguments = parse_arguments
+  parse_arguments = parse_arguments,
+  parse_spec = parse_spec
 }

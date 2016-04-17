@@ -77,10 +77,20 @@ describe "moonc", ->
         }, watcher\get_dirs!
 
   describe "parse args", ->
-    import parse_arguments from require "moonscript.cmd.args"
+    it "parses spec", ->
+      import parse_spec from require "moonscript.cmd.args"
+      spec = parse_spec "lt:o:X"
+      assert.same {
+        X: {}
+        o: {value: true}
+        t: {value: true}
+        l: {}
+      }, spec
 
     it "parses arguments", ->
+      import parse_arguments from require "moonscript.cmd.args"
       out, res = parse_arguments {
+        "ga:p"
         print: "p"
       }, {"hello", "word", "-gap"}
 
