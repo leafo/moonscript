@@ -2,6 +2,7 @@ local parse_spec
 parse_spec = function(spec)
   local flags, words
   if type(spec) == "table" then
+    local unpack = unpack or table.unpack
     flags, words = unpack(spec), spec
   else
     flags, words = spec, { }
