@@ -42,7 +42,7 @@ position_to_lines = function(file_content, positions)
 end
 local format_file
 format_file = function(fname, positions)
-  local file = assert(io.open(fname))
+  local file = assert(io.open(fname:sub(2)))
   local content = file:read("*a")
   file:close()
   local lines = position_to_lines(content, positions)

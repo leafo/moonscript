@@ -1,4 +1,4 @@
-
+import unpack from require "moonscript.util"
 parse_spec = (spec) ->
   flags, words = if type(spec) == "table"
     unpack(spec), spec

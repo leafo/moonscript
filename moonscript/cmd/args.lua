@@ -1,3 +1,4 @@
+local unpack = unpack or table.unpack
 local parse_spec
 parse_spec = function(spec)
   local flags, words
