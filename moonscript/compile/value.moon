@@ -40,7 +40,7 @@ string_chars = {
     @line "(", @value(node[2]), ")"
 
   string: (node) =>
-    _, delim, inner = unpack node
+    delim, inner = unpack node, 2
     end_delim = delim\gsub "%[", "]"
     if delim == "'" or delim == '"'
       inner = inner\gsub "[\r\n]", string_chars
@@ -91,7 +91,7 @@ string_chars = {
     @line callee_value, actions
 
   fndef: (node) =>
-    _, args, whitelist, arrow, block = unpack node
+    args, whitelist, arrow, block = unpack node, 2
 
     default_args = {}
     self_args = {}
@@ -137,7 +137,7 @@ string_chars = {
       .header = "function("..concat(arg_names, ", ")..")"
 
   table: (node) =>
-    _, items = unpack node
+    items = unpack node, 2
     with @block "{", "}"
       format_line = (tuple) ->
         if #tuple == 2

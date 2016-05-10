@@ -76,7 +76,7 @@ super_scope = (value, t, key) ->
   }
 
 (node, ret, parent_assign) =>
-  _, name, parent_val, body = unpack node
+  name, parent_val, body = unpack node, 2
   parent_val = nil if parent_val == ""
 
   parent_cls_name = NameProxy "parent"

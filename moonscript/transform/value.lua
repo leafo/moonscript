@@ -89,7 +89,7 @@ return Transformer({
     return a:wrap(node)
   end,
   tblcomprehension = function(self, node)
-    local _, explist, clauses = unpack(node)
+    local explist, clauses = unpack(node, 2)
     local key_exp, value_exp = unpack(explist)
     local accum = NameProxy("tbl")
     local inner
@@ -234,7 +234,7 @@ return Transformer({
     end
   end,
   block_exp = function(self, node)
-    local _, body = unpack(node)
+    local body = unpack(node, 2)
     local fn = nil
     local arg_list = { }
     fn = smart_node(build.fndef({

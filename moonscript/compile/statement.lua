@@ -57,7 +57,7 @@ return {
     end
   end,
   assign = function(self, node)
-    local _, names, values = unpack(node)
+    local names, values = unpack(node, 2)
     local undeclared = self:declare(names)
     local declare = "local " .. concat(undeclared, ", ")
     local has_fndef = false
@@ -136,7 +136,7 @@ return {
       current = next
     end
     for _index_0 = 4, #node do
-      cond = node[_index_0]
+      local cond = node[_index_0]
       add_clause(cond)
     end
     return root
@@ -150,7 +150,7 @@ return {
     end
   end,
   ["while"] = function(self, node)
-    local _, cond, block = unpack(node)
+    local cond, block = unpack(node, 2)
     do
       local _with_0 = self:block(self:line("while ", self:value(cond), " do"))
       _with_0:stms(block)
@@ -158,7 +158,7 @@ return {
     end
   end,
   ["for"] = function(self, node)
-    local _, name, bounds, block = unpack(node)
+    local name, bounds, block = unpack(node, 2)
     local loop = self:line("for ", self:name(name), " = ", self:value({
       "explist",
       unpack(bounds)
@@ -173,7 +173,7 @@ return {
     end
   end,
   foreach = function(self, node)
-    local _, names, exps, block = unpack(node)
+    local names, exps, block = unpack(node, 2)
     local loop
     do
       local _with_0 = self:line()
@@ -210,7 +210,7 @@ return {
     end
   end,
   export = function(self, node)
-    local _, names = unpack(node)
+    local names = unpack(node, 2)
     if type(names) == "string" then
       if names == "*" then
         self.export_all = true

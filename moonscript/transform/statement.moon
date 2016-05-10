@@ -222,14 +222,14 @@ Transformer {
       nil
 
   update: (node) =>
-    _, name, op, exp = unpack node
+    name, op, exp = unpack node, 2
     op_final = op\match "^(.+)=$"
     error "Unknown op: "..op if not op_final
     exp = {"parens", exp} unless value_is_singular exp
     build.assign_one name, {"exp", name, op_final, exp}
 
   import: (node) =>
-    _, names, source = unpack node
+    names, source = unpack node, 2
     table_values = for name in *names
       dest_name = if ntype(name) == "colon"
         name[2]
@@ -242,7 +242,7 @@ Transformer {
     { "assign", {dest}, {source}, [-1]: node[-1] }
 
   comprehension: (node, action) =>
-    _, exp, clauses = unpack node
+    exp, clauses = unpack node, 2
 
     action = action or (exp) -> {exp}
     construct_comprehension action(exp), clauses
@@ -280,7 +280,7 @@ Transformer {
   if: (node, ret) =>
     -- expand assign in cond
     if ntype(node[2]) == "assign"
-      _, assign, body = unpack node
+      assign, body = unpack node, 2
       if destructure.has_destructure assign[2]
         name = NameProxy "des"
 
@@ -426,7 +426,7 @@ Transformer {
     node.body = with_continue_listener node.body
 
   switch: (node, ret) =>
-    _, exp, conds = unpack node
+    exp, conds = unpack node, 2
     exp_name = NameProxy "exp"
 
     -- convert switch conds into if statment conds

@@ -71,7 +71,7 @@ return {
     return self:line("(", self:value(node[2]), ")")
   end,
   string = function(self, node)
-    local _, delim, inner = unpack(node)
+    local delim, inner = unpack(node, 2)
     local end_delim = delim:gsub("%[", "]")
     if delim == "'" or delim == '"' then
       inner = inner:gsub("[\r\n]", string_chars)
@@ -133,7 +133,7 @@ return {
     return self:line(callee_value, actions)
   end,
   fndef = function(self, node)
-    local _, args, whitelist, arrow, block = unpack(node)
+    local args, whitelist, arrow, block = unpack(node, 2)
     local default_args = { }
     local self_args = { }
     local arg_names
@@ -238,7 +238,7 @@ return {
     end
   end,
   table = function(self, node)
-    local _, items = unpack(node)
+    local items = unpack(node, 2)
     do
       local _with_0 = self:block("{", "}")
       local format_line

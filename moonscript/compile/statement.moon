@@ -26,7 +26,7 @@ import unpack from require "moonscript.util"
       \append_list [@name name for name in *names], ", "
 
   assign: (node) =>
-    _, names, values = unpack node
+    names, values = unpack node, 2
 
     undeclared = @declare names
     declare = "local " .. concat(undeclared, ", ")
@@ -83,12 +83,12 @@ import unpack from require "moonscript.util"
       \stms block
 
   while: (node) =>
-    _, cond, block = unpack node
+    cond, block = unpack node, 2
     with @block @line "while ", @value(cond), " do"
       \stms block
 
   for: (node) =>
-    _, name, bounds, block = unpack node
+    name, bounds, block = unpack node, 2
     loop = @line "for ", @name(name), " = ", @value({"explist", unpack bounds}), " do"
     with @block loop
       \declare {name}
@@ -97,7 +97,7 @@ import unpack from require "moonscript.util"
   -- for x in y ...
   -- {"foreach", {names...}, {exp...}, body}
   foreach: (node) =>
-    _, names, exps, block = unpack node
+    names, exps, block = unpack node, 2
 
     loop = with @line!
       \append "for "
@@ -112,7 +112,7 @@ import unpack from require "moonscript.util"
       \stms block
 
   export: (node) =>
-    _, names = unpack node
+    names = unpack node, 2
     if type(names) == "string"
       if names == "*"
         @export_all = true
