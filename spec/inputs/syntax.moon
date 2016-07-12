@@ -243,6 +243,8 @@ another hello, one,
 a += 3 - 5
 a *= 3 + 5
 a *= 3
+a >>= 3
+a <<= 3
 a /= func "cool"
 
 ---
