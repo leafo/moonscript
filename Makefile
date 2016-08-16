@@ -7,7 +7,7 @@ LUA_CPATH_MAKE = $(shell $(LUAROCKS) path --lr-cpath);./?.so
 .PHONY: test local compile compile_system watch lint count show
 
 test:
-	busted
+	busted spec/*_spec.moon
 
 show:
 	# LUA $(LUA)
