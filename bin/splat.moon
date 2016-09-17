@@ -2,8 +2,8 @@
 
 -- concatenate a collection of lua modules into one
 
-require "lfs"
-require "alt_getopt"
+lfs = require "lfs"
+alt_getopt = require "alt_getopt"
 
 import insert, concat from table
 import dump, split from require "moonscript.util"
