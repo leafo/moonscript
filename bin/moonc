@@ -70,9 +70,7 @@ local function scan_directory(root, collected)
 
 			if lfs.attributes(full_path, "mode") == "directory" then
 				scan_directory(full_path, collected)
-			end
-
-			if fname:match("%.moon$") then
+			elseif fname:match("%.moon$") then
 				table.insert(collected, full_path)
 			end
 		end
