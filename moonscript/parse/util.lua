@@ -41,6 +41,58 @@ extract_line = function(str, start_pos)
   end
   return str:match("^.-$")
 end
+local show_line_position
+show_line_position = function(str, pos, context)
+  if context == nil then
+    context = true
+  end
+  local lines = {
+    { }
+  }
+  for c in str:gmatch(".") do
+    lines[#lines] = lines[#lines] or { }
+    table.insert(lines[#lines], c)
+    if c == "\n" then
+      lines[#lines + 1] = { }
+    end
+  end
+  for i, line in ipairs(lines) do
+    lines[i] = table.concat(line)
+  end
+  local out
+  local remaining = pos - 1
+  for k, line in ipairs(lines) do
+    if remaining < #line then
+      local left = line:sub(1, remaining)
+      local right = line:sub(remaining + 1)
+      out = {
+        tostring(left) .. "◉" .. tostring(right)
+      }
+      if context then
+        do
+          local before = lines[k - 1]
+          if before then
+            table.insert(out, 1, before)
+          end
+        end
+        do
+          local after = lines[k + 1]
+          if after then
+            table.insert(out, after)
+          end
+        end
+      end
+      break
+    else
+      remaining = remaining - #line
+    end
+  end
+  if not (out) then
+    return "-"
+  end
+  out = table.concat(out)
+  return (out:gsub("\n*$", ""))
+end
 local mark
 mark = function(name)
   return function(...)
@@ -60,9 +112,12 @@ pos = function(patt)
   end
 end
 local got
-got = function(what)
+got = function(what, context)
+  if context == nil then
+    context = true
+  end
   return Cmt("", function(str, pos)
-    print("++ got " .. tostring(what), "[" .. tostring(extract_line(str, pos)) .. "]")
+    print("++ got " .. tostring(what), "[" .. tostring(show_line_position(str, pos, context)) .. "]")
     return true
   end)
 end
@@ -245,5 +300,7 @@ return {
   join_chain = join_chain,
   wrap_decorator = wrap_decorator,
   check_lua_string = check_lua_string,
-  self_assign = self_assign
+  self_assign = self_assign,
+  got = got,
+  show_line_position = show_line_position
 }

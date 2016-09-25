@@ -31,6 +31,46 @@ extract_line = (str, start_pos) ->
 
   str\match "^.-$"
 
+-- print the line with a token showing the position
+show_line_position = (str, pos, context=true) ->
+  lines = { {} }
+  for c in str\gmatch "."
+    lines[#lines] or= {}
+    table.insert lines[#lines], c
+    if c == "\n"
+      lines[#lines + 1] = {}
+
+  for i, line in ipairs lines
+    lines[i] = table.concat line
+
+  local out
+
+  remaining = pos - 1
+  for k, line in ipairs lines
+    if remaining < #line
+      left = line\sub 1, remaining
+      right = line\sub remaining + 1
+      out = {
+        "#{left}◉#{right}"
+      }
+
+      if context
+        if before = lines[k - 1]
+          table.insert out, 1, before
+
+        if after = lines[k + 1]
+          table.insert out, after
+
+      break
+    else
+      remaining -= #line
+
+
+  return "-" unless out
+
+  out = table.concat out
+  (out\gsub "\n*$", "")
+
 -- used to identify a capture with a label
 mark = (name) ->
   (...) -> {name, ...}
@@ -46,9 +86,9 @@ pos = (patt) ->
 
 -- generates a debug pattern that always succeeds and prints out where we are
 -- in the buffer with a label
-got = (what) ->
+got = (what, context=true) ->
   Cmt "", (str, pos) ->
-    print "++ got #{what}", "[#{extract_line str, pos}]"
+    print "++ got #{what}", "[#{show_line_position str, pos, context}]"
     true
 
 -- converts 1 element array to its value, otherwise marks it
@@ -154,4 +194,4 @@ self_assign = (name, pos) ->
 { :Indent, :Cut, :ensure, :extract_line, :mark, :pos, :flatten_or_mark,
   :is_assignable, :check_assignable, :format_assign, :format_single_assign,
   :sym, :symx, :simple_string, :wrap_func_arg, :join_chain, :wrap_decorator,
-  :check_lua_string, :self_assign }
+  :check_lua_string, :self_assign, :got, :show_line_position }
