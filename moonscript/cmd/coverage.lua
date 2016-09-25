@@ -42,6 +42,7 @@ position_to_lines = function(file_content, positions)
 end
 local format_file
 format_file = function(fname, positions)
+  fname = fname:gsub("^@", "")
   local file = assert(io.open(fname))
   local content = file:read("*a")
   file:close()

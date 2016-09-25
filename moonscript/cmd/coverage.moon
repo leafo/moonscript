@@ -23,6 +23,9 @@ position_to_lines = (file_content, positions) ->
   lines
 
 format_file = (fname, positions) ->
+  -- sources have @ in front of file names
+  fname = fname\gsub "^@", ""
+
   file = assert io.open fname
   content = file\read "*a"
   file\close!
