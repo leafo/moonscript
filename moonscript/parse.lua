@@ -165,7 +165,7 @@ local build_grammar = wrap_env(debug_grammar, function(root)
     Callable = pos(Name / mark("ref")) + SelfName + VarArg + Parens / mark("parens"),
     Parens = sym("(") * SpaceBreak ^ 0 * Exp * SpaceBreak ^ 0 * sym(")"),
     FnArgs = symx("(") * SpaceBreak ^ 0 * Ct(FnArgsExpList ^ -1) * SpaceBreak ^ 0 * sym(")") + sym("!") * -P("=") * Ct(""),
-    FnArgsExpList = Exp * (sym(",") * White * Exp) ^ 0,
+    FnArgsExpList = Exp * ((Break + sym(",")) * White * Exp) ^ 0,
     Chain = (Callable + String + -S(".\\")) * ChainItems / mark("chain") + Space * (DotChainItem * ChainItems ^ -1 + ColonChain) / mark("chain"),
     ChainItems = ChainItem ^ 1 * ColonChain ^ -1 + ColonChain,
     ChainItem = Invoke + DotChainItem + Slice + symx("[") * Exp / mark("index") * sym("]"),

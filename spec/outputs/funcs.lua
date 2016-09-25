@@ -108,8 +108,21 @@ k(function()
     return 
   end
 end)
-return function()
+_ = function()
   if something then
     return real_name
   end
 end
+d(function()
+  return print("hello world")
+end, 10)
+d(1, 2, 3, 4, 5, 6, (function()
+  if something then
+    print("okay")
+    return 10
+  end
+end)(), 10, 20)
+f()()(what)(function()
+  return print("srue")
+end, 123)
+return nil

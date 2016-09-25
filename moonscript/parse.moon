@@ -228,7 +228,7 @@ build_grammar = wrap_env debug_grammar, (root) ->
     Parens: sym"(" * SpaceBreak^0 * Exp * SpaceBreak^0 * sym")"
 
     FnArgs: symx"(" * SpaceBreak^0 * Ct(FnArgsExpList^-1) * SpaceBreak^0 * sym")" + sym"!" * -P"=" * Ct""
-    FnArgsExpList: Exp * (sym"," * White * Exp)^0
+    FnArgsExpList: Exp * ((Break + sym",") * White * Exp)^0
 
     Chain: (Callable + String + -S".\\") * ChainItems / mark"chain" +
       Space * (DotChainItem * ChainItems^-1 + ColonChain) / mark"chain"
