@@ -55,9 +55,9 @@ variable, or shadow an existing one.
 
 ## Update Assignment
 
-`+=`, `-=`, `/=`, `*=`, `%=`, `..=`, `or=`, `and=` operators have been added
-for updating and assigning at the same time. They are aliases for their
-expanded equivalents.
+`+=`, `-=`, `/=`, `*=`, `%=`, `..=`, `or=`, `and=`, `&=`, `|=`, `>>=`, and
+`<<=` operators have been added for updating and assigning at the same time.
+They are aliases for their expanded equivalents.
 
 ```moon
 x = 0
@@ -68,6 +68,12 @@ s ..= "world"
 
 b = false
 b and= true or false
+
+p = 50
+p &= 5
+p |= 3
+p >>= 3
+p <<= 3
 ```
 
 ## Comments
