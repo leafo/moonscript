@@ -19,7 +19,7 @@ test_script:
   - lua5.1.exe -e "assert(require('moonscript')); print(require('moonscript.version').version)"
 
 after_build:
-  - 7z a moonscript-%APPVEYOR_REPO_COMMIT%.zip moonscript.dll lua51.dll moon.exe moonc.exe LICENSE README.txt
+  - 7z a moonscript-%APPVEYOR_REPO_COMMIT%.zip moonscript.dll lua51.dll lua5.1.dll moon.exe moonc.exe LICENSE README.txt
   - dir
 
 artifacts:
