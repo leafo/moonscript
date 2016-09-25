@@ -3,8 +3,8 @@ branches:
     - binaries
 
 install:
-  - ps: Start-FileDownload 'http://leafo.net/dump/lua5_1_4_Win32_dll8_lib.zip'
-  - ps: Start-FileDownload 'http://leafo.net/dump/lua5_1_4_Win32_bin.zip'
+  - ps: Start-FileDownload 'http://commondatastorage.googleapis.com/leafo/lua5_1_4_Win32_dll8_lib.zip'
+  - ps: Start-FileDownload 'http://commondatastorage.googleapis.com/leafo/lua5_1_4_Win32_bin.zip'
   - 7z x lua5_1_4_Win32_dll8_lib.zip
   - 7z x lua5_1_4_Win32_bin.zip -aos
   - set PATH=C:\MinGW\bin;C:\MinGW\msys\1.0\bin;%PATH%
