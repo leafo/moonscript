@@ -154,3 +154,29 @@ a,c,b = "cool" if something
 
 
 
+---
+
+j = if 1
+  if 2
+    3
+else 6
+
+
+m = if 1
+
+
+
+  if 2
+
+
+    3
+
+
+else 6
+
+
+
+nil
+
+
+

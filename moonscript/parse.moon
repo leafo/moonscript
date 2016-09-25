@@ -27,7 +27,8 @@ Num = Space * (Num / (v) -> {"number", v})
   :Indent, :Cut, :ensure, :extract_line, :mark, :pos, :flatten_or_mark,
   :is_assignable, :check_assignable, :format_assign, :format_single_assign,
   :sym, :symx, :simple_string, :wrap_func_arg, :join_chain,
-  :wrap_decorator, :check_lua_string, :self_assign
+  :wrap_decorator, :check_lua_string, :self_assign, :got
+
 } = require "moonscript.parse.util"
 
 
@@ -150,8 +151,8 @@ build_grammar = wrap_env debug_grammar, (root) ->
 
     IfCond: Exp * Assign^-1 / format_single_assign
 
-    IfElse: (Break * CheckIndent)^-1 * EmptyLine^0 * key"else" * Body / mark"else"
-    IfElseIf: (Break * CheckIndent)^-1 * EmptyLine^0 * key"elseif" * pos(IfCond) * key"then"^-1 * Body / mark"elseif"
+    IfElse: (Break * EmptyLine^0 * CheckIndent)^-1  * key"else" * Body / mark"else"
+    IfElseIf: (Break * EmptyLine^0 * CheckIndent)^-1 * key"elseif" * pos(IfCond) * key"then"^-1 * Body / mark"elseif"
 
     If: key"if" * IfCond * key"then"^-1 * Body * IfElseIf^0 * IfElse^-1 / mark"if"
     Unless: key"unless" * IfCond * key"then"^-1 * Body * IfElseIf^0 * IfElse^-1 / mark"unless"
