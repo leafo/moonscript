@@ -28,6 +28,15 @@ busted
 Writing specs is a bit more complicated. Check out [the spec writing guide](spec/README.md).
 
 
+## Binaries
+
+Precompiled versions of MoonScript are provided for Windows. You can find them
+in the [GitHub releases page](https://github.com/leafo/moonscript/releases).
+(Scroll down to the `win32-` tags.
+
+The build code can be found in the [`binaries`
+branch](https://github.com/leafo/moonscript/tree/binaries)
+
 ## Editor Support
 
 * [Vim](https://github.com/leafo/moonscript-vim)
