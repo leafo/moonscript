@@ -106,7 +106,7 @@ super_scope = function(value, t, key)
   }
 end
 return function(self, node, ret, parent_assign)
-  local _, name, parent_val, body = unpack(node)
+  local name, parent_val, body = unpack(node, 2)
   if parent_val == "" then
     parent_val = nil
   end

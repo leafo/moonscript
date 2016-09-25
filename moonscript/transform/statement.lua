@@ -342,7 +342,7 @@ return Transformer({
     end
   end,
   update = function(self, node)
-    local _, name, op, exp = unpack(node)
+    local name, op, exp = unpack(node, 2)
     local op_final = op:match("^(.+)=$")
     if not op_final then
       error("Unknown op: " .. op)
@@ -361,7 +361,7 @@ return Transformer({
     })
   end,
   import = function(self, node)
-    local _, names, source = unpack(node)
+    local names, source = unpack(node, 2)
     local table_values
     do
       local _accum_0 = { }
@@ -402,7 +402,7 @@ return Transformer({
     }
   end,
   comprehension = function(self, node, action)
-    local _, exp, clauses = unpack(node)
+    local exp, clauses = unpack(node, 2)
     action = action or function(exp)
       return {
         exp
@@ -492,7 +492,7 @@ return Transformer({
   end,
   ["if"] = function(self, node, ret)
     if ntype(node[2]) == "assign" then
-      local _, assign, body = unpack(node)
+      local assign, body = unpack(node, 2)
       if destructure.has_destructure(assign[2]) then
         local name = NameProxy("des")
         body = {
@@ -694,7 +694,7 @@ return Transformer({
     node.body = with_continue_listener(node.body)
   end,
   switch = function(self, node, ret)
-    local _, exp, conds = unpack(node)
+    local exp, conds = unpack(node, 2)
     local exp_name = NameProxy("exp")
     local convert_cond
     convert_cond = function(cond)

@@ -56,7 +56,7 @@ Transformer {
     a\wrap node
 
   tblcomprehension: (node) =>
-    _, explist, clauses = unpack node
+    explist, clauses = unpack node, 2
     key_exp, value_exp = unpack explist
 
     accum = NameProxy "tbl"
@@ -144,7 +144,7 @@ Transformer {
       }
 
   block_exp: (node) =>
-    _, body = unpack node
+    body = unpack node, 2
 
     fn = nil
     arg_list = {}
