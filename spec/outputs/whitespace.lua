@@ -72,5 +72,9 @@ if hello(1, 2, 3, world, world) then
   print("hello")
 end
 if hello(1, 2, 3, world, world) then
-  return print("hello")
+  print("hello")
 end
+a(one, two, three)
+b(one, two, three)
+c(one, two, three, four)
+return nil

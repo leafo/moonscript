@@ -81,3 +81,22 @@ if hello 1,2,3,
   print "hello"
 
 
+--
+
+a(
+  one, two, three
+)
+
+b(
+  one,
+  two,
+  three
+)
+
+
+c(one, two,
+  three, four)
+
+-- 
+
+nil
