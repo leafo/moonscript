@@ -1,5 +1,5 @@
 
-require "alt_getopt"
+alt_getopt = require "alt_getopt"
 
 moonscript = require "moonscript.base"
 util = require "moonscript.util"

@@ -1,5 +1,5 @@
 #!/usr/bin/env lua
-require("alt_getopt")
+local alt_getopt = require("alt_getopt")
 local moonscript = require("moonscript.base")
 local util = require("moonscript.util")
 local errors = require("moonscript.errors")
