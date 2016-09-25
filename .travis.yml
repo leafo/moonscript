@@ -10,6 +10,7 @@ env:
     - LUA=lua5.2
     - LUA=lua5.3
     - LUA=luajit2.1  # current head of 2.1 branch
+    - LUA=luajit2.1 BUSTED="-o spec/coverage_output_handler.moon"
 
 before_install:
   - source .travis/setenv_lua.sh
@@ -19,4 +20,4 @@ install:
   - luarocks install loadkit
   - luarocks make
 
-script: busted
+script: busted $BUSTED
