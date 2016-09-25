@@ -204,7 +204,13 @@ return Transformer({
           local _continue_0 = false
           repeat
             local name = names[_index_0]
-            if not (name[2]:match("^%u")) then
+            local str_name
+            if ntype(name) == "ref" then
+              str_name = name[2]
+            else
+              str_name = name
+            end
+            if not (str_name:match("^%u")) then
               _continue_0 = true
               break
             end

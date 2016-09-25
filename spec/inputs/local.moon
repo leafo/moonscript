@@ -76,6 +76,17 @@ do
 
 
 do
+  local ^
+  lowercase = 5
+  Uppercase = 3
+
+  class One
+    Five = 6
+
+  class Two
+    class No
+
+do
   local *
   -- this generates a nil value in the body
   for a in *{} do a

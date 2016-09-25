@@ -122,7 +122,12 @@ Transformer {
 
     if node[2] == "^"
       names = for name in *names
-        continue unless name[2]\match "^%u"
+        str_name = if ntype(name) == "ref"
+          name[2]
+        else
+          name
+
+        continue unless str_name\match "^%u"
         name
 
     {"declare", names}
