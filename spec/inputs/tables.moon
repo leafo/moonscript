@@ -140,4 +140,22 @@ thing what:
     "more"
 okay: 123 -- a anon table
 
+
+-- 
+
+k = { "hello": "world" }
+k = { 'hello': 'world' }
+k = { "hello": 'world', "hat": "zat" }
+
+please "hello": "world"
+k = "hello": "world", "one": "zone"
+
+f = "one", "two": three, "four"
+f = "two": three, "four"
+f = { "one", "two": three, "four" }
+
+
+j = "one", "two": three, "four": five, 6, 7
+
+
 nil

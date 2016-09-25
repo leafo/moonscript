@@ -171,4 +171,36 @@ thing({
 local _ = {
   okay = 123
 }
+local k = {
+  ["hello"] = "world"
+}
+k = {
+  ['hello'] = 'world'
+}
+k = {
+  ["hello"] = 'world',
+  ["hat"] = "zat"
+}
+please({
+  ["hello"] = "world"
+})
+k = {
+  ["hello"] = "world",
+  ["one"] = "zone"
+}
+local f = "one", {
+  ["two"] = three
+}, "four"
+f = {
+  ["two"] = three
+}, "four"
+f = {
+  "one",
+  ["two"] = three,
+  "four"
+}
+local j = "one", {
+  ["two"] = three,
+  ["four"] = five
+}, 6, 7
 return nil
