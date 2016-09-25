@@ -147,6 +147,14 @@ print "hello" unless value
 
 dddd = {1,2,3} unless value
 
+
+-- 
+
+do
+  j = 100
+  unless j = hi!
+    error "not j!"
+
 ----------------
 
 a = 12

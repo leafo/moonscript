@@ -484,17 +484,35 @@ return Transformer({
     return wrapped
   end,
   unless = function(self, node)
-    return {
-      "if",
-      {
-        "not",
+    local clause = node[2]
+    if ntype(clause) == "assign" then
+      if destructure.has_destructure(clause[2]) then
+        error("destructure not allowed in unless assignment")
+      end
+      return build["do"]({
+        clause,
         {
-          "parens",
-          node[2]
+          "if",
+          {
+            "not",
+            clause[2][1]
+          },
+          unpack(node, 3)
         }
-      },
-      unpack(node, 3)
-    }
+      })
+    else
+      return {
+        "if",
+        {
+          "not",
+          {
+            "parens",
+            clause
+          }
+        },
+        unpack(node, 3)
+      }
+    end
   end,
   ["if"] = function(self, node, ret)
     if ntype(node[2]) == "assign" then

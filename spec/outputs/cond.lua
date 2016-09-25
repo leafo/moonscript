@@ -246,6 +246,15 @@ if not (value) then
     3
   }
 end
+do
+  local j = 100
+  do
+    j = hi()
+    if not j then
+      error("not j!")
+    end
+  end
+end
 local a = 12
 local c, b
 if something then

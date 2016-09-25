@@ -280,7 +280,19 @@ Transformer {
     wrapped
 
   unless: (node) =>
-    { "if", {"not", {"parens", node[2]}}, unpack node, 3 }
+    clause = node[2]
+
+    if ntype(clause) == "assign"
+      if destructure.has_destructure clause[2]
+        error "destructure not allowed in unless assignment"
+
+      build.do {
+        clause
+        { "if", {"not", clause[2][1]}, unpack node, 3 }
+      }
+
+    else
+      { "if", {"not", {"parens", clause}}, unpack node, 3 }
 
   if: (node, ret) =>
     -- expand assign in cond
@@ -300,7 +312,7 @@ Transformer {
         }
       else
         name = assign[2][1]
-        return build["do"] {
+        return build.do {
           assign
           {"if", name, unpack node, 3}
         }
