@@ -146,7 +146,7 @@ local build_grammar = wrap_env(debug_grammar, function(root)
     CompFor = key("for" * Name * sym("=") * Ct(Exp * sym(",") * Exp * (sym(",") * Exp) ^ -1) / mark("for")),
     CompClause = CompFor + CompForEach + key("when") * Exp / mark("when"),
     Assign = sym("=") * (Ct(With + If + Switch) + Ct(TableBlock + ExpListLow)) / mark("assign"),
-    Update = ((sym("..=") + sym("+=") + sym("-=") + sym("*=") + sym("/=") + sym("%=") + sym("or=") + sym("and=")) / trim) * Exp / mark("update"),
+    Update = ((sym("..=") + sym("+=") + sym("-=") + sym("*=") + sym("/=") + sym("%=") + sym("or=") + sym("and=") + sym("&=") + sym("|=") + sym(">>=") + sym("<<=")) / trim) * Exp / mark("update"),
     CharOperators = Space * C(S("+-*/%^><|&")),
     WordOperators = op("or") + op("and") + op("<=") + op(">=") + op("~=") + op("!=") + op("==") + op("..") + op("<<") + op(">>") + op("//"),
     BinaryOperator = (WordOperators + CharOperators) * SpaceBreak ^ 0,
