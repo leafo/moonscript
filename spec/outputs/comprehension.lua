@@ -168,4 +168,83 @@ do
   end
   _ = _tbl_0
 end
+local j
+do
+  local _accum_0 = { }
+  local _len_0 = 1
+  for _des_0 in things do
+    local a, b, c
+    a, b, c = _des_0[1], _des_0[2], _des_0[3]
+    _accum_0[_len_0] = a
+    _len_0 = _len_0 + 1
+  end
+  j = _accum_0
+end
+local k
+do
+  local _accum_0 = { }
+  local _len_0 = 1
+  local _list_0 = things
+  for _index_0 = 1, #_list_0 do
+    local _des_0 = _list_0[_index_0]
+    local a, b, c
+    a, b, c = _des_0[1], _des_0[2], _des_0[3]
+    _accum_0[_len_0] = a
+    _len_0 = _len_0 + 1
+  end
+  k = _accum_0
+end
+local i
+do
+  local _accum_0 = { }
+  local _len_0 = 1
+  local _list_0 = things
+  for _index_0 = 1, #_list_0 do
+    local _des_0 = _list_0[_index_0]
+    local hello, world
+    hello, world = _des_0.hello, _des_0.world
+    _accum_0[_len_0] = hello
+    _len_0 = _len_0 + 1
+  end
+  i = _accum_0
+end
+local hj
+do
+  local _tbl_0 = { }
+  for _des_0 in things do
+    local a, b, c
+    a, b, c = _des_0[1], _des_0[2], _des_0[3]
+    _tbl_0[a] = c
+  end
+  hj = _tbl_0
+end
+local hk
+do
+  local _tbl_0 = { }
+  local _list_0 = things
+  for _index_0 = 1, #_list_0 do
+    local _des_0 = _list_0[_index_0]
+    local a, b, c
+    a, b, c = _des_0[1], _des_0[2], _des_0[3]
+    _tbl_0[a] = c
+  end
+  hk = _tbl_0
+end
+local hi
+do
+  local _tbl_0 = { }
+  local _list_0 = things
+  for _index_0 = 1, #_list_0 do
+    local _des_0 = _list_0[_index_0]
+    local hello, world
+    hello, world = _des_0.hello, _des_0.world
+    _tbl_0[hello] = world
+  end
+  hi = _tbl_0
+end
+for _des_0 in things do
+  local a, b, c
+  a, b, c = _des_0[1], _des_0[2], _des_0[3]
+  ok(a, b, c)
+end
 return nil

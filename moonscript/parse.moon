@@ -171,7 +171,7 @@ build_grammar = wrap_env debug_grammar, (root) ->
     TblComprehension: sym"{" * Ct(Exp * (sym"," * Exp)^-1) * CompInner * sym"}" / mark"tblcomprehension"
 
     CompInner: Ct((CompForEach + CompFor) * CompClause^0)
-    CompForEach: key"for" * Ct(NameList) * key"in" * (sym"*" * Exp / mark"unpack" + Exp) / mark"foreach"
+    CompForEach: key"for" * Ct(AssignableNameList) * key"in" * (sym"*" * Exp / mark"unpack" + Exp) / mark"foreach"
     CompFor: key "for" * Name * sym"=" * Ct(Exp * sym"," * Exp * (sym"," * Exp)^-1) / mark"for"
     CompClause: CompFor + CompForEach + key"when" * Exp / mark"when"
 

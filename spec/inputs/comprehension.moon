@@ -30,4 +30,17 @@ dd = [y for i=1,10 when cool for thing in y when x > 3 when c + 3]
 
 {"hello", "world" for i=1,10}
 
+--
+
+j = [a for {a,b,c} in things]
+k = [a for {a,b,c} in *things]
+i = [hello for {:hello, :world} in *things]
+
+hj = {a,c for {a,b,c} in things}
+hk = {a,c for {a,b,c} in *things}
+hi = {hello,world for {:hello, :world} in *things}
+
+ok(a,b,c) for {a,b,c} in things
+
+
 nil

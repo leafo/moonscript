@@ -142,7 +142,7 @@ local build_grammar = wrap_env(debug_grammar, function(root)
     Comprehension = sym("[") * Exp * CompInner * sym("]") / mark("comprehension"),
     TblComprehension = sym("{") * Ct(Exp * (sym(",") * Exp) ^ -1) * CompInner * sym("}") / mark("tblcomprehension"),
     CompInner = Ct((CompForEach + CompFor) * CompClause ^ 0),
-    CompForEach = key("for") * Ct(NameList) * key("in") * (sym("*") * Exp / mark("unpack") + Exp) / mark("foreach"),
+    CompForEach = key("for") * Ct(AssignableNameList) * key("in") * (sym("*") * Exp / mark("unpack") + Exp) / mark("foreach"),
     CompFor = key("for" * Name * sym("=") * Ct(Exp * sym(",") * Exp * (sym(",") * Exp) ^ -1) / mark("for")),
     CompClause = CompFor + CompForEach + key("when") * Exp / mark("when"),
     Assign = sym("=") * (Ct(With + If + Switch) + Ct(TableBlock + ExpListLow)) / mark("assign"),
