@@ -1,4 +1,64 @@
 
+
+# MoonScript v0.5.0 (2016-X-XX)
+
+## Syntax updates
+
+### Function calls
+
+Function calls with parentheses can not have free whitespace around the
+arguments. Additionally, a line break may be used in place of a comma:
+
+```moonscript
+my_func(
+  "first arg"
+  =>
+    print "some func"
+
+  "third arg", "fourth arg"
+)
+```
+
+### Function argument definitions
+
+Just like the function all update, function argument definitions have no
+whitespace restrictions between arguments, and line breaks can be used to
+separate arguments:
+
+
+```moonscript
+some_func = (
+  name
+  type
+  action="print"
+) =>
+  print name, type, action
+```
+
+## Additions
+
+* `elseif` can be used part of an `unless` block (nymphium)
+* `unless` conditional expression can contain an assignment like an `if` statement (#251)
+* Lua 5.3 bitwise operator support (nymphium) (Kawahara Satoru)
+* Makefile is Lua version agnostic (nymphium)
+* Lint flag can be used with `moonc` watch mode (ChickenNuggers)
+* Lint exits with status 1 if there was a problem detected (ChickenNuggers)
+* Compiler can be used with lulpeg
+
+## Bug Fixes
+
+* Slice boundaries can be full expressions (#233)
+* Destructure works when used as loop variable in comprehension (#236)
+* Proper name local hoisting works for classes again (#287)
+* Quoted table key literals can now be parsed when table declaration is in single line (#286)
+* Fix an issue where `else` could get attached to wrong `if` statement (#276)
+* Loop variables will no longer overwrite variables of the same name in the same scope (egonSchiele)
+* A file being deleted will not crash polling watch mode (ChickenNuggers)
+* The compiler will not try to compile a directory ending in `.moon` (Gskartwii)
+* alt_getopt import works with modern version (Jon Allen)
+* Code coverage not being able to find file from chunk name
+
+
 # MoonScript v0.4.0 (2015-12-06)
 
 ## Changes to `super`
