@@ -125,4 +125,37 @@ end)(), 10, 20)
 f()()(what)(function()
   return print("srue")
 end, 123)
+x = function(a, b)
+  return print("what")
+end
+local y
+y = function(a, b)
+  if a == nil then
+    a = "hi"
+  end
+  if b == nil then
+    b = 23
+  end
+  return print("what")
+end
+local z
+z = function(a, b)
+  if a == nil then
+    a = "hi"
+  end
+  if b == nil then
+    b = 23
+  end
+  return print("what")
+end
+local j
+j = function(f, g, m, a, b)
+  if a == nil then
+    a = "hi"
+  end
+  if b == nil then
+    b = 23
+  end
+  return print("what")
+end
 return nil

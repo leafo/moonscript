@@ -95,5 +95,26 @@ f(
 
 --
 
+x = (a,
+  b) ->
+    print "what"
+
+
+y = (a="hi",
+  b=23) ->
+    print "what"
+
+z = (
+  a="hi",
+  b=23) ->
+    print "what"
+
+
+j = (f,g,m,
+  a="hi",
+  b=23
+) ->
+    print "what"
+
 
 nil

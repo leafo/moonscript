@@ -292,11 +292,11 @@ build_grammar = wrap_env debug_grammar, (root) ->
     KeyValueList: KeyValue * (sym"," * KeyValue)^0
     KeyValueLine: CheckIndent * KeyValueList * sym","^-1
 
-    FnArgsDef: sym"(" * Ct(FnArgDefList^-1) *
+    FnArgsDef: sym"(" * White * Ct(FnArgDefList^-1) *
       (key"using" * Ct(NameList + Space * "nil") + Ct"") *
-      sym")" + Ct"" * Ct""
+      White * sym")" + Ct"" * Ct""
 
-    FnArgDefList: FnArgDef * (sym"," * FnArgDef)^0 * (sym"," * Ct(VarArg))^0 + Ct(VarArg)
+    FnArgDefList: FnArgDef * (sym"," * White * FnArgDef)^0 * (sym"," * White * Ct(VarArg))^0 + Ct(VarArg)
     FnArgDef: Ct((Name + SelfName) * (sym"=" * Exp)^-1)
 
     FunLit: FnArgsDef *
