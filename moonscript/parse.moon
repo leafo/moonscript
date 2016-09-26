@@ -296,7 +296,7 @@ build_grammar = wrap_env debug_grammar, (root) ->
       (key"using" * Ct(NameList + Space * "nil") + Ct"") *
       White * sym")" + Ct"" * Ct""
 
-    FnArgDefList: FnArgDef * (sym"," * White * FnArgDef)^0 * (sym"," * White * Ct(VarArg))^0 + Ct(VarArg)
+    FnArgDefList: FnArgDef * ((sym"," + Break) * White * FnArgDef)^0 * ((sym"," + Break) * White * Ct(VarArg))^0 + Ct(VarArg)
     FnArgDef: Ct((Name + SelfName) * (sym"=" * Exp)^-1)
 
     FunLit: FnArgsDef *

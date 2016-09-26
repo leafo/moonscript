@@ -176,4 +176,35 @@ y = function(a, b, ...)
   end
   return print("what")
 end
+local args
+args = function(a, b)
+  return print("what")
+end
+args = function(a, b)
+  if a == nil then
+    a = "hi"
+  end
+  if b == nil then
+    b = 23
+  end
+  return print("what")
+end
+args = function(a, b)
+  if a == nil then
+    a = "hi"
+  end
+  if b == nil then
+    b = 23
+  end
+  return print("what")
+end
+args = function(f, g, m, a, b)
+  if a == nil then
+    a = "hi"
+  end
+  if b == nil then
+    b = 23
+  end
+  return print("what")
+end
 return nil

@@ -129,6 +129,28 @@ y = (a="hi",
 ) ->
     print "what"
 
+--
+
+args = (a
+  b) ->
+    print "what"
+
+
+args = (a="hi"
+  b=23) ->
+    print "what"
+
+args = (
+  a="hi"
+  b=23) ->
+    print "what"
+
+
+args = (f,g,m
+  a="hi"
+  b=23
+) ->
+    print "what"
 
 
 
