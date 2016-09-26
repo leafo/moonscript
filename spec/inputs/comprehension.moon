@@ -42,5 +42,11 @@ hi = {hello,world for {:hello, :world} in *things}
 
 ok(a,b,c) for {a,b,c} in things
 
+--
+
+[item for item in *items[1 + 2,3+4]]
+[item for item in *items[hello! * 4, 2 - thing[4]]]
+
+
 
 nil

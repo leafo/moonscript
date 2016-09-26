@@ -211,7 +211,7 @@ build_grammar = wrap_env debug_grammar, (root) ->
       ChainValue +
       String)
 
-    SliceValue: SimpleValue + ChainValue
+    SliceValue: Exp
 
     String: Space * DoubleString + Space * SingleString + LuaString
     SingleString: simple_string("'")

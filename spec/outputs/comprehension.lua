@@ -247,4 +247,14 @@ for _des_0 in things do
   a, b, c = _des_0[1], _des_0[2], _des_0[3]
   ok(a, b, c)
 end
+local _max_0 = 3 + 4
+for _index_0 = 1 + 2, _max_0 < 0 and #items + _max_0 or _max_0 do
+  local item = items[_index_0]
+  _ = item
+end
+local _max_1 = 2 - thing[4]
+for _index_0 = hello() * 4, _max_1 < 0 and #items + _max_1 or _max_1 do
+  local item = items[_index_0]
+  _ = item
+end
 return nil
