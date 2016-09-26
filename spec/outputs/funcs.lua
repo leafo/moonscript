@@ -158,4 +158,22 @@ j = function(f, g, m, a, b)
   end
   return print("what")
 end
+y = function(a, b, ...)
+  if a == nil then
+    a = "hi"
+  end
+  if b == nil then
+    b = 23
+  end
+  return print("what")
+end
+y = function(a, b, ...)
+  if a == nil then
+    a = "hi"
+  end
+  if b == nil then
+    b = 23
+  end
+  return print("what")
+end
 return nil

@@ -117,4 +117,20 @@ j = (f,g,m,
     print "what"
 
 
+y = (a="hi",
+  b=23,
+  ...) ->
+    print "what"
+
+
+y = (a="hi",
+  b=23,
+  ...
+) ->
+    print "what"
+
+
+
+
+
 nil
