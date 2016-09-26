@@ -1,12 +1,12 @@
 
 
-# MoonScript v0.5.0 (2016-X-XX)
+# MoonScript v0.5.0 (2016-9-25)
 
 ## Syntax updates
 
 ### Function calls
 
-Function calls with parentheses can not have free whitespace around the
+Function calls with parentheses can now have free whitespace around the
 arguments. Additionally, a line break may be used in place of a comma:
 
 ```moonscript
