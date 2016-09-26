@@ -1,4 +1,4 @@
-local version = "0.4.0"
+local version = "0.5.0"
 return {
   version = version,
   print_version = function()
