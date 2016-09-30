@@ -9,7 +9,7 @@ local opts, ind = alt_getopt.get_opts(arg, "lvhwt:o:pTXb", {
 
 local read_stdin = arg[1] == "--"
 
-local help = [[Usage: %s [options] files...
+local help = [[Usage: %s [options] files/directories...
 
     -h          Print this message
     -w          Watch file/directory
