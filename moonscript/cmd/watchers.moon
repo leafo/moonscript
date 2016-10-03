@@ -86,7 +86,6 @@ class SleepWatcher extends Watcher
       while true
         for {file} in *@file_list
           time = lfs.attributes file, "modification"
-          print file, time
           unless time -- file no longer exists
             mod_time[file] = nil
             continue

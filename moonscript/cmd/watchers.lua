@@ -203,7 +203,6 @@ do
               local file
               file = _des_0[1]
               local time = lfs.attributes(file, "modification")
-              print(file, time)
               if not (time) then
                 mod_time[file] = nil
                 _continue_0 = true
