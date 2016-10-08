@@ -42,6 +42,7 @@ branch](https://github.com/leafo/moonscript/tree/binaries)
 * [Vim](https://github.com/leafo/moonscript-vim)
 * [Textadept](https://github.com/leafo/moonscript-textadept)
 * [Sublime/Textmate](https://github.com/leafo/moonscript-tmbundle)
+* [Emacs](https://github.com/k2052/moonscript-mode)
 
 ## License (MIT)
 
