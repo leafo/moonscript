@@ -21,6 +21,6 @@ describe "import", ->
       { hello: "world", foo: "bar" }
 
     import hello, foo from source!
-    
+
     assert.same count, 1
 

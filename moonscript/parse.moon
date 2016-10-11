@@ -11,11 +11,11 @@ import unpack from require "moonscript.util"
 import wrap_env from require "moonscript.parse.env"
 
 {
-  :R, :S, :V, :P, :C, :Ct, :Cmt, :Cg, :Cb, :Cc
+  :S, :P, :C, :Ct, :Cmt, :Cg, :Cb, :Cc
 } = lpeg
 
 {
-  :White, :Break, :Stop, :Comment, :Space, :SomeSpace, :SpaceBreak, :EmptyLine,
+  :White, :Break, :Stop, :Space, :SomeSpace, :SpaceBreak, :EmptyLine,
   :AlphaNum, :Num, :Shebang, :L
   Name: _Name
 } = require "moonscript.parse.literals"
@@ -25,9 +25,9 @@ Num = Space * (Num / (v) -> {"number", v})
 
 {
   :Indent, :Cut, :ensure, :extract_line, :mark, :pos, :flatten_or_mark,
-  :is_assignable, :check_assignable, :format_assign, :format_single_assign,
+  :check_assignable, :format_assign, :format_single_assign,
   :sym, :symx, :simple_string, :wrap_func_arg, :join_chain,
-  :wrap_decorator, :check_lua_string, :self_assign, :got
+  :wrap_decorator, :check_lua_string, :self_assign
 
 } = require "moonscript.parse.util"
 
@@ -41,17 +41,17 @@ build_grammar = wrap_env debug_grammar, (root) ->
     last_pos: 0
   }
 
-  check_indent = (str, pos, indent) ->
-    state.last_pos = pos
+  check_indent = (str, at_pos, indent) ->
+    state.last_pos = at_pos
     _indent\top! == indent
 
-  advance_indent = (str, pos, indent) ->
+  advance_indent = (str, at_pos, indent) ->
     top = _indent\top!
     if top != -1 and indent > top
       _indent\push indent
       true
 
-  push_indent = (str, pos, indent) ->
+  push_indent = (str, at_pos, indent) ->
     _indent\push indent
     true
 
@@ -59,7 +59,7 @@ build_grammar = wrap_env debug_grammar, (root) ->
     assert _indent\pop!, "unexpected outdent"
     true
 
-  check_do = (str, pos, do_node) ->
+  check_do = (str, at_pos, do_node) ->
     top = _do_stack\top!
     if top == nil or top
       return true, do_node
@@ -90,7 +90,7 @@ build_grammar = wrap_env debug_grammar, (root) ->
 
     patt
 
-  Name = Cmt(SpaceName, (str, pos, name) ->
+  Name = Cmt(SpaceName, (str, at_pos, name) ->
     return false if keywords[name]
     true
   ) / trim

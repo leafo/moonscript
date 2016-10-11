@@ -249,7 +249,7 @@ Transformer {
   comprehension: (node, action) =>
     exp, clauses = unpack node, 2
 
-    action = action or (exp) -> {exp}
+    action = action or (arg) -> {arg}
     construct_comprehension action(exp), clauses
 
   do: (node, ret) =>
@@ -490,5 +490,5 @@ Transformer {
     }
 
   class: require "moonscript.transform.class"
-    
+
 }

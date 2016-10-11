@@ -409,9 +409,9 @@ return Transformer({
   end,
   comprehension = function(self, node, action)
     local exp, clauses = unpack(node, 2)
-    action = action or function(exp)
+    action = action or function(arg)
       return {
-        exp
+        arg
       }
     end
     return construct_comprehension(action(exp), clauses)

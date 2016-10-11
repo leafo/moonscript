@@ -772,3 +772,15 @@ describe 'lint', ->
 
           whitelist_globals = {'foo'}
           assert.is_true evaluator(:whitelist_globals).allow_global_access('table')
+
+      describe 'allow_unused(p)', ->
+        it 'generally returns false', ->
+          assert.is_false evaluator({}).allow_unused('foo')
+
+        it 'returns true if config.whitelist_unused contains <p>', ->
+          whitelist_unused = {'foo'}
+          assert.is_true evaluator(:whitelist_unused).allow_unused('foo')
+
+        it 'supports patterns', ->
+          whitelist_unused = {'^a+'}
+          assert.is_true evaluator(:whitelist_unused).allow_unused('aardwark')

@@ -1,6 +1,6 @@
 
 import ntype from require "moonscript.types"
-import concat, insert from table
+import concat from table
 
 import unpack from require "moonscript.util"
 
@@ -74,7 +74,7 @@ import unpack from require "moonscript.util"
       current.next = next
       current = next
 
-    add_clause cond for cond in *node[4,]
+    add_clause clause for clause in *node[4,]
     root
 
   repeat: (node) =>

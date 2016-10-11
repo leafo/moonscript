@@ -21,8 +21,6 @@ load_line_table = (chunk_name) ->
   busted = require "busted"
   handler = require("busted.outputHandlers.utfTerminal") options
 
-  local spec_name
-
   coverage = require "moonscript.cmd.coverage"
   cov = coverage.CodeCoverage!
 

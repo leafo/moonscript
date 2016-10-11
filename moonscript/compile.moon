@@ -443,20 +443,20 @@ format_error = (msg, pos, file_str) ->
     line_message
   }, "\n"
 
-value = (value) ->
+value = (v) ->
   out = nil
   with RootBlock!
-    \add \value value
+    \add \value v
     out = \render!
   out
 
-tree = (tree, options={}) ->
-  assert tree, "missing tree"
+tree = (t, options={}) ->
+  assert t, "missing tree"
 
   scope = (options.scope or RootBlock) options
 
   runner = coroutine.create ->
-    scope\root_stms tree
+    scope\root_stms t
 
   success, err = coroutine.resume runner
 
@@ -467,7 +467,7 @@ tree = (tree, options={}) ->
           unpack err, 2
         else
           -- unknown error, bubble it
-          error "Unknown error thrown", util.dump error_msg
+          error "Unknown error thrown", util.dump err
     else
       concat {err, debug.traceback runner}, "\n"
 

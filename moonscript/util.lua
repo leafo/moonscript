@@ -75,7 +75,7 @@ split = function(str, delim)
   return _accum_0
 end
 local dump
-dump = function(what)
+dump = function(object)
   local seen = { }
   local _dump
   _dump = function(what, depth)
@@ -107,7 +107,7 @@ dump = function(what)
       return tostring(what) .. "\n"
     end
   end
-  return _dump(what)
+  return _dump(object)
 end
 local debug_posmap
 debug_posmap = function(posmap, moon_code, lua_code)

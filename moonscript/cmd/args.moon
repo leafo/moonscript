@@ -1,11 +1,11 @@
 import unpack from require "moonscript.util"
 parse_spec = (spec) ->
-  flags, words = if type(spec) == "table"
-    unpack(spec), spec
+  flags = if type(spec) == "table"
+    unpack(spec)
   else
-    spec, {}
+    spec
 
-  assert "no flags for arguments"
+  assert flags, "no flags for arguments"
 
   out = {}
   for part in flags\gmatch "%w:?"
@@ -25,7 +25,6 @@ parse_arguments = (spec, args) ->
   last_flag = nil
 
   for arg in *args
-    group = {}
     if last_flag
       out[last_flag] = arg
       continue
