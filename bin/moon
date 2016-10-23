@@ -54,7 +54,7 @@ run = function()
   end
   local script_fname = arg[ind]
   if not (script_fname) then
-    print_help("repl not yet supported")
+    print_help("REPL not yet supported")
   end
   local new_arg = {
     [-1] = arg[0],
