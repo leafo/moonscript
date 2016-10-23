@@ -47,7 +47,7 @@ run = ->
   script_fname = arg[ind]
 
   unless script_fname
-    print_help "repl not yet supported"
+    print_help "REPL not yet supported"
 
   new_arg = {
     [-1]: arg[0],
