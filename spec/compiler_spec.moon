@@ -31,9 +31,27 @@ describe "moonscript.compile", ->
       }
 
       {
+        "number"
+        -> {"number", "14"}
+        "14"
+      }
+
+      {
+        "minus"
+        -> {"minus", ref!}
+        "-val"
+      }
+
+      {
         "explist"
         -> { "explist", ref("a"), ref("b"), ref("c")}
         "a, b, c"
+      }
+
+      {
+        "exp"
+        -> {"exp", ref("a"), "+", ref("b"), "!=", ref("c")}
+        "a + b ~= c"
       }
 
       {
@@ -59,6 +77,48 @@ describe "moonscript.compile", ->
         "string (lua)"
         -> {"string", '[==[', "Hello's world"}
         "[==[Hello's world]==]"
+      }
+
+      {
+        "self"
+        -> {"self", ref!}
+        "self.val"
+      }
+
+      {
+        "self_class"
+        -> {"self_class", ref!}
+        "self.__class.val"
+      }
+
+      {
+        "self_class_colon"
+        -> {"self_class_colon", ref!}
+        "self.__class:val"
+      }
+
+      {
+        "not"
+        -> {"not", ref!}
+        "not val"
+      }
+
+      {
+        "length"
+        -> {"length", ref!}
+        "#val"
+      }
+
+      {
+        "length"
+        -> {"length", ref!}
+        "#val"
+      }
+
+      {
+        "bitnot"
+        -> {"bitnot", ref!}
+        "~val"
       }
 
       {
@@ -89,14 +149,30 @@ describe "moonscript.compile", ->
       {
         "chain"
         -> {
-            "chain"
-             ref!
-            {"dot", "one"}
-            {"index", str!}
-            {"colon", "two"}
-            {"call", { ref("arg") }}
-          }
+          "chain"
+           ref!
+          {"dot", "one"}
+          {"index", str!}
+          {"colon", "two"}
+          {"call", { ref("arg") }}
+        }
         'val.one["dogzone"]:two(arg)'
+      }
+
+      {
+        "chain (self receiver)"
+        -> {
+          "chain"
+          {"self", ref!}
+          {"call", {ref "arg"} }
+        }
+        "self:val(arg)"
+      }
+
+      {
+        "fndef (empty)"
+        -> {"fndef", {}, {}, "slim", {}}
+        "function() end"
       }
 
     }
