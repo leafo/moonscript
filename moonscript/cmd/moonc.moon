@@ -60,6 +60,15 @@ gettime = do
     else
       nil, "LuaSocket needed for benchmark"
 
+
+import pos_to_line from require "moonscript.util"
+
+reverse_line_number = (code, line_table, line_num) ->
+  for i = line_num,0,-1
+    if line_table[i]
+      return pos_to_line code, line_table[i]
+  "unknown"
+
 -- compiles file to lua, returns lua code
 -- returns nil, error on error
 -- returns true if some option handled the output instead
@@ -106,6 +115,30 @@ compile_file_text = (text, opts={}) ->
       ""
     }, "\n"
     return true
+
+  if opts.keep_line_number
+    line_map = {}  -- lua line to moon line
+    for lua_line_number,moon_pos in pairs(posmap_or_err)
+      line_map[lua_line_number] = reverse_line_number text, posmap_or_err, lua_line_number
+    aligned_code = ""
+    lua_line_number = 1
+    current_moon_line_number = 1
+    for line in string.gmatch(code..'\n', "(.-)\n")
+      if moon_line_number = line_map[lua_line_number]
+        to_next_line = false
+        while current_moon_line_number < moon_line_number
+          to_next_line = true
+          aligned_code ..= '\n'
+          current_moon_line_number += 1
+        unless to_next_line
+          aligned_code ..= ' '  -- add a space
+      else
+        aligned_code ..= ' '
+        -- BUG cannot tell whether it is part of multi-line string
+        -- there should be \n only if it is a multi-line string
+      aligned_code ..= line
+      lua_line_number += 1
+    code = aligned_code .. '\n'
 
   code
 

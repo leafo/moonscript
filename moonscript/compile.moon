@@ -1,228 +1,485 @@
--- assorted utilities for moonc command line tool
 
-lfs = require "lfs"
+util = require "moonscript.util"
+dump = require "moonscript.dump"
+transform = require "moonscript.transform"
 
-import split from require "moonscript.util"
+import NameProxy, LocalName from require "moonscript.transform.names"
+import Set from require "moonscript.data"
+import ntype, value_can_be_statement from require "moonscript.types"
 
-local *
+statement_compilers = require "moonscript.compile.statement"
+value_compilers = require "moonscript.compile.value"
 
-dirsep = package.config\sub 1,1
-dirsep_chars = if dirsep == "\\"
-  "\\/" -- windows
-else
-  dirsep
+import concat, insert from table
+import pos_to_line, get_closest_line, trim, unpack from util
 
--- similar to mkdir -p
-mkdir = (path) ->
-  chunks = split path, dirsep
+mtype = util.moon.type
 
-  local accum
-  for dir in *chunks
-    accum = accum and "#{accum}#{dirsep}#{dir}" or dir
-    lfs.mkdir accum
+indent_char = "  "
 
-  lfs.attributes path, "mode"
+local Line, DelayedLine, Lines, Block, RootBlock
 
--- strips excess / and ensures path ends with /
-normalize_dir = (path) ->
-  path\match("^(.-)[#{dirsep_chars}]*$") .. dirsep
+-- a buffer for building up lines
+class Lines
+  new: =>
+    @posmap = {}
 
--- parse the directory out of a path
-parse_dir = (path) ->
-  (path\match "^(.-)[^#{dirsep_chars}]*$")
+  mark_pos: (pos, line=#@) =>
+    @posmap[line] = pos unless @posmap[line]
 
--- parse the filename out of a path
-parse_file = (path) ->
-  (path\match "^.-([^#{dirsep_chars}]*)$")
+  -- append a line or lines to the buffer
+  add: (item) =>
+    switch mtype item
+      when Line
+        item\render self
+      when Block
+        item\render self
+      else -- also captures DelayedLine
+        @[#@ + 1] = item
+    @
 
--- converts .moon to a .lua path for calcuating compile target
-convert_path = (path) ->
-  new_path = path\gsub "%.moon$", ".lua"
-  if new_path == path
-    new_path = path .. ".lua"
-  new_path
+  flatten_posmap: (line_no=0, out={}) =>
+    posmap = @posmap
+    for i, l in ipairs @
+      switch mtype l
+        when "string", DelayedLine
+          line_no += 1
+          out[line_no] = posmap[i]
 
-format_time = (time) ->
-  "%.3fms"\format time*1000
+          line_no += 1 for _ in l\gmatch"\n"
+          out[line_no] = posmap[i]
+        when Lines
+          _, line_no = l\flatten_posmap line_no, out
+        else
+          error "Unknown item in Lines: #{l}"
 
-gettime = do
-  local socket
-  ->
-    if socket == nil
-      pcall ->
-        socket = require "socket"
+    out, line_no
 
-      unless socket
-        socket = false
+  flatten: (indent=nil, buffer={}) =>
+    for i = 1, #@
+      l = @[i]
+      t = mtype l
 
-    if socket
-      socket.gettime()
-    else
-      nil, "LuaSocket needed for benchmark"
+      if t == DelayedLine
+        l = l\render!
+        t = "string"
 
+      switch t
+        when "string"
+          insert buffer, indent if indent
+          insert buffer, l
 
-import pos_to_line from require "moonscript.util"
+          -- insert breaks between ambiguous statements
+          if "string" == type @[i + 1]
+            lc = l\sub(-1)
+            if (lc == ")" or lc == "]") and @[i + 1]\sub(1,1) == "("
+              insert buffer, ";"
 
-reverse_line_number = (code, line_table, line_num) ->
-  for i = line_num,0,-1
-    if line_table[i]
-      return pos_to_line code, line_table[i]
-  "unknown"
+          insert buffer, "\n"
+        when Lines
+           l\flatten indent and indent .. indent_char or indent_char, buffer
+        else
+          error "Unknown item in Lines: #{l}"
+    buffer
 
--- compiles file to lua, returns lua code
--- returns nil, error on error
--- returns true if some option handled the output instead
-compile_file_text = (text, opts={}) ->
-  parse = require "moonscript.parse"
-  compile = require "moonscript.compile"
-
-  parse_time = if opts.benchmark
-    assert gettime!
-
-  tree, err = parse.string text
-  return nil, err unless tree
-
-  if parse_time
-    parse_time = gettime! - parse_time
-
-  if opts.show_parse_tree
-    dump = require "moonscript.dump"
-    dump.tree tree
-    return true
-
-  compile_time = if opts.benchmark
-    gettime!
-
-  code, posmap_or_err, err_pos = compile.tree tree
-
-  unless code
-    return nil, compile.format_error posmap_or_err, err_pos, text
-
-  if compile_time
-    compile_time = gettime() - compile_time
-
-  if opts.show_posmap
-    import debug_posmap from require "moonscript.util"
-    print "Pos", "Lua", ">>", "Moon"
-    print debug_posmap posmap_or_err, text, code
-    return true
-
-  if opts.benchmark
-    print table.concat {
-      opts.fname or "stdin",
-      "Parse time  \t" .. format_time(parse_time),
-      "Compile time\t" .. format_time(compile_time),
-      ""
-    }, "\n"
-    return true
-
-  if opts.keep_line_number
-    line_map = {}  -- lua line to moon line
-    for lua_line_number,moon_pos in pairs(posmap_or_err)
-      line_map[lua_line_number] = reverse_line_number text, posmap_or_err, lua_line_number
-    aligned_code = ""
-    lua_line_number = 1
-    current_moon_line_number = 1
-    for line in string.gmatch(code..'\n', "(.-)\n")
-      if moon_line_number = line_map[lua_line_number]
-        to_next_line = false
-        while current_moon_line_number < moon_line_number
-          to_next_line = true
-          aligned_code ..= '\n'
-          current_moon_line_number += 1
-        unless to_next_line
-          aligned_code ..= ' '  -- add a space
+  __tostring: =>
+    -- strip non-array elements
+    strip = (t) ->
+      if "table" == type t
+        [strip v for v in *t]
       else
-        aligned_code ..= ' '
-        -- BUG cannot tell whether it is part of multi-line string
-        -- there should be \n only if it is a multi-line string
-      aligned_code ..= line
-      lua_line_number += 1
-    code = aligned_code .. '\n'
+        t
 
-  code
+    "Lines<#{util.dump(strip @)\sub 1, -2}>"
 
-write_file = (fname, code) ->
-  mkdir parse_dir fname
-  f, err = io.open fname, "w"
-  unless f
-    return nil, err
+-- Buffer for building up a line
+-- A plain old table holding either strings or Block objects.
+-- Adding a line to a line will cause that line to be merged in.
+class Line
+  pos: nil
 
-  assert f\write code
-  assert f\write "\n"
-  f\close!
-  "build"
+  append_list: (items, delim) =>
+    for i = 1,#items
+      @append items[i]
+      if i < #items then insert self, delim
+    nil
 
-compile_and_write = (src, dest, opts={}) ->
-  f = io.open src
-  unless f
-    return nil, "Can't find file"
+  append: (first, ...) =>
+    if Line == mtype first
+      -- print "appending line to line", first.pos, first
+      @pos = first.pos unless @pos -- bubble pos if there isn't one
+      @append value for value in *first
+    else
+      insert self, first
 
-  text = assert f\read("*a")
-  f\close!
+    if ...
+      @append ...
 
-  code, err = compile_file_text text, opts
+  -- todo: try to remove concats from here
+  render: (buffer) =>
+    current = {}
 
-  if not code
-    return nil, err
+    add_current = ->
+      buffer\add concat current
+      buffer\mark_pos @pos
 
-  if code == true
-    return true
+    for chunk in *@
+      switch mtype chunk
+        when Block
+          for block_chunk in *chunk\render Lines!
+            if "string" == type block_chunk
+              insert current, block_chunk
+            else
+              add_current!
+              buffer\add block_chunk
+              current = {}
+        else
+          insert current, chunk
 
-  if opts.print
-    print code
-    return true
+    if current[1]
+      add_current!
 
-  write_file dest, code
+    buffer
 
-is_abs_path = (path) ->
-  first = path\sub 1, 1
-  if dirsep == "\\"
-    first == "/" or first == "\\" or path\sub(2,1) == ":"
-  else
-    first == dirsep
+  __tostring: =>
+    "Line<#{util.dump(@)\sub 1, -2}>"
 
+class DelayedLine
+  new: (fn) =>
+    @prepare = fn
 
--- calcuate where a path should be compiled to
--- target_dir: the directory to place the file (optional, from -t flag)
--- base_dir: the directory where the file came from when globbing recursively
-path_to_target = (path, target_dir=nil, base_dir=nil) ->
-  target = convert_path path
+  prepare: ->
 
-  if target_dir
-    target_dir = normalize_dir target_dir
+  render: =>
+    @prepare!
+    concat @
 
-  if base_dir and target_dir
-    -- one directory back
-    head = base_dir\match("^(.-)[^#{dirsep_chars}]*[#{dirsep_chars}]?$")
+class Block
+  header: "do"
+  footer: "end"
 
-    if head
-      start, stop = target\find head, 1, true
-      if start == 1
-        target = target\sub(stop + 1)
+  export_all: false
+  export_proper: false
 
-  if target_dir
-    if is_abs_path target
-      target = parse_file target
+  value_compilers: value_compilers
+  statement_compilers: statement_compilers
 
-    target = target_dir .. target
+  __tostring: =>
+    h = if "string" == type @header
+      @header
+    else
+      unpack @header\render {}
 
-  target
+    "Block<#{h}> <- " .. tostring @parent
 
-{
-  :dirsep
-  :mkdir
-  :normalize_dir
-  :parse_dir
-  :parse_file
-  :convert_path
-  :gettime
-  :format_time
-  :path_to_target
+  new: (@parent, @header, @footer) =>
+    @_lines = Lines!
 
-  :compile_file_text
-  :compile_and_write
-}
+    @_names = {}
+    @_state = {}
+    @_listeners = {}
 
-print compile_file_text [[x = [i for i in {1,2,3}]
-]], {keep_line_number: true}
+    with transform
+      @transform = {
+        value: .Value\bind self
+        statement: .Statement\bind self
+      }
+
+    if @parent
+      @root = @parent.root
+      @indent = @parent.indent + 1
+      setmetatable @_state, { __index: @parent._state }
+      setmetatable @_listeners, { __index: @parent._listeners }
+    else
+      @indent = 0
+
+  set: (name, value) =>
+    @_state[name] = value
+
+  get: (name) =>
+    @_state[name]
+
+  get_current: (name) =>
+    rawget @_state, name
+
+  listen: (name, fn) =>
+    @_listeners[name] = fn
+
+  unlisten: (name) =>
+    @_listeners[name] = nil
+
+  send: (name, ...) =>
+    if fn = @_listeners[name]
+      fn self, ...
+
+  extract_assign_name: (node) =>
+    is_local = false
+    real_name = switch mtype node
+      when LocalName
+        is_local = true
+        node\get_name self
+      when NameProxy
+        node\get_name self
+      when "table"
+        node[1] == "ref" and node[2]
+      when "string"
+        -- TOOD: some legacy transfomers might use string for ref
+        node
+
+    real_name, is_local
+
+  declare: (names) =>
+    undeclared = for name in *names
+      real_name, is_local = @extract_assign_name name
+      continue unless is_local or real_name and not @has_name real_name, true
+      -- this also puts exported names so they can be assigned a new value in
+      -- deeper scope
+      @put_name real_name
+      continue if @name_exported real_name
+      real_name
+
+    undeclared
+
+  whitelist_names: (names) =>
+    @_name_whitelist = Set names
+
+  name_exported: (name) =>
+    return true if @export_all
+    return true if @export_proper and name\match"^%u"
+
+  put_name: (name, ...) =>
+    value = ...
+    value = true if select("#", ...) == 0
+
+    name = name\get_name self if NameProxy == mtype name
+    @_names[name] = value
+
+  -- Check if a name is defined in the current or any enclosing scope
+  -- skip_exports: ignore names that have been exported using `export`
+  has_name: (name, skip_exports) =>
+    return true if not skip_exports and @name_exported name
+
+    yes = @_names[name]
+    if yes == nil and @parent
+      if not @_name_whitelist or @_name_whitelist[name]
+        @parent\has_name name, true
+    else
+      yes
+
+  is_local: (node) =>
+    t = mtype node
+
+    return @has_name(node, false) if t == "string"
+    return true if t == NameProxy or t == LocalName
+
+    if t == "table"
+      if node[1] == "ref" or (node[1] == "chain" and #node == 2)
+        return @is_local node[2]
+
+    false
+
+  free_name: (prefix, dont_put) =>
+    prefix = prefix or "moon"
+    searching = true
+    name, i = nil, 0
+    while searching
+      name = concat {"", prefix, i}, "_"
+      i = i + 1
+      searching = @has_name name, true
+
+    @put_name name if not dont_put
+    name
+
+  init_free_var: (prefix, value) =>
+    name = @free_name prefix, true
+    @stm {"assign", {name}, {value}}
+    name
+
+  -- add something to the line buffer
+  add: (item, pos) =>
+    with @_lines
+      \add item
+      \mark_pos pos if pos
+    item
+
+  -- todo: pass in buffer as argument
+  render: (buffer) =>
+    buffer\add @header
+    buffer\mark_pos @pos
+
+    if @next
+      buffer\add @_lines
+      @next\render buffer
+    else
+      -- join an empty block into a single line
+      if #@_lines == 0 and "string" == type buffer[#buffer]
+        buffer[#buffer] ..= " " .. (unpack Lines!\add @footer)
+      else
+        buffer\add @_lines
+        buffer\add @footer
+        buffer\mark_pos @pos
+
+    buffer
+
+  block: (header, footer) =>
+    Block self, header, footer
+
+  line: (...) =>
+    with Line!
+      \append ...
+
+  is_stm: (node) =>
+    @statement_compilers[ntype node] != nil
+
+  is_value: (node) =>
+    t = ntype node
+    @value_compilers[t] != nil or t == "value"
+
+  -- compile name for assign
+  name: (node, ...) =>
+    if type(node) == "string"
+      node
+    else
+      @value node, ...
+
+  value: (node, ...) =>
+    node = @transform.value node
+    action = if type(node) != "table"
+      "raw_value"
+    else
+      node[1]
+
+    fn = @value_compilers[action]
+    unless fn
+      error {
+        "compile-error"
+        "Failed to find value compiler for: " .. dump.value node
+        node[-1]
+      }
+
+    out = fn self, node, ...
+
+    -- store the pos, creating a line if necessary
+    if type(node) == "table" and node[-1]
+      if type(out) == "string"
+        out = with Line! do \append out
+      out.pos = node[-1]
+
+    out
+
+  values: (values, delim) =>
+    delim = delim or ', '
+    with Line!
+      \append_list [@value v for v in *values], delim
+
+  stm: (node, ...) =>
+    return if not node -- skip blank statements
+    node = @transform.statement node
+
+    result = if fn = @statement_compilers[ntype(node)]
+      fn @, node, ...
+    else
+      if value_can_be_statement node
+        @value node
+      else
+        -- coerce value into statement
+        @stm {"assign", {"_"}, {node}}
+
+    if result
+      if type(node) == "table" and type(result) == "table" and node[-1]
+        result.pos = node[-1]
+      @add result
+
+    nil
+
+  stms: (stms, ret) =>
+    error "deprecated stms call, use transformer" if ret
+    {:current_stms, :current_stm_i} = @
+
+    @current_stms = stms
+    for i=1,#stms
+      @current_stm_i = i
+      @stm stms[i]
+
+    @current_stms = current_stms
+    @current_stm_i = current_stm_i
+
+    nil
+
+  -- takes the existing set of lines and replaces them with the result of
+  -- calling fn on them
+  splice: (fn) =>
+    lines = {"lines", @_lines}
+    @_lines = Lines!
+    @stms fn lines
+
+class RootBlock extends Block
+  new: (@options) =>
+    @root = self
+    super!
+
+  __tostring: => "RootBlock<>"
+
+  root_stms: (stms) =>
+    unless @options.implicitly_return_root == false
+      stms = transform.Statement.transformers.root_stms self, stms
+    @stms stms
+
+  render: =>
+    -- print @_lines
+    buffer = @_lines\flatten!
+    buffer[#buffer] = nil if buffer[#buffer] == "\n"
+    table.concat buffer
+
+format_error = (msg, pos, file_str) ->
+  line_message = if pos
+    line = pos_to_line file_str, pos
+    line_str, line = get_closest_line file_str, line
+    line_str = line_str or ""
+    (" [%d] >>    %s")\format line, trim line_str
+
+  concat {
+    "Compile error: "..msg
+    line_message
+  }, "\n"
+
+value = (value) ->
+  out = nil
+  with RootBlock!
+    \add \value value
+    out = \render!
+  out
+
+tree = (tree, options={}) ->
+  assert tree, "missing tree"
+
+  scope = (options.scope or RootBlock) options
+
+  runner = coroutine.create ->
+    scope\root_stms tree
+
+  success, err = coroutine.resume runner
+
+  unless success
+    error_msg, error_pos = if type(err) == "table"
+      switch err[1]
+        when "user-error", "compile-error"
+          unpack err, 2
+        else
+          -- unknown error, bubble it
+          error "Unknown error thrown", util.dump error_msg
+    else
+      concat {err, debug.traceback runner}, "\n"
+
+    return nil, error_msg, error_pos or scope.last_pos
+
+  lua_code = scope\render!
+  posmap = scope._lines\flatten_posmap!
+  lua_code, posmap
+
+-- mmmm
+with data = require "moonscript.data"
+  for name, cls in pairs {:Line, :Lines, :DelayedLine}
+    data[name] = cls
+
+{ :tree, :value, :format_error, :Block, :RootBlock }
