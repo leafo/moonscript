@@ -17,7 +17,7 @@ Online demo/compiler at <http://moonscript.org/compiler>.
 ## Running Tests
 
 Tests are written in MoonScript and use [Busted](http://olivinelabs.com/busted/).
-In order to run the tests you must have MoonScript installed.
+In order to run the tests you must have MoonScript and [Loadkit](https://github.com/leafo/loadkit) installed.
 
 To run tests, execute from the root directory:
 
