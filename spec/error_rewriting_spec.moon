@@ -1,13 +1,12 @@
 
-import unindent, with_dev from require "spec.helpers"
+import unindent from require "spec.helpers"
 
 describe "moonscript.errors", ->
-  local moonscript, errors, util, to_lua
+  local moonscript, errors, to_lua
 
   -- with_dev ->
   moonscript = require "moonscript.base"
   errors = require "moonscript.errors"
-  util = require "moonscript.util"
 
   {:to_lua} = moonscript
 
@@ -42,7 +41,7 @@ describe "moonscript.errors", ->
           print "cats"
       ]]
 
-      lua_code, posmap = assert to_lua moon_code
+      _, posmap = assert to_lua moon_code
       -- print util.debug_posmap(posmap, moon_code, lua_code)
       assert.same { 1, 23, 36, 21 }, posmap
 
@@ -59,13 +58,13 @@ describe "moonscript.errors", ->
         print "two"
       ]]
 
-      lua_code, posmap = assert to_lua moon_code
+      _, posmap = assert to_lua moon_code
       -- print util.debug_posmap(posmap, moon_code, lua_code)
       assert.same {[1]: 1, [2]: 13, [7]: 13, [8]: 57}, posmap
 
   describe "error reporting", ->
     it "should compile bad code twice", ->
-      code, err = to_lua "{b=5}"
+      _, err = to_lua "{b=5}"
       assert.truthy err
-      code, err2 = to_lua "{b=5}"
+      _, err2 = to_lua "{b=5}"
       assert.same err, err2

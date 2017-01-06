@@ -174,8 +174,14 @@ if opts.w then
 	-- build function to check for lint or compile in watch
 	local handle_file
 	if opts.l then
-		local lint = require "moonscript.cmd.lint"
-		handle_file = lint.lint_file
+		local lint = require "moonscript.lint"
+		handle_file = function(file)
+			local res, err = lint.lint_file(file)
+			if res and #res > 0 then
+				return file .. "\n\n" .. lint.format_inspections(res)
+			end
+			return nil, err
+		end
 	else
 		handle_file = compile_and_write
 	end
@@ -220,16 +226,17 @@ if opts.w then
 	io.stderr:write("\nQuitting...\n")
 elseif opts.l then
 	local has_linted_with_error;
-	local lint = require "moonscript.cmd.lint"
+	local lint = require "moonscript.lint"
 	for _, tuple in pairs(files) do
 		local fname = tuple[1]
 		local res, err = lint.lint_file(fname)
-		if res then
+		if res and #res > 0 then
 			has_linted_with_error = true
-			io.stderr:write(res .. "\n\n")
+			local inspections = lint.format_inspections(res)
+			io.stderr:write(fname .. "\n\n" .. inspections .. "\n\n")
 		elseif err then
 			has_linted_with_error = true
-			io.stderr:write(fname .. "\n" .. err.. "\n\n")
+			io.stderr:write(fname .. "\n\n" .. err.. "\n\n")
 		end
 	end
 	if has_linted_with_error then

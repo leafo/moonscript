@@ -13,7 +13,7 @@ in_dev = false
 with_dev = (fn) ->
   error "already in dev mode" if in_dev
 
-  -- a package loader that only looks in currect directory
+  -- a package loader that only looks in the current directory
   import make_loader from require "loadkit"
   loader = make_loader "lua", nil, "./?.lua"
 

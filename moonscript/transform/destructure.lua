@@ -1,7 +1,7 @@
-local ntype, mtype, build
+local ntype, build
 do
   local _obj_0 = require("moonscript.types")
-  ntype, mtype, build = _obj_0.ntype, _obj_0.mtype, _obj_0.build
+  ntype, build = _obj_0.ntype, _obj_0.build
 end
 local NameProxy
 NameProxy = require("moonscript.transform.names").NameProxy
@@ -163,8 +163,8 @@ split_assign = function(scope, assign)
           (function()
             local _accum_0 = { }
             local _len_0 = 1
-            for i = start, stop do
-              _accum_0[_len_0] = names[i]
+            for j = start, stop do
+              _accum_0[_len_0] = names[j]
               _len_0 = _len_0 + 1
             end
             return _accum_0
@@ -172,8 +172,8 @@ split_assign = function(scope, assign)
           (function()
             local _accum_0 = { }
             local _len_0 = 1
-            for i = start, stop do
-              _accum_0[_len_0] = values[i]
+            for j = start, stop do
+              _accum_0[_len_0] = values[j]
               _len_0 = _len_0 + 1
             end
             return _accum_0

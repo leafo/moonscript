@@ -5,18 +5,18 @@
 lfs = require "lfs"
 alt_getopt = require "alt_getopt"
 
-import insert, concat from table
-import dump, split from require "moonscript.util"
+import insert from table
+import split from require "moonscript.util"
 
-opts, ind = alt_getopt.get_opts arg, "l:", {
+opts, ind = alt_getopt.get_opts _G.arg, "l:", {
   load: "l"
 }
 
-if not arg[ind]
+if not _G.arg[ind]
   print "usage: splat [-l module_names] directory [directories...]"
   os.exit!
 
-dirs = [a for a in *arg[ind,]]
+dirs = [a for a in *_G.arg[ind,]]
 
 normalize = (path) ->
   path\match("(.-)/*$").."/"

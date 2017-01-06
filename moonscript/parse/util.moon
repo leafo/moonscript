@@ -79,16 +79,16 @@ mark = (name) ->
 -- pos is the character offset from the buffer where the node was parsed from.
 -- Used to generate error messages
 pos = (patt) ->
-  (Cp! * patt) / (pos, value) ->
+  (Cp! * patt) / (at_pos, value) ->
     if type(value) == "table"
-      value[-1] = pos
+      value[-1] = at_pos
     value
 
 -- generates a debug pattern that always succeeds and prints out where we are
 -- in the buffer with a label
 got = (what, context=true) ->
-  Cmt "", (str, pos) ->
-    print "++ got #{what}", "[#{show_line_position str, pos, context}]"
+  Cmt "", (str, at_pos) ->
+    print "++ got #{what}", "[#{show_line_position str, at_pos, context}]"
     true
 
 -- converts 1 element array to its value, otherwise marks it
@@ -112,7 +112,7 @@ is_assignable = do
       else
         false
 
-check_assignable = (str, pos, value) ->
+check_assignable = (str, at_pos, value) ->
   if is_assignable value
     true, value
   else
@@ -184,12 +184,12 @@ wrap_decorator = (stm, dec) ->
   return stm unless dec
   {"decorated", stm, dec}
 
-check_lua_string = (str, pos, right, left) ->
+check_lua_string = (str, at_pos, right, left) ->
   #left == #right
 
 -- constructor for :name self assignments in table literals
-self_assign = (name, pos) ->
-	{{"key_literal", name}, {"ref", name, [-1]: pos}}
+self_assign = (name, at_pos) ->
+	{{"key_literal", name}, {"ref", name, [-1]: at_pos}}
 
 { :Indent, :Cut, :ensure, :extract_line, :mark, :pos, :flatten_or_mark,
   :is_assignable, :check_assignable, :format_assign, :format_single_assign,

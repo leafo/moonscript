@@ -2,8 +2,6 @@ lfs = require "lfs"
 
 import with_dev from require "spec.helpers"
 
-pattern = ...
-
 unpack = table.unpack or unpack
 
 options = {
@@ -27,7 +25,7 @@ timings = {}
 gettime = nil
 
 pcall ->
-  require "socket"
+  socket = require "socket"
   gettime = socket.gettime
 
 gettime or= os.clock
@@ -91,7 +89,7 @@ describe "input tests", ->
   with_dev ->
     parse = require "moonscript.parse"
     compile = require "moonscript.compile"
-  
+
   for name in *inputs
     input = input_fname name
     it input .. " #input", ->

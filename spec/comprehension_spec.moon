@@ -5,7 +5,6 @@ describe "comprehension", ->
   it "should double every number", ->
     input = {1,2,3,4,5,6}
     output_1 = [i * 2 for _, i in pairs input ]
-    output_2 = [i * 2 for i in *input ]
 
     assert.same output_1, {2,4,6,8,10,12}
 

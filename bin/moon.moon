@@ -7,7 +7,7 @@ errors = require "moonscript.errors"
 
 unpack = util.unpack
 
-opts, ind = alt_getopt.get_opts arg, "cvhd", {
+opts, ind = alt_getopt.get_opts _G.arg, "cvhd", {
   version: "v"
   help: "h"
 }
@@ -26,7 +26,7 @@ print_err = (...) ->
   io.stderr\write msg .. "\n"
 
 print_help = (err) ->
-  help = help\format arg[0]
+  help = help\format _G.arg[0]
 
   if err
     print_err err
@@ -44,15 +44,15 @@ run = ->
     require("moonscript.version").print_version!
     os.exit!
 
-  script_fname = arg[ind]
+  script_fname = _G.arg[ind]
 
   unless script_fname
     print_help "REPL not yet supported"
 
   new_arg = {
-    [-1]: arg[0],
-    [0]: arg[ind],
-    select ind + 1, unpack arg
+    [-1]: _G.arg[0],
+    [0]: _G.arg[ind],
+    select ind + 1, unpack _G.arg
   }
 
   local moonscript_chunk, lua_parse_error

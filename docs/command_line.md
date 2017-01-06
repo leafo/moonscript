@@ -133,9 +133,16 @@ A full list of flags can be seen by passing the `-h` or `--help` flag.
 ### Linter
 
 `moonc` contains a [lint][1] tool for statically detecting potential problems
-with code. The linter has two tests: detects accessed global variables,
-detect unused declared variables. If the linter detects any issues with a file,
-the program will exit with a status of `1`.
+with code. The linter can detect the following classes of potential errors:
+
+- global variable accesses
+- declared but unused variables
+- unused parameter declarations
+- unused loop variables
+- declaration shadowing
+
+If the linter detects any issues with a file, the program will exit with a
+status of `1`.
 
 You can execute the linter with the `-l` flag. When the linting flag is
 provided only linting takes place and no compiled code is generated.
@@ -149,7 +156,46 @@ moonc -l file1.moon file2.moon
 Like when compiling, you can also pass a directory as a command line argument
 to recursively process all the `.moon` files.
 
-#### Global Variable Checking
+#### Linter configuration file
+
+When linting a file, the linter will look for a file named either
+`lint_config.moon` or `lint_config.lua` in the same directory as the file, or in
+one of the parent directories. Written in Moonscript or Lua respectively, this
+file can provide additional configuration for the linter. The specific
+configuration options available are discussed in the sections below, but
+generally speaking, the linter configuration consists of either boolean flags or
+whitelisting lists. In the case of the lists, they are defined in a way that
+lets you easily define different lists for different files or directories. As an
+example, consider the following whitelist for globals:
+
+```moononly
+-- lint_config.moon
+{
+  whitelist_globals: {
+    ['.']: { 'foo' }
+
+    ['sub_dir/']: { 'bar' }
+
+    ['sub_dir/example.moon']: {
+      'zed',
+      '[A-Z]%w+'
+    }
+  }
+}
+```
+
+The structure of a list is that it's a table with keys that are Lua patterns
+which are matched against the path of the file being linted, with _all_ of the
+matching entries being considered for the file. The entries themselves are
+typically plain strings, but can also be Lua patterns. The above list would thus
+result in `foo` being whitelisted for all files in the project, while files
+below the `sub_dir` directory would have both `foo` and `bar` whitelisted.
+Finally, for the specific file "sub_dir/example.moon" all four entries would be
+used for whitelisting - `foo`, `bar`, `zed` and `[A-Z]%w+`. The latter, being a
+pattern would whitelist all occurrences matching the pattern, such as "Foo",
+"Bar2" and "FooBar2".
+
+#### Global Variable Accesses
 
 It's considered good practice to avoid using global variables and create local
 variables for all the values referenced. A good case for not using global
@@ -192,7 +238,7 @@ Outputs:
     ==================================
     > 		my_nmuber + 10
 
-#### Global Variable Whitelist
+##### Global Variable Whitelist
 
 In most circumstances it's impossible to avoid using some global variables. For
 example, to access any of the built in modules or functions you typically
@@ -208,11 +254,8 @@ global functions (like `describe`, `before_each`, `setup`) to make writing
 tests easy.
 
 It would be nice if we could allow all of those global functions to be called
-for `.moon` files located in the `spec/` directory. We can do that by creating
-a `lint_config` file.
-
-`lint_config` is a regular MoonScript or Lua file that provides configuration
-for the linter. One of those settings is `whitelist_globals`.
+for `.moon` files located in the `spec/` directory. We can do that by providing
+a `whitelist_globals` list in the `lint_config` file.
 
 To create a configuration for Busted we might do something like this:
 
@@ -242,13 +285,6 @@ $ moonc -l .
 
 The whitelisted global references in `spec/` will no longer raise notices.
 
-The `whitelist_globals` property of the `lint_config` is a table where the keys
-are Lua patterns that match file names, and the values are an array of globals
-that are allowed.
-
-Multiple patterns in `whitelist_globals` can match a single file, the union of
-the allowed globals will be used when linting that file.
-
 #### Unused Variable Assigns
 
 Sometimes when debugging, refactoring, or just developing, you might leave
@@ -256,9 +292,9 @@ behind stray assignments that aren't actually necessary for the execution of
 your code. It's good practice to clean them up to avoid any potential confusion
 they might cause.
 
-The unused assignment detector keeps track of any variables that are assigned,
-and if they aren't accessed in within their available scope, they are reported
-as an error.
+The unused assignment detector keeps track of any variables that are assigned or
+otherwise declared, and if they aren't accessed in within their available scope,
+they are reported as an error.
 
 Given the following code:
 
@@ -287,6 +323,91 @@ item = {123, "shoe", "brown", 123}
 _, name, _, count = unpack item
 print name, count
 ```
+
+There are very few cases where one would need additional whitelisting for unused
+variables, but it's possible that there are some, e.g. in tests. For this
+purpose additional whitelisting can be specified using the `whitelist_unused`
+configuration list:
+
+```moononly
+-- lint_config.moon
+{
+  whitelist_unused: {
+    ['spec/']: {
+      'my_unused'
+    }
+  }
+}
+```
+
+#### Unused parameter declarations
+
+The linter can also detect and complain about declared but unused function
+parameters. This is not enabled by default, as it's very common to have unused
+parameters. E.g. a function might follow an external API and still wants to
+indicate the available parameters even though not all are used.
+
+To enable this detection, set the `report_params` configuration option to
+`true`:
+
+```moononly
+-- lint_config.moon
+{
+  report_params: true
+}
+```
+
+The linter ships with a default configuration that whitelists any parameter
+starting with a '_', providing a way of keeping the documentational aspects for
+a function and still pleasing the linter. Other whitelisting can be specified by
+adding a `whitelist_params' list to the linter configuration (please note that
+the default whitelisting is not used when the configuration specifies a list).
+
+#### Unused loop variables
+
+Unused loop variables are detected. It's possible to disable this completely in
+the configuration by setting the `report_loop_variables` variable to `false`, or
+to provide an explicit whitelist only for loop variables. The linter ships with
+a default configuration that whitelists the arguments 'i' and 'j', or any
+variable starting with a '_'.
+
+Other whitelisting can be specified by adding a `whitelist_loop_variables' list
+to the linter configuration (please note that the default whitelisting is not
+used when the configuration specifies a list).
+
+#### Declaration shadowing
+
+Declaration shadowing occurs whenever a declaration shadows an earlier
+declaration with the same name. Consider the following code:
+
+```moononly
+my_mod = require 'my_mod'
+
+-- [.. more code in between.. ]
+
+for my_mod in get_modules('foo')
+  my_mod.bar!
+```
+
+While it in the example above is rather clear that the `my_mod` declared in the
+loop is different from the top level `my_mod`, this can quickly become less
+clear should more code be inserted between the for declaration and later usage.
+At that point the code becomes ambiguous. Declaration shadowing helps with this
+by ensuring that each variable is defined at most once, in an unambiguous
+manner:
+
+```bash
+$ moonc -l lint_example.moon
+```
+
+    line 5: shadowing outer variable - `my_mod`
+    ===========================================
+    > for my_mod in get_modules('foo')
+
+
+The detection can be turned off completely by setting the `report_shadowing`
+configuration variable to false, and the whitelisting can be configured by
+specifying a `whitelist_shadowing` configuration list.
 
   [1]: http://en.wikipedia.org/wiki/Lint_(software)
 

@@ -89,7 +89,7 @@ describe "moonc", ->
 
     it "parses arguments", ->
       import parse_arguments from require "moonscript.cmd.args"
-      out, res = parse_arguments {
+      out = parse_arguments {
         "ga:p"
         print: "p"
       }, {"hello", "word", "-gap"}

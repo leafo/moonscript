@@ -1,5 +1,5 @@
 
-import ntype, mtype, build from require "moonscript.types"
+import ntype, build from require "moonscript.types"
 import NameProxy from require "moonscript.transform.names"
 import insert from table
 import unpack from require "moonscript.util"
@@ -100,10 +100,10 @@ split_assign = (scope, assign) ->
         stop = i - 1
         insert g, {
           "assign"
-          for i=start,stop
-            names[i]
-          for i=start,stop
-            values[i]
+          for j=start,stop
+            names[j]
+          for j=start,stop
+            values[j]
         }
 
       insert g, build_assign scope, n, values[i]

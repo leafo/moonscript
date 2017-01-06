@@ -2,7 +2,7 @@ compile = require "moonscript.compile"
 parse = require "moonscript.parse"
 
 import concat, insert, remove from table
-import split, dump, get_options, unpack from require "moonscript.util"
+import split, get_options, unpack from require "moonscript.util"
 
 lua = :loadstring, :load
 

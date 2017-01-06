@@ -12,7 +12,7 @@ value = (op) ->
   flat_value op
 
 tree = (block) ->
-  print flat_value value for value in *block
+  print flat_value v for v in *block
 
 { :value, :tree }
 

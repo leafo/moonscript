@@ -3,7 +3,7 @@ util = require "moonscript.util"
 
 lpeg = require "lpeg"
 
-import concat, insert from table
+import concat from table
 import split, pos_to_line from util
 
 user_error = (...) ->
@@ -47,7 +47,7 @@ rewrite_traceback = (text, err) ->
   header_text = "stack traceback:"
 
   Header, Line = V("Header"), V("Line")
-  Break = lpeg.S "\n"
+  Break = S "\n"
   g = lpeg.P {
     Header
     Header: header_text * Break * Ct(Line^1)

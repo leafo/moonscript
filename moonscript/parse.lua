@@ -13,12 +13,12 @@ local unpack
 unpack = require("moonscript.util").unpack
 local wrap_env
 wrap_env = require("moonscript.parse.env").wrap_env
-local R, S, V, P, C, Ct, Cmt, Cg, Cb, Cc
-R, S, V, P, C, Ct, Cmt, Cg, Cb, Cc = lpeg.R, lpeg.S, lpeg.V, lpeg.P, lpeg.C, lpeg.Ct, lpeg.Cmt, lpeg.Cg, lpeg.Cb, lpeg.Cc
-local White, Break, Stop, Comment, Space, SomeSpace, SpaceBreak, EmptyLine, AlphaNum, Num, Shebang, L, _Name
+local S, P, C, Ct, Cmt, Cg, Cb, Cc
+S, P, C, Ct, Cmt, Cg, Cb, Cc = lpeg.S, lpeg.P, lpeg.C, lpeg.Ct, lpeg.Cmt, lpeg.Cg, lpeg.Cb, lpeg.Cc
+local White, Break, Stop, Space, SomeSpace, SpaceBreak, EmptyLine, AlphaNum, Num, Shebang, L, _Name
 do
   local _obj_0 = require("moonscript.parse.literals")
-  White, Break, Stop, Comment, Space, SomeSpace, SpaceBreak, EmptyLine, AlphaNum, Num, Shebang, L, _Name = _obj_0.White, _obj_0.Break, _obj_0.Stop, _obj_0.Comment, _obj_0.Space, _obj_0.SomeSpace, _obj_0.SpaceBreak, _obj_0.EmptyLine, _obj_0.AlphaNum, _obj_0.Num, _obj_0.Shebang, _obj_0.L, _obj_0.Name
+  White, Break, Stop, Space, SomeSpace, SpaceBreak, EmptyLine, AlphaNum, Num, Shebang, L, _Name = _obj_0.White, _obj_0.Break, _obj_0.Stop, _obj_0.Space, _obj_0.SomeSpace, _obj_0.SpaceBreak, _obj_0.EmptyLine, _obj_0.AlphaNum, _obj_0.Num, _obj_0.Shebang, _obj_0.L, _obj_0.Name
 end
 local SpaceName = Space * _Name
 Num = Space * (Num / function(v)
@@ -27,10 +27,10 @@ Num = Space * (Num / function(v)
     v
   }
 end)
-local Indent, Cut, ensure, extract_line, mark, pos, flatten_or_mark, is_assignable, check_assignable, format_assign, format_single_assign, sym, symx, simple_string, wrap_func_arg, join_chain, wrap_decorator, check_lua_string, self_assign, got
+local Indent, Cut, ensure, extract_line, mark, pos, flatten_or_mark, check_assignable, format_assign, format_single_assign, sym, symx, simple_string, wrap_func_arg, join_chain, wrap_decorator, check_lua_string, self_assign
 do
   local _obj_0 = require("moonscript.parse.util")
-  Indent, Cut, ensure, extract_line, mark, pos, flatten_or_mark, is_assignable, check_assignable, format_assign, format_single_assign, sym, symx, simple_string, wrap_func_arg, join_chain, wrap_decorator, check_lua_string, self_assign, got = _obj_0.Indent, _obj_0.Cut, _obj_0.ensure, _obj_0.extract_line, _obj_0.mark, _obj_0.pos, _obj_0.flatten_or_mark, _obj_0.is_assignable, _obj_0.check_assignable, _obj_0.format_assign, _obj_0.format_single_assign, _obj_0.sym, _obj_0.symx, _obj_0.simple_string, _obj_0.wrap_func_arg, _obj_0.join_chain, _obj_0.wrap_decorator, _obj_0.check_lua_string, _obj_0.self_assign, _obj_0.got
+  Indent, Cut, ensure, extract_line, mark, pos, flatten_or_mark, check_assignable, format_assign, format_single_assign, sym, symx, simple_string, wrap_func_arg, join_chain, wrap_decorator, check_lua_string, self_assign = _obj_0.Indent, _obj_0.Cut, _obj_0.ensure, _obj_0.extract_line, _obj_0.mark, _obj_0.pos, _obj_0.flatten_or_mark, _obj_0.check_assignable, _obj_0.format_assign, _obj_0.format_single_assign, _obj_0.sym, _obj_0.symx, _obj_0.simple_string, _obj_0.wrap_func_arg, _obj_0.join_chain, _obj_0.wrap_decorator, _obj_0.check_lua_string, _obj_0.self_assign
 end
 local build_grammar = wrap_env(debug_grammar, function(root)
   local _indent = Stack(0)
@@ -39,12 +39,12 @@ local build_grammar = wrap_env(debug_grammar, function(root)
     last_pos = 0
   }
   local check_indent
-  check_indent = function(str, pos, indent)
-    state.last_pos = pos
+  check_indent = function(str, at_pos, indent)
+    state.last_pos = at_pos
     return _indent:top() == indent
   end
   local advance_indent
-  advance_indent = function(str, pos, indent)
+  advance_indent = function(str, at_pos, indent)
     local top = _indent:top()
     if top ~= -1 and indent > top then
       _indent:push(indent)
@@ -52,7 +52,7 @@ local build_grammar = wrap_env(debug_grammar, function(root)
     end
   end
   local push_indent
-  push_indent = function(str, pos, indent)
+  push_indent = function(str, at_pos, indent)
     _indent:push(indent)
     return true
   end
@@ -62,7 +62,7 @@ local build_grammar = wrap_env(debug_grammar, function(root)
     return true
   end
   local check_do
-  check_do = function(str, pos, do_node)
+  check_do = function(str, at_pos, do_node)
     local top = _do_stack:top()
     if top == nil or top then
       return true, do_node
@@ -96,7 +96,7 @@ local build_grammar = wrap_env(debug_grammar, function(root)
     end
     return patt
   end
-  local Name = Cmt(SpaceName, function(str, pos, name)
+  local Name = Cmt(SpaceName, function(str, at_pos, name)
     if keywords[name] then
       return false
     end

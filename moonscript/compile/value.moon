@@ -63,8 +63,8 @@ string_chars = {
       if sup = @get "super"
         return @value sup self, node
 
-    chain_item = (node) ->
-      t, arg = unpack node
+    chain_item = (item) ->
+      t, arg = unpack item
       if t == "call"
         -- print arg, util.dump arg
         "(", @values(arg), ")"

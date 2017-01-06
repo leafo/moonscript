@@ -53,7 +53,7 @@ split = (str, delim) ->
   str ..= delim
   [m for m in str\gmatch("(.-)"..delim)]
 
-dump = (what) ->
+dump = (object) ->
   seen = {}
   _dump = (what, depth=0) ->
     t = type what
@@ -74,7 +74,7 @@ dump = (what) ->
     else
       tostring(what).."\n"
 
-  _dump what
+  _dump object
 
 
 debug_posmap = (posmap, moon_code, lua_code) ->

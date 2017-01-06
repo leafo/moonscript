@@ -104,9 +104,9 @@ mark = function(name)
 end
 local pos
 pos = function(patt)
-  return (Cp() * patt) / function(pos, value)
+  return (Cp() * patt) / function(at_pos, value)
     if type(value) == "table" then
-      value[-1] = pos
+      value[-1] = at_pos
     end
     return value
   end
@@ -116,8 +116,8 @@ got = function(what, context)
   if context == nil then
     context = true
   end
-  return Cmt("", function(str, pos)
-    print("++ got " .. tostring(what), "[" .. tostring(show_line_position(str, pos, context)) .. "]")
+  return Cmt("", function(str, at_pos)
+    print("++ got " .. tostring(what), "[" .. tostring(show_line_position(str, at_pos, context)) .. "]")
     return true
   end)
 end
@@ -153,7 +153,7 @@ do
   end
 end
 local check_assignable
-check_assignable = function(str, pos, value)
+check_assignable = function(str, at_pos, value)
   if is_assignable(value) then
     return true, value
   else
@@ -264,11 +264,11 @@ wrap_decorator = function(stm, dec)
   }
 end
 local check_lua_string
-check_lua_string = function(str, pos, right, left)
+check_lua_string = function(str, at_pos, right, left)
   return #left == #right
 end
 local self_assign
-self_assign = function(name, pos)
+self_assign = function(name, at_pos)
   return {
     {
       "key_literal",
@@ -277,7 +277,7 @@ self_assign = function(name, pos)
     {
       "ref",
       name,
-      [-1] = pos
+      [-1] = at_pos
     }
   }
 end

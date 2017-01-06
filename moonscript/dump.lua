@@ -31,8 +31,8 @@ local tree
 tree = function(block)
   local _list_0 = block
   for _index_0 = 1, #_list_0 do
-    local value = _list_0[_index_0]
-    print(flat_value(value))
+    local v = _list_0[_index_0]
+    print(flat_value(v))
   end
 end
 return {
