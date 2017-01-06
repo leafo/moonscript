@@ -1565,7 +1565,7 @@ their written order you can add `local *` to the top of your file.
 
 # License (MIT)
 
-    Copyright (C) 2015 by Leaf Corcoran
+    Copyright (C) 2017 by Leaf Corcoran
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
