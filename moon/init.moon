@@ -96,6 +96,12 @@ extend = (...) ->
 copy = =>
   {key,val for key,val in pairs self}
 
+-- merges the content of the second table with the content in the second table
+merge = (tbl) =>
+  for k, v in pairs tbl
+    self[k] = v
+  self
+
 -- mixin class properties into self, call new
 mixin = (cls, ...) =>
   for key, val in pairs cls.__base
