@@ -102,8 +102,10 @@ x = {
   end
 }
 x = {
-  something = something,
-  something = something
+  something = {
+    something,
+    something
+  }
 }
 local y = {
   hi = hi,
