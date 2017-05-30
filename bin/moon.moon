@@ -1,5 +1,4 @@
-
-alt_getopt = require "alt_getopt"
+argparse = require "argparse"
 
 moonscript = require "moonscript.base"
 util = require "moonscript.util"
@@ -7,53 +6,36 @@ errors = require "moonscript.errors"
 
 unpack = util.unpack
 
-opts, ind = alt_getopt.get_opts arg, "cvhd", {
-  version: "v"
-  help: "h"
-}
+argparser = argparse! name: "moon"
 
-help = [=[Usage: %s [options] [script [args]]
+argparser\argument "script"
+argparser\argument("args")\args "*"
+argparser\option "-c --coverage", "Collect and print code coverage"
+argparser\option "-d", "Disable stack trace rewriting"
+argparser\option "-v --version", "Print version information"
 
-    -h          Print this message
-    -d          Disable stack trace rewriting
-    -c          Collect and print code coverage
-    -v          Print version
-]=]
-
+base = 0
+for flag in *arg
+  base += 1
+  break if flag\sub(1, 1) != "-"
+args = {unpack arg, 1, base}
+opts = argparser\parse args
 
 print_err = (...) ->
   msg = table.concat [tostring v for v in *{...}], "\t"
   io.stderr\write msg .. "\n"
 
-print_help = (err) ->
-  help = help\format arg[0]
-
-  if err
-    print_err err
-    print_err help
-  else
-    print help
-
-  os.exit!
-
 run = ->
-  if opts.h
-    print_help!
 
-  if opts.v
+  if opts.version
     require("moonscript.version").print_version!
     os.exit!
 
-  script_fname = arg[ind]
+  script_fname = opts.script
 
-  unless script_fname
-    print_help "REPL not yet supported"
-
-  new_arg = {
-    [-1]: arg[0],
-    [0]: arg[ind],
-    select ind + 1, unpack arg
-  }
+  args = {unpack arg, base + 1}
+  args[-1] = arg[0]
+  args[0] = opts.script
 
   local moonscript_chunk, lua_parse_error
 
@@ -74,11 +56,11 @@ run = ->
 
     os.exit 1
 
-  util.getfenv(moonscript_chunk).arg = new_arg
+  util.getfenv(moonscript_chunk).arg = args
 
   run_chunk = ->
     moonscript.insert_loader!
-    moonscript_chunk unpack new_arg
+    moonscript_chunk unpack args
     moonscript.remove_loader!
 
   if opts.d
@@ -86,7 +68,7 @@ run = ->
 
   local err, trace, cov
 
-  if opts.c
+  if opts.coverage
     print "starting coverage"
     coverage = require "moonscript.cmd.coverage"
     cov = coverage.CodeCoverage!
