@@ -1,30 +1,39 @@
-#!/usr/bin/env lua
-local alt_getopt = require("alt_getopt")
+local argparse = require("argparse")
 local moonscript = require("moonscript.base")
 local util = require("moonscript.util")
 local errors = require("moonscript.errors")
 local unpack = util.unpack
-local opts, ind = alt_getopt.get_opts(arg, "cvhd", {
-  version = "v",
-  help = "h"
+local argparser = argparse()({
+  name = "moon"
 })
-local help = [=[Usage: %s [options] [script [args]]
-
-    -h          Print this message
-    -d          Disable stack trace rewriting
-    -c          Collect and print code coverage
-    -v          Print version
-]=]
+argparser:argument("script")
+argparser:argument("args"):args("*")
+argparser:option("-c --coverage", "Collect and print code coverage")
+argparser:option("-d", "Disable stack trace rewriting")
+argparser:option("-v --version", "Print version information")
+local base = 0
+local _list_0 = arg
+for _index_0 = 1, #_list_0 do
+  local flag = _list_0[_index_0]
+  base = base + 1
+  if flag:sub(1, 1) ~= "-" then
+    break
+  end
+end
+local args = {
+  unpack(arg, 1, base)
+}
+local opts = argparser:parse(args)
 local print_err
 print_err = function(...)
   local msg = table.concat((function(...)
     local _accum_0 = { }
     local _len_0 = 1
-    local _list_0 = {
+    local _list_1 = {
       ...
     }
-    for _index_0 = 1, #_list_0 do
-      local v = _list_0[_index_0]
+    for _index_0 = 1, #_list_1 do
+      local v = _list_1[_index_0]
       _accum_0[_len_0] = tostring(v)
       _len_0 = _len_0 + 1
     end
@@ -32,35 +41,18 @@ print_err = function(...)
   end)(...), "\t")
   return io.stderr:write(msg .. "\n")
 end
-local print_help
-print_help = function(err)
-  help = help:format(arg[0])
-  if err then
-    print_err(err)
-    print_err(help)
-  else
-    print(help)
-  end
-  return os.exit()
-end
 local run
 run = function()
-  if opts.h then
-    print_help()
-  end
-  if opts.v then
+  if opts.version then
     require("moonscript.version").print_version()
     os.exit()
   end
-  local script_fname = arg[ind]
-  if not (script_fname) then
-    print_help("REPL not yet supported")
-  end
-  local new_arg = {
-    [-1] = arg[0],
-    [0] = arg[ind],
-    select(ind + 1, unpack(arg))
+  local script_fname = opts.script
+  args = {
+    unpack(arg, base + 1)
   }
+  args[-1] = arg[0]
+  args[0] = opts.script
   local moonscript_chunk, lua_parse_error
   local passed, err = pcall(function()
     moonscript_chunk, lua_parse_error = moonscript.loadfile(script_fname, {
@@ -79,18 +71,19 @@ run = function()
     end
     os.exit(1)
   end
-  util.getfenv(moonscript_chunk).arg = new_arg
+  util.getfenv(moonscript_chunk).arg = args
+  print(args[-1], args[0], args[1])
   local run_chunk
   run_chunk = function()
     moonscript.insert_loader()
-    moonscript_chunk(unpack(new_arg))
+    moonscript_chunk(unpack(args))
     return moonscript.remove_loader()
   end
   if opts.d then
     return run_chunk()
   end
   local err, trace, cov
-  if opts.c then
+  if opts.coverage then
     print("starting coverage")
     local coverage = require("moonscript.cmd.coverage")
     cov = coverage.CodeCoverage()
@@ -119,4 +112,3 @@ run = function()
   end
 end
 return run()
--- vim: set filetype=lua:
