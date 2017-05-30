@@ -16,7 +16,7 @@ description = {
 dependencies = {
 	"lua >= 5.1",
 	"lpeg >= 0.10, ~= 0.11",
-	"alt-getopt >= 0.7",
+	"argparse >= 0.5",
 	"luafilesystem >= 1.5"
 }
 
