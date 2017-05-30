@@ -1,48 +1,36 @@
 #!/usr/bin/env lua
 
-local alt_getopt = require "alt_getopt"
+local argparse = require "argparse"
 local lfs = require "lfs"
 
-local opts, ind = alt_getopt.get_opts(arg, "lvhwt:o:pTXb", {
-	print = "p", tree = "T", version = "v", help = "h", lint = "l"
-})
+local parser = argparse()
 
-local read_stdin = arg[1] == "--"
+parser:flag("-l --lint", "Perform a lint on the file instead of compiling")
+parser:flag("-v --version", "Print version")
+parser:flag("-w --watch", "Watch file/directory for updates")
+parser:mutex(
+	parser:flag("-t --output-to", "Specify where to place compiled files"),
+	parser:flag("-o", "Write output to file"):args(1),
+	parser:flag("-p", "Write output to standard output"),
+	parser:flag("-T", "Write parse tree instead of code (to stdout)"),
+	parser:flag("-b", "Write parse and compile time instead of code(to stdout)"),
+	parser:flag("-X", "Write line rewrite map instead of code (to stdout)")
+)
+parser:flag("-",
+	"Read from standard in, print to standard out (Must be only argument)")
 
-local help = [[Usage: %s [options] files/directories...
+local read_stdin = arg[1] == "--" -- luacheck: ignore 113
 
-    -h          Print this message
-    -w          Watch file/directory
-    -t path     Specify where to place compiled files
-    -o file     Write output to file
-    -p          Write output to standard out
-    -T          Write parse tree instead of code (to stdout)
-    -X          Write line rewrite map instead of code (to stdout)
-    -l          Perform lint on the file instead of compiling
-    -b          Dump parse and compile time (doesn't write output)
-    -v          Print version
+if not read_stdin then
+	parser:argument("file/directory"):args("+")
+end
 
-    --          Read from standard in, print to standard out
-                (Must be first and only argument)
-]]
+local opts = parser:parse()
 
-if opts.v then
+if opts.version then
 	local v = require "moonscript.version"
 	v.print_version()
 	os.exit()
-end
-
-function print_help(err)
-	local help_msg = help:format(arg[0])
-
-	if err then
-		io.stderr:write("Error: ".. err .. "\n")
-		io.stderr:write(help_msg .. "\n")
-		os.exit(1)
-	else
-		print(help_msg)
-		os.exit(0)
-	end
 end
 
 function log_msg(...)
@@ -53,10 +41,7 @@ end
 
 local moonc = require("moonscript.cmd.moonc")
 local util = require "moonscript.util"
-local mkdir = moonc.mkdir
 local normalize_dir = moonc.normalize_dir
-local parse_dir = moonc.parse_dir
-local parse_file = moonc.parse_file
 local compile_and_write = moonc.compile_and_write
 local path_to_target = moonc.path_to_target
 
@@ -102,21 +87,17 @@ local function get_files(fname, files)
 		for _, sub_fname in ipairs(scan_directory(fname)) do
 			table.insert(files, {
 				sub_fname,
-				path_to_target(sub_fname, opts.t, fname)
+				path_to_target(sub_fname, opts.output_to, fname)
 			})
 		end
 	else
 		table.insert(files, {
 			fname,
-			path_to_target(fname, opts.t)
+			path_to_target(fname, opts.output_to)
 		})
 	end
 
 	return files
-end
-
-if opts.h then
-	print_help()
 end
 
 if read_stdin then
@@ -137,14 +118,7 @@ if read_stdin then
 	os.exit()
 end
 
-local inputs = {}
-for i = ind, #arg do
-	table.insert(inputs, arg[i])
-end
-
-if #inputs == 0 then
-	print_help("No files specified")
-end
+local inputs = opts["file/directory"]
 
 local files = {}
 for _, input in ipairs(inputs) do
@@ -154,10 +128,6 @@ end
 files = remove_dups(files, function(f)
 	return f[2]
 end)
-
-if opts.o and #files > 1 then
-	print_help("-o can not be used with multiple input files")
-end
 
 -- returns an iterator that returns files that have been updated
 local function create_watcher(files)
@@ -170,10 +140,10 @@ local function create_watcher(files)
 	return watchers.SleepWatcher(files):each_update()
 end
 
-if opts.w then
+if opts.watch then
 	-- build function to check for lint or compile in watch
 	local handle_file
-	if opts.l then
+	if opts.lint then
 		local lint = require "moonscript.cmd.lint"
 		handle_file = lint.lint_file
 	else
@@ -199,7 +169,7 @@ if opts.w then
 		end
 
 		local success, err = handle_file(fname, target)
-		if opts.l then
+		if opts.lint then
 			if success then
 				io.stderr:write(success .. "\n\n")
 			elseif err then
@@ -218,7 +188,7 @@ if opts.w then
 	end
 
 	io.stderr:write("\nQuitting...\n")
-elseif opts.l then
+elseif opts.lint then
 	local has_linted_with_error;
 	local lint = require "moonscript.cmd.lint"
 	for _, tuple in pairs(files) do
