@@ -21,7 +21,7 @@ local help = [[Usage: %s [options] files/directories...
     -l          Perform lint on the file instead of compiling
     -b          Dump parse and compile time (doesn't write output)
     -v          Print version
-
+    -n          Keep line numbers so that every output line maps a input line
     --          Read from standard in, print to standard out
                 (Must be first and only argument)
 ]]
@@ -248,6 +248,7 @@ else
 			benchmark = opts.b,
 			show_posmap = opts.X,
 			show_parse_tree = opts.T,
+			keep_line_number = opts.n
 		})
 
 		if not success then
