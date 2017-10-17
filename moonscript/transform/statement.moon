@@ -229,9 +229,37 @@ Transformer {
   update: (node) =>
     name, op, exp = unpack node, 2
     op_final = op\match "^(.+)=$"
+
     error "Unknown op: "..op if not op_final
+
+    local lifted
+
+    if ntype(name) == "chain"
+      lifted = {}
+      new_chain = for part in *name[3,]
+        if ntype(part) == "index"
+          proxy = NameProxy "update"
+          table.insert lifted, { proxy, part[2] }
+          { "index", proxy }
+        else
+          part
+
+      if next lifted
+        name = {name[1], name[2], unpack new_chain}
+
     exp = {"parens", exp} unless value_is_singular exp
-    build.assign_one name, {"exp", name, op_final, exp}
+    out = build.assign_one name, {"exp", name, op_final, exp}
+
+    if lifted and next lifted
+      names = [l[1] for l in *lifted]
+      values = [l[2] for l in *lifted]
+
+      out = build.group {
+        {"assign", names, values}
+        out
+      }
+
+    out
 
   import: (node) =>
     names, source = unpack node, 2

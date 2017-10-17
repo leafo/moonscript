@@ -353,18 +353,85 @@ return Transformer({
     if not op_final then
       error("Unknown op: " .. op)
     end
+    local lifted
+    if ntype(name) == "chain" then
+      lifted = { }
+      local new_chain
+      do
+        local _accum_0 = { }
+        local _len_0 = 1
+        for _index_0 = 3, #name do
+          local part = name[_index_0]
+          if ntype(part) == "index" then
+            local proxy = NameProxy("update")
+            table.insert(lifted, {
+              proxy,
+              part[2]
+            })
+            _accum_0[_len_0] = {
+              "index",
+              proxy
+            }
+          else
+            _accum_0[_len_0] = part
+          end
+          _len_0 = _len_0 + 1
+        end
+        new_chain = _accum_0
+      end
+      if next(lifted) then
+        name = {
+          name[1],
+          name[2],
+          unpack(new_chain)
+        }
+      end
+    end
     if not (value_is_singular(exp)) then
       exp = {
         "parens",
         exp
       }
     end
-    return build.assign_one(name, {
+    local out = build.assign_one(name, {
       "exp",
       name,
       op_final,
       exp
     })
+    if lifted and next(lifted) then
+      local names
+      do
+        local _accum_0 = { }
+        local _len_0 = 1
+        for _index_0 = 1, #lifted do
+          local l = lifted[_index_0]
+          _accum_0[_len_0] = l[1]
+          _len_0 = _len_0 + 1
+        end
+        names = _accum_0
+      end
+      local values
+      do
+        local _accum_0 = { }
+        local _len_0 = 1
+        for _index_0 = 1, #lifted do
+          local l = lifted[_index_0]
+          _accum_0[_len_0] = l[2]
+          _len_0 = _len_0 + 1
+        end
+        values = _accum_0
+      end
+      out = build.group({
+        {
+          "assign",
+          names,
+          values
+        },
+        out
+      })
+    end
+    return out
   end,
   import = function(self, node)
     local names, source = unpack(node, 2)
