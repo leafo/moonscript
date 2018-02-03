@@ -81,6 +81,12 @@ compile_file_text = function(text, opts)
   if opts.benchmark then
     compile_time = gettime()
   end
+  do
+    local mod = opts.transform_module
+    if mod then
+      tree = assert(require(mod)(tree))
+    end
+  end
   local code, posmap_or_err, err_pos = compile.tree(tree)
   if not (code) then
     return nil, compile.format_error(posmap_or_err, err_pos, text)

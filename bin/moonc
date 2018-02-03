@@ -8,9 +8,10 @@ local parser = argparse()
 parser:flag("-l --lint", "Perform a lint on the file instead of compiling")
 parser:flag("-v --version", "Print version")
 parser:flag("-w --watch", "Watch file/directory for updates")
+parser:option("--transform", "Transform syntax tree with module")
 parser:mutex(
 	parser:flag("-t --output-to", "Specify where to place compiled files"),
-	parser:flag("-o", "Write output to file"):args(1),
+	parser:option("-o", "Write output to file"),
 	parser:flag("-p", "Write output to standard output"),
 	parser:flag("-T", "Write parse tree instead of code (to stdout)"),
 	parser:flag("-b", "Write parse and compile time instead of code(to stdout)"),
@@ -218,6 +219,7 @@ else
 			benchmark = opts.b,
 			show_posmap = opts.X,
 			show_parse_tree = opts.T,
+			transform_module = opts.transform
 		})
 
 		if not success then

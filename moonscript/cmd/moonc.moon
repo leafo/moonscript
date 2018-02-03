@@ -84,6 +84,9 @@ compile_file_text = (text, opts={}) ->
   compile_time = if opts.benchmark
     gettime!
 
+  if mod = opts.transform_module
+    tree = assert require(mod) tree
+
   code, posmap_or_err, err_pos = compile.tree tree
 
   unless code
