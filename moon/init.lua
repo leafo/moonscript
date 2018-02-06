@@ -25,25 +25,24 @@ type = function(value)
   return base_type
 end
 debug = setmetatable({
-  upvalue = function(fn, k, v)
-    local upvalues = { }
+  upvalue = function(fn, k, ...)
+    local value = nil
     local i = 1
     while true do
-      local name = lua.debug.getupvalue(fn, i)
+      local name
+      name, value = lua.debug.getupvalue(fn, i)
       if name == nil then
+        error("Failed to find upvalue: " .. tostring(k))
+      end
+      if name == k then
         break
       end
-      upvalues[name] = i
       i = i + 1
     end
-    if not upvalues[k] then
-      error("Failed to find upvalue: " .. tostring(k))
-    end
-    if not v then
-      local _, value = lua.debug.getupvalue(fn, upvalues[k])
+    if select("#", ...) == 0 then
       return value
     else
-      return lua.debug.setupvalue(fn, upvalues[k], v)
+      return lua.debug.setupvalue(fn, i, ...)
     end
   end
 }, {
