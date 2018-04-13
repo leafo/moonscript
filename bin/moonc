@@ -225,9 +225,7 @@ else
 		if not success then
 			io.stderr:write(fname .. "\t" .. err .. "\n")
 			os.exit(1)
-		elseif success == "build" then
-			log_msg("Built", fname)
-		end
+		else
 	end
 end
 
