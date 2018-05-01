@@ -29,11 +29,16 @@ value = function(op)
 end
 local tree
 tree = function(block)
-  local _list_0 = block
-  for _index_0 = 1, #_list_0 do
-    local value = _list_0[_index_0]
-    flat_value(value)
-  end
+  return table.concat((function()
+    local _accum_0 = { }
+    local _len_0 = 1
+    for _index_0 = 1, #block do
+      local value = block[_index_0]
+      _accum_0[_len_0] = flat_value(value)
+      _len_0 = _len_0 + 1
+    end
+    return _accum_0
+  end)(), "\n")
 end
 return {
   value = value,

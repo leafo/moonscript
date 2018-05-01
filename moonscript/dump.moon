@@ -12,7 +12,7 @@ value = (op) ->
   flat_value op
 
 tree = (block) ->
-  flat_value value for value in *block
+  table.concat [flat_value value for value in *block], "\n"
 
 { :value, :tree }
 
