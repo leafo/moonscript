@@ -225,7 +225,7 @@ else
 		if not success then
 			io.stderr:write(fname .. "\t" .. err .. "\n")
 			os.exit(1)
-		else
+		end
 	end
 end
 
