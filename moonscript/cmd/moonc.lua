@@ -74,7 +74,7 @@ compile_file_text = function(text, opts)
   end
   if opts.show_parse_tree then
     local dump = require("moonscript.dump")
-    dump.tree(tree)
+    print(dump.tree(tree))
     return true
   end
   local compile_time
@@ -84,7 +84,9 @@ compile_file_text = function(text, opts)
   do
     local mod = opts.transform_module
     if mod then
-      tree = assert(require(mod)(tree))
+      local file = assert(loadfile(mod))
+      local fn = assert(file())
+      tree = assert(fn(tree))
     end
   end
   local code, posmap_or_err, err_pos = compile.tree(tree)
