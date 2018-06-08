@@ -14,6 +14,10 @@ See <http://moonscript.org>.
 
 Online demo/compiler at <http://moonscript.org/compiler>.
 
+## Join Our Community
+
+We just created a Discord for those interested in MoonScript. You can join us here: <https://discord.gg/Y75ZXrD>
+
 ## Running Tests
 
 Tests are written in MoonScript and use [Busted](http://olivinelabs.com/busted/).
