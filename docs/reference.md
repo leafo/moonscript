@@ -195,7 +195,7 @@ func = (num) => @value + num
 
 It is possible to provide default values for the arguments of a function. An
 argument is determined to be empty if its value is `nil`. Any `nil` arguments
-that have a default value will be replace before the body of the function is run.
+that have a default value will be replaced before the body of the function is run.
 
 ```moon
 my_function = (name="something", height=100) ->
