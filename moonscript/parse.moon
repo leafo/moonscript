@@ -285,7 +285,7 @@ build_grammar = wrap_env debug_grammar, (root) ->
     KeyValue: (sym":" * -SomeSpace *  Name * lpeg.Cp!) / self_assign +
       Ct(
         (KeyName + sym"[" * Exp * sym"]" +Space * DoubleString + Space * SingleString) *
-        symx":" *
+        Space * symx":" *
         (Exp + TableBlock + SpaceBreak^1 * Exp)
       )
 
