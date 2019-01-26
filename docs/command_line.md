@@ -130,6 +130,23 @@ compiled automatically.
 
 A full list of flags can be seen by passing the `-h` or `--help` flag.
 
+### Syntax Transformer
+
+A syntax transformer is a function that manipulates MoonScript code before
+compiling to Lua. It operates on the parsed AST (Abstract Syntax Tree). It can
+be used to implement macros, change syntax, optimize code, among other things.
+You specify the name of a Lua module. This module must return a single function
+(or callable object) that takes AST as an argument, and returns the new AST.
+
+```bash
+moonc --transform my_transfomer my_script.moon
+```
+
+The transform can fail by returning `nil` and an error message. MoonScript AST
+is currently undocumented, so you'll have to experiment by printing out the AST
+to see how to make changes. MoonScript AST is made up of standard Lua tables
+that are nested.
+
 ### Linter
 
 `moonc` contains a [lint][1] tool for statically detecting potential problems
