@@ -163,7 +163,7 @@ if opts.watch then
 	end
 
 	for fname in protected do
-		local target = path_to_target(fname, opts.t)
+		local target = path_to_target(fname, opts.output_to)
 
 		if opts.o then
 			target = opts.o
