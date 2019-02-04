@@ -199,6 +199,7 @@ path_to_target = (path, target_dir=nil, base_dir=nil) ->
   :parse_file
   :iterate_path
   :convert_path
+  :is_abs_path
   :gettime
   :format_time
   :path_to_target

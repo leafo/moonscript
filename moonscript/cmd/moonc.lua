@@ -205,6 +205,7 @@ return {
   parse_file = parse_file,
   iterate_path = iterate_path,
   convert_path = convert_path,
+  is_abs_path = is_abs_path,
   gettime = gettime,
   format_time = format_time,
   path_to_target = path_to_target,
