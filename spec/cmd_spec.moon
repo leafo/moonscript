@@ -14,9 +14,15 @@ describe "moonc", ->
 
   it "should normalize dir", ->
     same moonc.normalize_dir, "hello/world/", "hello/world/"
+    same moonc.normalize_dir, "/hello/world/", "/hello/world/"
     same moonc.normalize_dir, "hello/world//", "hello/world/"
-    same moonc.normalize_dir, "", "/" -- wrong
+    same moonc.normalize_dir, "/hello/world//", "/hello/world/"
+    same moonc.normalize_dir, "hello//world//", "hello/world/"
+    same moonc.normalize_dir, "/hello//world//", "/hello/world/"
+    same moonc.normalize_dir, "", ""
+    same moonc.normalize_dir, "/", "/"
     same moonc.normalize_dir, "hello", "hello/"
+    same moonc.normalize_dir, "/hello", "/hello/"
 
   it "should parse dir", ->
     same moonc.parse_dir, "/hello/world/file", "/hello/world/"
@@ -34,6 +40,25 @@ describe "moonc", ->
     same moonc.convert_path, "test.moon", "test.lua"
     same moonc.convert_path, "/hello/file.moon", "/hello/file.lua"
     same moonc.convert_path, "/hello/world/file", "/hello/world/file.lua"
+
+  it "iterates paths", ->
+    single = {"foo"}
+    single_path = "foo"
+    nested = {"foo", "bar"}
+    nested_path = "foo/bar"
+    nested_file = {"foo", "bar.baz"}
+    nested_file_path = "foo/bar.baz"
+
+    same_iterated_path = (path, comparison_tbl) ->
+      i = 0
+      for path_element in moonc.iterate_path(path)
+        i += 1
+        assert.same comparison_tbl[i], path_element
+      assert.same #comparison_tbl, i
+
+    same_iterated_path single_path, single
+    same_iterated_path nested_path, nested
+    same_iterated_path nested_file_path, nested_file
 
   it "calculate target", ->
     p = moonc.path_to_target

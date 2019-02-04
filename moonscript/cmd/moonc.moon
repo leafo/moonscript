@@ -23,9 +23,15 @@ mkdir = (path) ->
 
   lfs.attributes path, "mode"
 
--- strips excess / and ensures path ends with /
+-- Strips excess / and ensures path ends with /
 normalize_dir = (path) ->
-  path\match("^(.-)[#{dirsep_chars}]*$") .. dirsep
+  normalized_dir = if is_abs_path(path)
+    dirsep
+  else
+    ""
+  for path_element in iterate_path(path)
+    normalized_dir ..= path_element .. dirsep
+  return normalized_dir
 
 -- parse the directory out of a path
 parse_dir = (path) ->
@@ -41,6 +47,10 @@ convert_path = (path) ->
   if new_path == path
     new_path = path .. ".lua"
   new_path
+
+-- Iterates over the directories (and file) in a path
+iterate_path = (path) ->
+  path\gmatch "([^#{dirsep_chars}]+)"
 
 format_time = (time) ->
   "%.3fms"\format time*1000
@@ -187,6 +197,7 @@ path_to_target = (path, target_dir=nil, base_dir=nil) ->
   :normalize_dir
   :parse_dir
   :parse_file
+  :iterate_path
   :convert_path
   :gettime
   :format_time

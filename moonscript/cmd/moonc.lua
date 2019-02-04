@@ -1,7 +1,7 @@
 local lfs = require("lfs")
 local split
 split = require("moonscript.util").split
-local dirsep, dirsep_chars, mkdir, normalize_dir, parse_dir, parse_file, convert_path, format_time, gettime, compile_file_text, write_file, compile_and_write, is_abs_path, path_to_target
+local dirsep, dirsep_chars, mkdir, normalize_dir, parse_dir, parse_file, convert_path, iterate_path, format_time, gettime, compile_file_text, write_file, compile_and_write, is_abs_path, path_to_target
 dirsep = package.config:sub(1, 1)
 if dirsep == "\\" then
   dirsep_chars = "\\/"
@@ -19,7 +19,17 @@ mkdir = function(path)
   return lfs.attributes(path, "mode")
 end
 normalize_dir = function(path)
-  return path:match("^(.-)[" .. tostring(dirsep_chars) .. "]*$") .. dirsep
+  local normalized_dir
+  if is_abs_path(path) then
+    normalized_dir = dirsep
+  else
+    normalized_dir = ""
+  end
+  for path_element in iterate_path(path) do
+    normalized_dir = normalized_dir .. (path_element .. dirsep)
+  end
+  return normalized_dir
+end
 end
 parse_dir = function(path)
   return (path:match("^(.-)[^" .. tostring(dirsep_chars) .. "]*$"))
@@ -33,6 +43,9 @@ convert_path = function(path)
     new_path = path .. ".lua"
   end
   return new_path
+end
+iterate_path = function(path)
+  return path:gmatch("([^" .. tostring(dirsep_chars) .. "]+)")
 end
 format_time = function(time)
   return ("%.3fms"):format(time * 1000)
@@ -190,6 +203,7 @@ return {
   normalize_dir = normalize_dir,
   parse_dir = parse_dir,
   parse_file = parse_file,
+  iterate_path = iterate_path,
   convert_path = convert_path,
   gettime = gettime,
   format_time = format_time,
