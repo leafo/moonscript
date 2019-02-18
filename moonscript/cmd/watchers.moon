@@ -17,7 +17,7 @@ class Watcher
   print_start: (mode, misc) =>
     io.stderr\write "#{@start_msg} with #{mode} [#{misc}]\n"
 
-class InotifyWacher extends Watcher
+class InotifyWatcher extends Watcher
   @available: =>
     pcall -> require "inotify"
 
@@ -100,4 +100,4 @@ class SleepWatcher extends Watcher
 
         sleep @polling_rate
 
-{:Watcher, :SleepWatcher, :InotifyWacher}
+{:Watcher, :SleepWatcher, :InotifyWatcher}

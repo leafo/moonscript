@@ -62,7 +62,7 @@ do
   _base_0.__class = _class_0
   Watcher = _class_0
 end
-local InotifyWacher
+local InotifyWatcher
 do
   local _class_0
   local _parent_0 = Watcher
@@ -139,7 +139,7 @@ do
       return _class_0.__parent.__init(self, ...)
     end,
     __base = _base_0,
-    __name = "InotifyWacher",
+    __name = "InotifyWatcher",
     __parent = _parent_0
   }, {
     __index = function(cls, name)
@@ -169,7 +169,7 @@ do
   if _parent_0.__inherited then
     _parent_0.__inherited(_parent_0, _class_0)
   end
-  InotifyWacher = _class_0
+  InotifyWatcher = _class_0
 end
 local SleepWatcher
 do
@@ -264,5 +264,5 @@ end
 return {
   Watcher = Watcher,
   SleepWatcher = SleepWatcher,
-  InotifyWacher = InotifyWacher
+  InotifyWatcher = InotifyWatcher
 }
