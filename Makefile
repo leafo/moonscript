@@ -22,7 +22,7 @@ local: compile
 compile:
 	LUA_PATH='$(LUA_PATH_MAKE)' LUA_CPATH='$(LUA_CPATH_MAKE)' $(LUA) bin/moonc moon/ moonscript/
 	echo "#!/usr/bin/env lua" > bin/moon
-	$(LUA) bin/moonc -p bin/moon.moon >> bin/moon
+	LUA_PATH='$(LUA_PATH_MAKE)' LUA_CPATH='$(LUA_CPATH_MAKE)' $(LUA) bin/moonc -p bin/moon.moon >> bin/moon
 	echo "-- vim: set filetype=lua:" >> bin/moon
 
 compile_system:
