@@ -134,43 +134,52 @@ handle_watch_loop = function(opts, output_to, input_paths, prefix_map)
       end
     end
   end
-  local watcher = create_watcher(input_paths)
-  for filename in watcher do
-    local target = output_for(output_to, prefix_map, filename, "file")
+  local watcher = create_watcher(output_to, input_paths, prefix_map)
+  for file_tuple in watcher do
+    local event_type, filename, target, path_type
+    event_type, filename, target, path_type = file_tuple[1], file_tuple[2], file_tuple[3], file_tuple[4]
     if opts.o then
       target = opts.o
     end
     if opts.lint then
-      local lint = require("moonscript.cmd.lint")
-      local success, err = lint.lint_file(filename)
-      if success then
-        io.stderr:write(success .. "\n\n")
-      elseif err then
-        io.stderr:write(filename .. "\n" .. err .. "\n\n")
+      if event_type == "changedfile" then
+        local lint = require("moonscript.cmd.lint")
+        local success, err = lint.lint_file(filename)
+        if success then
+          io.stderr:write(success .. "\n\n")
+        elseif err then
+          io.stderr:write(filename .. "\n" .. err .. "\n\n")
+        end
+      elseif event_type == "removed" then
+        remove_orphaned_output(target, path_type)
       end
     else
-      local success, err = compile_and_write(filename, target)
-      if not success then
-        io.stderr:write(table.concat({
-          "",
-          "Error: " .. filename,
-          err,
-          "\n"
-        }, "\n"))
-      elseif success == "build" then
-        log_msg("Built", filename, "->", target)
+      if event_type == "changedfile" then
+        local success, err = compile_and_write(filename, target)
+        if not success then
+          io.stderr:write(table.concat({
+            "",
+            "Error: " .. filename,
+            err,
+            "\n"
+          }, "\n"))
+        elseif success == "build" then
+          log_msg("Built", filename, "->", target)
+        end
+      elseif event_type == "removed" then
+        remove_orphaned_output(target, path_type)
       end
     end
   end
   return io.stderr:write("\nQuitting...\n")
 end
-create_watcher = function(input_paths)
+create_watcher = function(output_to, input_paths, prefix_map)
   local watchers = require("moonscript.cmd.watchers")
   local watcher
   if watchers.InotifyWatcher:available() then
-    watcher = watchers.InotifyWatcher(input_paths)
+    watcher = watchers.InotifyWatcher(output_to, input_paths, prefix_map)
   else
-    watcher = watchers.SleepWatcher(input_paths)
+    watcher = watchers.SleepWatcher(output_to, input_paths, prefix_map)
   end
   return watcher:each_update()
 end

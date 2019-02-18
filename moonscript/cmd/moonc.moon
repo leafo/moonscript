@@ -126,44 +126,50 @@ handle_watch_loop = (opts, output_to, input_paths, prefix_map) ->
       else
         log_msg "Error removing file", target, err_string
 
-  watcher = create_watcher input_paths
+  watcher = create_watcher output_to, input_paths, prefix_map
 
-  for filename in watcher
-    target = output_for(output_to, prefix_map, filename, "file")
+  for file_tuple in watcher
+    {event_type, filename, target, path_type} = file_tuple
 
     if opts.o
       target = opts.o
 
     if opts.lint
-      lint = require "moonscript.cmd.lint"
-      success, err = lint.lint_file filename
-      if success
-        io.stderr\write success .. "\n\n"
-      elseif err
-        io.stderr\write filename .. "\n" .. err .. "\n\n"
+      if event_type == "changedfile"
+        lint = require "moonscript.cmd.lint"
+        success, err = lint.lint_file filename
+        if success
+          io.stderr\write success .. "\n\n"
+        elseif err
+          io.stderr\write filename .. "\n" .. err .. "\n\n"
+      elseif event_type == "removed"
+        remove_orphaned_output target, path_type
     else
-      success, err = compile_and_write filename, target
-      if not success
-        io.stderr\write table.concat({
-          "",
-          "Error: " .. filename,
-          err,
-          "\n",
-        }, "\n")
-      elseif success == "build"
-        log_msg "Built", filename, "->", target
+      if event_type == "changedfile"
+        success, err = compile_and_write filename, target
+        if not success
+          io.stderr\write table.concat({
+            "",
+            "Error: " .. filename,
+            err,
+            "\n",
+          }, "\n")
+        elseif success == "build"
+          log_msg "Built", filename, "->", target
+      elseif event_type == "removed"
+        remove_orphaned_output target, path_type
 
   io.stderr\write "\nQuitting...\n"
 
-create_watcher = (input_paths) ->
+create_watcher = (output_to, input_paths, prefix_map) ->
   watchers = require "moonscript.cmd.watchers"
 
   -- TODO cli argument to force sleep watcher (as it is potentially a little
   -- more reliable)
   watcher = if watchers.InotifyWatcher\available!
-    watchers.InotifyWatcher input_paths
+    watchers.InotifyWatcher output_to, input_paths, prefix_map
   else
-    watchers.SleepWatcher input_paths
+    watchers.SleepWatcher output_to, input_paths, prefix_map
 
   return watcher\each_update!
 

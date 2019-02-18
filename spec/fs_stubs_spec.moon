@@ -154,13 +154,6 @@ describe "filesystem stub helpers", ->
       before_each ->
         lfs = stubs.lfs
 
-      describe "attributes()", ->
-        it "", ->
-          nil -- TODO
-
-        it "", ->
-          nil -- TODO
-
       describe "mkdir()", ->
         local dir_name, parent_node, parent_name, dir_path, new_dir_name
 
@@ -196,7 +189,3 @@ describe "filesystem stub helpers", ->
           assert.is.not.Nil error_message
           assert.is.not.Nil error_code
           assert.are.same "No such directory", error_message
-
-      describe "touch()", ->
-        it "", ->
-          nil -- TODO

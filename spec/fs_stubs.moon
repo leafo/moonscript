@@ -75,6 +75,7 @@ create_io_stubs = () ->
 
   lfs =
     attributes: (filepath, aname) ->
+      assert aname == "mode" or aname == "modification", "lfs.attributes(): Not Yet Implemented: only 'mode' and 'modification' attributes currently work"
       fs_node, err_msg = traverse_entire_path filepath
 
       unless fs_node
@@ -113,10 +114,10 @@ create_io_stubs = () ->
         return nil, "Cannot create a directory with a name identical to an existing path", 2
 
     touch: (path, _atime, mtime=os.time!) ->
+      assert _atime == nil, "lfs.touch(): Not Yet Implemented: only supports setting mtime currently"
       parent_node, child_name = traverse_parent path
 
       file_name = path_handling.parse_file path
-      calc_path = path\sub(1, #path - #file_name)
 
       unless parent_node
         return nil, "No such directory", 2
