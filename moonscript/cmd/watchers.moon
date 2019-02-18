@@ -22,7 +22,7 @@ class InotifyWacher extends Watcher
     pcall -> require "inotify"
 
   get_dirs: =>
-    import parse_dir from require "moonscript.cmd.moonc"
+    import parse_dir from require "moonscript.cmd.path_handling"
     dirs = for {file_path} in *@file_list
       dir = parse_dir file_path
       dir = "./" if dir == ""

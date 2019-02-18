@@ -1,13 +1,12 @@
 local lfs = require("lfs")
 local split
 split = require("moonscript.util").split
-local dirsep, dirsep_chars, mkdir, normalize_dir, parse_dir, parse_file, convert_path, iterate_path, format_time, gettime, compile_file_text, write_file, compile_and_write, is_abs_path, path_to_target
-dirsep = package.config:sub(1, 1)
-if dirsep == "\\" then
-  dirsep_chars = "\\/"
-else
-  dirsep_chars = dirsep
+local dirsep, normalize_dir, normalize_path, parse_dir, parse_file, parse_subtree, convert_path
+do
+  local _obj_0 = require("moonscript.cmd.path_handling")
+  dirsep, normalize_dir, normalize_path, parse_dir, parse_file, parse_subtree, convert_path = _obj_0.dirsep, _obj_0.normalize_dir, _obj_0.normalize_path, _obj_0.parse_dir, _obj_0.parse_file, _obj_0.parse_subtree, _obj_0.convert_path
 end
+local mkdir, format_time, gettime, compile_file_text, write_file, compile_and_write, path_to_target
 mkdir = function(path)
   local chunks = split(path, dirsep)
   local accum
@@ -17,35 +16,6 @@ mkdir = function(path)
     lfs.mkdir(accum)
   end
   return lfs.attributes(path, "mode")
-end
-normalize_dir = function(path)
-  local normalized_dir
-  if is_abs_path(path) then
-    normalized_dir = dirsep
-  else
-    normalized_dir = ""
-  end
-  for path_element in iterate_path(path) do
-    normalized_dir = normalized_dir .. (path_element .. dirsep)
-  end
-  return normalized_dir
-end
-end
-parse_dir = function(path)
-  return (path:match("^(.-)[^" .. tostring(dirsep_chars) .. "]*$"))
-end
-parse_file = function(path)
-  return (path:match("^.-([^" .. tostring(dirsep_chars) .. "]*)$"))
-end
-convert_path = function(path)
-  local new_path = path:gsub("%.moon$", ".lua")
-  if new_path == path then
-    new_path = path .. ".lua"
-  end
-  return new_path
-end
-iterate_path = function(path)
-  return path:gmatch("([^" .. tostring(dirsep_chars) .. "]+)")
 end
 format_time = function(time)
   return ("%.3fms"):format(time * 1000)
@@ -161,14 +131,6 @@ compile_and_write = function(src, dest, opts)
   end
   return write_file(dest, code)
 end
-is_abs_path = function(path)
-  local first = path:sub(1, 1)
-  if dirsep == "\\" then
-    return first == "/" or first == "\\" or path:sub(2, 1) == ":"
-  else
-    return first == dirsep
-  end
-end
 path_to_target = function(path, target_dir, base_dir)
   if target_dir == nil then
     target_dir = nil
@@ -198,14 +160,7 @@ path_to_target = function(path, target_dir, base_dir)
   return target
 end
 return {
-  dirsep = dirsep,
   mkdir = mkdir,
-  normalize_dir = normalize_dir,
-  parse_dir = parse_dir,
-  parse_file = parse_file,
-  iterate_path = iterate_path,
-  convert_path = convert_path,
-  is_abs_path = is_abs_path,
   gettime = gettime,
   format_time = format_time,
   path_to_target = path_to_target,

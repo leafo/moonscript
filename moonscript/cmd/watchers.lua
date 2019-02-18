@@ -69,7 +69,7 @@ do
   local _base_0 = {
     get_dirs = function(self)
       local parse_dir
-      parse_dir = require("moonscript.cmd.moonc").parse_dir
+      parse_dir = require("moonscript.cmd.path_handling").parse_dir
       local dirs
       do
         local _accum_0 = { }

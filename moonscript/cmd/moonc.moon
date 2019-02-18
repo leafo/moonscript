@@ -3,14 +3,10 @@
 lfs = require "lfs"
 
 import split from require "moonscript.util"
+import dirsep, normalize_dir, normalize_path, parse_dir, parse_file, parse_subtree, convert_path from require "moonscript.cmd.path_handling"
 
 local *
 
-dirsep = package.config\sub 1,1
-dirsep_chars = if dirsep == "\\"
-  "\\/" -- windows
-else
-  dirsep
 
 -- similar to mkdir -p
 mkdir = (path) ->
@@ -22,35 +18,6 @@ mkdir = (path) ->
     lfs.mkdir accum
 
   lfs.attributes path, "mode"
-
--- Strips excess / and ensures path ends with /
-normalize_dir = (path) ->
-  normalized_dir = if is_abs_path(path)
-    dirsep
-  else
-    ""
-  for path_element in iterate_path(path)
-    normalized_dir ..= path_element .. dirsep
-  return normalized_dir
-
--- parse the directory out of a path
-parse_dir = (path) ->
-  (path\match "^(.-)[^#{dirsep_chars}]*$")
-
--- parse the filename out of a path
-parse_file = (path) ->
-  (path\match "^.-([^#{dirsep_chars}]*)$")
-
--- converts .moon to a .lua path for calcuating compile target
-convert_path = (path) ->
-  new_path = path\gsub "%.moon$", ".lua"
-  if new_path == path
-    new_path = path .. ".lua"
-  new_path
-
--- Iterates over the directories (and file) in a path
-iterate_path = (path) ->
-  path\gmatch "([^#{dirsep_chars}]+)"
 
 format_time = (time) ->
   "%.3fms"\format time*1000
@@ -157,14 +124,6 @@ compile_and_write = (src, dest, opts={}) ->
 
   write_file dest, code
 
-is_abs_path = (path) ->
-  first = path\sub 1, 1
-  if dirsep == "\\"
-    first == "/" or first == "\\" or path\sub(2,1) == ":"
-  else
-    first == dirsep
-
-
 -- calcuate where a path should be compiled to
 -- target_dir: the directory to place the file (optional, from -t flag)
 -- base_dir: the directory where the file came from when globbing recursively
@@ -192,14 +151,7 @@ path_to_target = (path, target_dir=nil, base_dir=nil) ->
   target
 
 {
-  :dirsep
   :mkdir
-  :normalize_dir
-  :parse_dir
-  :parse_file
-  :iterate_path
-  :convert_path
-  :is_abs_path
   :gettime
   :format_time
   :path_to_target

@@ -1,45 +1,44 @@
-
 import with_dev from require "spec.helpers"
 
 -- TODO: add specs for windows equivalents
 
-describe "moonc", ->
-  local moonc
+describe "path_handling", ->
+  local path_handling
 
   dev_loaded = with_dev ->
-    moonc = require "moonscript.cmd.moonc"
+    path_handling = require "moonscript.cmd.path_handling"
 
   same = (fn, a, b) ->
     assert.same b, fn a
 
   it "should normalize dir", ->
-    same moonc.normalize_dir, "hello/world/", "hello/world/"
-    same moonc.normalize_dir, "/hello/world/", "/hello/world/"
-    same moonc.normalize_dir, "hello/world//", "hello/world/"
-    same moonc.normalize_dir, "/hello/world//", "/hello/world/"
-    same moonc.normalize_dir, "hello//world//", "hello/world/"
-    same moonc.normalize_dir, "/hello//world//", "/hello/world/"
-    same moonc.normalize_dir, "", ""
-    same moonc.normalize_dir, "/", "/"
-    same moonc.normalize_dir, "hello", "hello/"
-    same moonc.normalize_dir, "/hello", "/hello/"
+    same path_handling.normalize_dir, "hello/world/", "hello/world/"
+    same path_handling.normalize_dir, "/hello/world/", "/hello/world/"
+    same path_handling.normalize_dir, "hello/world//", "hello/world/"
+    same path_handling.normalize_dir, "/hello/world//", "/hello/world/"
+    same path_handling.normalize_dir, "hello//world//", "hello/world/"
+    same path_handling.normalize_dir, "/hello//world//", "/hello/world/"
+    same path_handling.normalize_dir, "", ""
+    same path_handling.normalize_dir, "/", "/"
+    same path_handling.normalize_dir, "hello", "hello/"
+    same path_handling.normalize_dir, "/hello", "/hello/"
 
   it "should parse dir", ->
-    same moonc.parse_dir, "/hello/world/file", "/hello/world/"
-    same moonc.parse_dir, "/hello/world/", "/hello/world/"
-    same moonc.parse_dir, "world", ""
-    same moonc.parse_dir, "", ""
+    same path_handling.parse_dir, "/hello/world/file", "/hello/world/"
+    same path_handling.parse_dir, "/hello/world/", "/hello/world/"
+    same path_handling.parse_dir, "world", ""
+    same path_handling.parse_dir, "", ""
 
   it "should parse file", ->
-    same moonc.parse_file, "/hello/world/file", "file"
-    same moonc.parse_file, "/hello/world/", ""
-    same moonc.parse_file, "world", "world"
-    same moonc.parse_file, "", ""
+    same path_handling.parse_file, "/hello/world/file", "file"
+    same path_handling.parse_file, "/hello/world/", ""
+    same path_handling.parse_file, "world", "world"
+    same path_handling.parse_file, "", ""
 
   it "convert path", ->
-    same moonc.convert_path, "test.moon", "test.lua"
-    same moonc.convert_path, "/hello/file.moon", "/hello/file.lua"
-    same moonc.convert_path, "/hello/world/file", "/hello/world/file.lua"
+    same path_handling.convert_path, "test.moon", "test.lua"
+    same path_handling.convert_path, "/hello/file.moon", "/hello/file.lua"
+    same path_handling.convert_path, "/hello/world/file", "/hello/world/file.lua"
 
   it "iterates paths", ->
     single = {"foo"}
@@ -51,7 +50,7 @@ describe "moonc", ->
 
     same_iterated_path = (path, comparison_tbl) ->
       i = 0
-      for path_element in moonc.iterate_path(path)
+      for path_element in path_handling.iterate_path(path)
         i += 1
         assert.same comparison_tbl[i], path_element
       assert.same #comparison_tbl, i
@@ -59,6 +58,16 @@ describe "moonc", ->
     same_iterated_path single_path, single
     same_iterated_path nested_path, nested
     same_iterated_path nested_file_path, nested_file
+
+describe "moonc", ->
+  local moonc, path_handling
+
+  dev_loaded = with_dev ->
+    path_handling = require "moonscript.cmd.path_handling"
+    moonc = require "moonscript.cmd.moonc"
+
+  same = (fn, a, b) ->
+    assert.same b, fn a
 
   it "calculate target", ->
     p = moonc.path_to_target
