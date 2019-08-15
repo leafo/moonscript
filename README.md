@@ -47,6 +47,7 @@ branch](https://github.com/leafo/moonscript/tree/binaries)
 * [Textadept](https://github.com/leafo/moonscript-textadept)
 * [Sublime/Textmate](https://github.com/leafo/moonscript-tmbundle)
 * [Emacs](https://github.com/k2052/moonscript-mode)
+* [VSCode](https://marketplace.visualstudio.com/items?itemName=Lynxish-Developer.moonscript)
 
 ## License (MIT)
 
