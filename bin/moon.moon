@@ -90,6 +90,7 @@ run = ->
         err,
         util.trim trace
       }, "\n"
+    os.exit 1
   else
     if cov
       cov\stop!

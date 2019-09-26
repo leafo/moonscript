@@ -97,13 +97,14 @@ run = function()
     local truncated = errors.truncate_traceback(util.trim(trace))
     local rewritten = errors.rewrite_traceback(truncated, err)
     if rewritten then
-      return print_err(rewritten)
+      print_err(rewritten)
     else
-      return print_err(table.concat({
+      print_err(table.concat({
         err,
         util.trim(trace)
       }, "\n"))
     end
+    return os.exit(1)
   else
     if cov then
       cov:stop()
