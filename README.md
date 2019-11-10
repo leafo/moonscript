@@ -5,7 +5,7 @@
 [![Build Status](https://travis-ci.org/leafo/moonscript.svg?branch=master)](https://travis-ci.org/leafo/moonscript) [![Build status](https://ci.appveyor.com/api/projects/status/f5prpi4wvytul290/branch/binaries?svg=true)](https://ci.appveyor.com/project/leafo/moonscript/branch/binaries)
 
 
-[![](http://leafo.net/dump/twitch-banner.svg)](https://www.twitch.tv/moonscript)
+[![](https://leafo.net/dump/twitch-banner.svg)](https://www.twitch.tv/moonscript)
 
 MoonScript is a programmer friendly language that compiles into
 [Lua](https://www.lua.org/). It gives you the power of the fastest scripting
