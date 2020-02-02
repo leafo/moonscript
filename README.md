@@ -52,7 +52,7 @@ branch](https://github.com/leafo/moonscript/tree/binaries)
 
 ## License (MIT)
 
-Copyright (C) 2017 by Leaf Corcoran
+Copyright (C) 2020 by Leaf Corcoran
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
