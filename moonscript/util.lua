@@ -40,7 +40,7 @@ pos_to_line = function(str, pos)
 end
 local trim
 trim = function(str)
-  return str:match("^%s*(.-)%s*$")
+  return str:match("^[%s\\]*(.-)%s*$")
 end
 local get_line
 get_line = function(str, line_num)

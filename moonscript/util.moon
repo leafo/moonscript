@@ -33,7 +33,7 @@ pos_to_line = (str, pos) ->
   line
 
 trim = (str) ->
-  str\match "^%s*(.-)%s*$"
+  str\match "^[%s\\]*(.-)%s*$"
 
 get_line = (str, line_num) ->
   -- todo: this returns an extra blank line at the end

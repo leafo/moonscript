@@ -12,7 +12,8 @@ Break = P"\r"^-1 * P"\n"
 Stop = Break + -1
 
 Comment = P"--" * (1 - S"\r\n")^0 * L(Stop)
-Space = plain_space * Comment^-1
+escape_newline = P"\\" * plain_space * Comment^-1 * Break
+Space = (S" \t" + escape_newline)^0 * Comment^-1
 SomeSpace = S" \t"^1 * Comment^-1
 
 SpaceBreak = Space * Break
@@ -36,3 +37,4 @@ safe_module "moonscript.parse.literals", {
   :White, :Break, :Stop, :Comment, :Space, :SomeSpace, :SpaceBreak, :EmptyLine,
   :AlphaNum, :Name, :Num, :Shebang
 }
+

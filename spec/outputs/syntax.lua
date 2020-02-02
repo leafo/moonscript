@@ -258,3 +258,12 @@ z = a - b
 z = a(-b)
 z = a - b
 z = a - b
+local str = strA .. strB .. strC
+_ = function()
+  return a, b, c, d, e, f
+end
+do
+  local _with_0 = obj
+  print(_with_0:func())
+  return _with_0
+end

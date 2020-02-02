@@ -145,7 +145,7 @@ build_grammar = wrap_env debug_grammar, (root) ->
 
     Switch: key"switch" * DisableDo * ensure(Exp, PopDo) * key"do"^-1 * Space^-1 * Break * SwitchBlock / mark"switch"
 
-    SwitchBlock: EmptyLine^0 * Advance * Ct(SwitchCase * (Break^1 * SwitchCase)^0 * (Break^1 * SwitchElse)^-1) * PopIndent
+    SwitchBlock: EmptyLine^0 * Advance * Ct(SwitchCase * (SpaceBreak^1 * SwitchCase)^0 * (SpaceBreak ^1 * SwitchElse)^-1) * PopIndent
     SwitchCase: key"when" * Ct(ExpList) * key"then"^-1 * Body / mark"case"
     SwitchElse: key"else" * Body / mark"else"
 

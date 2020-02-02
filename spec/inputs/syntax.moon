@@ -270,3 +270,16 @@ z = a- b
 
 
 -- cooool
+
+str = strA \ -- comment 1
+  .. strB \ -- comment 2
+  .. strC
+
+->
+  a,b, \
+  c,d, \
+  e,f
+
+with obj
+  print \
+    \func!
