@@ -183,15 +183,28 @@ string_chars = {
     @line "not ", @value node[2]
 
   self: (node) =>
-    "self."..@name node[2]
+	return if data.lua_keywords[@name node[2]]
+	  "self[\"#{@name node[2]}\"]"
+	else
+      "self."..@name node[2]
 
   self_class: (node) =>
-    "self.__class."..@name node[2]
+	return if data.lua_keywords[@name node[2]]
+	  "self.__class[\"#{@name node[2]}\"]"
+	else
+      "self.__class."..@name node[2]
 
   self_colon: (node) =>
-    "self:"..@name node[2]
+	return if data.lua_keywords[@name node[2]]
+	  "(function(...) return self[\"#{@name node[2]}\"](self, ...) end)"
+	else
+      "self:"..@name node[2]
 
   self_class_colon: (node) =>
+	return if data.lua_keywords[@name node[2]]
+	  "(function(...) return self.__class[\"#{@name node[2]}\"](self.__class, ...) end)"
+	else
+      "self.__class:"..@name node[2]
     "self.__class:"..@name node[2]
 
   -- a variable reference
