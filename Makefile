@@ -1,8 +1,8 @@
 LUA ?= lua5.1
 LUA_VERSION = $(shell $(LUA) -e 'print(_VERSION:match("%d%.%d"))')
 LUAROCKS = luarocks-$(LUA_VERSION)
-LUA_PATH_MAKE = $(shell $(LUAROCKS) path --lr-path);./?.lua;./?/init.lua
-LUA_CPATH_MAKE = $(shell $(LUAROCKS) path --lr-cpath);./?.so
+LUA_PATH_MAKE = ./?.lua;./?/init.lua;$(shell $(LUAROCKS) path --lr-path)
+LUA_CPATH_MAKE = ./?.so;$(shell $(LUAROCKS) path --lr-cpath)
 
 .PHONY: test local compile compile_system watch lint count show
 
