@@ -1,7 +1,7 @@
 local concat
-concat = table.concat
-local unpack = unpack or table.unpack
-local type = type
+concat = table.concat;
+local unpack = unpack or table.unpack;
+local type = type;
 local moon = {
   is_object = function(value)
     return type(value) == "table" and value.__class
@@ -10,150 +10,150 @@ local moon = {
     if not (type(thing) == "table") then
       return false
     end
-    local cls = thing.__class
+    local cls = thing.__class;
     while cls do
       if cls == t then
         return true
       end
-      cls = cls.__parent
+      cls = cls.__parent;
     end
     return false
   end,
   type = function(value)
-    local base_type = type(value)
+    local base_type = type(value);
     if base_type == "table" then
-      local cls = value.__class
+      local cls = value.__class;
       if cls then
         return cls
       end
     end
     return base_type
   end
-}
+};
 local pos_to_line
 pos_to_line = function(str, pos)
-  local line = 1
+  local line = 1;
   for _ in str:sub(1, pos):gmatch("\n") do
-    line = line + 1
+    line = line + 1;
   end
   return line
-end
+end;
 local trim
 trim = function(str)
   return str:match("^%s*(.-)%s*$")
-end
+end;
 local get_line
 get_line = function(str, line_num)
   for line in str:gmatch("([^\n]*)\n?") do
     if line_num == 1 then
       return line
     end
-    line_num = line_num - 1
+    line_num = line_num - 1;
   end
-end
+end;
 local get_closest_line
 get_closest_line = function(str, line_num)
-  local line = get_line(str, line_num)
+  local line = get_line(str, line_num);
   if (not line or trim(line) == "") and line_num > 1 then
     return get_closest_line(str, line_num - 1)
   else
     return line, line_num
   end
-end
+end;
 local split
 split = function(str, delim)
   if str == "" then
     return { }
   end
-  str = str .. delim
-  local _accum_0 = { }
-  local _len_0 = 1
+  str = str .. delim;
+  local _accum_0 = { };
+  local _len_0 = 1;
   for m in str:gmatch("(.-)" .. delim) do
-    _accum_0[_len_0] = m
-    _len_0 = _len_0 + 1
+    _accum_0[_len_0] = m;
+    _len_0 = _len_0 + 1;
   end
   return _accum_0
-end
+end;
 local dump
 dump = function(what)
-  local seen = { }
+  local seen = { };
   local _dump
   _dump = function(what, depth)
     if depth == nil then
-      depth = 0
+      depth = 0;
     end
-    local t = type(what)
+    local t = type(what);
     if t == "string" then
       return '"' .. what .. '"\n'
     elseif t == "table" then
       if seen[what] then
         return "recursion(" .. tostring(what) .. ")...\n"
       end
-      seen[what] = true
-      depth = depth + 1
+      seen[what] = true;
+      depth = depth + 1;
       local lines
       do
-        local _accum_0 = { }
-        local _len_0 = 1
+        local _accum_0 = { };
+        local _len_0 = 1;
         for k, v in pairs(what) do
-          _accum_0[_len_0] = (" "):rep(depth * 4) .. "[" .. tostring(k) .. "] = " .. _dump(v, depth)
-          _len_0 = _len_0 + 1
+          _accum_0[_len_0] = (" "):rep(depth * 4) .. "[" .. tostring(k) .. "] = " .. _dump(v, depth);
+          _len_0 = _len_0 + 1;
         end
-        lines = _accum_0
+        lines = _accum_0;
       end
-      seen[what] = false
+      seen[what] = false;
       return "{\n" .. concat(lines) .. (" "):rep((depth - 1) * 4) .. "}\n"
     else
       return tostring(what) .. "\n"
     end
-  end
+  end;
   return _dump(what)
-end
+end;
 local debug_posmap
 debug_posmap = function(posmap, moon_code, lua_code)
   local tuples
   do
-    local _accum_0 = { }
-    local _len_0 = 1
+    local _accum_0 = { };
+    local _len_0 = 1;
     for k, v in pairs(posmap) do
       _accum_0[_len_0] = {
         k,
         v
-      }
-      _len_0 = _len_0 + 1
+      };
+      _len_0 = _len_0 + 1;
     end
-    tuples = _accum_0
+    tuples = _accum_0;
   end
   table.sort(tuples, function(a, b)
     return a[1] < b[1]
   end)
   local lines
   do
-    local _accum_0 = { }
-    local _len_0 = 1
+    local _accum_0 = { };
+    local _len_0 = 1;
     for _index_0 = 1, #tuples do
-      local pair = tuples[_index_0]
-      local lua_line, pos = unpack(pair)
-      local moon_line = pos_to_line(moon_code, pos)
-      local lua_text = get_line(lua_code, lua_line)
-      local moon_text = get_closest_line(moon_code, moon_line)
-      local _value_0 = tostring(pos) .. "\t " .. tostring(lua_line) .. ":[ " .. tostring(trim(lua_text)) .. " ] >> " .. tostring(moon_line) .. ":[ " .. tostring(trim(moon_text)) .. " ]"
-      _accum_0[_len_0] = _value_0
-      _len_0 = _len_0 + 1
+      local pair = tuples[_index_0];
+      local lua_line, pos = unpack(pair);
+      local moon_line = pos_to_line(moon_code, pos);
+      local lua_text = get_line(lua_code, lua_line);
+      local moon_text = get_closest_line(moon_code, moon_line);
+      local _value_0 = tostring(pos) .. "\t " .. tostring(lua_line) .. ":[ " .. tostring(trim(lua_text)) .. " ] >> " .. tostring(moon_line) .. ":[ " .. tostring(trim(moon_text)) .. " ]";
+      _accum_0[_len_0] = _value_0;
+      _len_0 = _len_0 + 1;
     end
-    lines = _accum_0
+    lines = _accum_0;
   end
   return concat(lines, "\n")
-end
+end;
 local setfenv = setfenv or function(fn, env)
   local name
-  local i = 1
+  local i = 1;
   while true do
-    name = debug.getupvalue(fn, i)
+    name = debug.getupvalue(fn, i);
     if not name or name == "_ENV" then
       break
     end
-    i = i + 1
+    i = i + 1;
   end
   if name then
     debug.upvaluejoin(fn, i, (function()
@@ -161,25 +161,25 @@ local setfenv = setfenv or function(fn, env)
     end), 1)
   end
   return fn
-end
+end;
 local getfenv = getfenv or function(fn)
-  local i = 1
+  local i = 1;
   while true do
-    local name, val = debug.getupvalue(fn, i)
+    local name, val = debug.getupvalue(fn, i);
     if not (name) then
       break
     end
     if name == "_ENV" then
       return val
     end
-    i = i + 1
+    i = i + 1;
   end
   return nil
-end
+end;
 local get_options
 get_options = function(...)
-  local count = select("#", ...)
-  local opts = select(count, ...)
+  local count = select("#", ...);
+  local opts = select(count, ...);
   if type(opts) == "table" then
     return opts, unpack({
       ...
@@ -187,7 +187,7 @@ get_options = function(...)
   else
     return { }, ...
   end
-end
+end;
 local safe_module
 safe_module = function(name, tbl)
   return setmetatable(tbl, {
@@ -195,7 +195,7 @@ safe_module = function(name, tbl)
       return error("Attempted to import non-existent `" .. tostring(key) .. "` from " .. tostring(name))
     end
   })
-end
+end;
 return {
   moon = moon,
   pos_to_line = pos_to_line,

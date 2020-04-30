@@ -1,51 +1,51 @@
-local lfs = require("lfs")
+local lfs = require("lfs");
 local split
-split = require("moonscript.util").split
+split = require("moonscript.util").split;
 local dirsep, dirsep_chars, mkdir, normalize_dir, parse_dir, parse_file, convert_path, format_time, gettime, compile_file_text, write_file, compile_and_write, is_abs_path, path_to_target
-dirsep = package.config:sub(1, 1)
+dirsep = package.config:sub(1, 1);
 if dirsep == "\\" then
-  dirsep_chars = "\\/"
+  dirsep_chars = "\\/";
 else
-  dirsep_chars = dirsep
+  dirsep_chars = dirsep;
 end
 mkdir = function(path)
-  local chunks = split(path, dirsep)
+  local chunks = split(path, dirsep);
   local accum
   for _index_0 = 1, #chunks do
-    local dir = chunks[_index_0]
-    accum = accum and tostring(accum) .. tostring(dirsep) .. tostring(dir) or dir
+    local dir = chunks[_index_0];
+    accum = accum and tostring(accum) .. tostring(dirsep) .. tostring(dir) or dir;
     lfs.mkdir(accum)
   end
   return lfs.attributes(path, "mode")
-end
+end;
 normalize_dir = function(path)
   return path:match("^(.-)[" .. tostring(dirsep_chars) .. "]*$") .. dirsep
-end
+end;
 parse_dir = function(path)
   return (path:match("^(.-)[^" .. tostring(dirsep_chars) .. "]*$"))
-end
+end;
 parse_file = function(path)
   return (path:match("^.-([^" .. tostring(dirsep_chars) .. "]*)$"))
-end
+end;
 convert_path = function(path)
-  local new_path = path:gsub("%.moon$", ".lua")
+  local new_path = path:gsub("%.moon$", ".lua");
   if new_path == path then
-    new_path = path .. ".lua"
+    new_path = path .. ".lua";
   end
   return new_path
-end
+end;
 format_time = function(time)
   return ("%.3fms"):format(time * 1000)
-end
+end;
 do
   local socket
   gettime = function()
     if socket == nil then
       pcall(function()
-        socket = require("socket")
+        socket = require("socket");
       end)
       if not (socket) then
-        socket = false
+        socket = false;
       end
     end
     if socket then
@@ -53,52 +53,52 @@ do
     else
       return nil, "LuaSocket needed for benchmark"
     end
-  end
+  end;
 end
 compile_file_text = function(text, opts)
   if opts == nil then
-    opts = { }
+    opts = { };
   end
-  local parse = require("moonscript.parse")
-  local compile = require("moonscript.compile")
+  local parse = require("moonscript.parse");
+  local compile = require("moonscript.compile");
   local parse_time
   if opts.benchmark then
-    parse_time = assert(gettime())
+    parse_time = assert(gettime());
   end
-  local tree, err = parse.string(text)
+  local tree, err = parse.string(text);
   if not (tree) then
     return nil, err
   end
   if parse_time then
-    parse_time = gettime() - parse_time
+    parse_time = gettime() - parse_time;
   end
   if opts.show_parse_tree then
-    local dump = require("moonscript.dump")
+    local dump = require("moonscript.dump");
     print(dump.tree(tree))
     return true
   end
   local compile_time
   if opts.benchmark then
-    compile_time = gettime()
+    compile_time = gettime();
   end
   do
-    local mod = opts.transform_module
+    local mod = opts.transform_module;
     if mod then
-      local file = assert(loadfile(mod))
-      local fn = assert(file())
-      tree = assert(fn(tree))
+      local file = assert(loadfile(mod));
+      local fn = assert(file());
+      tree = assert(fn(tree));
     end
   end
-  local code, posmap_or_err, err_pos = compile.tree(tree)
+  local code, posmap_or_err, err_pos = compile.tree(tree);
   if not (code) then
     return nil, compile.format_error(posmap_or_err, err_pos, text)
   end
   if compile_time then
-    compile_time = gettime() - compile_time
+    compile_time = gettime() - compile_time;
   end
   if opts.show_posmap then
     local debug_posmap
-    debug_posmap = require("moonscript.util").debug_posmap
+    debug_posmap = require("moonscript.util").debug_posmap;
     print("Pos", "Lua", ">>", "Moon")
     print(debug_posmap(posmap_or_err, text, code))
     return true
@@ -113,10 +113,10 @@ compile_file_text = function(text, opts)
     return true
   end
   return code
-end
+end;
 write_file = function(fname, code)
   mkdir(parse_dir(fname))
-  local f, err = io.open(fname, "w")
+  local f, err = io.open(fname, "w");
   if not (f) then
     return nil, err
   end
@@ -124,18 +124,18 @@ write_file = function(fname, code)
   assert(f:write("\n"))
   f:close()
   return "build"
-end
+end;
 compile_and_write = function(src, dest, opts)
   if opts == nil then
-    opts = { }
+    opts = { };
   end
-  local f = io.open(src)
+  local f = io.open(src);
   if not (f) then
     return nil, "Can't find file"
   end
-  local text = assert(f:read("*a"))
+  local text = assert(f:read("*a"));
   f:close()
-  local code, err = compile_file_text(text, opts)
+  local code, err = compile_file_text(text, opts);
   if not code then
     return nil, err
   end
@@ -147,43 +147,43 @@ compile_and_write = function(src, dest, opts)
     return true
   end
   return write_file(dest, code)
-end
+end;
 is_abs_path = function(path)
-  local first = path:sub(1, 1)
+  local first = path:sub(1, 1);
   if dirsep == "\\" then
     return first == "/" or first == "\\" or path:sub(2, 1) == ":"
   else
     return first == dirsep
   end
-end
+end;
 path_to_target = function(path, target_dir, base_dir)
   if target_dir == nil then
-    target_dir = nil
+    target_dir = nil;
   end
   if base_dir == nil then
-    base_dir = nil
+    base_dir = nil;
   end
-  local target = convert_path(path)
+  local target = convert_path(path);
   if target_dir then
-    target_dir = normalize_dir(target_dir)
+    target_dir = normalize_dir(target_dir);
   end
   if base_dir and target_dir then
-    local head = base_dir:match("^(.-)[^" .. tostring(dirsep_chars) .. "]*[" .. tostring(dirsep_chars) .. "]?$")
+    local head = base_dir:match("^(.-)[^" .. tostring(dirsep_chars) .. "]*[" .. tostring(dirsep_chars) .. "]?$");
     if head then
-      local start, stop = target:find(head, 1, true)
+      local start, stop = target:find(head, 1, true);
       if start == 1 then
-        target = target:sub(stop + 1)
+        target = target:sub(stop + 1);
       end
     end
   end
   if target_dir then
     if is_abs_path(target) then
-      target = parse_file(target)
+      target = parse_file(target);
     end
-    target = target_dir .. target
+    target = target_dir .. target;
   end
   return target
-end
+end;
 return {
   dirsep = dirsep,
   mkdir = mkdir,

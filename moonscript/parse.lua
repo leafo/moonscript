@@ -1,110 +1,110 @@
-local debug_grammar = false
-local lpeg = require("lpeg")
+local debug_grammar = false;
+local lpeg = require("lpeg");
 lpeg.setmaxstack(10000)
-local err_msg = "Failed to parse:%s\n [%d] >>    %s"
+local err_msg = "Failed to parse:%s\n [%d] >>    %s";
 local Stack
-Stack = require("moonscript.data").Stack
+Stack = require("moonscript.data").Stack;
 local trim, pos_to_line, get_line
 do
-  local _obj_0 = require("moonscript.util")
-  trim, pos_to_line, get_line = _obj_0.trim, _obj_0.pos_to_line, _obj_0.get_line
+  local _obj_0 = require("moonscript.util");
+  trim, pos_to_line, get_line = _obj_0.trim, _obj_0.pos_to_line, _obj_0.get_line;
 end
 local unpack
-unpack = require("moonscript.util").unpack
+unpack = require("moonscript.util").unpack;
 local wrap_env
-wrap_env = require("moonscript.parse.env").wrap_env
+wrap_env = require("moonscript.parse.env").wrap_env;
 local R, S, V, P, C, Ct, Cmt, Cg, Cb, Cc
-R, S, V, P, C, Ct, Cmt, Cg, Cb, Cc = lpeg.R, lpeg.S, lpeg.V, lpeg.P, lpeg.C, lpeg.Ct, lpeg.Cmt, lpeg.Cg, lpeg.Cb, lpeg.Cc
+R, S, V, P, C, Ct, Cmt, Cg, Cb, Cc = lpeg.R, lpeg.S, lpeg.V, lpeg.P, lpeg.C, lpeg.Ct, lpeg.Cmt, lpeg.Cg, lpeg.Cb, lpeg.Cc;
 local White, Break, Stop, Comment, Space, SomeSpace, SpaceBreak, EmptyLine, AlphaNum, Num, Shebang, L, _Name
 do
-  local _obj_0 = require("moonscript.parse.literals")
-  White, Break, Stop, Comment, Space, SomeSpace, SpaceBreak, EmptyLine, AlphaNum, Num, Shebang, L, _Name = _obj_0.White, _obj_0.Break, _obj_0.Stop, _obj_0.Comment, _obj_0.Space, _obj_0.SomeSpace, _obj_0.SpaceBreak, _obj_0.EmptyLine, _obj_0.AlphaNum, _obj_0.Num, _obj_0.Shebang, _obj_0.L, _obj_0.Name
+  local _obj_0 = require("moonscript.parse.literals");
+  White, Break, Stop, Comment, Space, SomeSpace, SpaceBreak, EmptyLine, AlphaNum, Num, Shebang, L, _Name = _obj_0.White, _obj_0.Break, _obj_0.Stop, _obj_0.Comment, _obj_0.Space, _obj_0.SomeSpace, _obj_0.SpaceBreak, _obj_0.EmptyLine, _obj_0.AlphaNum, _obj_0.Num, _obj_0.Shebang, _obj_0.L, _obj_0.Name;
 end
-local SpaceName = Space * _Name
+local SpaceName = Space * _Name;
 Num = Space * (Num / function(v)
   return {
     "number",
     v
   }
-end)
+end);
 local Indent, Cut, ensure, extract_line, mark, pos, flatten_or_mark, is_assignable, check_assignable, format_assign, format_single_assign, sym, symx, simple_string, wrap_func_arg, join_chain, wrap_decorator, check_lua_string, self_assign, got
 do
-  local _obj_0 = require("moonscript.parse.util")
-  Indent, Cut, ensure, extract_line, mark, pos, flatten_or_mark, is_assignable, check_assignable, format_assign, format_single_assign, sym, symx, simple_string, wrap_func_arg, join_chain, wrap_decorator, check_lua_string, self_assign, got = _obj_0.Indent, _obj_0.Cut, _obj_0.ensure, _obj_0.extract_line, _obj_0.mark, _obj_0.pos, _obj_0.flatten_or_mark, _obj_0.is_assignable, _obj_0.check_assignable, _obj_0.format_assign, _obj_0.format_single_assign, _obj_0.sym, _obj_0.symx, _obj_0.simple_string, _obj_0.wrap_func_arg, _obj_0.join_chain, _obj_0.wrap_decorator, _obj_0.check_lua_string, _obj_0.self_assign, _obj_0.got
+  local _obj_0 = require("moonscript.parse.util");
+  Indent, Cut, ensure, extract_line, mark, pos, flatten_or_mark, is_assignable, check_assignable, format_assign, format_single_assign, sym, symx, simple_string, wrap_func_arg, join_chain, wrap_decorator, check_lua_string, self_assign, got = _obj_0.Indent, _obj_0.Cut, _obj_0.ensure, _obj_0.extract_line, _obj_0.mark, _obj_0.pos, _obj_0.flatten_or_mark, _obj_0.is_assignable, _obj_0.check_assignable, _obj_0.format_assign, _obj_0.format_single_assign, _obj_0.sym, _obj_0.symx, _obj_0.simple_string, _obj_0.wrap_func_arg, _obj_0.join_chain, _obj_0.wrap_decorator, _obj_0.check_lua_string, _obj_0.self_assign, _obj_0.got;
 end
 local build_grammar = wrap_env(debug_grammar, function(root)
-  local _indent = Stack(0)
-  local _do_stack = Stack(0)
+  local _indent = Stack(0);
+  local _do_stack = Stack(0);
   local state = {
     last_pos = 0
-  }
+  };
   local check_indent
   check_indent = function(str, pos, indent)
-    state.last_pos = pos
+    state.last_pos = pos;
     return _indent:top() == indent
-  end
+  end;
   local advance_indent
   advance_indent = function(str, pos, indent)
-    local top = _indent:top()
+    local top = _indent:top();
     if top ~= -1 and indent > top then
       _indent:push(indent)
       return true
     end
-  end
+  end;
   local push_indent
   push_indent = function(str, pos, indent)
     _indent:push(indent)
     return true
-  end
+  end;
   local pop_indent
   pop_indent = function()
     assert(_indent:pop(), "unexpected outdent")
     return true
-  end
+  end;
   local check_do
   check_do = function(str, pos, do_node)
-    local top = _do_stack:top()
+    local top = _do_stack:top();
     if top == nil or top then
       return true, do_node
     end
     return false
-  end
+  end;
   local disable_do
   disable_do = function()
     _do_stack:push(false)
     return true
-  end
+  end;
   local pop_do
   pop_do = function()
     assert(_do_stack:pop() ~= nil, "unexpected do pop")
     return true
-  end
-  local DisableDo = Cmt("", disable_do)
-  local PopDo = Cmt("", pop_do)
-  local keywords = { }
+  end;
+  local DisableDo = Cmt("", disable_do);
+  local PopDo = Cmt("", pop_do);
+  local keywords = { };
   local key
   key = function(chars)
-    keywords[chars] = true
+    keywords[chars] = true;
     return Space * chars * -AlphaNum
-  end
+  end;
   local op
   op = function(chars)
-    local patt = Space * C(chars)
+    local patt = Space * C(chars);
     if chars:match("^%w*$") then
-      keywords[chars] = true
-      patt = patt * -AlphaNum
+      keywords[chars] = true;
+      patt = patt * -AlphaNum;
     end
     return patt
-  end
+  end;
   local Name = Cmt(SpaceName, function(str, pos, name)
     if keywords[name] then
       return false
     end
     return true
-  end) / trim
-  local SelfName = Space * "@" * ("@" * (_Name / mark("self_class") + Cc("self.__class")) + _Name / mark("self") + Cc("self"))
-  local KeyName = SelfName + Space * _Name / mark("key_literal")
-  local VarArg = Space * P("...") / trim
+  end) / trim;
+  local SelfName = Space * "@" * ("@" * (_Name / mark("self_class") + Cc("self.__class")) + _Name / mark("self") + Cc("self"));
+  local KeyName = SelfName + Space * _Name / mark("key_literal");
+  local VarArg = Space * P("...") / trim;
   local g = P({
     root or File,
     File = Shebang ^ -1 * (Block + Ct("")),
@@ -199,43 +199,43 @@ local build_grammar = wrap_env(debug_grammar, function(root)
     InvokeArgs = -P("-") * (ExpList * (sym(",") * (TableBlock + SpaceBreak * Advance * ArgBlock * TableBlock ^ -1) + TableBlock) ^ -1 + TableBlock),
     ArgBlock = ArgLine * (sym(",") * SpaceBreak * ArgLine) ^ 0 * PopIndent,
     ArgLine = CheckIndent * ExpList
-  })
+  });
   return g, state
-end)
+end);
 local file_parser
 file_parser = function()
-  local g, state = build_grammar()
-  local file_grammar = White * g * White * -1
+  local g, state = build_grammar();
+  local file_grammar = White * g * White * -1;
   return {
     match = function(self, str)
       local tree
       local _, err = xpcall((function()
-        tree = file_grammar:match(str)
+        tree = file_grammar:match(str);
       end), function(err)
         return debug.traceback(err, 2)
-      end)
+      end);
       if type(err) == "string" then
         return nil, err
       end
       if not (tree) then
         local msg
-        local err_pos = state.last_pos
+        local err_pos = state.last_pos;
         if err then
           local node
-          node, msg = unpack(err)
+          node, msg = unpack(err);
           if msg then
-            msg = " " .. msg
+            msg = " " .. msg;
           end
-          err_pos = node[-1]
+          err_pos = node[-1];
         end
-        local line_no = pos_to_line(str, err_pos)
-        local line_str = get_line(str, line_no) or ""
+        local line_no = pos_to_line(str, err_pos);
+        local line_str = get_line(str, line_no) or "";
         return nil, err_msg:format(msg or "", line_no, trim(line_str))
       end
       return tree
     end
   }
-end
+end;
 return {
   extract_line = extract_line,
   build_grammar = build_grammar,

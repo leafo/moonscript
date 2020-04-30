@@ -1,65 +1,65 @@
 #!/usr/bin/env lua
-local argparse = require("argparse")
-local moonscript = require("moonscript.base")
-local util = require("moonscript.util")
-local errors = require("moonscript.errors")
-local unpack = util.unpack
+local argparse = require("argparse");
+local moonscript = require("moonscript.base");
+local util = require("moonscript.util");
+local errors = require("moonscript.errors");
+local unpack = util.unpack;
 local argparser = argparse()({
   name = "moon"
-})
+});
 argparser:argument("script")
 argparser:argument("args"):args("*")
 argparser:option("-c --coverage", "Collect and print code coverage")
 argparser:option("-d", "Disable stack trace rewriting")
 argparser:option("-v --version", "Print version information")
-local base = 0
-local _list_0 = arg
+local base = 0;
+local _list_0 = arg;
 for _index_0 = 1, #_list_0 do
-  local flag = _list_0[_index_0]
-  base = base + 1
+  local flag = _list_0[_index_0];
+  base = base + 1;
   if flag:sub(1, 1) ~= "-" then
     break
   end
 end
 local args = {
   unpack(arg, 1, base)
-}
-local opts = argparser:parse(args)
+};
+local opts = argparser:parse(args);
 local print_err
 print_err = function(...)
   local msg = table.concat((function(...)
-    local _accum_0 = { }
-    local _len_0 = 1
+    local _accum_0 = { };
+    local _len_0 = 1;
     local _list_1 = {
       ...
-    }
+    };
     for _index_0 = 1, #_list_1 do
-      local v = _list_1[_index_0]
-      _accum_0[_len_0] = tostring(v)
-      _len_0 = _len_0 + 1
+      local v = _list_1[_index_0];
+      _accum_0[_len_0] = tostring(v);
+      _len_0 = _len_0 + 1;
     end
     return _accum_0
-  end)(...), "\t")
+  end)(...), "\t");
   return io.stderr:write(msg .. "\n")
-end
+end;
 local run
 run = function()
   if opts.version then
     require("moonscript.version").print_version()
     os.exit()
   end
-  local script_fname = opts.script
+  local script_fname = opts.script;
   args = {
     unpack(arg, base + 1)
-  }
-  args[-1] = arg[0]
-  args[0] = opts.script
+  };
+  args[-1] = arg[0];
+  args[0] = opts.script;
   local moonscript_chunk, lua_parse_error
   local passed, err = pcall(function()
     moonscript_chunk, lua_parse_error = moonscript.loadfile(script_fname, {
       implicitly_return_root = false
-    })
-  end)
+    });
+  end);
   if not (passed) then
     print_err(err)
     os.exit(1)
@@ -72,30 +72,30 @@ run = function()
     end
     os.exit(1)
   end
-  util.getfenv(moonscript_chunk).arg = args
+  util.getfenv(moonscript_chunk).arg = args;
   local run_chunk
   run_chunk = function()
     moonscript.insert_loader()
     moonscript_chunk(unpack(args))
     return moonscript.remove_loader()
-  end
+  end;
   if opts.d then
     return run_chunk()
   end
   local err, trace, cov
   if opts.coverage then
     print("starting coverage")
-    local coverage = require("moonscript.cmd.coverage")
-    cov = coverage.CodeCoverage()
+    local coverage = require("moonscript.cmd.coverage");
+    cov = coverage.CodeCoverage();
     cov:start()
   end
   xpcall(run_chunk, function(_err)
-    err = _err
-    trace = debug.traceback("", 2)
+    err = _err;
+    trace = debug.traceback("", 2);
   end)
   if err then
-    local truncated = errors.truncate_traceback(util.trim(trace))
-    local rewritten = errors.rewrite_traceback(truncated, err)
+    local truncated = errors.truncate_traceback(util.trim(trace));
+    local rewritten = errors.rewrite_traceback(truncated, err);
     if rewritten then
       print_err(rewritten)
     else
@@ -111,6 +111,6 @@ run = function()
       return cov:print_results()
     end
   end
-end
+end;
 return run()
 -- vim: set filetype=lua:

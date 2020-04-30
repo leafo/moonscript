@@ -1,24 +1,24 @@
 local NameProxy, LocalName
 do
-  local _obj_0 = require("moonscript.transform.names")
-  NameProxy, LocalName = _obj_0.NameProxy, _obj_0.LocalName
+  local _obj_0 = require("moonscript.transform.names");
+  NameProxy, LocalName = _obj_0.NameProxy, _obj_0.LocalName;
 end
 local Run
-Run = require("moonscript.transform.statements").Run
-local CONSTRUCTOR_NAME = "new"
+Run = require("moonscript.transform.statements").Run;
+local CONSTRUCTOR_NAME = "new";
 local insert
-insert = table.insert
+insert = table.insert;
 local build, ntype, NOOP
 do
-  local _obj_0 = require("moonscript.types")
-  build, ntype, NOOP = _obj_0.build, _obj_0.ntype, _obj_0.NOOP
+  local _obj_0 = require("moonscript.types");
+  build, ntype, NOOP = _obj_0.build, _obj_0.ntype, _obj_0.NOOP;
 end
 local unpack
-unpack = require("moonscript.util").unpack
+unpack = require("moonscript.util").unpack;
 local transform_super
 transform_super = function(cls_name, on_base, block, chain)
   if on_base == nil then
-    on_base = true
+    on_base = true;
   end
   local relative_parent = {
     "chain",
@@ -27,19 +27,19 @@ transform_super = function(cls_name, on_base, block, chain)
       "dot",
       "__parent"
     }
-  }
+  };
   if not (chain) then
     return relative_parent
   end
   local chain_tail = {
     unpack(chain, 3)
-  }
-  local head = chain_tail[1]
+  };
+  local head = chain_tail[1];
   if head == nil then
     return relative_parent
   end
-  local new_chain = relative_parent
-  local _exp_0 = head[1]
+  local new_chain = relative_parent;
+  local _exp_0 = head[1];
   if "call" == _exp_0 then
     if on_base then
       insert(new_chain, {
@@ -47,7 +47,7 @@ transform_super = function(cls_name, on_base, block, chain)
         "__base"
       })
     end
-    local calling_name = block:get("current_method")
+    local calling_name = block:get("current_method");
     assert(calling_name, "missing calling name")
     chain_tail[1] = {
       "call",
@@ -55,7 +55,7 @@ transform_super = function(cls_name, on_base, block, chain)
         "self",
         unpack(head[2])
       }
-    }
+    };
     if ntype(calling_name) == "key_literal" then
       insert(new_chain, {
         "dot",
@@ -68,34 +68,34 @@ transform_super = function(cls_name, on_base, block, chain)
       })
     end
   elseif "colon" == _exp_0 then
-    local call = chain_tail[2]
+    local call = chain_tail[2];
     if call and call[1] == "call" then
       chain_tail[1] = {
         "dot",
         head[2]
-      }
+      };
       chain_tail[2] = {
         "call",
         {
           "self",
           unpack(call[2])
         }
-      }
+      };
     end
   end
   for _index_0 = 1, #chain_tail do
-    local item = chain_tail[_index_0]
+    local item = chain_tail[_index_0];
     insert(new_chain, item)
   end
   return new_chain
-end
+end;
 local super_scope
 super_scope = function(value, t, key)
   local prev_method
   return {
     "scoped",
     Run(function(self)
-      prev_method = self:get("current_method")
+      prev_method = self:get("current_method");
       self:set("current_method", key)
       return self:set("super", t)
     end),
@@ -104,41 +104,41 @@ super_scope = function(value, t, key)
       return self:set("current_method", prev_method)
     end)
   }
-end
+end;
 return function(self, node, ret, parent_assign)
-  local name, parent_val, body = unpack(node, 2)
+  local name, parent_val, body = unpack(node, 2);
   if parent_val == "" then
-    parent_val = nil
+    parent_val = nil;
   end
-  local parent_cls_name = NameProxy("parent")
-  local base_name = NameProxy("base")
-  local self_name = NameProxy("self")
-  local cls_name = NameProxy("class")
+  local parent_cls_name = NameProxy("parent");
+  local base_name = NameProxy("base");
+  local self_name = NameProxy("self");
+  local cls_name = NameProxy("class");
   local cls_instance_super
   cls_instance_super = function(...)
     return transform_super(cls_name, true, ...)
-  end
+  end;
   local cls_super
   cls_super = function(...)
     return transform_super(cls_name, false, ...)
-  end
-  local statements = { }
-  local properties = { }
+  end;
+  local statements = { };
+  local properties = { };
   for _index_0 = 1, #body do
-    local item = body[_index_0]
-    local _exp_0 = item[1]
+    local item = body[_index_0];
+    local _exp_0 = item[1];
     if "stm" == _exp_0 then
       insert(statements, item[2])
     elseif "props" == _exp_0 then
       for _index_1 = 2, #item do
-        local tuple = item[_index_1]
+        local tuple = item[_index_1];
         if ntype(tuple[1]) == "self" then
           local k, v
-          k, v = tuple[1], tuple[2]
+          k, v = tuple[1], tuple[2];
           v = super_scope(v, cls_super, {
             "key_literal",
             k[2]
-          })
+          });
           insert(statements, build.assign_one(k, v))
         else
           insert(properties, tuple)
@@ -148,35 +148,35 @@ return function(self, node, ret, parent_assign)
   end
   local constructor
   do
-    local _accum_0 = { }
-    local _len_0 = 1
+    local _accum_0 = { };
+    local _len_0 = 1;
     for _index_0 = 1, #properties do
-      local _continue_0 = false
+      local _continue_0 = false;
       repeat
-        local tuple = properties[_index_0]
-        local key = tuple[1]
+        local tuple = properties[_index_0];
+        local key = tuple[1];
         local _value_0
         if key[1] == "key_literal" and key[2] == CONSTRUCTOR_NAME then
-          constructor = tuple[2]
-          _continue_0 = true
+          constructor = tuple[2];
+          _continue_0 = true;
           break
         else
           local val
-          key, val = tuple[1], tuple[2]
+          key, val = tuple[1], tuple[2];
           _value_0 = {
             key,
             super_scope(val, cls_instance_super, key)
-          }
+          };
         end
-        _accum_0[_len_0] = _value_0
-        _len_0 = _len_0 + 1
-        _continue_0 = true
+        _accum_0[_len_0] = _value_0;
+        _len_0 = _len_0 + 1;
+        _continue_0 = true;
       until true
       if not _continue_0 then
         break
       end
     end
-    properties = _accum_0
+    properties = _accum_0;
   end
   if not (constructor) then
     if parent_val then
@@ -198,44 +198,44 @@ return function(self, node, ret, parent_assign)
             }
           })
         }
-      })
+      });
     else
-      constructor = build.fndef()
+      constructor = build.fndef();
     end
   end
-  local real_name = name or parent_assign and parent_assign[2][1]
-  local _exp_0 = ntype(real_name)
+  local real_name = name or parent_assign and parent_assign[2][1];
+  local _exp_0 = ntype(real_name);
   if "chain" == _exp_0 then
-    local last = real_name[#real_name]
-    local _exp_1 = ntype(last)
+    local last = real_name[#real_name];
+    local _exp_1 = ntype(last);
     if "dot" == _exp_1 then
       real_name = {
         "string",
         '"',
         last[2]
-      }
+      };
     elseif "index" == _exp_1 then
-      real_name = last[2]
+      real_name = last[2];
     else
-      real_name = "nil"
+      real_name = "nil";
     end
   elseif "nil" == _exp_0 then
-    real_name = "nil"
+    real_name = "nil";
   else
-    local name_t = type(real_name)
+    local name_t = type(real_name);
     local flattened_name
     if name_t == "string" then
-      flattened_name = real_name
+      flattened_name = real_name;
     elseif name_t == "table" and real_name[1] == "ref" then
-      flattened_name = real_name[2]
+      flattened_name = real_name[2];
     else
-      flattened_name = error("don't know how to extract name from " .. tostring(name_t))
+      flattened_name = error("don't know how to extract name from " .. tostring(name_t));
     end
     real_name = {
       "string",
       '"',
       flattened_name
-    }
+    };
   end
   local cls = build.table({
     {
@@ -257,7 +257,7 @@ return function(self, node, ret, parent_assign)
       "__parent",
       parent_cls_name
     } or nil
-  })
+  });
   local class_index
   if parent_val then
     local class_lookup = build["if"]({
@@ -301,7 +301,7 @@ return function(self, node, ret, parent_assign)
           }
         })
       }
-    })
+    });
     insert(class_lookup, {
       "else",
       {
@@ -333,9 +333,9 @@ return function(self, node, ret, parent_assign)
         })),
         class_lookup
       }
-    })
+    });
   else
-    class_index = base_name
+    class_index = base_name;
   end
   local cls_mt = build.table({
     {
@@ -378,7 +378,7 @@ return function(self, node, ret, parent_assign)
         }
       })
     }
-  })
+  });
   cls = build.chain({
     base = "setmetatable",
     {
@@ -388,8 +388,8 @@ return function(self, node, ret, parent_assign)
         cls_mt
       }
     }
-  })
-  local value = nil
+  });
+  local value = nil;
   do
     local out_body = {
       Run(function(self)
@@ -466,7 +466,7 @@ return function(self, node, ret, parent_assign)
           return ret(cls_name)
         end
       end)()
-    }
+    };
     value = build.group({
       build.group((function()
         if ntype(name) == "value" then
@@ -480,7 +480,7 @@ return function(self, node, ret, parent_assign)
         end
       end)()),
       build["do"](out_body)
-    })
+    });
   end
   return value
 end
