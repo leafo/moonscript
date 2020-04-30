@@ -192,7 +192,7 @@ _ = 5 + what(wack)
 what(whack + 5)
 _ = 5 - what(wack)
 what(whack - 5)
-x = hello - world - something
+x = hello - world - something;
 (function(something)
   if something == nil then
     do
