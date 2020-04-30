@@ -7,7 +7,7 @@ LUA_CPATH_MAKE = ./?.so;$(shell $(LUAROCKS) path --lr-cpath)
 .PHONY: test local compile compile_system watch lint count show
 
 test:
-	busted
+	LUA_PATH='$(LUA_PATH_MAKE)' LUA_CPATH='$(LUA_CPATH_MAKE)' busted
 
 show:
 	# LUA $(LUA)
