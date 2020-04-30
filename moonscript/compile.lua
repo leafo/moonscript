@@ -94,8 +94,7 @@ do
           end
           insert(buffer, l)
           if "string" == type(self[i + 1]) then
-            local lc = l:sub(-1)
-            if (lc == ")" or lc == "]") and self[i + 1]:sub(1, 1) == "(" then
+            if l:sub(-1) ~= ',' and l:sub(-3) ~= 'end' and self[i + 1]:sub(1, 1) == "(" then
               insert(buffer, ";")
             end
           end
