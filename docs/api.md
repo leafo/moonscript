@@ -83,7 +83,7 @@ table. If there are any errors then `nil` and the error message are returned.
 ```moononly
 import to_lua from require "moonscript.base"
 
-lua_code, line_tabel = to_lua [[
+lua_code, line_table = to_lua [[
 x = 124
 print "hello world #{x}"
 ]]
