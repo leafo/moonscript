@@ -11,31 +11,31 @@ local backpack = {
   yow = 1000,
   eat = goo,
   yeah = dudd
-}
+};
 local start = {
   something = "cold"
-}
+};
 local bathe = {
   on = "fire"
-}
+};
 local another = {
   [4] = 232,
   ["good food"] = "is the best"
-}
+};
 local fwip = {
   something = hello("what"),
   number = 2323,
   what = yo("momma", "yeah"),
   fruit = basket,
   nuts = day
-}
+};
 local frick = {
   hello = "world"
-}
+};
 local frack, best = {
   hello = "world",
   rice = 3434
-}, "what"
+}, "what";
 local ya = {
   1,
   2,
@@ -44,14 +44,14 @@ local ya = {
   343,
   "hello",
   umm = 232
-}
+};
 local x = {
   1,
   2,
   4343,
   343,
   343
-}
+};
 local g, p = {
   1,
   2,
@@ -60,7 +60,7 @@ local g, p = {
   4,
   hey = 232,
   another = "day"
-}, 234
+}, 234;
 local annother = {
   1,
   2,
@@ -71,12 +71,12 @@ local annother = {
   6,
   7,
   8
-}
+};
 local yeah = {
   [232] = 3434,
   "helo",
   ice = "cake"
-}
+};
 local whatabout = {
   hello(world, another),
   what,
@@ -85,7 +85,7 @@ local whatabout = {
   hello("world"),
   yeah,
   hello("world", yeah)
-}
+};
 x = {
   something = function(self)
     return "hello"
@@ -100,18 +100,18 @@ x = {
   name = function(self, node)
     return self:value(node)
   end
-}
+};
 x = {
   something = something,
   something = something
-}
+};
 local y = {
   hi = hi,
   there = there,
   how = how,
   you = you,
   thing = thing
-}
+};
 call_me("hello", {
   x = x,
   y = y,
@@ -120,12 +120,12 @@ call_me("hello", {
 local t = {
   a = 'a',
   [b] = 'b'
-}
+};
 local xam = {
   hello = 1234,
   ["hello"] = 12354,
   ["hello"] = 12354
-}
+};
 local kam = {
   hello = 12,
   goodcheese = "mmm",
@@ -138,11 +138,11 @@ local kam = {
   more = {
     1,
     (function()
-      local _accum_0 = { }
-      local _len_0 = 1
+      local _accum_0 = { };
+      local _len_0 = 1;
       for x = 1, 10 do
-        _accum_0[_len_0] = x
-        _len_0 = _len_0 + 1
+        _accum_0[_len_0] = x;
+        _len_0 = _len_0 + 1;
       end
       return _accum_0
     end)()
@@ -151,7 +151,7 @@ local kam = {
     "one",
     "two"
   }] = one_thing(function(self) end)
-}
+};
 keepit({
   going = true
 }, {
@@ -170,37 +170,37 @@ thing({
 })
 local _ = {
   okay = 123
-}
+};
 local k = {
   ["hello"] = "world"
-}
+};
 k = {
   ['hello'] = 'world'
-}
+};
 k = {
   ["hello"] = 'world',
   ["hat"] = "zat"
-}
+};
 please({
   ["hello"] = "world"
 })
 k = {
   ["hello"] = "world",
   ["one"] = "zone"
-}
+};
 local f = "one", {
   ["two"] = three
-}, "four"
+}, "four";
 f = {
   ["two"] = three
-}, "four"
+}, "four";
 f = {
   "one",
   ["two"] = three,
   "four"
-}
+};
 local j = "one", {
   ["two"] = three,
   ["four"] = five
-}, 6, 7
+}, 6, 7;
 return nil

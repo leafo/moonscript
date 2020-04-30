@@ -1,25 +1,25 @@
-local you_cool = false
+local you_cool = false;
 if cool then
   if you_cool then
-    local _ = one
+    local _ = one;
   else
     if eatdic then
-      local _ = yeah
+      local _ = yeah;
     else
-      local _ = two
-      _ = three
+      local _ = two;
+      _ = three;
     end
   end
 else
-  local _ = no
+  local _ = no;
 end
 if cool then
-  local _ = no
+  local _ = no;
 end
 if cool then
-  local _ = no
+  local _ = no;
 else
-  local _ = yes
+  local _ = yes;
 end
 if cool then
   wow(cool)
@@ -29,12 +29,12 @@ end
 if working then
   if cool then
     if cool then
-      local _ = okay
+      local _ = okay;
     else
-      local _ = what
+      local _ = what;
     end
   else
-    local _ = nah
+    local _ = nah;
   end
 end
 if yeah then
@@ -86,7 +86,7 @@ else
   show(5555555)
 end
 do
-  local something = 10
+  local something = 10;
   if something then
     print(something)
   else
@@ -95,36 +95,36 @@ do
 end
 local hello
 do
-  local something = 10
+  local something = 10;
   if something then
-    hello = print(something)
+    hello = print(something);
   else
-    hello = print("else")
+    hello = print("else");
   end
 end
 hello = 5 + (function()
   do
-    local something = 10
+    local something = 10;
     if something then
       return print(something)
     end
   end
-end)()
-local z = false
+end)();
+local z = false;
 if false then
-  local _ = one
+  local _ = one;
 else
   do
-    local x = true
+    local x = true;
     if x then
-      local _ = two
+      local _ = two;
     else
       do
-        z = true
+        z = true;
         if z then
-          local _ = three
+          local _ = three;
         else
-          local _ = four
+          local _ = four;
         end
       end
     end
@@ -132,19 +132,19 @@ else
 end
 local out
 if false then
-  out = one
+  out = one;
 else
   do
-    local x = true
+    local x = true;
     if x then
-      out = two
+      out = two;
     else
       do
-        z = true
+        z = true;
         if z then
-          out = three
+          out = three;
         else
-          out = four
+          out = four;
         end
       end
     end
@@ -153,19 +153,19 @@ end
 local kzy
 kzy = function()
   do
-    local something = true
+    local something = true;
     if something then
       return 1
     else
       do
-        local another = false
+        local another = false;
         if another then
           return 2
         end
       end
     end
   end
-end
+end;
 if not (true) then
   print("cool!")
 end
@@ -187,24 +187,24 @@ else
 end
 local x
 if not (true) then
-  x = print("cool!")
+  x = print("cool!");
 end
 if not (true and false) then
-  x = print("cool!")
+  x = print("cool!");
 end
 local y
 if not (false) then
-  y = print("cool!")
+  y = print("cool!");
 end
 if not (false) then
-  y = print("cool!")
+  y = print("cool!");
 else
-  y = print("no way!")
+  y = print("no way!");
 end
 if not (nil) then
-  z = print("hello")
+  z = print("hello");
 else
-  z = print("world")
+  z = print("world");
 end
 print((function()
   if not (true) then
@@ -244,36 +244,36 @@ if not (value) then
     1,
     2,
     3
-  }
+  };
 end
 do
-  local j = 100
+  local j = 100;
   do
-    j = hi()
+    j = hi();
     if not j then
       error("not j!")
     end
   end
 end
-local a = 12
+local a = 12;
 local c, b
 if something then
-  a, c, b = "cool"
+  a, c, b = "cool";
 end
 local j
 if 1 then
   if 2 then
-    j = 3
+    j = 3;
   end
 else
-  j = 6
+  j = 6;
 end
 local m
 if 1 then
   if 2 then
-    m = 3
+    m = 3;
   end
 else
-  m = 6
+  m = 6;
 end
 return nil

@@ -5,14 +5,14 @@ end
 local x
 do
   print("hello")
-  x = print("world")
+  x = print("world");
 end
 local y
 do
-  local things = "shhh"
+  local things = "shhh";
   y = function()
     return "hello: " .. things
-  end
+  end;
 end
 local _
 _ = function()
@@ -21,25 +21,25 @@ _ = function()
       return "yeah"
     end
   end
-end
+end;
 local t = {
   y = (function()
-    local number = 100
+    local number = 100;
     return function(x)
       return x + number
     end
   end)()
-}
+};
 return function(y, k)
   if y == nil then
     y = ((function()
-      x = 10 + 2
+      x = 10 + 2;
       return x
-    end)())
+    end)());
   end
   if k == nil then
     do
-      k = "nothing"
+      k = "nothing";
     end
   end
   do
