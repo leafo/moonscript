@@ -47,6 +47,7 @@ import unpack from require "moonscript.util"
 
       \append " = "
       \append_list [@value v for v in *values], ", "
+      \append ";"
 
   return: (node) =>
     @line "return ", if node[2] != "" then @value node[2]
