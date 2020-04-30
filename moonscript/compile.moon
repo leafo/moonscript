@@ -71,8 +71,7 @@ class Lines
 
           -- insert breaks between ambiguous statements
           if "string" == type @[i + 1]
-            lc = l\sub(-1)
-            if (lc == ")" or lc == "]") and @[i + 1]\sub(1,1) == "("
+            if l\sub(-1)!=',' and l\sub(-3)!='end' and @[i + 1]\sub(1,1) == "("
               insert buffer, ";"
 
           insert buffer, "\n"
