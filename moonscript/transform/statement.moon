@@ -230,6 +230,11 @@ Transformer {
     name, op, exp = unpack node, 2
     op_final = op\match "^(.+)=$"
 
+    if op_final=="#"
+      exp = {"parens", exp} unless value_is_singular exp
+      return {"assign", {{"chain", name, {"index", {"length", {"exp", name, "+", {"number", "1"}}}}}}, {exp}}
+      -- #= operator is a special case, since it's not the # operator
+
     error "Unknown op: "..op if not op_final
 
     local lifted

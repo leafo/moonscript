@@ -350,6 +350,41 @@ return Transformer({
   update = function(self, node)
     local name, op, exp = unpack(node, 2)
     local op_final = op:match("^(.+)=$")
+    if op_final == "#" then
+      if not (value_is_singular(exp)) then
+        exp = {
+          "parens",
+          exp
+        }
+      end
+      return {
+        "assign",
+        {
+          {
+            "chain",
+            name,
+            {
+              "index",
+              {
+                "length",
+                {
+                  "exp",
+                  name,
+                  "+",
+                  {
+                    "number",
+                    "1"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          exp
+        }
+      }
+    end
     if not op_final then
       error("Unknown op: " .. op)
     end
