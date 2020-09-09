@@ -136,6 +136,8 @@ format_assign = do
         {"assign", lhs_exps, unpack assign, 2}
       when "update"
         {"update", lhs_exps[1], unpack assign, 2}
+      when "compound"
+        {"compound", lhs_exps[1], unpack assign, 2}
       else
         error "unknown assign expression: #{t}"
 

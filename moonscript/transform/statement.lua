@@ -347,16 +347,16 @@ return Transformer({
       return nil
     end
   end,
-  update = function(self, node)
+  compound = function(self, node)
     local name, op, exp = unpack(node, 2)
-    local op_final = op:match("^(.+)=$")
-    if op_final == "#" then
-      if not (value_is_singular(exp)) then
-        exp = {
-          "parens",
-          exp
-        }
-      end
+    if not (value_is_singular(exp)) then
+      exp = {
+        "parens",
+        exp
+      }
+    end
+    local _exp_0 = op:match('^(.+)=$')
+    if "#" == _exp_0 then
       return {
         "assign",
         {
@@ -384,7 +384,67 @@ return Transformer({
           exp
         }
       }
+    elseif "." == _exp_0 then
+      if exp[1] == "ref" then
+        exp = {
+          "chain",
+          {
+            "ref",
+            exp[2]
+          }
+        }
+      end
+      return {
+        "assign",
+        {
+          name
+        },
+        {
+          {
+            "chain",
+            name,
+            {
+              "dot",
+              unpack(exp[2], 2)
+            },
+            unpack(exp, 3)
+          }
+        }
+      }
+    elseif "\\" == _exp_0 then
+      if exp[1] == "ref" then
+        exp = {
+          "chain",
+          {
+            "ref",
+            exp[2]
+          }
+        }
+      end
+      return {
+        "assign",
+        {
+          name
+        },
+        {
+          {
+            "chain",
+            name,
+            {
+              "colon",
+              unpack(exp[2], 2)
+            },
+            unpack(exp, 3)
+          }
+        }
+      }
+    else
+      return error("Unknown compound operator: " .. op)
     end
+  end,
+  update = function(self, node)
+    local name, op, exp = unpack(node, 2)
+    local op_final = op:match("^(.+)=$")
     if not op_final then
       error("Unknown op: " .. op)
     end

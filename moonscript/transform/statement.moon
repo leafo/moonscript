@@ -226,14 +226,30 @@ Transformer {
     else
       nil
 
+  compound: (node) =>
+    name, op, exp = unpack node, 2
+    exp = {"parens", exp} unless value_is_singular exp
+
+    switch op\match '^(.+)=$'
+      when "#"
+        {"assign", {{"chain", name, {"index", {"length", {"exp", name, "+", {"number", "1"}}}}}}, {exp}}
+
+      when "."
+        if exp[1]=="ref"
+          exp = {"chain", {"ref", exp[2]}}
+        {"assign", {name}, {{"chain", name, {"dot", unpack exp[2], 2}, unpack exp, 3}}}
+
+      when "\\"
+        if exp[1]=="ref"
+          exp = {"chain", {"ref", exp[2]}}
+        {"assign", {name}, {{"chain", name, {"colon", unpack exp[2], 2}, unpack exp, 3}}}
+
+      else
+        error "Unknown compound operator: "..op
+
   update: (node) =>
     name, op, exp = unpack node, 2
     op_final = op\match "^(.+)=$"
-
-    if op_final=="#"
-      exp = {"parens", exp} unless value_is_singular exp
-      return {"assign", {{"chain", name, {"index", {"length", {"exp", name, "+", {"number", "1"}}}}}}, {exp}}
-      -- #= operator is a special case, since it's not the # operator
 
     error "Unknown op: "..op if not op_final
 

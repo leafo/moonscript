@@ -114,7 +114,7 @@ build_grammar = wrap_env debug_grammar, (root) ->
     Statement: pos(
         Import + While + With + For + ForEach + Switch + Return +
         Local + Export + BreakLoop +
-        Ct(ExpList) * (Update + Assign)^-1 / format_assign
+        Ct(ExpList) * (Update + Compound + Assign)^-1 / format_assign
       ) * Space * ((
         -- statement decorators
         key"if" * Exp * (key"else" * Exp)^-1 * Space / mark"if" +
@@ -176,7 +176,8 @@ build_grammar = wrap_env debug_grammar, (root) ->
     CompClause: CompFor + CompForEach + key"when" * Exp / mark"when"
 
     Assign: sym"=" * (Ct(With + If + Switch) + Ct(TableBlock + ExpListLow)) / mark"assign"
-    Update: ((sym"..=" + sym"+=" + sym"-=" + sym"*=" + sym"/=" + sym"%=" + sym"or=" + sym"and=" + sym"&=" + sym"|=" + sym">>=" + sym"<<=" + sym"#=") / trim) * Exp / mark"update"
+    Update: ((sym"..=" + sym"+=" + sym"-=" + sym"*=" + sym"/=" + sym"%=" + sym"or=" + sym"and=" + sym"&=" + sym"|=" + sym">>=" + sym"<<=") / trim) * Exp / mark"update"
+    Compound: ((sym"#=" + sym".=" + sym"\\=") / trim) * Exp / mark"compound"
 
     CharOperators: Space * C(S"+-*/%^><|&")
     WordOperators: op"or" + op"and" + op"<=" + op">=" + op"~=" + op"!=" + op"==" + op".." + op"<<" + op">>" + op"//"

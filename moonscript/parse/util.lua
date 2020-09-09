@@ -190,6 +190,12 @@ do
         lhs_exps[1],
         unpack(assign, 2)
       }
+    elseif "compound" == _exp_0 then
+      return {
+        "compound",
+        lhs_exps[1],
+        unpack(assign, 2)
+      }
     else
       return error("unknown assign expression: " .. tostring(t))
     end
