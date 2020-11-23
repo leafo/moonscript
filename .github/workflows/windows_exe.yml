@@ -26,4 +26,6 @@ jobs:
     - name: List Files
       run: Get-ChildItem -Recurse
 
+    - name: Run Lua
+      run: lua-5.1.5/src/lua.exe -v
 
