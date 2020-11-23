@@ -21,6 +21,7 @@ jobs:
       run: |
         curl -O https://www.lua.org/ftp/lua-5.1.5.tar.gz
         tar -xZf lua-5.1.5.tar.gz
+        cd lua-5.1.5; make PLAT=mingw
 
     - name: List Files
       run: Get-ChildItem
