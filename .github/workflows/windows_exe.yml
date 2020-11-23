@@ -10,3 +10,12 @@ jobs:
     - uses: actions/checkout@master
     - name: hello
       run: Get-ChildItem
+
+    - uses: msys2/setup-msys2@v2
+      with:
+        install: gcc make
+
+    - run: gcc -v
+
+
+
