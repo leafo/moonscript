@@ -8,14 +8,20 @@ jobs:
 
     steps:
     - uses: actions/checkout@master
-    - name: hello
-      run: Get-ChildItem
+
 
     - uses: msys2/setup-msys2@v2
       with:
-        install: gcc make
+        install: gcc make curl
 
     - run: gcc -v
 
+    - name: Setup Lua
+    - run: |
+        curl -O https://www.lua.org/ftp/lua-5.1.5.tar.gz
+        tar -xZf lua-5.1.5.tar.gz
+
+    - name: list files
+      run: Get-ChildItem
 
 
