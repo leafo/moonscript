@@ -54,6 +54,8 @@ extract_assign_names = (name, accum={}, prefix={}) ->
   accum
 
 build_assign = (scope, destruct_literal, receiver) ->
+  assert receiver,  "attempting to build destructure assign with no receiver"
+
   extracted_names = extract_assign_names destruct_literal
 
   names = {}

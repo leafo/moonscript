@@ -103,6 +103,7 @@ extract_assign_names = function(name, accum, prefix)
 end
 local build_assign
 build_assign = function(scope, destruct_literal, receiver)
+  assert(receiver, "attempting to build destructure assign with no receiver")
   local extracted_names = extract_assign_names(destruct_literal)
   local names = { }
   local values = { }
