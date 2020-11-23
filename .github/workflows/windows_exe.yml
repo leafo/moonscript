@@ -24,6 +24,6 @@ jobs:
         cd lua-5.1.5; make PLAT=mingw
 
     - name: List Files
-      run: Get-ChildItem
+      run: Get-ChildItem -Recurse
 
 
