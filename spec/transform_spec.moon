@@ -27,16 +27,45 @@ describe "moonscript.transform.destructure", ->
 
       out = split_assign Block!, node
 
-      assert.same {
-        "group", {
-          {
-            "group", {
-              { "declare", { {"ref", "hello"} } }
-              { "assign", { {"ref", "hello"} }, { {"chain", {"ref", "world"}, {"dot", "hello"}} } }
+      assert.same { "group", {
+        { "group", {
+          { "declare", { {"ref", "hello"} } }
+          { "assign", { {"ref", "hello"} }, { {"chain", {"ref", "world"}, {"dot", "hello"}} } }
+        }}
+      }}, out
+
+    -- {:a, :b} = world!
+    -- a complex value should never be repeated to avoid double execution
+    it "complex value", ->
+      node = {
+        "assign"
+        {
+          { "table", {
+              {{"key_literal", "a"}, {"ref", "a"}}
+              {{"key_literal", "b"}, {"ref", "b"}}
             }
           }
         }
-      }, out
+        {
+          {"chain", {"ref", "world"}, {"call", {}}}
+        }
+      }
+
+      out = split_assign Block!, node
+
+      -- the temp name the result is stored into
+      tmp = {"temp_name", prefix: "obj"}
+
+      assert.same { "group", {
+        { "group", {
+          { "declare", { {"ref", "a"}, {"ref", "b"} } }
+
+          { "do", {
+            {"assign", { tmp }, { {"chain", {"ref", "world"}, {"call", {}}} } }
+            {"assign", { {"ref", "a"}, {"ref", "b"} }, { {"chain", tmp, {"dot", "a"}}, {"chain", tmp, {"dot", "b"}} } }
+          }}
+        }}
+      }}, out
 
     -- a, {:hello} = one, two
     it "multiple assigns", ->
@@ -57,21 +86,17 @@ describe "moonscript.transform.destructure", ->
 
       out = split_assign Block!, node
 
-      assert.same {
-        "group", {
-          {"assign", { {"ref", "a"} }, { {"ref", "one"} }}
+      assert.same { "group", {
+        {"assign", { {"ref", "a"} }, { {"ref", "one"} }}
 
-          {
-            "group", {
-              { "declare", { {"ref", "hello"} } }
-              { "assign", { {"ref", "hello"} }, { {"chain", {"ref", "two"}, {"dot", "hello"}} } }
-            }
-          }
-        }
-      }, out
+        { "group", {
+          { "declare", { {"ref", "hello"} } }
+          { "assign", { {"ref", "hello"} }, { {"chain", {"ref", "two"}, {"dot", "hello"}} } }
+        }}
+      }}, out
 
     -- {:hello}, a = one, two
-    it "multiple assigns swapped #ddd", ->
+    it "multiple assigns swapped", ->
       node = {
         "assign"
         {
@@ -89,18 +114,14 @@ describe "moonscript.transform.destructure", ->
 
       out = split_assign Block!, node
 
-      assert.same {
-        "group", {
-          {
-            "group", {
-              { "declare", { {"ref", "hello"} } }
-              { "assign", { {"ref", "hello"} }, { {"chain", {"ref", "one"}, {"dot", "hello"}} } }
-            }
-          }
+      assert.same { "group", {
+        { "group", {
+          { "declare", { {"ref", "hello"} } }
+          { "assign", { {"ref", "hello"} }, { {"chain", {"ref", "one"}, {"dot", "hello"}} } }
+        }}
 
-          {"assign", { {"ref", "a"} }, { {"ref", "two"} }}
-        }
-      }, out
+        {"assign", { {"ref", "a"} }, { {"ref", "two"} }}
+      }}, out
 
 
   it "extracts names from table destructure", ->
