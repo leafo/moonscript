@@ -30,7 +30,7 @@ jobs:
 
     - name: Get Luafilesystem
       run: |
-        curl -o luafilesystem.tar.gz https://github.com/keplerproject/luafilesystem/archive/v1_8_0.tar.gz
+        curl -L -o luafilesystem.tar.gz https://github.com/keplerproject/luafilesystem/archive/v1_8_0.tar.gz
         tar -xZf luafilesystem.tar.gz
 
     - name: List Files
