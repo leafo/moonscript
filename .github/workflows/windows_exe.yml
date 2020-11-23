@@ -1,0 +1,11 @@
+name: "windows_exe"
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: hello
+        run: Get-ChildItem
