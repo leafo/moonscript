@@ -438,7 +438,8 @@ do
         self.next:render(buffer)
       else
         if #self._lines == 0 and "string" == type(buffer[#buffer]) then
-          buffer[#buffer] = buffer[#buffer] .. (" " .. (unpack(Lines():add(self.footer))))
+          local _update_0 = #buffer
+          buffer[_update_0] = buffer[_update_0] .. (" " .. (unpack(Lines():add(self.footer))))
         else
           buffer:add(self._lines)
           buffer:add(self.footer)

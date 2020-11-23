@@ -50,7 +50,8 @@ show_line_position = function(str, pos, context)
     { }
   }
   for c in str:gmatch(".") do
-    lines[#lines] = lines[#lines] or { }
+    local _update_0 = #lines
+    lines[_update_0] = lines[_update_0] or { }
     table.insert(lines[#lines], c)
     if c == "\n" then
       lines[#lines + 1] = { }

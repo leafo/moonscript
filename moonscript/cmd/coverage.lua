@@ -82,7 +82,8 @@ do
     process_line = function(self, _, line_no)
       local debug_data = debug.getinfo(2, "S")
       local source = debug_data.source
-      self.line_counts[source][line_no] = self.line_counts[source][line_no] + 1
+      local _update_0, _update_1 = source, line_no
+      self.line_counts[_update_0][_update_1] = self.line_counts[_update_0][_update_1] + 1
     end,
     format_results = function(self)
       local line_table = require("moonscript.line_tables")
@@ -103,7 +104,8 @@ do
                 _continue_1 = true
                 break
               end
-              positions[file][position] = positions[file][position] + count
+              local _update_0, _update_1 = file, position
+              positions[_update_0][_update_1] = positions[_update_0][_update_1] + count
               _continue_1 = true
             until true
             if not _continue_1 then
