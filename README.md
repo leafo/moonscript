@@ -2,7 +2,8 @@
 
 [![MoonScript](https://leafo.net/dump/sailormoonscript.png)](https://moonscript.org)
 
-[![Build Status](https://travis-ci.org/leafo/moonscript.svg?branch=master)](https://travis-ci.org/leafo/moonscript) [![Build status](https://ci.appveyor.com/api/projects/status/f5prpi4wvytul290/branch/binaries?svg=true)](https://ci.appveyor.com/project/leafo/moonscript/branch/binaries)
+
+[![spec](https://github.com/leafo/moonscript/workflows/spec/badge.svg)](https://github.com/leafo/moonscript/actions?query=workflow%3Aspec) [![Build status](https://ci.appveyor.com/api/projects/status/f5prpi4wvytul290/branch/binaries?svg=true)](https://ci.appveyor.com/project/leafo/moonscript/branch/binaries)
 
 
 [![](https://leafo.net/dump/twitch-banner.svg)](https://www.twitch.tv/moonscript)
