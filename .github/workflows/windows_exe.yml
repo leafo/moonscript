@@ -14,14 +14,15 @@ jobs:
       with:
         install: gcc make curl
 
-    - run: gcc -v
+    - name: Show GCC
+      run: gcc -v
 
     - name: Setup Lua
-    - run: |
+      run: |
         curl -O https://www.lua.org/ftp/lua-5.1.5.tar.gz
         tar -xZf lua-5.1.5.tar.gz
 
-    - name: list files
+    - name: List Files
       run: Get-ChildItem
 
 
