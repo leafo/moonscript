@@ -23,6 +23,16 @@ jobs:
         tar -xZf lua-5.1.5.tar.gz
         cd lua-5.1.5; make PLAT=mingw
 
+    - name: Get LPeg
+      run: |
+        curl -o lpeg.tar.gz http://www.inf.puc-rio.br/~roberto/lpeg/lpeg-1.0.2.tar.gz
+        tar -xZf lpeg.tar.gz
+
+    - name: Get Luafilesystem
+      run: |
+        curl -o luafilesystem.tar.gz https://github.com/keplerproject/luafilesystem/archive/v1_8_0.tar.gz
+        tar -xZf luafilesystem.tar.gz
+
     - name: List Files
       run: Get-ChildItem -Recurse
 
