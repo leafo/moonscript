@@ -26,7 +26,7 @@ if not read_stdin then
 	parser:argument("file/directory"):args("+")
 end
 
-local opts = parser:parse()
+local opts = read_stdin and {} or parser:parse()
 
 if opts.version then
 	local v = require "moonscript.version"
