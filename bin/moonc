@@ -20,7 +20,7 @@ parser:mutex(
 parser:flag("-",
 	"Read from standard in, print to standard out (Must be only argument)")
 
-local read_stdin = arg[1] == "--" -- luacheck: ignore 113
+local read_stdin = arg[1] == "-" -- luacheck: ignore 113
 
 if not read_stdin then
 	parser:argument("file/directory"):args("+")
