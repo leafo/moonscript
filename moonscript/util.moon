@@ -70,7 +70,10 @@ dump = (what) ->
 
       seen[what] = false
 
-      "{\n" .. concat(lines) .. (" ")\rep((depth - 1)*4) .. "}\n"
+      class_name = if what.__class
+        "<#{what.__class.__name}>"
+
+      "#{class_name or ""}{\n" .. concat(lines) .. (" ")\rep((depth - 1)*4) .. "}\n"
     else
       tostring(what).."\n"
 

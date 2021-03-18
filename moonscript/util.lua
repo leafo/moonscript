@@ -102,7 +102,11 @@ dump = function(what)
         lines = _accum_0
       end
       seen[what] = false
-      return "{\n" .. concat(lines) .. (" "):rep((depth - 1) * 4) .. "}\n"
+      local class_name
+      if what.__class then
+        class_name = "<" .. tostring(what.__class.__name) .. ">"
+      end
+      return tostring(class_name or "") .. "{\n" .. concat(lines) .. (" "):rep((depth - 1) * 4) .. "}\n"
     else
       return tostring(what) .. "\n"
     end
