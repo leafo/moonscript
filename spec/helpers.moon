@@ -1,4 +1,3 @@
-
 -- remove front indentation from a multiline string, making it suitable to be
 -- parsed
 unindent = (str) ->
@@ -44,5 +43,6 @@ with_dev = (fn) ->
     in_dev = false
 
   dev_cache
+
 
 { :unindent, :with_dev }

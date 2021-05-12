@@ -1,13 +1,13 @@
 LUA ?= lua5.1
 LUA_VERSION = $(shell $(LUA) -e 'print(_VERSION:match("%d%.%d"))')
 LUAROCKS = luarocks-$(LUA_VERSION)
-LUA_PATH_MAKE = $(shell $(LUAROCKS) path --lr-path);./?.lua;./?/init.lua
-LUA_CPATH_MAKE = $(shell $(LUAROCKS) path --lr-cpath);./?.so
+LUA_PATH_MAKE = $(shell $(LUAROCKS) path --lr-path);./?.lua;./?/init.lua;$(LUA_PATH)
+LUA_CPATH_MAKE = $(shell $(LUAROCKS) path --lr-cpath);./?.so;$(LUA_CPATH)
 
 .PHONY: test local compile compile_system watch lint count show
 
 test:
-	busted
+	LUA_PATH='$(LUA_PATH_MAKE)' LUA_CPATH='$(LUA_CPATH_MAKE)' busted
 
 show:
 	# LUA $(LUA)
@@ -22,7 +22,7 @@ local: compile
 compile:
 	LUA_PATH='$(LUA_PATH_MAKE)' LUA_CPATH='$(LUA_CPATH_MAKE)' $(LUA) bin/moonc moon/ moonscript/
 	echo "#!/usr/bin/env lua" > bin/moon
-	$(LUA) bin/moonc -p bin/moon.moon >> bin/moon
+	LUA_PATH='$(LUA_PATH_MAKE)' LUA_CPATH='$(LUA_CPATH_MAKE)' $(LUA) bin/moonc -p bin/moon.moon >> bin/moon
 	echo "-- vim: set filetype=lua:" >> bin/moon
 
 compile_system:

@@ -1,3 +1,14 @@
+local lfs = require("lfs")
+local moonc = require("moonscript.cmd.moonc")
+local unpack
+unpack = require("moonscript.util").unpack
+local process_filesystem_tree
+process_filesystem_tree = moonc.process_filesystem_tree
+local iterate_path, parse_dir, parse_subtree, parse_root, dirsep, normalize_dir, normalize_path
+do
+  local _obj_0 = require("moonscript.cmd.path_handling")
+  iterate_path, parse_dir, parse_subtree, parse_root, dirsep, normalize_dir, normalize_path = _obj_0.iterate_path, _obj_0.parse_dir, _obj_0.parse_subtree, _obj_0.parse_root, _obj_0.dirsep, _obj_0.normalize_dir, _obj_0.normalize_path
+end
 local remove_dupes
 remove_dupes = function(list, key_fn)
   local seen = { }
@@ -40,14 +51,31 @@ do
   local _class_0
   local _base_0 = {
     start_msg = "Starting watch loop (Ctrl-C to exit)",
+    output_for = function(self, path, path_type)
+      return moonc.output_for(self.output_to, self.prefix_map, path, path_type)
+    end,
     print_start = function(self, mode, misc)
       return io.stderr:write(tostring(self.start_msg) .. " with " .. tostring(mode) .. " [" .. tostring(misc) .. "]\n")
+    end,
+    valid_moon_file = function(self, file)
+      file = normalize_path(file)
+      return file:match("%.moon$") ~= nil or self.initial_files[file] ~= nil
     end
   }
   _base_0.__index = _base_0
   _class_0 = setmetatable({
-    __init = function(self, file_list)
-      self.file_list = file_list
+    __init = function(self, output_to, initial_paths, prefix_map)
+      self.output_to, self.initial_paths, self.prefix_map = output_to, initial_paths, prefix_map
+      self.initial_files = { }
+      local _list_0 = self.initial_paths
+      for _index_0 = 1, #_list_0 do
+        local path_tuple = _list_0[_index_0]
+        local path, path_type
+        path, path_type = path_tuple[1], path_tuple[2]
+        if path_type == "file" then
+          self.initial_files[normalize_path(path)] = true
+        end
+      end
     end,
     __base = _base_0,
     __name = "Watcher"
@@ -62,84 +90,169 @@ do
   _base_0.__class = _class_0
   Watcher = _class_0
 end
-local InotifyWacher
+local InotifyWatcher
 do
   local _class_0
   local _parent_0 = Watcher
   local _base_0 = {
-    get_dirs = function(self)
-      local parse_dir
-      parse_dir = require("moonscript.cmd.moonc").parse_dir
-      local dirs
-      do
-        local _accum_0 = { }
-        local _len_0 = 1
-        local _list_0 = self.file_list
-        for _index_0 = 1, #_list_0 do
-          local _des_0 = _list_0[_index_0]
-          local file_path
-          file_path = _des_0[1]
-          local dir = parse_dir(file_path)
-          if dir == "" then
-            dir = "./"
-          end
-          local _value_0 = dir
-          _accum_0[_len_0] = _value_0
-          _len_0 = _len_0 + 1
-        end
-        dirs = _accum_0
-      end
-      return remove_dupes(dirs)
-    end,
     each_update = function(self)
+      self:print_start("inotify", (plural(#self.initial_paths, "path")))
       return coroutine.wrap(function()
-        local dirs = self:get_dirs()
-        self:print_start("inotify", plural(#dirs, "dir"))
-        local wd_table = { }
-        local inotify = require("inotify")
-        local handle = inotify.init()
-        for _index_0 = 1, #dirs do
-          local dir = dirs[_index_0]
-          local wd = handle:addwatch(dir, inotify.IN_CLOSE_WRITE, inotify.IN_MOVED_TO)
-          wd_table[wd] = dir
-        end
+        self:register_initial_watchers()
         while true do
-          local events = handle:read()
-          if not (events) then
-            break
+          local events, err_msg, err_no = self.handle:read()
+          if events == nil then
+            error("Error reading events from inotify handle, errno " .. tostring(err_no) .. ", message: " .. tostring(err_msg))
           end
           for _index_0 = 1, #events do
-            local _continue_0 = false
-            repeat
-              local ev = events[_index_0]
-              local fname = ev.name
-              if not (fname:match("%.moon$")) then
-                _continue_0 = true
-                break
-              end
-              local dir = wd_table[ev.wd]
-              if dir ~= "./" then
-                fname = dir .. fname
-              end
-              coroutine.yield(fname)
-              _continue_0 = true
-            until true
-            if not _continue_0 then
-              break
-            end
+            local ev = events[_index_0]
+            self:handle_event(ev)
           end
         end
       end)
+    end,
+    register_initial_watchers = function(self)
+      local _list_0 = self.initial_paths
+      for _index_0 = 1, #_list_0 do
+        local path_tuple = _list_0[_index_0]
+        local path, path_type
+        path, path_type = path_tuple[1], path_tuple[2]
+        if path_type == "file" then
+          self:register_watcher(path, path_type, self.file_event_types)
+        else
+          self:register_recursive_watchers(path)
+        end
+      end
+    end,
+    register_watcher = function(self, path, path_type, events)
+      if not (self.path_map[path]) then
+        local wd = self.handle:addwatch(path, unpack(events))
+        self.wd_map[wd] = {
+          path,
+          path_type
+        }
+        self.path_map[path] = wd
+        self:seen_path_type(path, path_type)
+        if path_type == "file" then
+          return coroutine.yield({
+            "changedfile",
+            path,
+            (self:output_for(path, path_type))
+          })
+        end
+      end
+    end,
+    register_recursive_watchers = function(self, path)
+      local directory_cb
+      directory_cb = function(directory_path)
+        return self:register_watcher(directory_path, "directory", self.dir_event_types)
+      end
+      local file_cb
+      file_cb = function(file_path)
+        if self:valid_moon_file(file_path) then
+          self:seen_path_type(file_path, "file")
+          return coroutine.yield({
+            "changedfile",
+            file_path,
+            (self:output_for(file_path, "file"))
+          })
+        end
+      end
+      return process_filesystem_tree(path, directory_cb, file_cb)
+    end,
+    handle_event = function(self, ev)
+      local path_tuple = self.wd_map[ev.wd]
+      if not (path_tuple) then
+        return 
+      end
+      local path, path_type
+      path, path_type = path_tuple[1], path_tuple[2]
+      local is_dir = path_type == 'directory'
+      local _exp_0 = ev.mask
+      if self.inotify.IN_CLOSE_WRITE == _exp_0 then
+        if is_dir then
+          local subpath = path .. ev.name
+          local subpath_type = lfs.attributes(subpath, "mode")
+          if subpath_type == "file" and self:valid_moon_file(subpath) then
+            return coroutine.yield({
+              "changedfile",
+              subpath,
+              (self:output_for(subpath, subpath_type))
+            })
+          end
+        else
+          return coroutine.yield({
+            "changedfile",
+            path,
+            (self:output_for(path, path_type))
+          })
+        end
+      elseif self.inotify.IN_DELETE_SELF == _exp_0 or self.inotify.IN_MOVE_SELF == _exp_0 then
+        self.handle:rmwatch(ev.wd)
+        self.wd_map[ev.wd] = nil
+        self.path_map[path] = nil
+        self.path_type_map[path] = nil
+        return coroutine.yield({
+          "removed",
+          path,
+          (self:output_for(path, path_type)),
+          path_type
+        })
+      elseif self.inotify.IN_DELETE == _exp_0 or self.inotify.IN_MOVED_TO == _exp_0 then
+        local subpath = path .. ev.name
+        local subpath_type = self.path_type_map[subpath]
+        self.path_type_map[subpath] = nil
+        return coroutine.yield({
+          "removed",
+          subpath,
+          (self:output_for(subpath, subpath_type)),
+          subpath_type
+        })
+      elseif self.inotify.IN_CREATE == _exp_0 then
+        local subpath = path .. ev.name
+        local subpath_type = lfs.attributes(subpath, "mode")
+        if subpath_type == "directory" then
+          return self:register_recursive_watchers(normalize_dir(subpath))
+        else
+          if self:valid_moon_file(subpath) then
+            return self:seen_path_type(subpath, subpath_type)
+          end
+        end
+      end
+    end,
+    seen_path_type = function(self, path, path_type)
+      path = normalize_path(path)
+      if not (self.path_type_map[path]) then
+        self.path_type_map[path] = path_type
+      end
     end
   }
   _base_0.__index = _base_0
   setmetatable(_base_0, _parent_0.__base)
   _class_0 = setmetatable({
-    __init = function(self, ...)
-      return _class_0.__parent.__init(self, ...)
+    __init = function(self, input_paths, output_to, prefix_map)
+      _class_0.__parent.__init(self, input_paths, output_to, prefix_map)
+      self.wd_map = { }
+      self.path_map = { }
+      self.path_type_map = { }
+      self.inotify = require("inotify")
+      self.file_event_types = {
+        self.inotify.IN_CLOSE_WRITE,
+        self.inotify.IN_MOVE_SELF,
+        self.inotify.IN_DELETE_SELF
+      }
+      self.dir_event_types = {
+        self.inotify.IN_CLOSE_WRITE,
+        self.inotify.IN_MOVE_SELF,
+        self.inotify.IN_DELETE_SELF,
+        self.inotify.IN_CREATE,
+        self.inotify.IN_MOVED_TO,
+        self.inotify.IN_DELETE
+      }
+      self.handle = self.inotify.init()
     end,
     __base = _base_0,
-    __name = "InotifyWacher",
+    __name = "InotifyWatcher",
     __parent = _parent_0
   }, {
     __index = function(cls, name)
@@ -169,7 +282,7 @@ do
   if _parent_0.__inherited then
     _parent_0.__inherited(_parent_0, _class_0)
   end
-  InotifyWacher = _class_0
+  InotifyWatcher = _class_0
 end
 local SleepWatcher
 do
@@ -189,50 +302,113 @@ do
       return sleep
     end,
     each_update = function(self)
+      self:print_start("polling", (plural(#self.initial_paths, "path")))
       return coroutine.wrap(function()
-        local lfs = require("lfs")
-        local sleep = self:get_sleep_func()
-        self:print_start("polling", plural(#self.file_list, "files"))
-        local mod_time = { }
         while true do
-          local _list_0 = self.file_list
-          for _index_0 = 1, #_list_0 do
-            local _continue_0 = false
-            repeat
-              local _des_0 = _list_0[_index_0]
-              local file
-              file = _des_0[1]
-              local time = lfs.attributes(file, "modification")
-              if not (time) then
-                mod_time[file] = nil
-                _continue_0 = true
-                break
-              end
-              if not (mod_time[file]) then
-                mod_time[file] = time
-                _continue_0 = true
-                break
-              end
-              if time > mod_time[file] then
-                mod_time[file] = time
-                coroutine.yield(file)
-              end
-              _continue_0 = true
-            until true
-            if not _continue_0 then
-              break
-            end
-          end
-          sleep(self.polling_rate)
+          self:scan_path_times()
+          self:remove_missing_paths()
+          self.sleep(self.polling_rate)
         end
       end)
+    end,
+    scan_path_times = function(self)
+      local _list_0 = self.initial_paths
+      for _index_0 = 1, #_list_0 do
+        local path_tuple = _list_0[_index_0]
+        local path, path_type
+        path, path_type = path_tuple[1], path_tuple[2]
+        local is_dir = path_type == 'directory'
+        if not (is_dir) then
+          self:process_file_time(path)
+        else
+          local directory_cb
+          directory_cb = function(directory_path)
+            return self:process_directory_time(directory_path)
+          end
+          local file_cb
+          file_cb = function(file_path)
+            return self:process_file_time(file_path)
+          end
+          process_filesystem_tree(path, directory_cb, file_cb)
+        end
+      end
+    end,
+    process_file_time = function(self, file)
+      local time = lfs.attributes(file, "modification")
+      if not (time) then
+        return 
+      end
+      if not (self:valid_moon_file(file)) then
+        return 
+      end
+      local output = self:output_for(file, 'file')
+      if not (self.mod_time[file]) then
+        self.mod_time[file] = time
+        self.path_type_map[file] = 'file'
+        return coroutine.yield({
+          "changedfile",
+          file,
+          output
+        })
+      elseif time ~= self.mod_time[file] then
+        self.mod_time[file] = time
+        return coroutine.yield({
+          "changedfile",
+          file,
+          output
+        })
+      end
+    end,
+    process_directory_time = function(self, directory)
+      local time = lfs.attributes(directory, "modification")
+      if not (time) then
+        return 
+      end
+      directory = normalize_dir(directory)
+      if not (self.mod_time[directory]) then
+        self.path_type_map[directory] = 'directory'
+      end
+    end,
+    remove_missing_paths = function(self)
+      for path, path_type in pairs(self.path_type_map) do
+        local _continue_0 = false
+        repeat
+          local time = lfs.attributes(path, "modification")
+          if time then
+            _continue_0 = true
+            break
+          end
+          self.path_type_map[path] = nil
+          self.mod_time[path] = nil
+          coroutine.yield({
+            "removed",
+            path,
+            (self:output_for(path, path_type)),
+            path_type
+          })
+          _continue_0 = true
+        until true
+        if not _continue_0 then
+          break
+        end
+      end
     end
   }
   _base_0.__index = _base_0
   setmetatable(_base_0, _parent_0.__base)
   _class_0 = setmetatable({
-    __init = function(self, ...)
-      return _class_0.__parent.__init(self, ...)
+    __init = function(self, input_paths, output_to, prefix_map)
+      _class_0.__parent.__init(self, input_paths, output_to, prefix_map)
+      self.sleep = self:get_sleep_func()
+      self.mod_time = { }
+      self.path_type_map = { }
+      local _list_0 = self.initial_paths
+      for _index_0 = 1, #_list_0 do
+        local path_tuple = _list_0[_index_0]
+        local path, path_type
+        path, path_type = path_tuple[1], path_tuple[2]
+        self.path_type_map[path] = path_type
+      end
     end,
     __base = _base_0,
     __name = "SleepWatcher",
@@ -264,5 +440,5 @@ end
 return {
   Watcher = Watcher,
   SleepWatcher = SleepWatcher,
-  InotifyWacher = InotifyWacher
+  InotifyWatcher = InotifyWatcher
 }

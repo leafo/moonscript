@@ -116,17 +116,38 @@ files in the same directories.
 $ moonc my_script1.moon my_script2.moon ...
 ```
 
-You can control where the compiled files are put using the `-t` flag, followed
-by a directory.
+You can control where the compiled files are put using the `-t`/`--output-to`
+flag, followed by a directory.
 
 `moonc` can also take a directory as an argument, and it will recursively scan
 for all MoonScript files and compile them.
+
+If you use `-t` and also specify a directory as argument, then similar to
+`rsync`, handling of whether or not directory names are included in the output
+file paths differs depending on whether or not you specify a trailing `/`.
+
+For example, if you have a folder called `src` containing a file `foo.moon`:
+
+```bash
+$ moonc -t out src
+```
+
+Produces the file `out/src/foo.lua`. Alternatively:
+
+```bash
+$ moonc -t out src/
+```
+
+Produces the file `out/foo.lua`. It does not matter whether or not there is a
+trailing `/` on the `--output-to` directory, only on each of the input
+directories specified.
 
 `moonc` can write to standard out by passing the `-p` flag.
 
 The `-w` flag can be used to enable watch mode. `moonc` will stay running, and
 watch for changes to the input files. If any of them change then they will be
-compiled automatically.
+compiled automatically. Watch mode also works in combination with the `-t`
+flag.
 
 A full list of flags can be seen by passing the `-h` or `--help` flag.
 
