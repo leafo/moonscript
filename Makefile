@@ -4,10 +4,13 @@ LUAROCKS = luarocks --lua-version=$(LUA_VERSION)
 LUA_PATH_MAKE = $(shell $(LUAROCKS) path --lr-path);./?.lua;./?/init.lua
 LUA_CPATH_MAKE = $(shell $(LUAROCKS) path --lr-cpath);./?.so
 
-.PHONY: test local compile compile_system watch lint count show
+.PHONY: test local build watch lint count show
 
-test:
-	busted
+build:
+	LUA_PATH='$(LUA_PATH_MAKE)' LUA_CPATH='$(LUA_CPATH_MAKE)' $(LUA) bin/moonc moon/ moonscript/
+	echo "#!/usr/bin/env lua" > bin/moon
+	$(LUA) bin/moonc -p bin/moon.moon >> bin/moon
+	echo "-- vim: set filetype=lua:" >> bin/moon
 
 show:
 	# LUA $(LUA)
@@ -16,14 +19,11 @@ show:
 	# LUA_PATH_MAKE $(LUA_PATH_MAKE)
 	# LUA_CPATH_MAKE $(LUA_CPATH_MAKE)
 
-local: compile
-	LUA_PATH='$(LUA_PATH_MAKE)' LUA_CPATH='$(LUA_CPATH_MAKE)' $(LUAROCKS) make --local moonscript-dev-1.rockspec
+test: build
+	busted
 
-compile:
-	LUA_PATH='$(LUA_PATH_MAKE)' LUA_CPATH='$(LUA_CPATH_MAKE)' $(LUA) bin/moonc moon/ moonscript/
-	echo "#!/usr/bin/env lua" > bin/moon
-	$(LUA) bin/moonc -p bin/moon.moon >> bin/moon
-	echo "-- vim: set filetype=lua:" >> bin/moon
+local: build
+	LUA_PATH='$(LUA_PATH_MAKE)' LUA_CPATH='$(LUA_CPATH_MAKE)' $(LUAROCKS) make --local moonscript-dev-1.rockspec
 
 watch:
 	moonc moon/ moonscript/ && moonc -w moon/ moonscript/
