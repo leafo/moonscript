@@ -296,7 +296,8 @@ return {
     return self:line("not ", self:value(node[2]))
   end,
   self = function(self, node)
-    if data.lua_keywords[node[2]] then
+    local field_name = self:name(node[2])
+    if data.lua_keywords[field_name] then
       return self:value({
         "chain",
         "self",
@@ -305,16 +306,17 @@ return {
           {
             "string",
             '"',
-            self:name(node[2])
+            field_name
           }
         }
       })
     else
-      return "self." .. self:name(node[2])
+      return "self." .. tostring(field_name)
     end
   end,
   self_class = function(self, node)
-    if data.lua_keywords[node[2]] then
+    local field_name = self:name(node[2])
+    if data.lua_keywords[field_name] then
       return self:value({
         "chain",
         "self",
@@ -327,19 +329,19 @@ return {
           {
             "string",
             '"',
-            self:name(node[2])
+            field_name
           }
         }
       })
     else
-      return "self.__class." .. self:name(node[2])
+      return "self.__class." .. tostring(field_name)
     end
   end,
   self_colon = function(self, node)
-    return "self:" .. self:name(node[2])
+    return "self:" .. tostring(self:name(node[2]))
   end,
   self_class_colon = function(self, node)
-    return "self.__class:" .. self:name(node[2])
+    return "self.__class:" .. tostring(self:name(node[2]))
   end,
   ref = function(self, value)
     do

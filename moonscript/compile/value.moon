@@ -183,26 +183,29 @@ string_chars = {
     @line "not ", @value node[2]
 
   self: (node) =>
-    if data.lua_keywords[node[2]]
+    field_name = @name node[2]
+    if data.lua_keywords[field_name]
       @value {"chain", "self", {"index", {
-        "string", '"', @name node[2]
+        "string", '"', field_name
       }}}
     else
-      "self."..@name node[2]
+      "self.#{field_name}"
 
   self_class: (node) =>
-    if data.lua_keywords[node[2]]
+    field_name = @name node[2]
+
+    if data.lua_keywords[field_name]
       @value {"chain", "self", {"dot", "__class"}, {"index", {
-        "string", '"', @name node[2]
+        "string", '"', field_name
       }}}
     else
-      "self.__class."..@name node[2]
+      "self.__class.#{field_name}"
 
   self_colon: (node) =>
-    "self:"..@name node[2]
+    "self:#{@name node[2]}"
 
   self_class_colon: (node) =>
-    "self.__class:"..@name node[2]
+    "self.__class:#{@name node[2]}"
 
   -- a variable reference
   ref: (value) =>
