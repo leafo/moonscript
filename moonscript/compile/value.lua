@@ -305,7 +305,7 @@ return {
           {
             "string",
             '"',
-            node[2]
+            self:name(node[2])
           }
         }
       })
@@ -327,7 +327,7 @@ return {
           {
             "string",
             '"',
-            node[2]
+            self:name(node[2])
           }
         }
       })

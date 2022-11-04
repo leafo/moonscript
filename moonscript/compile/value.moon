@@ -185,7 +185,7 @@ string_chars = {
   self: (node) =>
     if data.lua_keywords[node[2]]
       @value {"chain", "self", {"index", {
-        "string", '"', node[2]
+        "string", '"', @name node[2]
       }}}
     else
       "self."..@name node[2]
@@ -193,7 +193,7 @@ string_chars = {
   self_class: (node) =>
     if data.lua_keywords[node[2]]
       @value {"chain", "self", {"dot", "__class"}, {"index", {
-        "string", '"', node[2]
+        "string", '"', @name node[2]
       }}}
     else
       "self.__class."..@name node[2]
