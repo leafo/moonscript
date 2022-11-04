@@ -22,6 +22,10 @@ show:
 test: build
 	busted
 
+
+build_test_outputs: build
+	BUILD=1 busted spec/lang_spec.moon
+
 local: build
 	LUA_PATH='$(LUA_PATH_MAKE)' LUA_CPATH='$(LUA_CPATH_MAKE)' $(LUAROCKS) make --local moonscript-dev-1.rockspec
 

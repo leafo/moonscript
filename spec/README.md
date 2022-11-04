@@ -44,13 +44,3 @@ describe "moonscript.base", ->
 `with_dev`'s require function will load the `.lua` files in the local
 directory, not the `moon` ones. You're responsible for compiling them first
 before running the tests.
-
-You might do
-
-```bash
-$ make compile_system; busted
-```
-
-> `make compile_system` is a makefile task included in the repo that will build
-> MoonScript in the current directory with the version installed to the system
-
