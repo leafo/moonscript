@@ -12,6 +12,14 @@ build:
 	$(LUA) bin/moonc -p bin/moon.moon >> bin/moon
 	echo "-- vim: set filetype=lua:" >> bin/moon
 
+
+# This will rebuild MoonScript from the (hopefully working) system installation of moonc
+build_from_system:
+	moonc moon/ moonscript/
+	echo "#!/usr/bin/env lua" > bin/moon
+	moonc -p bin/moon.moon >> bin/moon
+	echo "-- vim: set filetype=lua:" >> bin/moon
+
 show:
 	# LUA $(LUA)
 	# LUA_VERSION $(LUA_VERSION)
@@ -21,7 +29,6 @@ show:
 
 test: build
 	busted
-
 
 build_test_outputs: build
 	BUILD=1 busted spec/lang_spec.moon
