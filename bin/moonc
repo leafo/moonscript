@@ -23,13 +23,18 @@ parser:mutex(
 parser:flag("-",
   "Read from standard in, print to standard out (Must be only argument)")
 
-local read_stdin = arg[1] == "--" -- luacheck: ignore 113
+local read_stdin = arg[1] == "-" -- luacheck: ignore 113
 
 if not read_stdin then
   parser:argument("file/directory"):args("+")
+else
+  if arg[2] ~= nil then
+    io.stderr:write("- must be the only argument\n")
+    os.exit(1)
+  end
 end
 
-local opts = parser:parse()
+local opts = read_stdin and {} or parser:parse()
 
 if opts.version then
   local v = require "moonscript.version"
