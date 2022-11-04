@@ -183,10 +183,20 @@ string_chars = {
     @line "not ", @value node[2]
 
   self: (node) =>
-    "self."..@name node[2]
+    if data.lua_keywords[node[2]]
+      @value {"chain", "self", {"index", {
+        "string", '"', node[2]
+      }}}
+    else
+      "self."..@name node[2]
 
   self_class: (node) =>
-    "self.__class."..@name node[2]
+    if data.lua_keywords[node[2]]
+      @value {"chain", "self", {"dot", "__class"}, {"index", {
+        "string", '"', node[2]
+      }}}
+    else
+      "self.__class."..@name node[2]
 
   self_colon: (node) =>
     "self:"..@name node[2]

@@ -296,10 +296,44 @@ return {
     return self:line("not ", self:value(node[2]))
   end,
   self = function(self, node)
-    return "self." .. self:name(node[2])
+    if data.lua_keywords[node[2]] then
+      return self:value({
+        "chain",
+        "self",
+        {
+          "index",
+          {
+            "string",
+            '"',
+            node[2]
+          }
+        }
+      })
+    else
+      return "self." .. self:name(node[2])
+    end
   end,
   self_class = function(self, node)
-    return "self.__class." .. self:name(node[2])
+    if data.lua_keywords[node[2]] then
+      return self:value({
+        "chain",
+        "self",
+        {
+          "dot",
+          "__class"
+        },
+        {
+          "index",
+          {
+            "string",
+            '"',
+            node[2]
+          }
+        }
+      })
+    else
+      return "self.__class." .. self:name(node[2])
+    end
   end,
   self_colon = function(self, node)
     return "self:" .. self:name(node[2])

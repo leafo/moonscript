@@ -76,7 +76,8 @@ do
             _continue_0 = true
             break
           end
-          names_by_position[pos] = names_by_position[pos] or { }
+          local _update_0 = pos
+          names_by_position[_update_0] = names_by_position[_update_0] or { }
           insert(names_by_position[pos], name)
           _continue_0 = true
         until true
