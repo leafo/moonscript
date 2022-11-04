@@ -75,5 +75,17 @@ There is a make task to conveniently do this:
 make build_test_outputs
 ```
 
+## Performance timing
+
+The syntax specs have performance timing collection built in. To get these
+times run the test suite with the `TIME` environment variable set.
+
+```
+TIME=1 busted spec/lang_spec.moon
+```
+
+Any changes to the compiler should not introduce any substantial performance
+decreases.
+
 
 
