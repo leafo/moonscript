@@ -1,4 +1,4 @@
-name: "windows_exe"
+name: "binaries"
 
 on: [push]
 
