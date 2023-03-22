@@ -3,12 +3,40 @@ name: "windows_exe"
 on: [push]
 
 jobs:
-  build:
-    runs-on: windows-latest
+  linux: 
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@master
 
+    - name: Show GCC
+      run: gcc -v
+
+    - name: Setup Lua
+      run: |
+        curl -O https://www.lua.org/ftp/lua-5.1.5.tar.gz
+        tar -xZf lua-5.1.5.tar.gz
+        cd lua-5.1.5; make PLAT=mingw
+
+    - name: Get LPeg
+      run: |
+        curl -o lpeg.tar.gz http://www.inf.puc-rio.br/~roberto/lpeg/lpeg-1.0.2.tar.gz
+        tar -xZf lpeg.tar.gz
+
+    - name: Get Luafilesystem
+      run: |
+        curl -L -o luafilesystem.tar.gz https://github.com/keplerproject/luafilesystem/archive/v1_8_0.tar.gz
+        tar -xZf luafilesystem.tar.gz
+
+    - name: Build
+      run: gcc -o moon '-Ilua-5.1.5/src/' bin/binaries/moon.c lpeg-1.0.2/lpvm.c lpeg-1.0.2/lpcap.c lpeg-1.0.2/lptree.c lpeg-1.0.2/lpcode.c lpeg-1.0.2/lpprint.c
+
+
+  windows:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@master
 
     - uses: msys2/setup-msys2@v2
       with:
