@@ -33,18 +33,30 @@ whitespace = S"\t " -- not including newline
 ignore_line = Ct until_end -- tag it for empty line
 
 -- we have to do this double Ct to capture both the full line and the grouped captures
-Line = (p) -> Ct C Ct Cg(Indent, "indent") * p
 Type = (name) -> Cg Cc(name), "type"
+Line = (type_name, p) -> Ct C Ct Cg(Indent, "indent") * p * Type type_name
 
-class_line = Line P"class" * whitespace^1 * Cg(literals.Name, "tag") * until_end * Type "class"
+class_line = Line "class", P"class" * whitespace^1 * Cg(literals.Name, "tag") * until_end
+
 -- TODO: support lapis style routes
 -- class_property = Line P("@")^-1 * Cg(literals.Name, "tag") * P":" * until_end * Type "property"
 
 method = P { P"=>" + P(1 - literals.Stop) * V(1) }
-class_method = Line P("@")^-1 * Cg(literals.Name, "tag") * P":" * method * until_end * Type "method"
+func = P { P"->" + P"=>" + P(1 - literals.Stop) * V(1) }
+
+-- this matches end-of-file return table convention for module files to figure
+-- out what names are exported
+export_list = Ct P"{" * P {
+  P"}" + ((P":" * literals.Name) + (P(1) - P"}")) * V(1)
+}
+
+eof_exports = P { export_list * S(" \t\r\n")^0 * P(-1) + P(1) * V(1) }
+
+class_method = Line("method", P("@")^-1 * Cg(literals.Name, "tag") * P":" * method) * until_end
+function_def = Line("function", Cg(literals.Name, "tag") * whitespace^0 * P"=" * func) * until_end
 
 parse_lines = Ct P {
-  (class_line + class_method + ignore_line) * (P(-1) + literals.Break * V(1))
+  (class_line + class_method + function_def + ignore_line) * (P(-1) + literals.Break * V(1))
 }
 
 escape_tagaddress = (line_text) ->
@@ -54,6 +66,8 @@ escape_tagaddress = (line_text) ->
 for fname in *args.files
   file = assert io.open fname
   contents = assert file\read "*a"
+  exports = {e, true for e in *eof_exports\match(contents) or {}}
+
   lines = assert parse_lines\match contents
 
   class_stack = {}
@@ -95,6 +109,17 @@ for fname in *args.files
       table.insert fields, 1, "line:#{line_no}"
 
     switch properties.type
+      when "function"
+        if exports[properties.tag] and properties.indent == 0
+          table.insert TAGS, {
+            properties.tag
+            fname
+            -- note we don't use $ here
+            "/^#{escape_tagaddress line_text}$/;\""
+            "f"
+            table.concat fields, " "
+          }
+
       when "method"
         if cls = find_class properties
           table.insert fields, "class:#{cls.tag}"
@@ -102,6 +127,7 @@ for fname in *args.files
           table.insert TAGS, {
             properties.tag
             fname
+            -- note we don't use $ here
             "/^#{escape_tagaddress line_text}$/;\""
             "f"
             table.concat fields, " "
