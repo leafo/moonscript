@@ -60,7 +60,7 @@ parse_lines = Ct P {
 }
 
 escape_tagaddress = (line_text) ->
-  replacements = P([[\]]) / [[\\]] + P([[/]]) / [[\/]] + P("\t") / [[\t]] + P("\r") / [[\r]] + P("\n") / [[\n]]
+  replacements = S([[\/.$^]]) / [[\%0]]+ P("\t") / [[\t]] + P("\r") / [[\r]] + P("\n") / [[\n]]
   Cs((replacements + 1)^0)\match line_text
 
 for fname in *args.files
@@ -115,7 +115,7 @@ for fname in *args.files
             properties.tag
             fname
             -- note we don't use $ here
-            "/^#{escape_tagaddress line_text}$/;\""
+            "/^#{escape_tagaddress line_text}/;\""
             "f"
             table.concat fields, " "
           }
@@ -128,7 +128,7 @@ for fname in *args.files
             properties.tag
             fname
             -- note we don't use $ here
-            "/^#{escape_tagaddress line_text}$/;\""
+            "/^#{escape_tagaddress line_text}/;\""
             "f"
             table.concat fields, " "
           }
