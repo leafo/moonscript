@@ -17,13 +17,14 @@ argparse = require "argparse"
 parser = argparse "moon-tags", "Generate ctags style tags file for MoonScript files"
 parser\argument("files", "MoonScript files to generate tags for")\args "+"
 parser\flag "--include-line", "Include line number field for each tag"
+parser\flag "--lapis", "Support extracting lapis routes"
 
 args = parser\parse [v for _, v in ipairs _G.arg]
 
 TAGS = {} -- the final output of tags
 
 literals = require "moonscript.parse.literals"
-import Indent from require "moonscript.parse.util"
+import Indent, simple_string from require "moonscript.parse.util"
 
 import P, S, C, Cc, Cg, Cb, Ct, Cs, V from require "lpeg"
 
@@ -32,17 +33,19 @@ until_end = (1 - literals.Stop)^0
 whitespace = S"\t " -- not including newline
 ignore_line = Ct until_end -- tag it for empty line
 
+-- NOTE: we disable interpolation parsing since we don't have full grammar
+SingleString = simple_string "'", false
+DoubleString = simple_string '"', false
+String = SingleString + DoubleString
+
 -- we have to do this double Ct to capture both the full line and the grouped captures
 Type = (name) -> Cg Cc(name), "type"
 Line = (type_name, p) -> Ct C Ct Cg(Indent, "indent") * p * Type type_name
 
-class_line = Line "class", P"class" * whitespace^1 * Cg(literals.Name, "tag") * until_end
-
--- TODO: support lapis style routes
--- class_property = Line P("@")^-1 * Cg(literals.Name, "tag") * P":" * until_end * Type "property"
-
 method = P { P"=>" + P(1 - literals.Stop) * V(1) }
 func = P { P"->" + P"=>" + P(1 - literals.Stop) * V(1) }
+
+self_prefix = Cg(P("@") * Cc(true), "self")
 
 -- this matches end-of-file return table convention for module files to figure
 -- out what names are exported
@@ -52,16 +55,36 @@ export_list = Ct P"{" * P {
 
 eof_exports = P { export_list * S(" \t\r\n")^0 * P(-1) + P(1) * V(1) }
 
+class_line = Line "class", P"class" * whitespace^1 * Cg(literals.Name, "tag") * until_end
+class_property = Line "property", self_prefix^-1 * Cg(literals.Name, "tag") * P":" * whitespace^0 * Cg(String, "value")^0 * until_end
 class_method = Line("method", P("@")^-1 * Cg(literals.Name, "tag") * P":" * method) * until_end
 function_def = Line("function", Cg(literals.Name, "tag") * whitespace^0 * P"=" * func) * until_end
+lapis_route = Line "lapis-route", P"[" * Cg(literals.Name, "tag") * P":" * whitespace^0 * Cg(String, "route") * whitespace^0 * P("]:") * until_end
+
+line_types = class_line + class_method + class_property + function_def
+
+if args.lapis
+  line_types += lapis_route
 
 parse_lines = Ct P {
-  (class_line + class_method + function_def + ignore_line) * (P(-1) + literals.Break * V(1))
+  (line_types + ignore_line) * (P(-1) + literals.Break * V(1))
 }
 
 escape_tagaddress = (line_text) ->
   replacements = S([[\/.$^]]) / [[\%0]]+ P("\t") / [[\t]] + P("\r") / [[\r]] + P("\n") / [[\n]]
   Cs((replacements + 1)^0)\match line_text
+
+import types from require "tableshape"
+
+class_field = types.partial {
+  "self": true
+  tag: types.string\tag "name"
+  value: types.partial {
+    "string"
+    types.string
+    types.string\tag "value" -- TODO: will need to un-escape this
+  }
+}
 
 for fname in *args.files
   file = assert io.open fname
@@ -109,6 +132,30 @@ for fname in *args.files
       table.insert fields, 1, "line:#{line_no}"
 
     switch properties.type
+      when "lapis-route"
+        if cls = find_class properties
+          prefix = if cls.fields
+            cls.fields.name
+
+          table.insert TAGS, {
+            "#{prefix or ""}#{properties.tag}"
+            fname
+            "/^#{escape_tagaddress line_text}/;\""
+            "f"
+            table.concat fields, " "
+          }
+
+      when "property"
+        -- this is necessary to register the correct indent level for the class
+        cls = find_class properties
+
+        -- record the fields into the class object so they can be referenced by
+        -- other tags. Note this is code-order dependent
+        if cls and args.lapis
+          if field = class_field properties
+            cls.fields or= {}
+            cls.fields[field.name] = field.value
+
       when "function"
         if exports[properties.tag] and properties.indent == 0
           table.insert TAGS, {
