@@ -56,11 +56,14 @@ export_list = Ct P"{" * P {
 
 eof_exports = P { export_list * S(" \t\r\n")^0 * P(-1) + P(1) * V(1) }
 
+-- convert a parsed string to the value the string represents
+StringVal = C(String) / (str) -> loadstring("return " .. str)()
+
 class_line = Line "class", P"class" * whitespace^1 * Cg(literals.Name, "tag") * until_end
 class_property = Line "property", self_prefix^-1 * Cg(literals.Name, "tag") * P":" * whitespace^0 * Cg(String, "value")^0 * until_end
 class_method = Line("method", P("@")^-1 * Cg(literals.Name, "tag") * P":" * method) * until_end
 function_def = Line("function", Cg(literals.Name, "tag") * whitespace^0 * P"=" * func) * until_end
-lapis_route = Line "lapis-route", P"[" * Cg(literals.Name, "tag") * P":" * whitespace^0 * Cg(String, "route") * whitespace^0 * P("]:") * until_end
+lapis_route = Line "lapis-route", P"[" * Cg(literals.Name + StringVal, "tag") * P":" * whitespace^0 * Cg(String, "route") * whitespace^0 * P("]:") * until_end
 
 line_types = class_line + class_method + class_property + function_def
 
