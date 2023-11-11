@@ -18,23 +18,20 @@ type = (value) -> -- class aware type
   base_type
 
 debug = setmetatable {
-  upvalue: (fn, k, v) ->
-    upvalues = {}
+  upvalue: (fn, k, ...) ->
+    value = nil
     i = 1
     while true
-      name = lua.debug.getupvalue(fn, i)
-      break if name == nil
-      upvalues[name] = i
+      name, value = lua.debug.getupvalue(fn, i)
+      if name == nil
+        error "Failed to find upvalue: " .. tostring k
+      break if name == k
       i += 1
 
-    if not upvalues[k]
-      error "Failed to find upvalue: " .. tostring k
-
-    if not v
-      _, value = lua.debug.getupvalue fn, upvalues[k]
+    if select("#", ...) == 0
       value
     else
-      lua.debug.setupvalue fn, upvalues[k], v
+      lua.debug.setupvalue fn, i, ...
 }, __index: lua.debug
 
 -- run a function with scope injected before its function environment
