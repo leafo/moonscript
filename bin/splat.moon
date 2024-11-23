@@ -1,26 +1,18 @@
 #!/usr/bin/env moon
+argparse = require "argparse"
 
--- concatenate a collection of lua modules into one
+parser = argparse "splat.moon", "Concatenate a collection of Lua modules into a single file"
+parser\option("--load -l", "Module names that will be load on require")\count "*"
 
-lfs = require "lfs"
-alt_getopt = require "alt_getopt"
+parser\argument("directories", "Directories to scan for Lua modules")\args "+"
 
-import insert, concat from table
-import dump, split from require "moonscript.util"
-
-opts, ind = alt_getopt.get_opts arg, "l:", {
-  load: "l"
-}
-
-if not arg[ind]
-  print "usage: splat [-l module_names] directory [directories...]"
-  os.exit!
-
-dirs = [a for a in *arg[ind,]]
+args = parser\parse [v for _, v in ipairs _G.arg]
+dirs = args.directories
 
 normalize = (path) ->
   path\match("(.-)/*$").."/"
 
+lfs = require "lfs"
 scan_directory = (root, patt, collected={}) ->
   root = normalize root
   for fname in lfs.dir root
@@ -31,7 +23,7 @@ scan_directory = (root, patt, collected={}) ->
         scan_directory full_path, patt, collected
       else
         if full_path\match patt
-          insert collected, full_path
+          table.insert collected, full_path
 
   collected
 
@@ -39,15 +31,14 @@ path_to_module_name = (path) ->
   (path\match("(.-)%.lua")\gsub("/", "."))
 
 each_line = (text) ->
-  import yield from coroutine
   coroutine.wrap ->
     start = 1
     while true
       pos, after = text\find "\n", start, true
       break if not pos
-      yield text\sub start, pos - 1
+      coroutine.yield text\sub start, pos - 1
       start = after + 1
-    yield text\sub start, #text
+    coroutine.yield text\sub start, #text
     nil
 
 write_module = (name, text) ->
@@ -73,8 +64,7 @@ for dir in *dirs
       name = base
     write_module name, content
 
-if opts.l
-  for module_name in *split opts.l, ","
-    if modules[module_name]
-      print ([[package.preload["%s"]()]])\format module_name
+for module_name in *args.load
+  if modules[module_name]
+    print ([[package.preload["%s"]()]])\format module_name
 
