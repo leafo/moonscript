@@ -103,7 +103,7 @@ dump = function(what)
       end
       seen[what] = false
       local class_name
-      if what.__class then
+      if type(what.__class) == "table" and type(what.__class.__name) == "string" then
         class_name = "<" .. tostring(what.__class.__name) .. ">"
       end
       return tostring(class_name or "") .. "{\n" .. concat(lines) .. (" "):rep((depth - 1) * 4) .. "}\n"

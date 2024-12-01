@@ -70,7 +70,7 @@ dump = (what) ->
 
       seen[what] = false
 
-      class_name = if what.__class
+      class_name = if type(what.__class) == "table" and type(what.__class.__name) == "string"
         "<#{what.__class.__name}>"
 
       "#{class_name or ""}{\n" .. concat(lines) .. (" ")\rep((depth - 1)*4) .. "}\n"
