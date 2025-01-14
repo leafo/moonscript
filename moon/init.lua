@@ -8,8 +8,11 @@ do
   getfenv, setfenv, dump = _obj_0.getfenv, _obj_0.setfenv, _obj_0.dump
 end
 local p, is_object, type, debug, run_with_scope, bind_methods, defaultbl, extend, copy, mixin, mixin_object, mixin_table, fold
-p = function(...)
-  return print(dump(...))
+p = function(o, ...)
+  print(dump(o))
+  if select("#", ...) > 0 then
+    return p(...)
+  end
 end
 is_object = function(value)
   return lua.type(value) == "table" and value.__class

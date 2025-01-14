@@ -4,8 +4,10 @@ import getfenv, setfenv, dump from require "moonscript.util"
 
 local *
 
-p = (...) ->
-  print dump ...
+p = (o, ...) ->
+  print dump o
+  if select("#", ...) > 0
+    p ...
 
 is_object =  (value) -> -- is a moonscript object
   lua.type(value) == "table" and value.__class
