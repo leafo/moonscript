@@ -19,7 +19,22 @@ Online demo/compiler at <https://moonscript.org/compiler>.
 
 ## Join Our Community
 
-We just created a Discord for those interested in MoonScript. You can join us here: <https://discord.gg/Y75ZXrD>
+We have a Discord for those interested in MoonScript and related projects. You can join us here: <https://discord.gg/Y75ZXrD>
+
+## Contributing
+
+MoonScript is a self-hosted compiler, meaning it's written in MoonScript itself. When contributing, please follow the following guidelines:
+
+1. Edit `.moon` files, never modify the alongside `.lua` files directly
+2. After making changes to `.moon` files, run the compiler to regenerate the corresponding `.lua` files
+3. Both `.moon` and `.lua` files are included in the repository to ensure that:
+   - Users can install and use MoonScript without having to compile it themselves
+   - The compiler bootstrapping process works consistently
+
+It's helpful to have a separate installation of MoonScript should you break
+something and you need to re-build the MoonScript with a working version of
+MoonScript. You can check out the repo in another directory, or install it
+using LuaRocks to have a separate working version.
 
 ## Running Tests
 
@@ -33,7 +48,6 @@ busted
 ```
 
 Writing specs is a bit more complicated. Check out [the spec writing guide](spec/README.md).
-
 
 ## Binaries
 
@@ -53,7 +67,7 @@ branch](https://github.com/leafo/moonscript/tree/binaries)
 
 ## License (MIT)
 
-Copyright (C) 2020 by Leaf Corcoran
+Copyright (C) 2025 by Leaf Corcoran
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
