@@ -8,11 +8,12 @@ unpack = util.unpack
 
 argparser = argparse! name: "moon"
 
-argparser\argument "script"
+argparser\argument("script")\args "?"
 argparser\argument("args")\args "*"
-argparser\option "-c --coverage", "Collect and print code coverage"
-argparser\option "-d", "Disable stack trace rewriting"
-argparser\option "-v --version", "Print version information"
+argparser\flag "--coverage -c", "Collect and print code coverage"
+argparser\flag "-d", "Disable stack trace rewriting"
+argparser\option "--execute -e", "Execute MoonScript code string"
+argparser\flag "--version -v", "Print version information"
 
 base = 0
 for flag in *arg
@@ -31,30 +32,54 @@ run = ->
     require("moonscript.version").print_version!
     os.exit!
 
-  script_fname = opts.script
-
   args = {unpack arg, base + 1}
   args[-1] = arg[0]
-  args[0] = opts.script
 
   local moonscript_chunk, lua_parse_error
 
-  passed, err = pcall ->
-    moonscript_chunk, lua_parse_error = moonscript.loadfile script_fname, {
-      implicitly_return_root: false
-    }
+  if opts.execute
+    args[0] = "-e"
 
-  unless passed
-    print_err err
-    os.exit 1
+    passed, err = pcall ->
+      moonscript_chunk, lua_parse_error = moonscript.loadstring opts.execute, "=(command line)", {
+        implicitly_return_root: false
+      }
 
-  unless moonscript_chunk
-    if lua_parse_error
-      print_err lua_parse_error
-    else
-      print_err "Can't file file: #{script_fname}"
+    unless passed
+      print_err err
+      os.exit 1
 
-    os.exit 1
+    unless moonscript_chunk
+      if lua_parse_error
+        print_err lua_parse_error
+      else
+        print_err "Failed to compile: #{opts.execute}"
+      os.exit 1
+  else
+    script_fname = opts.script
+
+    unless script_fname
+      print_err "Usage: moon [options] script [args]"
+      print_err "Use 'moon --help' for more information."
+      os.exit 1
+
+    args[0] = script_fname
+
+    passed, err = pcall ->
+      moonscript_chunk, lua_parse_error = moonscript.loadfile script_fname, {
+        implicitly_return_root: false
+      }
+
+    unless passed
+      print_err err
+      os.exit 1
+
+    unless moonscript_chunk
+      if lua_parse_error
+        print_err lua_parse_error
+      else
+        print_err "Can't file file: #{script_fname}"
+      os.exit 1
 
   util.getfenv(moonscript_chunk).arg = args
 

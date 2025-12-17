@@ -7,11 +7,12 @@ local unpack = util.unpack
 local argparser = argparse()({
   name = "moon"
 })
-argparser:argument("script")
+argparser:argument("script"):args("?")
 argparser:argument("args"):args("*")
-argparser:option("-c --coverage", "Collect and print code coverage")
-argparser:option("-d", "Disable stack trace rewriting")
-argparser:option("-v --version", "Print version information")
+argparser:flag("--coverage -c", "Collect and print code coverage")
+argparser:flag("-d", "Disable stack trace rewriting")
+argparser:option("--execute -e", "Execute MoonScript code string")
+argparser:flag("--version -v", "Print version information")
 local base = 0
 local _list_0 = arg
 for _index_0 = 1, #_list_0 do
@@ -48,29 +49,55 @@ run = function()
     require("moonscript.version").print_version()
     os.exit()
   end
-  local script_fname = opts.script
   args = {
     unpack(arg, base + 1)
   }
   args[-1] = arg[0]
-  args[0] = opts.script
   local moonscript_chunk, lua_parse_error
-  local passed, err = pcall(function()
-    moonscript_chunk, lua_parse_error = moonscript.loadfile(script_fname, {
-      implicitly_return_root = false
-    })
-  end)
-  if not (passed) then
-    print_err(err)
-    os.exit(1)
-  end
-  if not (moonscript_chunk) then
-    if lua_parse_error then
-      print_err(lua_parse_error)
-    else
-      print_err("Can't file file: " .. tostring(script_fname))
+  if opts.execute then
+    args[0] = "-e"
+    local passed, err = pcall(function()
+      moonscript_chunk, lua_parse_error = moonscript.loadstring(opts.execute, "=(command line)", {
+        implicitly_return_root = false
+      })
+    end)
+    if not (passed) then
+      print_err(err)
+      os.exit(1)
     end
-    os.exit(1)
+    if not (moonscript_chunk) then
+      if lua_parse_error then
+        print_err(lua_parse_error)
+      else
+        print_err("Failed to compile: " .. tostring(opts.execute))
+      end
+      os.exit(1)
+    end
+  else
+    local script_fname = opts.script
+    if not (script_fname) then
+      print_err("Usage: moon [options] script [args]")
+      print_err("Use 'moon --help' for more information.")
+      os.exit(1)
+    end
+    args[0] = script_fname
+    local passed, err = pcall(function()
+      moonscript_chunk, lua_parse_error = moonscript.loadfile(script_fname, {
+        implicitly_return_root = false
+      })
+    end)
+    if not (passed) then
+      print_err(err)
+      os.exit(1)
+    end
+    if not (moonscript_chunk) then
+      if lua_parse_error then
+        print_err(lua_parse_error)
+      else
+        print_err("Can't file file: " .. tostring(script_fname))
+      end
+      os.exit(1)
+    end
   end
   util.getfenv(moonscript_chunk).arg = args
   local run_chunk
