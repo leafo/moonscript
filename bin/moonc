@@ -5,7 +5,26 @@ local lfs = require "lfs"
 
 local parser = argparse()
 
-parser:flag("-l --lint", "Perform a lint on the file instead of compiling")
+parser:group("Lint mode",
+  parser:flag("-l --lint", "Perform a lint on the file instead of compiling"),
+  parser:option("--lint-config-module", "Module name used for lint configuration", "lint_config"),
+  parser:option("--lint-stages", "Which stages of lint to perform", "globals,unused"):convert(function(stages_string)
+    local valid_stages = { globals = true, unused = true }
+    local stages = {}
+    for stage in stages_string:gmatch("([^%s,]+)") do
+      if not valid_stages[stage] then
+        return nil, "--lint-stages: Invalid stage name `" .. stage .. "`"
+      end
+      table.insert(stages, stage)
+    end
+
+    if not next(stages) then
+      return nil, "--lint-stages: Can not be empty"
+    end
+
+    return stages
+  end)
+)
 
 parser:flag("-v --version", "Print version")
 parser:flag("-w --watch", "Watch file/directory for updates")
@@ -149,12 +168,20 @@ local function create_watcher(files)
   return watchers.SleepWatcher(files):each_update()
 end
 
+-- lint options to pass through
+local lint_opts = {
+  stages = opts.lint_stages,
+  config_module = opts.lint_config_module
+}
+
 if opts.watch then
   -- build function to check for lint or compile in watch
   local handle_file
   if opts.lint then
     local lint = require "moonscript.cmd.lint"
-    handle_file = lint.lint_file
+    handle_file = function(fname, target)
+      return lint.lint_file(fname, lint_opts)
+    end
   else
     handle_file = compile_and_write
   end
@@ -202,7 +229,7 @@ elseif opts.lint then
   local lint = require "moonscript.cmd.lint"
   for _, tuple in pairs(files) do
     local fname = tuple[1]
-    local res, err = lint.lint_file(fname)
+    local res, err = lint.lint_file(fname, lint_opts)
     if res then
       has_linted_with_error = true
       io.stderr:write(res .. "\n\n")

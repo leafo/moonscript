@@ -50,6 +50,10 @@ local default_whitelist = Set({
   "true",
   "false"
 })
+local default_stages = {
+  globals = true,
+  unused = true
+}
 local LinterBlock
 do
   local _class_0
@@ -65,6 +69,9 @@ do
       end
     end,
     lint_check_unused = function(self)
+      if not (self.stages.unused) then
+        return 
+      end
       if not (self.lint_unused_names and next(self.lint_unused_names)) then
         return 
       end
@@ -130,6 +137,7 @@ do
         _with_0.block = self.block
         _with_0.render = self.render
         _with_0.get_root_block = self.get_root_block
+        _with_0.stages = self.stages
         _with_0.lint_check_unused = self.lint_check_unused
         _with_0.lint_mark_used = self.lint_mark_used
         _with_0.value_compilers = self.value_compilers
@@ -141,26 +149,34 @@ do
   _base_0.__index = _base_0
   setmetatable(_base_0, _parent_0.__base)
   _class_0 = setmetatable({
-    __init = function(self, whitelist_globals, ...)
+    __init = function(self, whitelist_globals, stages, ...)
       if whitelist_globals == nil then
         whitelist_globals = default_whitelist
+      end
+      if stages == nil then
+        stages = default_stages
       end
       _class_0.__parent.__init(self, ...)
       self.get_root_block = function()
         return self
       end
+      self.stages = stages
       self.lint_errors = { }
       local vc = self.value_compilers
       self.value_compilers = setmetatable({
         ref = function(block, val)
           local name = val[2]
-          if not (block:has_name(name) or whitelist_globals[name] or name:match("%.")) then
-            insert(self.lint_errors, {
-              "accessing global `" .. tostring(name) .. "`",
-              val[-1]
-            })
+          if self.stages.globals then
+            if not (block:has_name(name) or whitelist_globals[name] or name:match("%.")) then
+              insert(self.lint_errors, {
+                "accessing global `" .. tostring(name) .. "`",
+                val[-1]
+              })
+            end
           end
-          block:lint_mark_used(name)
+          if self.stages.unused then
+            block:lint_mark_used(name)
+          end
           return vc.ref(block, val)
         end
       }, {
@@ -169,30 +185,32 @@ do
       local sc = self.statement_compilers
       self.statement_compilers = setmetatable({
         assign = function(block, node)
-          local names = node[2]
-          for _index_0 = 1, #names do
-            local _continue_0 = false
-            repeat
-              local name = names[_index_0]
-              if type(name) == "table" and name[1] == "temp_name" then
+          if self.stages.unused then
+            local names = node[2]
+            for _index_0 = 1, #names do
+              local _continue_0 = false
+              repeat
+                local name = names[_index_0]
+                if type(name) == "table" and name[1] == "temp_name" then
+                  _continue_0 = true
+                  break
+                end
+                local real_name, is_local = block:extract_assign_name(name)
+                if not (is_local or real_name and not block:has_name(real_name, true)) then
+                  _continue_0 = true
+                  break
+                end
+                if real_name == "_" then
+                  _continue_0 = true
+                  break
+                end
+                block.lint_unused_names = block.lint_unused_names or { }
+                block.lint_unused_names[real_name] = node[-1] or 0
                 _continue_0 = true
+              until true
+              if not _continue_0 then
                 break
               end
-              local real_name, is_local = block:extract_assign_name(name)
-              if not (is_local or real_name and not block:has_name(real_name, true)) then
-                _continue_0 = true
-                break
-              end
-              if real_name == "_" then
-                _continue_0 = true
-                break
-              end
-              block.lint_unused_names = block.lint_unused_names or { }
-              block.lint_unused_names[real_name] = node[-1] or 0
-              _continue_0 = true
-            until true
-            if not _continue_0 then
-              break
             end
           end
           return sc.assign(block, node)
@@ -270,14 +288,18 @@ format_lint = function(errors, code, header)
 end
 local whitelist_for_file
 do
-  local lint_config
-  whitelist_for_file = function(fname)
-    if not (lint_config) then
-      lint_config = { }
+  local loaded_configs = { }
+  whitelist_for_file = function(fname, config_module)
+    if config_module == nil then
+      config_module = "lint_config"
+    end
+    if not (loaded_configs[config_module]) then
+      loaded_configs[config_module] = { }
       pcall(function()
-        lint_config = require("lint_config")
+        loaded_configs[config_module] = require(config_module)
       end)
     end
+    local lint_config = loaded_configs[config_module]
     if not (lint_config.whitelist_globals) then
       return default_whitelist
     end
@@ -295,28 +317,55 @@ do
     })
   end
 end
+local normalize_stages
+normalize_stages = function(stages)
+  if not (stages) then
+    return default_stages
+  end
+  if stages.globals ~= nil or stages.unused ~= nil then
+    return stages
+  end
+  local out = { }
+  for _index_0 = 1, #stages do
+    local stage = stages[_index_0]
+    out[stage] = true
+  end
+  return out
+end
 local lint_code
-lint_code = function(code, name, whitelist_globals)
+lint_code = function(code, name, opts)
   if name == nil then
     name = "string input"
+  end
+  if opts == nil then
+    opts = { }
   end
   local parse = require("moonscript.parse")
   local tree, err = parse.string(code)
   if not (tree) then
     return nil, err
   end
-  local scope = LinterBlock(whitelist_globals)
+  local whitelist_globals = opts.whitelist_globals or default_whitelist
+  local stages = normalize_stages(opts.stages)
+  local scope = LinterBlock(whitelist_globals, stages)
   scope:stms(tree)
   scope:lint_check_unused()
   return format_lint(scope.lint_errors, code, name)
 end
 local lint_file
-lint_file = function(fname)
+lint_file = function(fname, opts)
+  if opts == nil then
+    opts = { }
+  end
   local f, err = io.open(fname)
   if not (f) then
     return nil, err
   end
-  return lint_code(f:read("*a"), fname, whitelist_for_file(fname))
+  local config_module = opts.config_module or "lint_config"
+  return lint_code(f:read("*a"), fname, {
+    whitelist_globals = whitelist_for_file(fname, config_module),
+    stages = opts.stages
+  })
 end
 return {
   lint_code = lint_code,
