@@ -29,7 +29,9 @@ jobs:
         tar -xzf luafilesystem.tar.gz
 
     - name: Build
-      run: gcc -o moon '-Ilua-5.1.5/src/' bin/binaries/moon.c lpeg-1.0.2/lpvm.c lpeg-1.0.2/lpcap.c lpeg-1.0.2/lptree.c lpeg-1.0.2/lpcode.c lpeg-1.0.2/lpprint.c
+      run: |
+        mkdir -p dist
+        gcc -o dist/moon '-Ilua-5.1.5/src/' bin/binaries/moon.c lpeg-1.0.2/lpvm.c lpeg-1.0.2/lpcap.c lpeg-1.0.2/lptree.c lpeg-1.0.2/lpcode.c lpeg-1.0.2/lpprint.c
 
 
   windows:
@@ -68,7 +70,9 @@ jobs:
       run: lua-5.1.5/src/lua.exe -v
 
     - name: Build
-      run: gcc -o moon.exe '-Ilua-5.1.5/src/' bin/binaries/moon.c lpeg-1.0.2/lpvm.c lpeg-1.0.2/lpcap.c lpeg-1.0.2/lptree.c lpeg-1.0.2/lpcode.c lpeg-1.0.2/lpprint.c
+      run: |
+        mkdir -p dist
+        gcc -o dist/moon.exe '-Ilua-5.1.5/src/' bin/binaries/moon.c lpeg-1.0.2/lpvm.c lpeg-1.0.2/lpcap.c lpeg-1.0.2/lptree.c lpeg-1.0.2/lpcode.c lpeg-1.0.2/lpprint.c
 
 
 
