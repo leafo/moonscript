@@ -55,6 +55,10 @@ jobs:
       matrix:
         lua_version: ["5.1.5"]
 
+    defaults:
+      run:
+        shell: msys2 {0}
+
     steps:
     - uses: actions/checkout@master
 
