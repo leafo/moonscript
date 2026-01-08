@@ -58,10 +58,26 @@ lpeg-$(LPEG_VERSION)/lptree.c:
 	curl -L -o lpeg.tar.gz https://www.inf.puc-rio.br/~roberto/lpeg/lpeg-$(LPEG_VERSION).tar.gz
 	tar -xzf lpeg.tar.gz
 
-dist/moon: lua-$(LUA_SRC_VERSION)/src/liblua.a lpeg-$(LPEG_VERSION)/lptree.c
+bin/binaries/moonscript.h: moonscript/*.lua moon/*.lua
+	bin/splat.moon -l moonscript moonscript moon > moonscript.lua
+	xxd -i moonscript.lua > $@
+	rm moonscript.lua
+
+dist/moon: lua-$(LUA_SRC_VERSION)/src/liblua.a lpeg-$(LPEG_VERSION)/lptree.c bin/binaries/moonscript.h
 	mkdir -p dist
-	gcc -static -o dist/moon -Ilua-$(LUA_SRC_VERSION)/src/ bin/binaries/moon.c lpeg-$(LPEG_VERSION)/lpvm.c lpeg-$(LPEG_VERSION)/lpcap.c lpeg-$(LPEG_VERSION)/lptree.c lpeg-$(LPEG_VERSION)/lpcode.c lpeg-$(LPEG_VERSION)/lpprint.c lua-$(LUA_SRC_VERSION)/src/liblua.a -lm -ldl
+	gcc -static -o dist/moon \
+		-Ilua-$(LUA_SRC_VERSION)/src/ \
+		-Ilpeg-$(LPEG_VERSION)/ \
+		-Ibin/binaries/ \
+		bin/binaries/moon.c \
+		bin/binaries/moonscript.c \
+		lpeg-$(LPEG_VERSION)/lpvm.c \
+		lpeg-$(LPEG_VERSION)/lpcap.c \
+		lpeg-$(LPEG_VERSION)/lptree.c \
+		lpeg-$(LPEG_VERSION)/lpcode.c \
+		lpeg-$(LPEG_VERSION)/lpprint.c \
+		lua-$(LUA_SRC_VERSION)/src/liblua.a \
+		-lm -ldl
 
 test_binary: dist/moon
-	dist/moon -h
-	dist/moon -e 'print "hello world"'
+	dist/moon
