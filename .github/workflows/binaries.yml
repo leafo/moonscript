@@ -3,8 +3,12 @@ name: "binaries"
 on: [push]
 
 jobs:
-  linux: 
+  linux:
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        lua_version: ["5.1.5"]
 
     steps:
     - uses: actions/checkout@master
@@ -14,9 +18,9 @@ jobs:
 
     - name: Setup Lua
       run: |
-        curl -L -O https://www.lua.org/ftp/lua-5.1.5.tar.gz
-        tar -xzf lua-5.1.5.tar.gz
-        cd lua-5.1.5/src && make liblua.a MYCFLAGS=-DLUA_USE_POSIX
+        curl -L -O https://www.lua.org/ftp/lua-${{ matrix.lua_version }}.tar.gz
+        tar -xzf lua-${{ matrix.lua_version }}.tar.gz
+        cd lua-${{ matrix.lua_version }}/src && make liblua.a MYCFLAGS=-DLUA_USE_POSIX
 
     - name: Get LPeg
       run: |
@@ -31,19 +35,23 @@ jobs:
     - name: Build
       run: |
         mkdir -p dist
-        gcc -static -o dist/moon -Ilua-5.1.5/src/ bin/binaries/moon.c lpeg-1.0.2/lpvm.c lpeg-1.0.2/lpcap.c lpeg-1.0.2/lptree.c lpeg-1.0.2/lpcode.c lpeg-1.0.2/lpprint.c lua-5.1.5/src/liblua.a -lm -ldl
+        gcc -static -o dist/moon -Ilua-${{ matrix.lua_version }}/src/ bin/binaries/moon.c lpeg-1.0.2/lpvm.c lpeg-1.0.2/lpcap.c lpeg-1.0.2/lptree.c lpeg-1.0.2/lpcode.c lpeg-1.0.2/lpprint.c lua-${{ matrix.lua_version }}/src/liblua.a -lm -ldl
 
     - name: Test run
       run: dist/moon -e 'print "hello world"'
 
     - name: Upload artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
-        name: moon-linux
+        name: moon-linux-lua${{ matrix.lua_version }}
         path: dist/
 
   windows:
     runs-on: windows-latest
+
+    strategy:
+      matrix:
+        lua_version: ["5.1.5"]
 
     steps:
     - uses: actions/checkout@master
@@ -57,9 +65,9 @@ jobs:
 
     - name: Setup Lua
       run: |
-        curl -L -O https://www.lua.org/ftp/lua-5.1.5.tar.gz
-        tar -xzf lua-5.1.5.tar.gz
-        cd lua-5.1.5/src && make liblua.a
+        curl -L -O https://www.lua.org/ftp/lua-${{ matrix.lua_version }}.tar.gz
+        tar -xzf lua-${{ matrix.lua_version }}.tar.gz
+        cd lua-${{ matrix.lua_version }}/src && make liblua.a
 
     - name: Get LPeg
       run: |
@@ -74,13 +82,13 @@ jobs:
     - name: Build
       run: |
         mkdir -p dist
-        gcc -static -o dist/moon.exe -Ilua-5.1.5/src/ bin/binaries/moon.c lpeg-1.0.2/lpvm.c lpeg-1.0.2/lpcap.c lpeg-1.0.2/lptree.c lpeg-1.0.2/lpcode.c lpeg-1.0.2/lpprint.c lua-5.1.5/src/liblua.a -lm
+        gcc -static -o dist/moon.exe -Ilua-${{ matrix.lua_version }}/src/ bin/binaries/moon.c lpeg-1.0.2/lpvm.c lpeg-1.0.2/lpcap.c lpeg-1.0.2/lptree.c lpeg-1.0.2/lpcode.c lpeg-1.0.2/lpprint.c lua-${{ matrix.lua_version }}/src/liblua.a -lm
 
     - name: Test run
       run: dist/moon.exe -e 'print "hello world"'
 
     - name: Upload artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
-        name: moon-windows
+        name: moon-windows-lua${{ matrix.lua_version }}
         path: dist/
