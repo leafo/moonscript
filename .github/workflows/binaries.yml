@@ -32,8 +32,8 @@ jobs:
     - name: Generate argparse.h
       run: |
         luarocks install argparse --tree=lua_modules
-        bin/splat.moon -l argparse $(find lua_modules/share/lua -name "*.lua" -exec dirname {} \; | head -1) > argparse.lua
-        xxd -i argparse.lua > bin/binaries/argparse.h
+        bin/splat.moon --strip-prefix -l argparse $(find lua_modules/share/lua -name "argparse.lua" -exec dirname {} \; | head -1) > bin/binaries/argparse.lua
+        xxd -i -n argparse_lua bin/binaries/argparse.lua > bin/binaries/argparse.h
 
     - name: Upload headers
       uses: actions/upload-artifact@v6

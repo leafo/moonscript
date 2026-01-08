@@ -1,16 +1,18 @@
 #!/usr/bin/env moon
 argparse = require "argparse"
 
+normalize = (path) ->
+  path\match("(.-)/*$").."/"
+
 parser = argparse "splat.moon", "Concatenate a collection of Lua modules into a single file"
 parser\option("--load -l", "Module names that will be load on require")\count "*"
+parser\flag("--strip-prefix -s", "Strip directory prefix from module names")
 
 parser\argument("directories", "Directories to scan for Lua modules")\args "+"
 
 args = parser\parse [v for _, v in ipairs _G.arg]
 dirs = args.directories
-
-normalize = (path) ->
-  path\match("(.-)/*$").."/"
+strip_prefix = args.strip_prefix
 
 lfs = require "lfs"
 scan_directory = (root, patt, collected={}) ->
@@ -27,7 +29,9 @@ scan_directory = (root, patt, collected={}) ->
 
   collected
 
-path_to_module_name = (path) ->
+path_to_module_name = (path, prefix) ->
+  if prefix and path\sub(1, #prefix) == prefix
+    path = path\sub(#prefix + 1)
   (path\match("(.-)%.lua")\gsub("/", "."))
 
 each_line = (text) ->
@@ -50,8 +54,9 @@ write_module = (name, text) ->
 modules = {}
 for dir in *dirs
   files = scan_directory dir, "%.lua$"
+  prefix = strip_prefix and normalize(dir) or nil
   chunks = for path in *files
-    module_name = path_to_module_name path
+    module_name = path_to_module_name path, prefix
     content = io.open(path)\read"*a"
     modules[module_name] = true
     {module_name, content}

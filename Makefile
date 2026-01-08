@@ -72,9 +72,8 @@ bin/binaries/moon.h: bin/moon
 	rm moon.lua
 
 bin/binaries/argparse.h: lua_modules
-	bin/splat.moon -l argparse $$(find lua_modules/share/lua -name "*.lua" -exec dirname {} \; | head -1) > argparse.lua
-	xxd -i argparse.lua > $@
-	rm argparse.lua
+	bin/splat.moon --strip-prefix -l argparse $$(find lua_modules/share/lua -name "argparse.lua" -exec dirname {} \; | head -1) > bin/binaries/argparse.lua
+	xxd -i -n argparse_lua bin/binaries/argparse.lua > $@
 
 dist/moon: lua-$(LUA_SRC_VERSION)/src/liblua.a lpeg-$(LPEG_VERSION)/lptree.c bin/binaries/moonscript.h bin/binaries/moon.h bin/binaries/argparse.h
 	mkdir -p dist
