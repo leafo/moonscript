@@ -31,7 +31,7 @@ jobs:
     - name: Build
       run: |
         mkdir -p dist
-        gcc -o dist/moon '-Ilua-5.1.5/src/' bin/binaries/moon.c lpeg-1.0.2/lpvm.c lpeg-1.0.2/lpcap.c lpeg-1.0.2/lptree.c lpeg-1.0.2/lpcode.c lpeg-1.0.2/lpprint.c
+        gcc -o dist/moon -Ilua-5.1.5/src/ bin/binaries/moon.c lpeg-1.0.2/lpvm.c lpeg-1.0.2/lpcap.c lpeg-1.0.2/lptree.c lpeg-1.0.2/lpcode.c lpeg-1.0.2/lpprint.c lua-5.1.5/src/liblua.a -lm -ldl
 
 
   windows:
@@ -72,7 +72,7 @@ jobs:
     - name: Build
       run: |
         mkdir -p dist
-        gcc -o dist/moon.exe '-Ilua-5.1.5/src/' bin/binaries/moon.c lpeg-1.0.2/lpvm.c lpeg-1.0.2/lpcap.c lpeg-1.0.2/lptree.c lpeg-1.0.2/lpcode.c lpeg-1.0.2/lpprint.c
+        gcc -o dist/moon.exe -Ilua-5.1.5/src/ bin/binaries/moon.c lpeg-1.0.2/lpvm.c lpeg-1.0.2/lpcap.c lpeg-1.0.2/lptree.c lpeg-1.0.2/lpcode.c lpeg-1.0.2/lpprint.c lua-5.1.5/src/liblua.a -lm
 
 
 
