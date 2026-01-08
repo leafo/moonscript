@@ -3,8 +3,41 @@ name: "binaries"
 on: [push]
 
 jobs:
+  generate-headers:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+
+    - uses: leafo/gh-actions-lua@master
+      with:
+        luaVersion: "5.1"
+
+    - uses: leafo/gh-actions-luarocks@master
+
+    - name: Install dependencies
+      run: |
+        luarocks install argparse
+        luarocks make
+
+    - name: Generate moonscript.h
+      run: |
+        bin/splat.moon -l moonscript moonscript moon > moonscript.lua
+        xxd -i moonscript.lua > bin/binaries/moonscript.h
+
+    - name: Generate moon.h
+      run: |
+        awk 'FNR>1' bin/moon > moon.lua
+        xxd -i moon.lua > bin/binaries/moon.h
+
+    - name: Upload headers
+      uses: actions/upload-artifact@v6
+      with:
+        name: generated-headers
+        path: bin/binaries/*.h
+
   linux:
     runs-on: ubuntu-latest
+    needs: generate-headers
 
     strategy:
       matrix:
@@ -12,6 +45,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@master
+
+    - name: Download headers
+      uses: actions/download-artifact@v4
+      with:
+        name: generated-headers
+        path: bin/binaries/
 
     - name: Show GCC
       run: gcc -v
@@ -35,7 +74,19 @@ jobs:
     - name: Build
       run: |
         mkdir -p dist
-        gcc -static -o dist/moon -Ilua-${{ matrix.lua_version }}/src/ bin/binaries/moon.c lpeg-1.0.2/lpvm.c lpeg-1.0.2/lpcap.c lpeg-1.0.2/lptree.c lpeg-1.0.2/lpcode.c lpeg-1.0.2/lpprint.c lua-${{ matrix.lua_version }}/src/liblua.a -lm -ldl
+        gcc -static -o dist/moon \
+          -Ilua-${{ matrix.lua_version }}/src/ \
+          -Ilpeg-1.0.2/ \
+          -Ibin/binaries/ \
+          bin/binaries/moon.c \
+          bin/binaries/moonscript.c \
+          lpeg-1.0.2/lpvm.c \
+          lpeg-1.0.2/lpcap.c \
+          lpeg-1.0.2/lptree.c \
+          lpeg-1.0.2/lpcode.c \
+          lpeg-1.0.2/lpprint.c \
+          lua-${{ matrix.lua_version }}/src/liblua.a \
+          -lm -ldl
 
     - name: Test run
       run: |
@@ -50,6 +101,7 @@ jobs:
 
   windows:
     runs-on: windows-latest
+    needs: generate-headers
 
     strategy:
       matrix:
@@ -61,6 +113,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@master
+
+    - name: Download headers
+      uses: actions/download-artifact@v4
+      with:
+        name: generated-headers
+        path: bin/binaries/
 
     - uses: msys2/setup-msys2@v2
       with:
@@ -88,7 +146,19 @@ jobs:
     - name: Build
       run: |
         mkdir -p dist
-        gcc -static -o dist/moon.exe -Ilua-${{ matrix.lua_version }}/src/ bin/binaries/moon.c lpeg-1.0.2/lpvm.c lpeg-1.0.2/lpcap.c lpeg-1.0.2/lptree.c lpeg-1.0.2/lpcode.c lpeg-1.0.2/lpprint.c lua-${{ matrix.lua_version }}/src/liblua.a -lm
+        gcc -static -o dist/moon.exe \
+          -Ilua-${{ matrix.lua_version }}/src/ \
+          -Ilpeg-1.0.2/ \
+          -Ibin/binaries/ \
+          bin/binaries/moon.c \
+          bin/binaries/moonscript.c \
+          lpeg-1.0.2/lpvm.c \
+          lpeg-1.0.2/lpcap.c \
+          lpeg-1.0.2/lptree.c \
+          lpeg-1.0.2/lpcode.c \
+          lpeg-1.0.2/lpprint.c \
+          lua-${{ matrix.lua_version }}/src/liblua.a \
+          -lm
 
     - name: Test run
       run: |
