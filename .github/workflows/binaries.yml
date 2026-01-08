@@ -14,13 +14,13 @@ jobs:
 
     - name: Setup Lua
       run: |
-        curl -O https://www.lua.org/ftp/lua-5.1.5.tar.gz
+        curl -L -O https://www.lua.org/ftp/lua-5.1.5.tar.gz
         tar -xzf lua-5.1.5.tar.gz
         cd lua-5.1.5; make
 
     - name: Get LPeg
       run: |
-        curl -o lpeg.tar.gz http://www.inf.puc-rio.br/~roberto/lpeg/lpeg-1.0.2.tar.gz
+        curl -L -o lpeg.tar.gz https://www.inf.puc-rio.br/~roberto/lpeg/lpeg-1.0.2.tar.gz
         tar -xzf lpeg.tar.gz
 
     - name: Get Luafilesystem
@@ -47,13 +47,13 @@ jobs:
 
     - name: Setup Lua
       run: |
-        curl -O https://www.lua.org/ftp/lua-5.1.5.tar.gz
+        curl -L -O https://www.lua.org/ftp/lua-5.1.5.tar.gz
         tar -xzf lua-5.1.5.tar.gz
         cd lua-5.1.5; make PLAT=mingw
 
     - name: Get LPeg
       run: |
-        curl -o lpeg.tar.gz http://www.inf.puc-rio.br/~roberto/lpeg/lpeg-1.0.2.tar.gz
+        curl -L -o lpeg.tar.gz https://www.inf.puc-rio.br/~roberto/lpeg/lpeg-1.0.2.tar.gz
         tar -xzf lpeg.tar.gz
 
     - name: Get Luafilesystem
