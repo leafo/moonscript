@@ -24,6 +24,12 @@ with_dev = (fn) ->
 
   setup ->
     _G.require = (mod) ->
+      switch mod
+        when "moonscript"
+          "moonscript.init"
+        when "moon"
+          "moon.init"
+
       return dev_cache[mod] if dev_cache[mod]
 
       testable = mod\match("moonscript%.") or mod == "moonscript" or
