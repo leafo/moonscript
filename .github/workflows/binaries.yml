@@ -38,7 +38,9 @@ jobs:
         gcc -static -o dist/moon -Ilua-${{ matrix.lua_version }}/src/ bin/binaries/moon.c lpeg-1.0.2/lpvm.c lpeg-1.0.2/lpcap.c lpeg-1.0.2/lptree.c lpeg-1.0.2/lpcode.c lpeg-1.0.2/lpprint.c lua-${{ matrix.lua_version }}/src/liblua.a -lm -ldl
 
     - name: Test run
-      run: dist/moon -e 'print "hello world"'
+      run: |
+        dist/moon -h
+        dist/moon -e 'print "hello world"'
 
     - name: Upload artifact
       uses: actions/upload-artifact@v6
@@ -85,7 +87,9 @@ jobs:
         gcc -static -o dist/moon.exe -Ilua-${{ matrix.lua_version }}/src/ bin/binaries/moon.c lpeg-1.0.2/lpvm.c lpeg-1.0.2/lpcap.c lpeg-1.0.2/lptree.c lpeg-1.0.2/lpcode.c lpeg-1.0.2/lpprint.c lua-${{ matrix.lua_version }}/src/liblua.a -lm
 
     - name: Test run
-      run: dist/moon.exe -e 'print "hello world"'
+      run: |
+        dist/moon.exe -h
+        dist/moon.exe -e 'print "hello world"'
 
     - name: Upload artifact
       uses: actions/upload-artifact@v6
