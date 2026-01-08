@@ -4,6 +4,7 @@
 #include <stdio.h>
 
 #include "moonscript.h"
+#include "argparse.h"
 
 // put whatever is on top of stack into package.loaded under name if something
 // is not already there
@@ -26,6 +27,11 @@ extern int luaopen_lpeg(lua_State *l);
 LUALIB_API int luaopen_moonscript(lua_State *l) {
 	luaopen_lpeg(l);
 	setloaded(l, "lpeg");
+
+	// Load argparse (splat output sets up package.preload)
+	if (luaL_loadbuffer(l, (const char *)argparse_lua, argparse_lua_len, "argparse.lua") == 0) {
+		lua_call(l, 0, 0);
+	}
 
 	if (luaL_loadbuffer(l, (const char *)moonscript_lua, moonscript_lua_len, "moonscript.lua") == 0) {
 		lua_call(l, 0, 1);

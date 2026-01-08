@@ -49,6 +49,9 @@ count:
 	wc -l $$(git ls-files | grep 'moon$$') | sort -n | tail
 
 # Binary build targets for local verification (Linux only)
+lua_modules:
+	luarocks install argparse --tree=lua_modules
+
 lua-$(LUA_SRC_VERSION)/src/liblua.a:
 	curl -L -O https://www.lua.org/ftp/lua-$(LUA_SRC_VERSION).tar.gz
 	tar -xzf lua-$(LUA_SRC_VERSION).tar.gz
@@ -68,7 +71,12 @@ bin/binaries/moon.h: bin/moon
 	xxd -i moon.lua > $@
 	rm moon.lua
 
-dist/moon: lua-$(LUA_SRC_VERSION)/src/liblua.a lpeg-$(LPEG_VERSION)/lptree.c bin/binaries/moonscript.h bin/binaries/moon.h
+bin/binaries/argparse.h: lua_modules
+	bin/splat.moon -l argparse $$(find lua_modules/share/lua -name "*.lua" -exec dirname {} \; | head -1) > argparse.lua
+	xxd -i argparse.lua > $@
+	rm argparse.lua
+
+dist/moon: lua-$(LUA_SRC_VERSION)/src/liblua.a lpeg-$(LPEG_VERSION)/lptree.c bin/binaries/moonscript.h bin/binaries/moon.h bin/binaries/argparse.h
 	mkdir -p dist
 	gcc -static -o dist/moon \
 		-Ilua-$(LUA_SRC_VERSION)/src/ \
