@@ -24,7 +24,7 @@ with_dev = (fn) ->
 
   setup ->
     _G.require = (mod) ->
-      switch mod
+      mod = switch mod
         when "moonscript"
           "moonscript.init"
         when "moon"
