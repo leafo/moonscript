@@ -16,7 +16,7 @@ jobs:
       run: |
         curl -L -O https://www.lua.org/ftp/lua-5.1.5.tar.gz
         tar -xzf lua-5.1.5.tar.gz
-        cd lua-5.1.5 && make linux
+        cd lua-5.1.5/src && make liblua.a MYCFLAGS=-DLUA_USE_POSIX
 
     - name: Get LPeg
       run: |
@@ -51,7 +51,7 @@ jobs:
       run: |
         curl -L -O https://www.lua.org/ftp/lua-5.1.5.tar.gz
         tar -xzf lua-5.1.5.tar.gz
-        cd lua-5.1.5 && make generic
+        cd lua-5.1.5/src && make liblua.a
 
     - name: Get LPeg
       run: |
