@@ -63,7 +63,12 @@ bin/binaries/moonscript.h: moonscript/*.lua moon/*.lua
 	xxd -i moonscript.lua > $@
 	rm moonscript.lua
 
-dist/moon: lua-$(LUA_SRC_VERSION)/src/liblua.a lpeg-$(LPEG_VERSION)/lptree.c bin/binaries/moonscript.h
+bin/binaries/moon.h: bin/moon
+	awk 'FNR>1' bin/moon > moon.lua
+	xxd -i moon.lua > $@
+	rm moon.lua
+
+dist/moon: lua-$(LUA_SRC_VERSION)/src/liblua.a lpeg-$(LPEG_VERSION)/lptree.c bin/binaries/moonscript.h bin/binaries/moon.h
 	mkdir -p dist
 	gcc -static -o dist/moon \
 		-Ilua-$(LUA_SRC_VERSION)/src/ \
