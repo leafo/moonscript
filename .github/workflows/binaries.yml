@@ -29,6 +29,12 @@ jobs:
         awk 'FNR>1' bin/moon > moon.lua
         xxd -i moon.lua > bin/binaries/moon.h
 
+    - name: Generate argparse.h
+      run: |
+        luarocks install argparse --tree=lua_modules
+        bin/splat.moon -l argparse $(find lua_modules/share/lua -name "*.lua" -exec dirname {} \; | head -1) > argparse.lua
+        xxd -i argparse.lua > bin/binaries/argparse.h
+
     - name: Upload headers
       uses: actions/upload-artifact@v6
       with:
