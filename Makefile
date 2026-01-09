@@ -6,6 +6,7 @@ LUA_CPATH_MAKE = $(shell $(LUAROCKS) path --lr-cpath);./?.so
 
 LUA_SRC_VERSION ?= 5.1.5
 LPEG_VERSION ?= 1.0.2
+LFS_VERSION ?= 1_8_0
 
 .PHONY: test local build watch lint count show test_binary
 
@@ -61,6 +62,10 @@ lpeg-$(LPEG_VERSION)/lptree.c:
 	curl -L -o lpeg.tar.gz https://www.inf.puc-rio.br/~roberto/lpeg/lpeg-$(LPEG_VERSION).tar.gz
 	tar -xzf lpeg.tar.gz
 
+luafilesystem-$(LFS_VERSION)/src/lfs.c:
+	curl -L -o luafilesystem.tar.gz https://github.com/keplerproject/luafilesystem/archive/v$(LFS_VERSION).tar.gz
+	tar -xzf luafilesystem.tar.gz
+
 bin/binaries/moonscript.h: moonscript/*.lua moon/*.lua
 	bin/splat.moon -l moonscript moonscript moon > moonscript.lua
 	xxd -i moonscript.lua > $@
@@ -75,7 +80,12 @@ bin/binaries/argparse.h: lua_modules
 	bin/splat.moon --strip-prefix -l argparse $$(find lua_modules/share/lua -name "argparse.lua" -exec dirname {} \; | head -1) > bin/binaries/argparse.lua
 	xxd -i -n argparse_lua bin/binaries/argparse.lua > $@
 
-dist/moon: lua-$(LUA_SRC_VERSION)/src/liblua.a lpeg-$(LPEG_VERSION)/lptree.c bin/binaries/moonscript.h bin/binaries/moon.h bin/binaries/argparse.h
+bin/binaries/moonc.h: bin/moonc
+	awk 'FNR>1' bin/moonc > moonc.lua
+	xxd -i moonc.lua > $@
+	rm moonc.lua
+
+dist/moon: lua-$(LUA_SRC_VERSION)/src/liblua.a lpeg-$(LPEG_VERSION)/lptree.c bin/binaries/moonscript.h bin/binaries/moon.h bin/binaries/argparse.h bin/binaries/moon.c bin/binaries/moonscript.c
 	mkdir -p dist
 	gcc -static -o dist/moon \
 		-Ilua-$(LUA_SRC_VERSION)/src/ \
@@ -88,6 +98,23 @@ dist/moon: lua-$(LUA_SRC_VERSION)/src/liblua.a lpeg-$(LPEG_VERSION)/lptree.c bin
 		lpeg-$(LPEG_VERSION)/lptree.c \
 		lpeg-$(LPEG_VERSION)/lpcode.c \
 		lpeg-$(LPEG_VERSION)/lpprint.c \
+		lua-$(LUA_SRC_VERSION)/src/liblua.a \
+		-lm -ldl
+
+dist/moonc: lua-$(LUA_SRC_VERSION)/src/liblua.a lpeg-$(LPEG_VERSION)/lptree.c luafilesystem-$(LFS_VERSION)/src/lfs.c bin/binaries/moonscript.h bin/binaries/moonc.h bin/binaries/argparse.h bin/binaries/moonc.c bin/binaries/moonscript.c
+	mkdir -p dist
+	gcc -static -o dist/moonc \
+		-Ilua-$(LUA_SRC_VERSION)/src/ \
+		-Ilpeg-$(LPEG_VERSION)/ \
+		-Ibin/binaries/ \
+		bin/binaries/moonc.c \
+		bin/binaries/moonscript.c \
+		lpeg-$(LPEG_VERSION)/lpvm.c \
+		lpeg-$(LPEG_VERSION)/lpcap.c \
+		lpeg-$(LPEG_VERSION)/lptree.c \
+		lpeg-$(LPEG_VERSION)/lpcode.c \
+		lpeg-$(LPEG_VERSION)/lpprint.c \
+		luafilesystem-$(LFS_VERSION)/src/lfs.c \
 		lua-$(LUA_SRC_VERSION)/src/liblua.a \
 		-lm -ldl
 

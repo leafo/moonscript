@@ -1,6 +1,9 @@
 #!/usr/bin/env moon
 argparse = require "argparse"
 
+-- TODO: it would be cool if you could just point this at a luarocks tree, pass a list of top level module names, and it figures it out for you.
+-- Perhaps even merge the header generation into here as well to avoid using xxd
+
 normalize = (path) ->
   path\match("(.-)/*$").."/"
 
