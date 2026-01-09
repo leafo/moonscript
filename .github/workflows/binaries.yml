@@ -35,6 +35,11 @@ jobs:
         bin/splat.moon --strip-prefix -l argparse $(find lua_modules/share/lua -name "argparse.lua" -exec dirname {} \; | head -1) > bin/binaries/argparse.lua
         xxd -i -n argparse_lua bin/binaries/argparse.lua > bin/binaries/argparse.h
 
+    - name: Generate moonc.h
+      run: |
+        awk 'FNR>1' bin/moonc > moonc.lua
+        xxd -i moonc.lua > bin/binaries/moonc.h
+
     - name: Upload headers
       uses: actions/upload-artifact@v6
       with:
@@ -93,11 +98,26 @@ jobs:
           lpeg-1.0.2/lpprint.c \
           lua-${{ matrix.lua_version }}/src/liblua.a \
           -lm -ldl
+        gcc -static -o dist/moonc \
+          -Ilua-${{ matrix.lua_version }}/src/ \
+          -Ilpeg-1.0.2/ \
+          -Ibin/binaries/ \
+          bin/binaries/moonc.c \
+          bin/binaries/moonscript.c \
+          lpeg-1.0.2/lpvm.c \
+          lpeg-1.0.2/lpcap.c \
+          lpeg-1.0.2/lptree.c \
+          lpeg-1.0.2/lpcode.c \
+          lpeg-1.0.2/lpprint.c \
+          luafilesystem-1_8_0/src/lfs.c \
+          lua-${{ matrix.lua_version }}/src/liblua.a \
+          -lm -ldl
 
     - name: Test run
       run: |
         dist/moon -h
         dist/moon -e 'print "hello world"'
+        dist/moonc -h
 
     - name: Upload artifact
       uses: actions/upload-artifact@v6
@@ -165,11 +185,26 @@ jobs:
           lpeg-1.0.2/lpprint.c \
           lua-${{ matrix.lua_version }}/src/liblua.a \
           -lm
+        gcc -static -o dist/moonc.exe \
+          -Ilua-${{ matrix.lua_version }}/src/ \
+          -Ilpeg-1.0.2/ \
+          -Ibin/binaries/ \
+          bin/binaries/moonc.c \
+          bin/binaries/moonscript.c \
+          lpeg-1.0.2/lpvm.c \
+          lpeg-1.0.2/lpcap.c \
+          lpeg-1.0.2/lptree.c \
+          lpeg-1.0.2/lpcode.c \
+          lpeg-1.0.2/lpprint.c \
+          luafilesystem-1_8_0/src/lfs.c \
+          lua-${{ matrix.lua_version }}/src/liblua.a \
+          -lm
 
     - name: Test run
       run: |
         dist/moon.exe -h
         dist/moon.exe -e 'print "hello world"'
+        dist/moonc.exe -h
 
     - name: Upload artifact
       uses: actions/upload-artifact@v6
