@@ -57,6 +57,14 @@ jobs:
     steps:
     - uses: actions/checkout@master
 
+    - name: Set version suffix
+      run: |
+        if [[ "${{ github.ref_type }}" == "tag" ]]; then
+          echo "VERSION_SUFFIX=${{ github.ref_name }}" >> $GITHUB_ENV
+        else
+          echo "VERSION_SUFFIX=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+        fi
+
     - name: Download headers
       uses: actions/download-artifact@v4
       with:
@@ -122,8 +130,20 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-artifact@v6
       with:
-        name: moon-linux-lua${{ matrix.lua_version }}
+        name: moonscript-${{ env.VERSION_SUFFIX }}-linux-lua${{ matrix.lua_version }}
         path: dist/
+
+    - name: Package for release
+      if: github.ref_type == 'tag'
+      run: |
+        cd dist
+        tar -czvf ../moonscript-${{ env.VERSION_SUFFIX }}-linux-x86_64.tar.gz *
+
+    - name: Upload to release
+      if: github.ref_type == 'tag'
+      uses: softprops/action-gh-release@v2
+      with:
+        files: moonscript-${{ env.VERSION_SUFFIX }}-linux-x86_64.tar.gz
 
   windows:
     runs-on: windows-latest
@@ -140,6 +160,14 @@ jobs:
     steps:
     - uses: actions/checkout@master
 
+    - name: Set version suffix
+      run: |
+        if [[ "${{ github.ref_type }}" == "tag" ]]; then
+          echo "VERSION_SUFFIX=${{ github.ref_name }}" >> $GITHUB_ENV
+        else
+          echo "VERSION_SUFFIX=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+        fi
+
     - name: Download headers
       uses: actions/download-artifact@v4
       with:
@@ -148,7 +176,7 @@ jobs:
 
     - uses: msys2/setup-msys2@v2
       with:
-        install: gcc make curl
+        install: gcc make curl zip
 
     - name: Show GCC
       run: gcc -v
@@ -209,5 +237,17 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-artifact@v6
       with:
-        name: moon-windows-lua${{ matrix.lua_version }}
+        name: moonscript-${{ env.VERSION_SUFFIX }}-windows-lua${{ matrix.lua_version }}
         path: dist/
+
+    - name: Package for release
+      if: github.ref_type == 'tag'
+      run: |
+        cd dist
+        zip ../moonscript-${{ env.VERSION_SUFFIX }}-windows-x86_64.zip *
+
+    - name: Upload to release
+      if: github.ref_type == 'tag'
+      uses: softprops/action-gh-release@v2
+      with:
+        files: moonscript-${{ env.VERSION_SUFFIX }}-windows-x86_64.zip
