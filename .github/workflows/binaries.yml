@@ -171,6 +171,7 @@ jobs:
         install: gcc make curl zip
 
     - name: Set version suffix
+      shell: bash
       run: |
         if [[ "${{ github.ref_type }}" == "tag" ]]; then
           echo "VERSION_SUFFIX=${{ github.ref_name }}" >> $GITHUB_ENV
