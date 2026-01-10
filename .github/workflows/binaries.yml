@@ -160,14 +160,6 @@ jobs:
     steps:
     - uses: actions/checkout@master
 
-    - name: Set version suffix
-      run: |
-        if [[ "${{ github.ref_type }}" == "tag" ]]; then
-          echo "VERSION_SUFFIX=${{ github.ref_name }}" >> $GITHUB_ENV
-        else
-          echo "VERSION_SUFFIX=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
-        fi
-
     - name: Download headers
       uses: actions/download-artifact@v4
       with:
@@ -177,6 +169,14 @@ jobs:
     - uses: msys2/setup-msys2@v2
       with:
         install: gcc make curl zip
+
+    - name: Set version suffix
+      run: |
+        if [[ "${{ github.ref_type }}" == "tag" ]]; then
+          echo "VERSION_SUFFIX=${{ github.ref_name }}" >> $GITHUB_ENV
+        else
+          echo "VERSION_SUFFIX=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+        fi
 
     - name: Show GCC
       run: gcc -v
