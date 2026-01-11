@@ -15,7 +15,9 @@ describe "moon", ->
       Test, Test!, 1, true, nil, "hello"
     }
 
-    types = [moon.type t for t in *things]
+    types = {}
+    for i=1, moon.len things
+      types[i] = moon.type things[i]
     assert.same types, { Test, Test, "number", "boolean", "nil", "string" }
 
   it "should get upvalue", ->

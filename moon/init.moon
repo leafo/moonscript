@@ -129,7 +129,16 @@ fold = (items, fn)->
   else
     items[1]
 
+-- gets largest integer key of tbl
+len = (tbl)->
+  largest = 0
+  for key, val in pairs tbl
+    if type(key) == "number" and key > largest
+      largest = key
+  largest
+
 {
   :dump, :p, :is_object, :type, :debug, :run_with_scope, :bind_methods,
-  :defaultbl, :extend, :copy, :mixin, :mixin_object, :mixin_table, :fold
+  :defaultbl, :extend, :copy, :mixin, :mixin_object, :mixin_table, :fold,
+  :len
 }
