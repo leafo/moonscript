@@ -7,7 +7,7 @@ do
   local _obj_0 = require("moonscript.util")
   getfenv, setfenv, dump = _obj_0.getfenv, _obj_0.setfenv, _obj_0.dump
 end
-local p, is_object, type, debug, run_with_scope, bind_methods, defaultbl, extend, copy, mixin, mixin_object, mixin_table, fold
+local p, is_object, type, debug, run_with_scope, bind_methods, defaultbl, extend, copy, mixin, mixin_object, mixin_table, fold, len
 p = function(o, ...)
   print(dump(o))
   if select("#", ...) > 0 then
@@ -149,7 +149,7 @@ mixin_table = function(self, tbl, keys)
   end
 end
 fold = function(items, fn)
-  local len = #items
+  len = #items
   if len > 1 then
     local accum = fn(items[1], items[2])
     for i = 3, len do
@@ -159,6 +159,15 @@ fold = function(items, fn)
   else
     return items[1]
   end
+end
+len = function(tbl)
+  local largest = 0
+  for key, val in pairs(tbl) do
+    if type(key) == "number" and key > largest then
+      largest = key
+    end
+  end
+  return largest
 end
 return {
   dump = dump,
@@ -174,5 +183,6 @@ return {
   mixin = mixin,
   mixin_object = mixin_object,
   mixin_table = mixin_table,
-  fold = fold
+  fold = fold,
+  len = len
 }

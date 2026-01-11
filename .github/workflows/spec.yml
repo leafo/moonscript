@@ -1,13 +1,13 @@
 name: "spec"
 
-on: [push, pull_request]
+on: [push, pull_request, workflow_dispatch]
 
 jobs:
   test:
     strategy:
       fail-fast: false
       matrix:
-        luaVersion: ["5.1", "5.2", "5.3", "5.4", "luajit", "luajit-openresty"]
+        luaVersion: ["5.1", "5.2", "5.3", "5.4", "5.5.0", "luajit", "luajit-openresty"]
 
     runs-on: ubuntu-latest
 
@@ -19,6 +19,8 @@ jobs:
         luaVersion: ${{ matrix.luaVersion }}
 
     - uses: leafo/gh-actions-luarocks@master
+      with:
+        luarocksVersion: "3.13.0"
 
     - name: build
       run: |
