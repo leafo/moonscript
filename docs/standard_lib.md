@@ -108,19 +108,52 @@ copy = (arg) -> {k,v for k,v in pairs self}
 
 ### `is_object(value)`
 
-Returns true if `value` is an instance of a MoonScript class, false otherwise.
+**Deprecated:** Use `is_instance` or `is_class` instead. `is_object` returns
+truthy for instances, classes, and `__base` tables — any table with `__class`
+accessible. It cannot distinguish between these cases.
 
-### `type(value)`
+### `is_class(value)`
 
-If `value` is an instance of a MoonScript class, then return it's class object.
-Otherwise, return the result of calling Lua's type method.
+Returns `true` if `value` is a MoonScript class table, `false` otherwise.
+Returns `false` for instances, `__base` tables, plain tables, and non-table
+values.
 
 ```moon
 class MyClass
-  nil
+
+is_class MyClass        -- true
+is_class MyClass!       -- false
+is_class MyClass.__base -- false
+```
+
+### `is_instance(value)`
+
+Returns `true` if `value` is an instance of a MoonScript class, `false`
+otherwise. Returns `false` for class tables, `__base` tables, plain tables, and
+non-table values.
+
+```moon
+class MyClass
+
+is_instance MyClass!       -- true
+is_instance MyClass        -- false
+is_instance MyClass.__base -- false
+```
+
+### `type(value)`
+
+If `value` is an instance of a MoonScript class, then return its class object.
+If `value` is a class table, return the class itself. Returns the result of
+calling Lua's built-in `type` for all other values, including `__base` tables
+and plain tables.
+
+```moon
+class MyClass
 
 x = MyClass!
 assert type(x) == MyClass
+assert type(MyClass) == MyClass
+assert type(MyClass.__base) == "table"
 ```
 
 ### `bind_methods(obj)`

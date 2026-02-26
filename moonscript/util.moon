@@ -4,9 +4,15 @@ import concat from table
 unpack = unpack or table.unpack
 type = type
 
-moon =
-  is_object: (value) -> -- is a moonscript object
-    type(value) == "table" and value.__class
+moon = {
+  is_class: (value) ->
+    type(value) == "table" and rawget(value, "__base") != nil
+
+  is_instance: (value) ->
+    if type(value) == "table"
+      mt = getmetatable value
+      return mt and rawget(mt, "__class") != nil
+    false
 
   is_a: (thing, t) ->
     return false unless type(thing) == "table"
@@ -22,8 +28,10 @@ moon =
     base_type = type value
     if base_type == "table"
       cls = value.__class
-      return cls if cls
+      if cls and rawget(value, "__class") == nil
+        return cls
     base_type
+}
 
 -- convet position in text to line number
 pos_to_line = (str, pos) ->

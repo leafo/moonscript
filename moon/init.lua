@@ -7,21 +7,31 @@ do
   local _obj_0 = require("moonscript.util")
   getfenv, setfenv, dump = _obj_0.getfenv, _obj_0.setfenv, _obj_0.dump
 end
-local p, is_object, type, debug, run_with_scope, bind_methods, defaultbl, extend, copy, mixin, mixin_object, mixin_table, fold
+local p, is_object, is_class, is_instance, type, debug, run_with_scope, bind_methods, defaultbl, extend, copy, mixin, mixin_object, mixin_table, fold
 p = function(o, ...)
   print(dump(o))
   if select("#", ...) > 0 then
     return p(...)
   end
 end
-is_object = function(value)
+is_object = function(value) -- deprecated: use is_instance or is_class instead
   return lua.type(value) == "table" and value.__class
+end
+is_class = function(value)
+  return lua.type(value) == "table" and rawget(value, "__base") ~= nil
+end
+is_instance = function(value)
+  if lua.type(value) == "table" then
+    local mt = getmetatable(value)
+    return mt and rawget(mt, "__class") ~= nil
+  end
+  return false
 end
 type = function(value)
   local base_type = lua.type(value)
   if base_type == "table" then
     local cls = value.__class
-    if cls then
+    if cls and rawget(value, "__class") == nil then
       return cls
     end
   end
@@ -164,6 +174,8 @@ return {
   dump = dump,
   p = p,
   is_object = is_object,
+  is_class = is_class,
+  is_instance = is_instance,
   type = type,
   debug = debug,
   run_with_scope = run_with_scope,

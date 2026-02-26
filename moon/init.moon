@@ -9,14 +9,24 @@ p = (o, ...) ->
   if select("#", ...) > 0
     p ...
 
-is_object =  (value) -> -- is a moonscript object
+is_object =  (value) -> -- deprecated: use is_instance or is_class instead
   lua.type(value) == "table" and value.__class
+
+is_class = (value) ->
+  lua.type(value) == "table" and rawget(value, "__base") != nil
+
+is_instance = (value) ->
+  if lua.type(value) == "table"
+    mt = getmetatable value
+    return mt and rawget(mt, "__class") != nil
+  false
 
 type = (value) -> -- class aware type
   base_type = lua.type value
   if base_type == "table"
     cls = value.__class
-    return cls if cls
+    if cls and rawget(value, "__class") == nil
+      return cls
   base_type
 
 debug = setmetatable {
@@ -130,6 +140,6 @@ fold = (items, fn)->
     items[1]
 
 {
-  :dump, :p, :is_object, :type, :debug, :run_with_scope, :bind_methods,
+  :dump, :p, :is_object, :is_class, :is_instance, :type, :debug, :run_with_scope, :bind_methods,
   :defaultbl, :extend, :copy, :mixin, :mixin_object, :mixin_table, :fold
 }

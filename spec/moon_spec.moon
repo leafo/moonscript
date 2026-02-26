@@ -8,15 +8,37 @@ describe "moon", ->
   with_dev ->
     moon = require "moon"
 
-  it "should determine correct type", ->
-    class Test
+  describe "type", ->
+    it "returns the class for a class", ->
+      class Test
+      assert.equal Test, moon.type Test
 
-    things = {
-      Test, Test!, 1, true, nil, "hello"
-    }
+    it "returns the class for an instance", ->
+      class Test
+      assert.equal Test, moon.type Test!
 
-    types = [moon.type t for t in *things]
-    assert.same types, { Test, Test, "number", "boolean", "nil", "string" }
+    it "returns 'table' for __base", ->
+      class Test
+      assert.equal "table", moon.type Test.__base
+
+    it "returns primitive type for non-tables", ->
+      assert.equal "number", moon.type 1
+      assert.equal "boolean", moon.type true
+      assert.equal "nil", moon.type nil
+      assert.equal "string", moon.type "hello"
+      assert.equal "function", moon.type ->
+
+    it "returns 'table' for plain tables", ->
+      assert.equal "table", moon.type {}
+      assert.equal "table", moon.type {hello: "world"}
+
+    it "works with inheritance", ->
+      class Parent
+      class Child extends Parent
+      assert.equal Child, moon.type Child!
+      assert.equal Parent, moon.type Parent!
+      assert.equal "table", moon.type Child.__base
+      assert.equal "table", moon.type Parent.__base
 
   it "should get upvalue", ->
     fn = do
@@ -113,6 +135,61 @@ describe "moon", ->
     moon.mixin_table a, b
 
     assert.same a, { hello: "world", cat: "mouse", foo: "bar"}
+
+  describe "is_class", ->
+    it "returns true for a class", ->
+      class Hello
+      assert.truthy moon.is_class Hello
+
+    it "returns false for an instance", ->
+      class Hello
+      assert.falsy moon.is_class Hello!
+
+    it "returns false for __base", ->
+      class Hello
+      assert.falsy moon.is_class Hello.__base
+
+    it "returns false for plain tables and non-tables", ->
+      assert.falsy moon.is_class {}
+      assert.falsy moon.is_class 123
+      assert.falsy moon.is_class "hello"
+      assert.falsy moon.is_class nil
+      assert.falsy moon.is_class true
+
+    it "works with inheritance", ->
+      class Parent
+      class Child extends Parent
+      assert.truthy moon.is_class Parent
+      assert.truthy moon.is_class Child
+      assert.falsy moon.is_class Child!
+
+  describe "is_instance", ->
+    it "returns true for an instance", ->
+      class Hello
+      assert.truthy moon.is_instance Hello!
+
+    it "returns false for a class", ->
+      class Hello
+      assert.falsy moon.is_instance Hello
+
+    it "returns false for __base", ->
+      class Hello
+      assert.falsy moon.is_instance Hello.__base
+
+    it "returns false for plain tables and non-tables", ->
+      assert.falsy moon.is_instance {}
+      assert.falsy moon.is_instance 123
+      assert.falsy moon.is_instance "hello"
+      assert.falsy moon.is_instance nil
+      assert.falsy moon.is_instance true
+
+    it "works with inheritance", ->
+      class Parent
+      class Child extends Parent
+      assert.truthy moon.is_instance Parent!
+      assert.truthy moon.is_instance Child!
+      assert.falsy moon.is_instance Parent
+      assert.falsy moon.is_instance Child
 
   it "should fold", ->
     numbers = {4,3,5,6,7,2,3}

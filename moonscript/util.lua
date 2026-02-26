@@ -3,8 +3,15 @@ concat = table.concat
 local unpack = unpack or table.unpack
 local type = type
 local moon = {
-  is_object = function(value)
-    return type(value) == "table" and value.__class
+  is_class = function(value)
+    return type(value) == "table" and rawget(value, "__base") ~= nil
+  end,
+  is_instance = function(value)
+    if type(value) == "table" then
+      local mt = getmetatable(value)
+      return mt and rawget(mt, "__class") ~= nil
+    end
+    return false
   end,
   is_a = function(thing, t)
     if not (type(thing) == "table") then
@@ -23,7 +30,7 @@ local moon = {
     local base_type = type(value)
     if base_type == "table" then
       local cls = value.__class
-      if cls then
+      if cls and rawget(value, "__class") == nil then
         return cls
       end
     end
