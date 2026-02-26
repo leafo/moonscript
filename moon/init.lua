@@ -14,16 +14,20 @@ p = function(o, ...)
     return p(...)
   end
 end
-is_object = function(value) -- deprecated: use is_instance or is_class instead
+is_object = function(value)
   return lua.type(value) == "table" and value.__class
 end
 is_class = function(value)
-  return lua.type(value) == "table" and rawget(value, "__base") ~= nil
+  if lua.type(value) == "table" and rawget(value, "__base") ~= nil then
+    local mt = getmetatable(value)
+    return mt and rawget(mt, "__call") ~= nil
+  end
+  return false
 end
 is_instance = function(value)
   if lua.type(value) == "table" then
     local mt = getmetatable(value)
-    return mt and rawget(mt, "__class") ~= nil
+    return mt and rawget(mt, "__index") == mt and rawget(value, "__index") ~= value
   end
   return false
 end

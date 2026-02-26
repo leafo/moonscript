@@ -13,12 +13,15 @@ is_object =  (value) -> -- deprecated: use is_instance or is_class instead
   lua.type(value) == "table" and value.__class
 
 is_class = (value) ->
-  lua.type(value) == "table" and rawget(value, "__base") != nil
+  if lua.type(value) == "table" and rawget(value, "__base") != nil
+    mt = getmetatable value
+    return mt and rawget(mt, "__call") != nil
+  false
 
 is_instance = (value) ->
   if lua.type(value) == "table"
     mt = getmetatable value
-    return mt and rawget(mt, "__class") != nil
+    return mt and rawget(mt, "__index") == mt and rawget(value, "__index") != value
   false
 
 type = (value) -> -- class aware type

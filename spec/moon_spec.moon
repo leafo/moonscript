@@ -21,6 +21,12 @@ describe "moon", ->
       class Test
       assert.equal "table", moon.type Test.__base
 
+    it "returns 'table' for __base with inheritance", ->
+      class Parent
+      class Child extends Parent
+      assert.equal "table", moon.type Child.__base
+      assert.equal "table", moon.type Parent.__base
+
     it "returns primitive type for non-tables", ->
       assert.equal "number", moon.type 1
       assert.equal "boolean", moon.type true
@@ -149,6 +155,12 @@ describe "moon", ->
       class Hello
       assert.falsy moon.is_class Hello.__base
 
+    it "returns false for __base with inheritance", ->
+      class Parent
+      class Child extends Parent
+      assert.falsy moon.is_class Child.__base
+      assert.falsy moon.is_class Parent.__base
+
     it "returns false for plain tables and non-tables", ->
       assert.falsy moon.is_class {}
       assert.falsy moon.is_class 123
@@ -163,6 +175,42 @@ describe "moon", ->
       assert.truthy moon.is_class Child
       assert.falsy moon.is_class Child!
 
+  describe "is_instance and is_class with imposter tables", ->
+    it "rejects table with only __base set", ->
+      fake = { __base: {} }
+      assert.falsy moon.is_class fake
+      assert.falsy moon.is_instance fake
+
+    it "rejects table with __base and non-callable metatable", ->
+      fake = setmetatable { __base: {} }, { __index: {} }
+      assert.falsy moon.is_class fake
+      assert.falsy moon.is_instance fake
+
+    it "rejects table with self-referencing __index but no metatable", ->
+      fake = {}
+      fake.__index = fake
+      assert.falsy moon.is_class fake
+      assert.falsy moon.is_instance fake
+
+    it "rejects table with __class set directly", ->
+      fake = { __class: {} }
+      assert.falsy moon.is_class fake
+      assert.falsy moon.is_instance fake
+
+    it "rejects table whose metatable has __class but not self-referencing __index", ->
+      mt = { __class: {} }
+      fake = setmetatable {}, mt
+      assert.falsy moon.is_class fake
+      assert.falsy moon.is_instance fake
+
+    it "rejects table with self-referencing __index used as its own metatable", ->
+      -- looks like a __base used as a metatable for itself
+      fake = {}
+      fake.__index = fake
+      setmetatable fake, fake
+      assert.falsy moon.is_class fake
+      assert.falsy moon.is_instance fake
+
   describe "is_instance", ->
     it "returns true for an instance", ->
       class Hello
@@ -175,6 +223,12 @@ describe "moon", ->
     it "returns false for __base", ->
       class Hello
       assert.falsy moon.is_instance Hello.__base
+
+    it "returns false for __base with inheritance", ->
+      class Parent
+      class Child extends Parent
+      assert.falsy moon.is_instance Child.__base
+      assert.falsy moon.is_instance Parent.__base
 
     it "returns false for plain tables and non-tables", ->
       assert.falsy moon.is_instance {}

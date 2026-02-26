@@ -118,6 +118,10 @@ Returns `true` if `value` is a MoonScript class table, `false` otherwise.
 Returns `false` for instances, `__base` tables, plain tables, and non-table
 values.
 
+Works by checking that the value is a table with a `__base` field set directly
+on it, and that its metatable has a `__call` field (the constructor). Both are
+properties unique to MoonScript class tables.
+
 ```moon
 class MyClass
 
@@ -131,6 +135,10 @@ is_class MyClass.__base -- false
 Returns `true` if `value` is an instance of a MoonScript class, `false`
 otherwise. Returns `false` for class tables, `__base` tables, plain tables, and
 non-table values.
+
+Works by checking that the value is a table whose metatable is a `__base` table
+(identified by having a self-referencing `__index`), and that the value itself
+is not a `__base` table.
 
 ```moon
 class MyClass

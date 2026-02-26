@@ -4,12 +4,16 @@ local unpack = unpack or table.unpack
 local type = type
 local moon = {
   is_class = function(value)
-    return type(value) == "table" and rawget(value, "__base") ~= nil
+    if type(value) == "table" and rawget(value, "__base") ~= nil then
+      local mt = getmetatable(value)
+      return mt and rawget(mt, "__call") ~= nil
+    end
+    return false
   end,
   is_instance = function(value)
     if type(value) == "table" then
       local mt = getmetatable(value)
-      return mt and rawget(mt, "__class") ~= nil
+      return mt and rawget(mt, "__index") == mt and rawget(value, "__index") ~= value
     end
     return false
   end,

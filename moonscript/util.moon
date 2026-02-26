@@ -6,12 +6,15 @@ type = type
 
 moon = {
   is_class: (value) ->
-    type(value) == "table" and rawget(value, "__base") != nil
+    if type(value) == "table" and rawget(value, "__base") != nil
+      mt = getmetatable value
+      return mt and rawget(mt, "__call") != nil
+    false
 
   is_instance: (value) ->
     if type(value) == "table"
       mt = getmetatable value
-      return mt and rawget(mt, "__class") != nil
+      return mt and rawget(mt, "__index") == mt and rawget(value, "__index") != value
     false
 
   is_a: (thing, t) ->
