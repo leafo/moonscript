@@ -34,9 +34,20 @@ is_instance_of = (value, cls) ->
     check = check.__parent
   false
 
+is_subclass_of = (cls, parent) ->
+  error "is_subclass_of: expected class, got #{lua.type cls}" unless is_class cls
+  check = cls.__parent
+  while check
+    if check == parent
+      return true
+    check = check.__parent
+  false
+
 type = (value) -> -- class aware type
   base_type = lua.type value
   if base_type == "table"
+    if is_class value
+      return "class"
     cls = value.__class
     if cls and rawget(value, "__class") == nil
       return cls
@@ -153,6 +164,6 @@ fold = (items, fn)->
     items[1]
 
 {
-  :dump, :p, :is_object, :is_class, :is_instance, :is_instance_of, :type, :debug, :run_with_scope, :bind_methods,
+  :dump, :p, :is_object, :is_class, :is_instance, :is_instance_of, :is_subclass_of, :type, :debug, :run_with_scope, :bind_methods,
   :defaultbl, :extend, :copy, :mixin, :mixin_object, :mixin_table, :fold
 }

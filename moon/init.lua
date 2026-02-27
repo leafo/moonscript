@@ -7,7 +7,7 @@ do
   local _obj_0 = require("moonscript.util")
   getfenv, setfenv, dump = _obj_0.getfenv, _obj_0.setfenv, _obj_0.dump
 end
-local p, is_object, is_class, is_instance, is_instance_of, type, debug, run_with_scope, bind_methods, defaultbl, extend, copy, mixin, mixin_object, mixin_table, fold
+local p, is_object, is_class, is_instance, is_instance_of, is_subclass_of, type, debug, run_with_scope, bind_methods, defaultbl, extend, copy, mixin, mixin_object, mixin_table, fold
 p = function(o, ...)
   print(dump(o))
   if select("#", ...) > 0 then
@@ -45,9 +45,25 @@ is_instance_of = function(value, cls)
   end
   return false
 end
+is_subclass_of = function(cls, parent)
+  if not (is_class(cls)) then
+    error("is_subclass_of: expected class, got " .. tostring(lua.type(cls)))
+  end
+  local check = cls.__parent
+  while check do
+    if check == parent then
+      return true
+    end
+    check = check.__parent
+  end
+  return false
+end
 type = function(value)
   local base_type = lua.type(value)
   if base_type == "table" then
+    if is_class(value) then
+      return "class"
+    end
     local cls = value.__class
     if cls and rawget(value, "__class") == nil then
       return cls
@@ -195,6 +211,7 @@ return {
   is_class = is_class,
   is_instance = is_instance,
   is_instance_of = is_instance_of,
+  is_subclass_of = is_subclass_of,
   type = type,
   debug = debug,
   run_with_scope = run_with_scope,

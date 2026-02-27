@@ -9,9 +9,9 @@ describe "moon", ->
     moon = require "moon"
 
   describe "type", ->
-    it "returns the class for a class", ->
+    it "returns 'class' for a class", ->
       class Test
-      assert.equal Test, moon.type Test
+      assert.equal "class", moon.type Test
 
     it "returns the class for an instance", ->
       class Test
@@ -37,6 +37,12 @@ describe "moon", ->
     it "returns 'table' for plain tables", ->
       assert.equal "table", moon.type {}
       assert.equal "table", moon.type {hello: "world"}
+
+    it "returns 'class' for classes with inheritance", ->
+      class Parent
+      class Child extends Parent
+      assert.equal "class", moon.type Parent
+      assert.equal "class", moon.type Child
 
     it "works with inheritance", ->
       class Parent
@@ -306,6 +312,60 @@ describe "moon", ->
       assert.truthy moon.is_instance_of C!, C
       assert.falsy moon.is_instance_of A!, B
       assert.falsy moon.is_instance_of A!, C
+
+  describe "is_subclass_of", ->
+    it "returns true for direct child", ->
+      class Parent
+      class Child extends Parent
+      assert.truthy moon.is_subclass_of Child, Parent
+
+    it "returns true for deep inheritance", ->
+      class A
+      class B extends A
+      class C extends B
+      assert.truthy moon.is_subclass_of C, A
+      assert.truthy moon.is_subclass_of C, B
+      assert.truthy moon.is_subclass_of B, A
+
+    it "returns false for same class", ->
+      class A
+      assert.falsy moon.is_subclass_of A, A
+
+    it "returns false for parent checked against child", ->
+      class Parent
+      class Child extends Parent
+      assert.falsy moon.is_subclass_of Parent, Child
+
+    it "returns false for unrelated classes", ->
+      class A
+      class B
+      assert.falsy moon.is_subclass_of A, B
+      assert.falsy moon.is_subclass_of B, A
+
+    it "returns false for class without parent", ->
+      class A
+      class B
+      assert.falsy moon.is_subclass_of A, B
+
+    it "returns false when __base is passed as the parent", ->
+      class Parent
+      class Child extends Parent
+      assert.falsy moon.is_subclass_of Child, Parent.__base
+      assert.falsy moon.is_subclass_of Child, Child.__base
+
+    it "errors when first argument is not a class", ->
+      class Hello
+      assert.has_error (-> moon.is_subclass_of Hello!, Hello), "is_subclass_of: expected class, got table"
+      assert.has_error (-> moon.is_subclass_of Hello.__base, Hello), "is_subclass_of: expected class, got table"
+      assert.has_error (-> moon.is_subclass_of {}, Hello), "is_subclass_of: expected class, got table"
+      assert.has_error (-> moon.is_subclass_of nil, Hello), "is_subclass_of: expected class, got nil"
+      assert.has_error (-> moon.is_subclass_of 123, Hello), "is_subclass_of: expected class, got number"
+
+    it "errors when __base is passed as the first argument", ->
+      class Parent
+      class Child extends Parent
+      assert.has_error (-> moon.is_subclass_of Parent.__base, Parent), "is_subclass_of: expected class, got table"
+      assert.has_error (-> moon.is_subclass_of Child.__base, Child), "is_subclass_of: expected class, got table"
 
   it "should fold", ->
     numbers = {4,3,5,6,7,2,3}

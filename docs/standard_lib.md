@@ -160,24 +160,43 @@ inherits from `class`.
 class Parent
 class Child extends Parent
 
-is_instance_of Child!, Parent -- true
 is_instance_of Child!, Child  -- true
+is_instance_of Child!, Parent -- true (checks parent classes)
 is_instance_of Parent!, Child -- false
+```
+
+To check if a value is a direct instance of a specific class without considering
+inheritance, use `type(value) == MyClass` instead.
+
+### `is_subclass_of(cls, parent)`
+
+Returns `true` if `cls` is a subclass of `parent`, `false` otherwise. Throws an
+error if `cls` is not a MoonScript class. Note that a class is not considered a
+subclass of itself. Walks the `__parent` chain starting from `cls` to check if
+any ancestor matches `parent`.
+
+```moon
+class Parent
+class Child extends Parent
+
+is_subclass_of Child, Parent -- true
+is_subclass_of Parent, Child -- false
+is_subclass_of Child, Child  -- false
 ```
 
 ### `type(value)`
 
-If `value` is an instance of a MoonScript class, then return its class object.
-If `value` is a class table, return the class itself. Returns the result of
-calling Lua's built-in `type` for all other values, including `__base` tables
-and plain tables.
+Returns a class-aware type for a value. If `value` is an instance of a
+MoonScript class, returns its class object. If `value` is a class table, returns
+the string `"class"`. Returns the result of calling Lua's built-in `type` for
+all other values, including `__base` tables and plain tables.
 
 ```moon
 class MyClass
 
 x = MyClass!
 assert type(x) == MyClass
-assert type(MyClass) == MyClass
+assert type(MyClass) == "class"
 assert type(MyClass.__base) == "table"
 ```
 
