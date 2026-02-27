@@ -1,3 +1,58 @@
+# MoonScript v0.6.0 (2026-01-10)
+
+## New Features
+
+### Command Line Improvements
+
+- **Switched from alt_getopt to argparse** - Both `moon` and `moonc` now use argparse for argument parsing, providing better help messages via `--help` and more robust option handling
+- **Added `-e/--execute` flag to `moon`** - Execute MoonScript code directly from the command line:
+  ```
+  moon -e "print 'Hello World'"
+  ```
+- **New `--transform` option for `moonc`** - Allows custom AST transformations before compilation by specifying a module that receives and returns the syntax tree
+- **Improved `-` (stdin) handling** - Now properly enforces that `-` must be the only argument
+
+### moonc Option Renames
+- `-w` is now also available as `--watch`
+- `-l` is now also available as `--lint`  
+- `-t` is now also available as `--output-to`
+
+### New Tools
+
+- **moon-tags** - New script for generating ctags-compatible tag files for MoonScript, with support for:
+  - Class definitions
+  - Class methods
+  - Top-level function definitions (exported via `{:func}` pattern)
+  - Lapis route detection (`--lapis` flag)
+  - Optional line numbers (`--include-line` flag)
+  - Optionally skip header (`--no-header` flag)
+
+### Utility Improvements
+
+- **`moon.p()` now prints multiple arguments** - Pass multiple values and each will be dumped
+- **`util.dump` shows class names** - When dumping objects, the class name is displayed (e.g., `<MyClass>{...}`)
+
+### Compiler Enhancements
+
+- **Lua keyword property access on self** - Properties with Lua keyword names (like `@then` or `@@then`) now compile correctly using bracket notation instead of invalid `self.then`
+
+## Bug Fixes
+
+- **Fixed ambiguous Lua generation after `import`** - Semicolons are now correctly inserted when the next line starts with `(`, preventing parsing ambiguity
+- **Fixed update operators with complex chain indexes** - Expressions like `a[func()].x += 1` now correctly lift the index expression to avoid double evaluation
+- **Exit with proper error code** - `moon` now exits with code 1 when the executed script fails
+- **Fixed `moonc -`** - Reading from stdin now works correctly
+- **Removed accidental debug print** - Removed stray `print file, time` in watcher code
+- **`dump.tree` returns string** - Now returns the string instead of printing directly
+- **Removed noisy "Built" message** - Single file compilation no longer prints "Built" to stderr
+
+## Internal Changes
+
+- Migrated CI from Travis to GitHub Actions
+- Added comprehensive compiler and transform specs
+- Improved binary building workflow for Windows and Linux
+- Better error messages for invalid destructure assignments
+- Updated `splat.moon` to use argparse, added `--strip-prefix` option
 
 
 # MoonScript v0.5.0 (2016-9-25)
