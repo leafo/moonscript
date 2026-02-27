@@ -5,7 +5,7 @@ Set = require("moonscript.data").Set
 local Block
 Block = require("moonscript.compile").Block
 local mtype
-mtype = require("moonscript.util").moon.type
+mtype = require("moonscript.util").mtype
 local default_whitelist = Set({
   '_G',
   '_VERSION',

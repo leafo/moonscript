@@ -11,9 +11,7 @@ statement_compilers = require "moonscript.compile.statement"
 value_compilers = require "moonscript.compile.value"
 
 import concat, insert from table
-import pos_to_line, get_closest_line, trim, unpack from util
-
-mtype = util.moon.type
+import pos_to_line, get_closest_line, trim, unpack, mtype from util
 
 indent_char = "  "
 

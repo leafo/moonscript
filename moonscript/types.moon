@@ -33,7 +33,7 @@ ntype = (node) ->
 
 -- gets the class of a type if possible
 mtype = do
-  moon_type = util.moon.type
+  moon_type = util.mtype
   -- lets us check a smart node without throwing an error
   (val) ->
     mt = getmetatable val

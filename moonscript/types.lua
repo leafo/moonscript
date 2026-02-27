@@ -36,7 +36,7 @@ ntype = function(node)
 end
 local mtype
 do
-  local moon_type = util.moon.type
+  local moon_type = util.mtype
   mtype = function(val)
     local mt = getmetatable(val)
     if mt and mt.smart_node then

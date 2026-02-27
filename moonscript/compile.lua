@@ -20,9 +20,8 @@ do
   local _obj_0 = table
   concat, insert = _obj_0.concat, _obj_0.insert
 end
-local pos_to_line, get_closest_line, trim, unpack
-pos_to_line, get_closest_line, trim, unpack = util.pos_to_line, util.get_closest_line, util.trim, util.unpack
-local mtype = util.moon.type
+local pos_to_line, get_closest_line, trim, unpack, mtype
+pos_to_line, get_closest_line, trim, unpack, mtype = util.pos_to_line, util.get_closest_line, util.trim, util.unpack, util.mtype
 local indent_char = "  "
 local Line, DelayedLine, Lines, Block, RootBlock
 do

@@ -17,14 +17,15 @@ moon = {
       return mt and rawget(mt, "__index") == mt and rawget(value, "__index") != value
     false
 
-  type: (value) -> -- the moonscript object class
-    base_type = type value
-    if base_type == "table"
-      cls = value.__class
-      if cls and rawget(value, "__class") == nil
-        return cls
-    base_type
 }
+
+mtype = (value) -> -- the moonscript object class
+  base_type = type value
+  if base_type == "table"
+    cls = value.__class
+    if cls and rawget(value, "__class") == nil
+      return cls
+  base_type
 
 -- convet position in text to line number
 pos_to_line = (str, pos) ->
@@ -135,7 +136,7 @@ safe_module = (name, tbl) ->
   }
 
 {
-  :moon, :pos_to_line, :get_closest_line, :get_line, :trim, :split, :dump,
+  :moon, :mtype, :pos_to_line, :get_closest_line, :get_line, :trim, :split, :dump,
   :debug_posmap, :getfenv, :setfenv, :get_options, :unpack, :safe_module
 }
 

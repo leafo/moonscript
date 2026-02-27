@@ -3,7 +3,7 @@ import insert from table
 import Set from require "moonscript.data"
 import Block from require "moonscript.compile"
 
-{type: mtype} = require("moonscript.util").moon
+import mtype from require "moonscript.util"
 
 -- globals allowed to be referenced
 default_whitelist = Set {

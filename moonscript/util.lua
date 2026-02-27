@@ -16,18 +16,19 @@ local moon = {
       return mt and rawget(mt, "__index") == mt and rawget(value, "__index") ~= value
     end
     return false
-  end,
-  type = function(value)
-    local base_type = type(value)
-    if base_type == "table" then
-      local cls = value.__class
-      if cls and rawget(value, "__class") == nil then
-        return cls
-      end
-    end
-    return base_type
   end
 }
+local mtype
+mtype = function(value)
+  local base_type = type(value)
+  if base_type == "table" then
+    local cls = value.__class
+    if cls and rawget(value, "__class") == nil then
+      return cls
+    end
+  end
+  return base_type
+end
 local pos_to_line
 pos_to_line = function(str, pos)
   local line = 1
@@ -200,6 +201,7 @@ safe_module = function(name, tbl)
 end
 return {
   moon = moon,
+  mtype = mtype,
   pos_to_line = pos_to_line,
   get_closest_line = get_closest_line,
   get_line = get_line,
