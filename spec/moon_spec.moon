@@ -245,6 +245,68 @@ describe "moon", ->
       assert.falsy moon.is_instance Parent
       assert.falsy moon.is_instance Child
 
+  describe "is_instance_of", ->
+    it "returns true for direct instance", ->
+      class Hello
+      assert.truthy moon.is_instance_of Hello!, Hello
+
+    it "returns true for instance of parent class", ->
+      class Parent
+      class Child extends Parent
+      assert.truthy moon.is_instance_of Child!, Parent
+      assert.truthy moon.is_instance_of Child!, Child
+
+    it "returns false for instance of unrelated class", ->
+      class A
+      class B
+      assert.falsy moon.is_instance_of A!, B
+      assert.falsy moon.is_instance_of B!, A
+
+    it "returns false for parent instance checked against child class", ->
+      class Parent
+      class Child extends Parent
+      assert.falsy moon.is_instance_of Parent!, Child
+
+    it "errors when value is not an instance", ->
+      class Hello
+      assert.has_error (-> moon.is_instance_of Hello, Hello), "is_instance_of: expected instance, got table"
+      assert.has_error (-> moon.is_instance_of Hello.__base, Hello), "is_instance_of: expected instance, got table"
+      assert.has_error (-> moon.is_instance_of {}, Hello), "is_instance_of: expected instance, got table"
+      assert.has_error (-> moon.is_instance_of nil, Hello), "is_instance_of: expected instance, got nil"
+      assert.has_error (-> moon.is_instance_of 123, Hello), "is_instance_of: expected instance, got number"
+
+    it "errors when __base is passed as the value", ->
+      class Parent
+      class Child extends Parent
+      assert.has_error (-> moon.is_instance_of Parent.__base, Parent), "is_instance_of: expected instance, got table"
+      assert.has_error (-> moon.is_instance_of Child.__base, Child), "is_instance_of: expected instance, got table"
+      assert.has_error (-> moon.is_instance_of Child.__base, Parent), "is_instance_of: expected instance, got table"
+
+    it "returns false when __base is passed as the class", ->
+      class Parent
+      class Child extends Parent
+      assert.falsy moon.is_instance_of Parent!, Parent.__base
+      assert.falsy moon.is_instance_of Child!, Child.__base
+      assert.falsy moon.is_instance_of Child!, Parent.__base
+
+    it "errors when __base is on both sides", ->
+      class Parent
+      class Child extends Parent
+      assert.has_error (-> moon.is_instance_of Parent.__base, Parent.__base), "is_instance_of: expected instance, got table"
+      assert.has_error (-> moon.is_instance_of Child.__base, Child.__base), "is_instance_of: expected instance, got table"
+      assert.has_error (-> moon.is_instance_of Child.__base, Parent.__base), "is_instance_of: expected instance, got table"
+      assert.has_error (-> moon.is_instance_of Parent.__base, Child.__base), "is_instance_of: expected instance, got table"
+
+    it "works with deep inheritance chain", ->
+      class A
+      class B extends A
+      class C extends B
+      assert.truthy moon.is_instance_of C!, A
+      assert.truthy moon.is_instance_of C!, B
+      assert.truthy moon.is_instance_of C!, C
+      assert.falsy moon.is_instance_of A!, B
+      assert.falsy moon.is_instance_of A!, C
+
   it "should fold", ->
     numbers = {4,3,5,6,7,2,3}
     sum = moon.fold numbers, (a,b) -> a + b

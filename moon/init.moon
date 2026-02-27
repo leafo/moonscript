@@ -24,6 +24,16 @@ is_instance = (value) ->
     return mt and rawget(mt, "__index") == mt and rawget(value, "__index") != value
   false
 
+is_instance_of = (value, cls) ->
+  error "is_instance_of: expected instance, got #{lua.type value}" unless is_instance value
+  mt = getmetatable value
+  check = rawget mt, "__class"
+  while check
+    if check == cls
+      return true
+    check = check.__parent
+  false
+
 type = (value) -> -- class aware type
   base_type = lua.type value
   if base_type == "table"
@@ -143,6 +153,6 @@ fold = (items, fn)->
     items[1]
 
 {
-  :dump, :p, :is_object, :is_class, :is_instance, :type, :debug, :run_with_scope, :bind_methods,
+  :dump, :p, :is_object, :is_class, :is_instance, :is_instance_of, :type, :debug, :run_with_scope, :bind_methods,
   :defaultbl, :extend, :copy, :mixin, :mixin_object, :mixin_table, :fold
 }

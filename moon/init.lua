@@ -7,7 +7,7 @@ do
   local _obj_0 = require("moonscript.util")
   getfenv, setfenv, dump = _obj_0.getfenv, _obj_0.setfenv, _obj_0.dump
 end
-local p, is_object, is_class, is_instance, type, debug, run_with_scope, bind_methods, defaultbl, extend, copy, mixin, mixin_object, mixin_table, fold
+local p, is_object, is_class, is_instance, is_instance_of, type, debug, run_with_scope, bind_methods, defaultbl, extend, copy, mixin, mixin_object, mixin_table, fold
 p = function(o, ...)
   print(dump(o))
   if select("#", ...) > 0 then
@@ -28,6 +28,20 @@ is_instance = function(value)
   if lua.type(value) == "table" then
     local mt = getmetatable(value)
     return mt and rawget(mt, "__index") == mt and rawget(value, "__index") ~= value
+  end
+  return false
+end
+is_instance_of = function(value, cls)
+  if not (is_instance(value)) then
+    error("is_instance_of: expected instance, got " .. tostring(lua.type(value)))
+  end
+  local mt = getmetatable(value)
+  local check = rawget(mt, "__class")
+  while check do
+    if check == cls then
+      return true
+    end
+    check = check.__parent
   end
   return false
 end
@@ -180,6 +194,7 @@ return {
   is_object = is_object,
   is_class = is_class,
   is_instance = is_instance,
+  is_instance_of = is_instance_of,
   type = type,
   debug = debug,
   run_with_scope = run_with_scope,

@@ -148,6 +148,23 @@ is_instance MyClass        -- false
 is_instance MyClass.__base -- false
 ```
 
+### `is_instance_of(value, class)`
+
+Returns `true` if `value` is an instance of `class` or any of its parent
+classes, `false` otherwise. Throws an error if `value` is not a MoonScript
+instance. First verifies that `value` is a valid instance using `is_instance`,
+then walks the `__parent` chain to check if the instance's class matches or
+inherits from `class`.
+
+```moon
+class Parent
+class Child extends Parent
+
+is_instance_of Child!, Parent -- true
+is_instance_of Child!, Child  -- true
+is_instance_of Parent!, Child -- false
+```
+
 ### `type(value)`
 
 If `value` is an instance of a MoonScript class, then return its class object.

@@ -17,19 +17,6 @@ local moon = {
     end
     return false
   end,
-  is_a = function(thing, t)
-    if not (type(thing) == "table") then
-      return false
-    end
-    local cls = thing.__class
-    while cls do
-      if cls == t then
-        return true
-      end
-      cls = cls.__parent
-    end
-    return false
-  end,
   type = function(value)
     local base_type = type(value)
     if base_type == "table" then

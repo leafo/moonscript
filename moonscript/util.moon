@@ -17,16 +17,6 @@ moon = {
       return mt and rawget(mt, "__index") == mt and rawget(value, "__index") != value
     false
 
-  is_a: (thing, t) ->
-    return false unless type(thing) == "table"
-    cls = thing.__class
-    while cls
-      if cls == t
-        return true
-      cls = cls.__parent
-
-    false
-
   type: (value) -> -- the moonscript object class
     base_type = type value
     if base_type == "table"
