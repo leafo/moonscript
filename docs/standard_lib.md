@@ -106,11 +106,6 @@ copy = (arg) -> {k,v for k,v in pairs self}
 
 ## Class/Object Functions
 
-### `is_object(value)`
-
-**Deprecated:** Use `is_instance` or `is_class` instead. `is_object` returns
-truthy for instances, classes, and `__base` tables — any table with `__class`
-accessible. It cannot distinguish between these cases.
 
 ### `is_class(value)`
 
@@ -199,6 +194,14 @@ assert type(x) == MyClass
 assert type(MyClass) == "class"
 assert type(MyClass.__base) == "table"
 ```
+
+### `is_object(value)`
+
+Legacy method for testing if a value is an instance.
+
+**Deprecated:** Use `is_instance` or `is_class` instead. `is_object` returns
+truthy for instances, classes, and `__base` tables, any table with `__class`
+accessible. It cannot distinguish between these cases.
 
 ### `bind_methods(obj)`
 
