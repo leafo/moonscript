@@ -7,7 +7,10 @@ local parser = argparse()
 
 parser:flag("-l --lint", "Perform a lint on the file instead of compiling")
 
-parser:flag("-v --version", "Print version")
+parser:flag("-v --version", "Print version"):action(function()
+  require("moonscript.version").print_version()
+  os.exit(0)
+end)
 parser:flag("-w --watch", "Watch file/directory for updates")
 parser:option("--transform", "Transform syntax tree with module")
 
@@ -35,12 +38,6 @@ else
 end
 
 local opts = read_stdin and {} or parser:parse()
-
-if opts.version then
-  local v = require "moonscript.version"
-  v.print_version()
-  os.exit()
-end
 
 function log_msg(...)
   if not opts.p then
