@@ -47,12 +47,20 @@ jobs:
         path: bin/binaries/*.h
 
   linux:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.runner }}
     needs: generate-headers
 
     strategy:
       matrix:
-        lua_version: ["5.1.5"]
+        include:
+        - runner: ubuntu-latest
+          architecture: x86_64
+          artifact_suffix: ""
+          lua_version: "5.1.5"
+        - runner: ubuntu-24.04-arm
+          architecture: arm64
+          artifact_suffix: "-arm64"
+          lua_version: "5.1.5"
 
     steps:
     - uses: actions/checkout@master
@@ -130,20 +138,20 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-artifact@v6
       with:
-        name: moonscript-${{ env.VERSION_SUFFIX }}-linux-lua${{ matrix.lua_version }}
+        name: moonscript-${{ env.VERSION_SUFFIX }}-linux-lua${{ matrix.lua_version }}${{ matrix.artifact_suffix }}
         path: dist/
 
     - name: Package for release
       if: github.ref_type == 'tag'
       run: |
         cd dist
-        tar -czvf ../moonscript-${{ env.VERSION_SUFFIX }}-linux-x86_64.tar.gz *
+        tar -czvf ../moonscript-${{ env.VERSION_SUFFIX }}-linux-${{ matrix.architecture }}.tar.gz *
 
     - name: Upload to release
       if: github.ref_type == 'tag'
       uses: softprops/action-gh-release@v2
       with:
-        files: moonscript-${{ env.VERSION_SUFFIX }}-linux-x86_64.tar.gz
+        files: moonscript-${{ env.VERSION_SUFFIX }}-linux-${{ matrix.architecture }}.tar.gz
 
   windows:
     runs-on: windows-latest
