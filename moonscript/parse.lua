@@ -236,10 +236,29 @@ file_parser = function()
     end
   }
 end
+local native_parser
+local get_native_parser
+get_native_parser = function()
+  if native_parser == nil then
+    if os.getenv("MOONSCRIPT_PARSER") == "pgen" then
+      native_parser = require("moonscript_parser")
+    else
+      native_parser = false
+    end
+  end
+  return native_parser
+end
 return {
   extract_line = extract_line,
   build_grammar = build_grammar,
   string = function(str)
-    return file_parser():match(str)
+    do
+      local native = get_native_parser()
+      if native then
+        return native.string(str)
+      else
+        return file_parser():match(str)
+      end
+    end
   end
 }

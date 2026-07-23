@@ -350,12 +350,29 @@ file_parser = ->
       tree
   }
 
+-- opt in to the compiled parser from the moonscript-parser rock by setting
+-- MOONSCRIPT_PARSER=pgen in the environment. Fails loudly if the rock
+-- isn't installed rather than silently using the LPeg parser
+local native_parser
+get_native_parser = ->
+  if native_parser == nil
+    native_parser = if os.getenv("MOONSCRIPT_PARSER") == "pgen"
+      require "moonscript_parser"
+    else
+      false
+
+  native_parser
+
 {
   :extract_line
   :build_grammar
 
   -- parse a string as a file
   -- returns tree, or nil and error message
-  string: (str) -> file_parser!\match str
+  string: (str) ->
+    if native = get_native_parser!
+      native.string str
+    else
+      file_parser!\match str
 }
 
