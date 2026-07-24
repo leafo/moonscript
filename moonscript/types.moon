@@ -52,8 +52,19 @@ is_value = (stm) ->
 
   compile.Block\is_value(stm) or transform.Value\can_transform stm
 
+-- is this expression a single term that can sit next to a binary operator
+-- without parentheses changing its meaning
 value_is_singular = (node) ->
-  type(node) != "table" or node[1] != "exp" or #node == 2
+  return true if type(node) != "table"
+  switch node[1]
+    when "exp"
+      #node == 2 and value_is_singular node[2]
+    when "length", "minus", "not", "bitnot"
+      -- prefix operators parse greedily but compile without grouping, so a
+      -- compound operand renders with a trailing operator sequence
+      value_is_singular node[2]
+    else
+      true
 
 is_slice = (node) ->
   ntype(node) == "chain" and ntype(node[#node]) == "slice"

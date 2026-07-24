@@ -165,6 +165,11 @@ a["hello"] += 10
 a["hello#{tostring ff}"] += 10
 a[four].x += 10
 
+count -= #datum + 1
+count -= #datum
+total *= -x + 1
+flag and= not a or b
+
 x = 0
 (if ntype(v) == "fndef" then x += 1) for v in *values
 

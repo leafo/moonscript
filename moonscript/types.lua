@@ -60,7 +60,17 @@ is_value = function(stm)
 end
 local value_is_singular
 value_is_singular = function(node)
-  return type(node) ~= "table" or node[1] ~= "exp" or #node == 2
+  if type(node) ~= "table" then
+    return true
+  end
+  local _exp_0 = node[1]
+  if "exp" == _exp_0 then
+    return #node == 2 and value_is_singular(node[2])
+  elseif "length" == _exp_0 or "minus" == _exp_0 or "not" == _exp_0 or "bitnot" == _exp_0 then
+    return value_is_singular(node[2])
+  else
+    return true
+  end
 end
 local is_slice
 is_slice = function(node)
