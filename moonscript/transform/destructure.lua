@@ -1,7 +1,7 @@
-local ntype, mtype, build
+local ntype, mtype, build, is_assignable
 do
   local _obj_0 = require("moonscript.types")
-  ntype, mtype, build = _obj_0.ntype, _obj_0.mtype, _obj_0.build
+  ntype, mtype, build, is_assignable = _obj_0.ntype, _obj_0.mtype, _obj_0.build, _obj_0.is_assignable
 end
 local NameProxy
 NameProxy = require("moonscript.transform.names").NameProxy
@@ -104,16 +104,22 @@ extract_assign_names = function(name, accum, prefix)
     suffix = join(prefix, {
       suffix
     })
-    local _exp_0 = ntype(value)
-    if "value" == _exp_0 or "ref" == _exp_0 or "chain" == _exp_0 or "self" == _exp_0 then
+    if ntype(value) == "table" then
+      extract_assign_names(value, accum, suffix)
+    elseif is_assignable(value) then
       insert(accum, {
         value,
         suffix
       })
-    elseif "table" == _exp_0 then
-      extract_assign_names(value, accum, suffix)
     else
-      user_error("Can't destructure value of type: " .. tostring(ntype(value)), value[-1] or name[-1])
+      local pos = type(value) == "table" and value[-1] or name[-1]
+      if value == "..." then
+        user_error("Can't destructure into '...'", pos)
+      elseif ntype(value) == "chain" then
+        user_error("Can't destructure into chain ending in " .. tostring(ntype(value[#value])), pos)
+      else
+        user_error("Can't destructure value of type: " .. tostring(ntype(value)), pos)
+      end
     end
   end
   return accum

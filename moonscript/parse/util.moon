@@ -1,7 +1,7 @@
 
 import unpack from require "moonscript.util"
 import P, C, S, Cp, Cmt, V from require "lpeg"
-import ntype from require "moonscript.types"
+import ntype, is_assignable from require "moonscript.types"
 import Space from require "moonscript.parse.literals"
 
 -- captures an indentation, returns indent depth
@@ -97,20 +97,6 @@ flatten_or_mark = (name) ->
     return tbl[1] if #tbl == 1
     table.insert tbl, 1, name
     tbl
-
--- determines if node is able to be on left side of assignment
-is_assignable = do
-  chain_assignable = { index: true, dot: true, slice: true }
-
-  (node) ->
-    return false if node == "..."
-    switch ntype node
-      when "ref", "self", "value", "self_class", "table"
-        true
-      when "chain"
-        chain_assignable[ntype node[#node]]
-      else
-        false
 
 check_assignable = (str, pos, value) ->
   if is_assignable value

@@ -1,5 +1,5 @@
 
-import ntype, mtype, build from require "moonscript.types"
+import ntype, mtype, build, is_assignable from require "moonscript.types"
 import NameProxy from require "moonscript.transform.names"
 import insert from table
 import unpack from require "moonscript.util"
@@ -55,13 +55,18 @@ extract_assign_names = (name, accum={}, prefix={}) ->
 
     suffix = join prefix, {suffix}
 
-    switch ntype value
-      when "value", "ref", "chain", "self"
-        insert accum, {value, suffix}
-      when "table"
-        extract_assign_names value, accum, suffix
+    if ntype(value) == "table"
+      extract_assign_names value, accum, suffix
+    elseif is_assignable value
+      insert accum, {value, suffix}
+    else
+      pos = type(value) == "table" and value[-1] or name[-1]
+      if value == "..."
+        user_error "Can't destructure into '...'", pos
+      elseif ntype(value) == "chain"
+        user_error "Can't destructure into chain ending in #{ntype value[#value]}", pos
       else
-        user_error "Can't destructure value of type: #{ntype value}", value[-1] or name[-1]
+        user_error "Can't destructure value of type: #{ntype value}", pos
 
   accum
 

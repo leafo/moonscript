@@ -52,6 +52,20 @@ is_value = (stm) ->
 
   compile.Block\is_value(stm) or transform.Value\can_transform stm
 
+-- determines if node is able to be on left side of assignment
+is_assignable = do
+  chain_assignable = { index: true, dot: true, slice: true }
+
+  (node) ->
+    return false if node == "..."
+    switch ntype node
+      when "ref", "self", "value", "self_class", "table"
+        true
+      when "chain"
+        chain_assignable[ntype node[#node]]
+      else
+        false
+
 -- is this expression a single term that can sit next to a binary operator
 -- without parentheses changing its meaning
 value_is_singular = (node) ->
@@ -200,9 +214,8 @@ smart_node = (node) ->
 NOOP = {"noop"}
 
 {
-  :ntype, :smart_node, :build, :is_value, :is_slice, :manual_return,
-  :cascading, :value_is_singular,
+  :ntype, :smart_node, :build, :is_value, :is_slice, :is_assignable,
+  :manual_return, :cascading, :value_is_singular,
   :value_can_be_statement, :mtype, :terminating
   :NOOP
 }
-

@@ -137,3 +137,7 @@ grab = (...) ->
 {:negated} = not thing
 
 {:len} = #thing
+
+-- assignable non-name targets
+
+{x: obj.a, y: obj["b"], z: @prop, w: @@cls_prop} = t

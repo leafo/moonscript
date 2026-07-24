@@ -105,7 +105,7 @@ dump = function(what)
       if type(what.__class) == "table" and type(what.__class.__name) == "string" then
         class_name = "<" .. tostring(what.__class.__name) .. ">"
       end
-      return tostring(class_name or "") .. "{\n" .. concat(lines) .. (" "):rep((depth - 1) * 4) .. "}\n"
+      return (tostring(class_name or "") .. "{\n") .. concat(lines) .. (" "):rep((depth - 1) * 4) .. "}\n"
     else
       return tostring(what) .. "\n"
     end

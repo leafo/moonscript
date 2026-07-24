@@ -49,6 +49,16 @@ describe "compile errors", ->
     }
 
     {
+      "destructuring into a function call"
+      unindent [[
+        print "hello"
+        {foo!} = thing
+      ]]
+      "Can't destructure into chain ending in call"
+      2
+    }
+
+    {
       "continue outside of loop"
       unindent [[
         print "hello"

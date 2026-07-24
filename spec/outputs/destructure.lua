@@ -308,3 +308,4 @@ do
   local _obj_0 = #thing
   len = _obj_0.len
 end
+obj.a, obj["b"], self.prop, self.__class.cls_prop = t.x, t.y, t.z, t.w

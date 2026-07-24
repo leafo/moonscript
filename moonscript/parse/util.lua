@@ -5,8 +5,11 @@ do
   local _obj_0 = require("lpeg")
   P, C, S, Cp, Cmt, V = _obj_0.P, _obj_0.C, _obj_0.S, _obj_0.Cp, _obj_0.Cmt, _obj_0.V
 end
-local ntype
-ntype = require("moonscript.types").ntype
+local ntype, is_assignable
+do
+  local _obj_0 = require("moonscript.types")
+  ntype, is_assignable = _obj_0.ntype, _obj_0.is_assignable
+end
 local Space
 Space = require("moonscript.parse.literals").Space
 local Indent = C(S("\t ") ^ 0) / function(str)
@@ -130,27 +133,6 @@ flatten_or_mark = function(name)
     end
     table.insert(tbl, 1, name)
     return tbl
-  end
-end
-local is_assignable
-do
-  local chain_assignable = {
-    index = true,
-    dot = true,
-    slice = true
-  }
-  is_assignable = function(node)
-    if node == "..." then
-      return false
-    end
-    local _exp_0 = ntype(node)
-    if "ref" == _exp_0 or "self" == _exp_0 or "value" == _exp_0 or "self_class" == _exp_0 or "table" == _exp_0 then
-      return true
-    elseif "chain" == _exp_0 then
-      return chain_assignable[ntype(node[#node])]
-    else
-      return false
-    end
   end
 end
 local check_assignable

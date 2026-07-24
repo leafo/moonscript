@@ -58,6 +58,27 @@ is_value = function(stm)
   local transform = require("moonscript.transform")
   return compile.Block:is_value(stm) or transform.Value:can_transform(stm)
 end
+local is_assignable
+do
+  local chain_assignable = {
+    index = true,
+    dot = true,
+    slice = true
+  }
+  is_assignable = function(node)
+    if node == "..." then
+      return false
+    end
+    local _exp_0 = ntype(node)
+    if "ref" == _exp_0 or "self" == _exp_0 or "value" == _exp_0 or "self_class" == _exp_0 or "table" == _exp_0 then
+      return true
+    elseif "chain" == _exp_0 then
+      return chain_assignable[ntype(node[#node])]
+    else
+      return false
+    end
+  end
+end
 local value_is_singular
 value_is_singular = function(node)
   if type(node) ~= "table" then
@@ -323,6 +344,7 @@ return {
   build = build,
   is_value = is_value,
   is_slice = is_slice,
+  is_assignable = is_assignable,
   manual_return = manual_return,
   cascading = cascading,
   value_is_singular = value_is_singular,
