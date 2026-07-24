@@ -136,7 +136,7 @@ Transformer {
     names, values = unpack node, 2
 
     num_values = #values
-    num_names = #values
+    num_names = #names
 
     -- special code simplifications for single assigns
     if num_names == 1 and num_values == 1

@@ -234,7 +234,7 @@ return Transformer({
   assign = function(self, node)
     local names, values = unpack(node, 2)
     local num_values = #values
-    local num_names = #values
+    local num_names = #names
     if num_names == 1 and num_values == 1 then
       local first_value = values[1]
       local first_name = names[1]
