@@ -55,8 +55,6 @@ default_whitelist = Set {
 class LinterBlock extends Block
   new: (whitelist_globals=default_whitelist, ...) =>
     super ...
-    @get_root_block = -> @
-
     @lint_errors = {}
 
     vc = @value_compilers
@@ -117,7 +115,7 @@ class LinterBlock extends Block
     table.sort tuples, (a,b) -> a[1] < b[1]
 
     for {pos, names} in *tuples
-      insert @get_root_block!.lint_errors, {
+      insert @root.lint_errors, {
         "assigned but unused #{table.concat ["`#{n}`" for n in *names], ", "}"
         pos
       }
@@ -131,7 +129,6 @@ class LinterBlock extends Block
     with super ...
       .block = @block
       .render = @render
-      .get_root_block = @get_root_block
       .lint_check_unused = @lint_check_unused
       .lint_mark_used = @lint_mark_used
       .value_compilers = @value_compilers

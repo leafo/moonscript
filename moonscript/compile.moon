@@ -186,6 +186,7 @@ class Block
       @indent = @parent.indent + 1
       setmetatable @_state, { __index: @parent._state }
     else
+      @root = self
       @indent = 0
 
   set: (name, value) =>
@@ -398,7 +399,6 @@ class Block
 
 class RootBlock extends Block
   new: (@options) =>
-    @root = self
     super!
 
   __tostring: => "RootBlock<>"

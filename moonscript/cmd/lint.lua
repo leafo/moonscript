@@ -105,7 +105,7 @@ do
         local _des_0 = tuples[_index_0]
         local pos, names
         pos, names = _des_0[1], _des_0[2]
-        insert(self:get_root_block().lint_errors, {
+        insert(self.root.lint_errors, {
           "assigned but unused " .. tostring(table.concat((function()
             local _accum_0 = { }
             local _len_0 = 1
@@ -129,7 +129,6 @@ do
         local _with_0 = _class_0.__parent.__base.block(self, ...)
         _with_0.block = self.block
         _with_0.render = self.render
-        _with_0.get_root_block = self.get_root_block
         _with_0.lint_check_unused = self.lint_check_unused
         _with_0.lint_mark_used = self.lint_mark_used
         _with_0.value_compilers = self.value_compilers
@@ -146,9 +145,6 @@ do
         whitelist_globals = default_whitelist
       end
       _class_0.__parent.__init(self, ...)
-      self.get_root_block = function()
-        return self
-      end
       self.lint_errors = { }
       local vc = self.value_compilers
       self.value_compilers = setmetatable({

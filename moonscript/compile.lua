@@ -576,6 +576,7 @@ do
           __index = self.parent._state
         })
       else
+        self.root = self
         self.indent = 0
       end
     end,
@@ -618,7 +619,6 @@ do
   _class_0 = setmetatable({
     __init = function(self, options)
       self.options = options
-      self.root = self
       return _class_0.__parent.__init(self)
     end,
     __base = _base_0,
