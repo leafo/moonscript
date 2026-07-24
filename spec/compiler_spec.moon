@@ -1,25 +1,27 @@
-import Block from require "moonscript.compile"
-
 import ref, str from require "spec.factory"
-
--- no transform step
-class SimpleBlock extends Block
-  new: (...) =>
-    super ...
-    @transform = {
-      value: (...) -> ...
-      statement: (...) -> ...
-    }
-
-value = require "moonscript.compile.value"
+import with_dev from require "spec.helpers"
 
 describe "moonscript.compile", ->
-  compile_node = (node) ->
-    block = SimpleBlock!
-    block\add block\value node
-    lines = block._lines\flatten!
-    lines[#lines] = nil if lines[#lines] == "\n"
-    table.concat lines
+  local compile_node
+
+  with_dev ->
+    import Block from require "moonscript.compile"
+
+    -- no transform step
+    class SimpleBlock extends Block
+      new: (...) =>
+        super ...
+        @transform = {
+          value: (...) -> ...
+          statement: (...) -> ...
+        }
+
+    compile_node = (node) ->
+      block = SimpleBlock!
+      block\add block\value node
+      lines = block._lines\flatten!
+      lines[#lines] = nil if lines[#lines] == "\n"
+      table.concat lines
 
   -- compiling lua ast
   describe "value", ->
