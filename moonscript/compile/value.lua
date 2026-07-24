@@ -16,6 +16,78 @@ local string_chars = {
   ["\r"] = "\\r",
   ["\n"] = "\\n"
 }
+local binary_op_prec
+do
+  local out = { }
+  for prec, ops in ipairs({
+    {
+      "or"
+    },
+    {
+      "and"
+    },
+    {
+      "<",
+      ">",
+      "<=",
+      ">=",
+      "~=",
+      "!=",
+      "=="
+    },
+    {
+      "|"
+    },
+    {
+      "&"
+    },
+    {
+      "<<",
+      ">>"
+    },
+    {
+      ".."
+    },
+    {
+      "+",
+      "-"
+    },
+    {
+      "*",
+      "/",
+      "//",
+      "%"
+    },
+    {
+      "^"
+    }
+  }) do
+    for _index_0 = 1, #ops do
+      local op = ops[_index_0]
+      out[op] = prec
+    end
+  end
+  binary_op_prec = out
+end
+local right_assoc_op = {
+  [".."] = true,
+  ["^"] = true
+}
+local exp_precedence
+exp_precedence = function(node)
+  local min_prec
+  for i = 3, #node, 2 do
+    do
+      local prec = binary_op_prec[node[i]]
+      if prec then
+        if not min_prec or prec < min_prec then
+          min_prec = prec
+        end
+      end
+    end
+  end
+  return min_prec
+end
 return {
   scoped = function(self, node)
     local _, before, value, after
@@ -28,12 +100,56 @@ return {
     end
   end,
   exp = function(self, node)
+    local needs_parens
+    needs_parens = function(value, i)
+      if not (type(value) == "table" and value[1] == "exp") then
+        return false
+      end
+      local inner = exp_precedence(value)
+      if not (inner) then
+        return false
+      end
+      if i > 2 then
+        do
+          local left = binary_op_prec[node[i - 1]]
+          if left then
+            if left > inner then
+              return true
+            end
+            if left == inner and not right_assoc_op[node[i - 1]] then
+              return true
+            end
+          end
+        end
+      end
+      if i < #node then
+        do
+          local right = binary_op_prec[node[i + 1]]
+          if right then
+            if right > inner then
+              return true
+            end
+            if right == inner and right_assoc_op[node[i + 1]] and node[i + 1] ~= ".." then
+              return true
+            end
+          end
+        end
+      end
+      return false
+    end
     local _comp
     _comp = function(i, value)
       if i % 2 == 1 and value == "!=" then
         value = "~="
       end
-      return self:value(value)
+      if type(value) == "table" then
+        value = self.transform.value(value)
+      end
+      if needs_parens(value, i) then
+        return self:line("(", self:value(value), ")")
+      else
+        return self:value(value)
+      end
     end
     do
       local _with_0 = self:line()

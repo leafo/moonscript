@@ -14,6 +14,37 @@ string_chars = {
   "\n": "\\n"
 }
 
+-- lua binary operator precedence, from loosest to tightest binding
+binary_op_prec = do
+  out = {}
+  for prec, ops in ipairs {
+    {"or"}
+    {"and"}
+    {"<", ">", "<=", ">=", "~=", "!=", "=="}
+    {"|"}
+    {"&"}
+    {"<<", ">>"}
+    {".."}
+    {"+", "-"}
+    {"*", "/", "//", "%"}
+    {"^"}
+  }
+    out[op] = prec for op in *ops
+  out
+
+right_assoc_op = {
+  "..": true
+  "^": true
+}
+
+-- the loosest binding operator in a flat exp node, nil if there are none
+exp_precedence = (node) ->
+  local min_prec
+  for i=3, #node, 2
+    if prec = binary_op_prec[node[i]]
+      min_prec = prec if not min_prec or prec < min_prec
+  min_prec
+
 {
   scoped: (node) =>
     {_, before, value, after} = node
@@ -23,10 +54,43 @@ string_chars = {
 
   -- list of values separated by binary operators
   exp: (node) =>
+    -- exp nodes nested by transformations (eg. string interpolation) must
+    -- keep their grouping if an adjacent operator binds tighter than one of
+    -- their own operators
+    needs_parens = (value, i) ->
+      return false unless type(value) == "table" and value[1] == "exp"
+      inner = exp_precedence value
+      return false unless inner
+
+      if i > 2
+        if left = binary_op_prec[node[i - 1]]
+          return true if left > inner
+          return true if left == inner and not right_assoc_op[node[i - 1]]
+
+      if i < #node
+        if right = binary_op_prec[node[i + 1]]
+          return true if right > inner
+          -- equal precedence on the right regroups under a right associative
+          -- operator: an exp holding x ^ y rendered flat as x ^ y ^ b
+          -- evaluates as x ^ (y ^ b). only concat is safe because string
+          -- concatenation is associative
+          return true if right == inner and right_assoc_op[node[i + 1]] and node[i + 1] != ".."
+
+      false
+
     _comp = (i, value) ->
       if i % 2 == 1 and value == "!="
         value = "~="
-      @value value
+
+      -- transform now so nested exps (eg. from string interpolation) are
+      -- visible to the parenthesization check
+      if type(value) == "table"
+        value = @transform.value value
+
+      if needs_parens value, i
+        @line "(", @value(value), ")"
+      else
+        @value value
 
     with @line!
       \append_list [_comp i,v for i,v in ipairs node when i > 1], " "

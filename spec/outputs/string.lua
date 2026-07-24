@@ -34,4 +34,9 @@ local _ = "hello";
 ("hello"):format().hello(1, 2, 3);
 ("hello"):format(1, 2, 3)
 something("hello"):world()
-return something(("hello"):world())
+something(("hello"):world())
+x = 10 / (tostring(b) .. ".5")
+local y = 1 + (tostring(n) .. "0") * 2
+local cmp = a == "v" .. tostring(b)
+local joined = "a" .. "b" .. tostring(c)
+local mixed = (tostring(a) .. "b") * 2 - ("c" .. tostring(d))

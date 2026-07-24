@@ -64,3 +64,15 @@ c = 'hello #{hello}'
 something"hello"\world!
 something "hello"\world!
 
+
+-- interpolation keeps grouping next to tighter binding operators
+
+x = 10 / "#{b}.5"
+
+y = 1 + "#{n}0" * 2
+
+cmp = a == "v#{b}"
+
+joined = "a" .. "b#{c}"
+
+mixed = "#{a}b" * 2 - "c#{d}"
