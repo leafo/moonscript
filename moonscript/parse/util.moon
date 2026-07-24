@@ -144,7 +144,9 @@ simple_string = (delim, allow_interpolation) ->
 
   inner = if allow_interpolation
     interp = symx'#{' * V"Exp" * sym'}'
-    (C((inner - interp)^1) + interp / mark"interpolate")^0
+    -- string content stops at every #{ so a malformed interpolation fails
+    -- the parse instead of falling through to literal text
+    (C((inner - symx'#{')^1) + interp / mark"interpolate")^0
   else
     C inner^0
 

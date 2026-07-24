@@ -3,7 +3,7 @@ import with_dev, unindent from require "spec.helpers"
 -- tests the user facing compile errors triggered by invalid code, including
 -- the source position they point at
 describe "compile errors", ->
-  local to_error
+  local to_error, parse_fails
 
   with_dev ->
     parse = require "moonscript.parse"
@@ -15,6 +15,11 @@ describe "compile errors", ->
       code, err, pos = compile.tree tree
       assert.is_nil code, "expected compile to fail"
       err, pos and pos_to_line str, pos
+
+    parse_fails = (str) ->
+      tree, err = parse.string str
+      assert.is_nil tree, "expected parse to fail: #{str}"
+      assert.truthy err
 
   for {name, code_str, expected_msg, expected_line} in *{
     {
@@ -72,3 +77,10 @@ describe "compile errors", ->
       err, line = to_error code_str
       assert.same expected_msg, err
       assert.same expected_line, line
+
+  -- a malformed interpolation must fail the parse instead of falling
+  -- through to literal string content
+  it "invalid string interpolation fails to parse", ->
+    parse_fails [[x = "one #{three ..} two"]]
+    parse_fails [[x = "abc#{"]]
+    parse_fails [[x = "#{}"]]

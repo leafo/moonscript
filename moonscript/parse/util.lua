@@ -201,7 +201,7 @@ simple_string = function(delim, allow_interpolation)
   local inner = P("\\" .. tostring(delim)) + "\\\\" + (1 - P(delim))
   if allow_interpolation then
     local interp = symx('#{') * V("Exp") * sym('}')
-    inner = (C((inner - interp) ^ 1) + interp / mark("interpolate")) ^ 0
+    inner = (C((inner - symx('#{')) ^ 1) + interp / mark("interpolate")) ^ 0
   else
     inner = C(inner ^ 0)
   end
