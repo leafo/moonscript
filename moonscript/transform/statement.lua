@@ -20,6 +20,8 @@ local construct_comprehension
 construct_comprehension = require("moonscript.transform.comprehension").construct_comprehension
 local unpack
 unpack = require("moonscript.util").unpack
+local user_error
+user_error = require("moonscript.errors").user_error
 local apply_continue
 apply_continue = function(body)
   local continues = find_continues(body)
@@ -316,7 +318,7 @@ return Transformer({
   continue = function(self, node)
     local continue_name = node[2]
     if not (continue_name) then
-      error("continue must be inside of a loop")
+      user_error("continue must be inside of a loop", node[-1])
     end
     return build.group({
       build.assign_one(continue_name, "true"),

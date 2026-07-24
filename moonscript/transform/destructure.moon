@@ -61,7 +61,7 @@ extract_assign_names = (name, accum={}, prefix={}) ->
       when "table"
         extract_assign_names value, accum, suffix
       else
-        user_error "Can't destructure value of type: #{ntype value}"
+        user_error "Can't destructure value of type: #{ntype value}", value[-1] or name[-1]
 
   accum
 

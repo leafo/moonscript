@@ -359,6 +359,11 @@ class Block
 
   stm: (node, ...) =>
     return if not node -- skip blank statements
+
+    -- track the most recent position for errors raised without one
+    if type(node) == "table" and node[-1]
+      @root.last_pos = node[-1]
+
     node = @transform.statement node
 
     result = if fn = @statement_compilers[ntype(node)]

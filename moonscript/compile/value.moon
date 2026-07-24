@@ -118,13 +118,15 @@ exp_precedence = (node) ->
     if callee_type == "dot" or callee_type == "colon" or callee_type == "index"
       callee = @get "scope_var"
       unless callee
-        user_error "Short-dot syntax must be called within a with block"
+        user_error "Short-dot syntax must be called within a with block", node[-1]
       item_offset = 2
 
     -- TODO: don't use string literals as ref
     if callee_type == "ref" and callee[2] == "super" or callee == "super"
       if sup = @get "super"
         return @value sup self, node
+
+    chain_pos = node[-1]
 
     chain_item = (node) ->
       t, arg = unpack node
@@ -138,7 +140,7 @@ exp_precedence = (node) ->
       elseif t == "colon"
         ":", tostring arg
       elseif t == "colon_stub"
-        user_error "Uncalled colon stub"
+        user_error "Uncalled colon stub", chain_pos
       else
         error "Unknown chain action: #{t}"
 

@@ -266,7 +266,7 @@ do
       else
         h = unpack(self.header:render({ }))
       end
-      return "Block<" .. tostring(h) .. "> <- " .. tostring(self.parent)
+      return ("Block<" .. tostring(h) .. "> <- ") .. tostring(self.parent)
     end,
     set = function(self, name, value)
       self._state[name] = value
@@ -506,6 +506,9 @@ do
     stm = function(self, node, ...)
       if not node then
         return 
+      end
+      if type(node) == "table" and node[-1] then
+        self.root.last_pos = node[-1]
       end
       node = self.transform.statement(node)
       local result

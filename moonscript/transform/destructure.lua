@@ -113,7 +113,7 @@ extract_assign_names = function(name, accum, prefix)
     elseif "table" == _exp_0 then
       extract_assign_names(value, accum, suffix)
     else
-      user_error("Can't destructure value of type: " .. tostring(ntype(value)))
+      user_error("Can't destructure value of type: " .. tostring(ntype(value)), value[-1] or name[-1])
     end
   end
   return accum

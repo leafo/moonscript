@@ -201,7 +201,7 @@ return {
     if callee_type == "dot" or callee_type == "colon" or callee_type == "index" then
       callee = self:get("scope_var")
       if not (callee) then
-        user_error("Short-dot syntax must be called within a with block")
+        user_error("Short-dot syntax must be called within a with block", node[-1])
       end
       item_offset = 2
     end
@@ -213,6 +213,7 @@ return {
         end
       end
     end
+    local chain_pos = node[-1]
     local chain_item
     chain_item = function(node)
       local t, arg = unpack(node)
@@ -225,7 +226,7 @@ return {
       elseif t == "colon" then
         return ":", tostring(arg)
       elseif t == "colon_stub" then
-        return user_error("Uncalled colon stub")
+        return user_error("Uncalled colon stub", chain_pos)
       else
         return error("Unknown chain action: " .. tostring(t))
       end

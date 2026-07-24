@@ -16,6 +16,7 @@ destructure = require "moonscript.transform.destructure"
 import construct_comprehension from require "moonscript.transform.comprehension"
 
 import unpack from require "moonscript.util"
+import user_error from require "moonscript.errors"
 
 -- binds the continue statements in a loop body to a loop-local flag,
 -- wrapping the body in a repeat block that continue can break out of
@@ -213,7 +214,7 @@ Transformer {
   -- is outside of any loop
   continue: (node) =>
     continue_name = node[2]
-    error "continue must be inside of a loop" unless continue_name
+    user_error "continue must be inside of a loop", node[-1] unless continue_name
     build.group {
       build.assign_one continue_name, "true"
       {"break"}
