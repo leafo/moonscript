@@ -57,6 +57,36 @@ describe "moonscript.compile", ->
       }
 
       {
+        "exp (nested under tighter operator)"
+        -> {"exp", {"exp", ref("a"), "..", ref("b")}, "*", ref("c")}
+        "(a .. b) * c"
+      }
+
+      {
+        "exp (nested under looser operator)"
+        -> {"exp", ref("a"), "==", {"exp", ref("b"), "..", ref("c")}}
+        "a == b .. c"
+      }
+
+      {
+        "exp (nested right of equal precedence left associative)"
+        -> {"exp", ref("a"), "-", {"exp", ref("b"), "+", ref("c")}}
+        "a - (b + c)"
+      }
+
+      {
+        "exp (nested concat within concat stays flat)"
+        -> {"exp", {"exp", ref("a"), "..", ref("b")}, "..", ref("c")}
+        "a .. b .. c"
+      }
+
+      {
+        "exp (nested left of right associative operator)"
+        -> {"exp", {"exp", ref("x"), "^", ref("y")}, "^", ref("b")}
+        "(x ^ y) ^ b"
+      }
+
+      {
         "parens"
         -> { "parens", ref! }
         "(val)"
