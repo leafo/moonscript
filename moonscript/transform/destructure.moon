@@ -19,6 +19,12 @@ has_destructure = (names) ->
     return true if ntype(n) == "table"
   false
 
+-- can this value provide more than one return value
+is_multi_return = (node) ->
+  return true if node == "..."
+  return false unless type(node) == "table"
+  node[1] == "chain" and ntype(node[#node]) == "call"
+
 extract_assign_names = (name, accum={}, prefix={}) ->
 
   i = 1
@@ -93,26 +99,59 @@ split_assign = (scope, assign) ->
   total_names = #names
   total_values = #values
 
+  -- if the final value can return multiple values then the names consuming
+  -- its returns must be assigned in a single statement. destructuring
+  -- literals among them receive a temporary that is unpacked afterwards
+  local suffix_start
+  if total_names > total_values and is_multi_return values[total_values]
+    for i=total_values, total_names
+      if ntype(names[i]) == "table"
+        suffix_start = total_values
+        break
+
   -- We have to break apart the assign into groups of regular
   -- assigns, and then the destructuring assignments
   start = 1
-  for i, n in ipairs names
+  stop = suffix_start and suffix_start - 1 or total_names
+  for i=1, stop
+    n = names[i]
     if ntype(n) == "table"
       if i > start
-        stop = i - 1
         insert g, {
           "assign"
-          for i=start,stop
-            names[i]
-          for i=start,stop
-            values[i]
+          for j=start,i-1 do names[j]
+          for j=start,i-1 do values[j]
         }
 
       insert g, build_assign scope, n, values[i]
 
       start = i + 1
 
-  if total_names >= start or total_values >= start
+  if suffix_start
+    -- plain names left over between the last destructure and the suffix
+    if start <= stop
+      insert g, {
+        "assign"
+        for j=start,stop do names[j]
+        for j=start,stop do values[j]
+      }
+
+    suffix_names = {}
+    destructures = {}
+    for i=suffix_start, total_names
+      name = names[i]
+      if ntype(name) == "table"
+        proxy = NameProxy "destruct"
+        insert suffix_names, proxy
+        insert destructures, {name, proxy}
+      else
+        insert suffix_names, name
+
+    insert g, {"assign", suffix_names, {values[total_values]}}
+
+    for {literal, proxy} in *destructures
+      insert g, build_assign scope, literal, proxy
+  elseif total_names >= start or total_values >= start
     name_slice = if total_names < start
       {"_"}
     else

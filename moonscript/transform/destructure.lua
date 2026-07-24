@@ -40,6 +40,16 @@ has_destructure = function(names)
   end
   return false
 end
+local is_multi_return
+is_multi_return = function(node)
+  if node == "..." then
+    return true
+  end
+  if not (type(node) == "table") then
+    return false
+  end
+  return node[1] == "chain" and ntype(node[#node]) == "call"
+end
 local extract_assign_names
 extract_assign_names = function(name, accum, prefix)
   if accum == nil then
@@ -154,18 +164,28 @@ split_assign = function(scope, assign)
   local g = { }
   local total_names = #names
   local total_values = #values
+  local suffix_start
+  if total_names > total_values and is_multi_return(values[total_values]) then
+    for i = total_values, total_names do
+      if ntype(names[i]) == "table" then
+        suffix_start = total_values
+        break
+      end
+    end
+  end
   local start = 1
-  for i, n in ipairs(names) do
+  local stop = suffix_start and suffix_start - 1 or total_names
+  for i = 1, stop do
+    local n = names[i]
     if ntype(n) == "table" then
       if i > start then
-        local stop = i - 1
         insert(g, {
           "assign",
           (function()
             local _accum_0 = { }
             local _len_0 = 1
-            for i = start, stop do
-              _accum_0[_len_0] = names[i]
+            for j = start, i - 1 do
+              _accum_0[_len_0] = names[j]
               _len_0 = _len_0 + 1
             end
             return _accum_0
@@ -173,8 +193,8 @@ split_assign = function(scope, assign)
           (function()
             local _accum_0 = { }
             local _len_0 = 1
-            for i = start, stop do
-              _accum_0[_len_0] = values[i]
+            for j = start, i - 1 do
+              _accum_0[_len_0] = values[j]
               _len_0 = _len_0 + 1
             end
             return _accum_0
@@ -185,7 +205,59 @@ split_assign = function(scope, assign)
       start = i + 1
     end
   end
-  if total_names >= start or total_values >= start then
+  if suffix_start then
+    if start <= stop then
+      insert(g, {
+        "assign",
+        (function()
+          local _accum_0 = { }
+          local _len_0 = 1
+          for j = start, stop do
+            _accum_0[_len_0] = names[j]
+            _len_0 = _len_0 + 1
+          end
+          return _accum_0
+        end)(),
+        (function()
+          local _accum_0 = { }
+          local _len_0 = 1
+          for j = start, stop do
+            _accum_0[_len_0] = values[j]
+            _len_0 = _len_0 + 1
+          end
+          return _accum_0
+        end)()
+      })
+    end
+    local suffix_names = { }
+    local destructures = { }
+    for i = suffix_start, total_names do
+      local name = names[i]
+      if ntype(name) == "table" then
+        local proxy = NameProxy("destruct")
+        insert(suffix_names, proxy)
+        insert(destructures, {
+          name,
+          proxy
+        })
+      else
+        insert(suffix_names, name)
+      end
+    end
+    insert(g, {
+      "assign",
+      suffix_names,
+      {
+        values[total_values]
+      }
+    })
+    for _index_0 = 1, #destructures do
+      local _des_0 = destructures[_index_0]
+      local literal, proxy
+      literal, proxy = _des_0[1], _des_0[2]
+      insert(g, build_assign(scope, literal, proxy))
+    end
+  elseif total_names >= start or total_values >= start then
     local name_slice
     if total_names < start then
       name_slice = {

@@ -123,6 +123,49 @@ describe "moonscript.transform.destructure", ->
         {"assign", { {"ref", "a"} }, { {"ref", "two"} }}
       }}, out
 
+    -- a, {:hello} = func! -- where func returns multiple values, second destructured
+    it "multiple return value", ->
+      node = {
+        "assign"
+        {
+          {"ref", "a"}
+          { "table", {
+              {{"key_literal", "hello"}, {"ref", "hello"}}
+            }
+          }
+        }
+        {
+          {"chain", {"ref", "func"}, {"call", {}}}
+        }
+      }
+
+      out = split_assign Block!, node
+
+      assert.same "group", out[1]
+      assert.same 2, #out[2]
+
+      assign = out[2][1]
+      assert.same "assign", assign[1]
+      assert.same {"ref", "a"}, assign[2][1]
+      tmp = assign[2][2]
+      assert.same "temp_name", tmp[1]
+      assert.same { {"chain", {"ref", "func"}, {"call", {}}} }, assign[3]
+
+      destruct_group = out[2][2]
+      assert.same "group", destruct_group[1]
+      declare = destruct_group[2][1]
+      assert.same { "declare", { {"ref", "hello"} } }, declare
+
+      destruct_assign = destruct_group[2][2]
+      assert.same "assign", destruct_assign[1]
+      assert.same { {"ref", "hello"} }, destruct_assign[2]
+
+      destruct_value = destruct_assign[3][1]
+      assert.same "chain", destruct_value[1]
+      assert.is_true tmp == destruct_value[2]
+      assert.same "dot", destruct_value[3][1]
+      assert.same "hello", destruct_value[3][2]
+
 
   it "extracts names from table destructure", ->
     des = {
