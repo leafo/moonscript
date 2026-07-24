@@ -2,6 +2,10 @@ name: "binaries"
 
 on: [push]
 
+env:
+  # LuaJIT has no releases; pin a commit from the v2.1 branch
+  LUAJIT_COMMIT: 346ab587cb235b4ef0b5777b4cd29009808d0cc0
+
 jobs:
   generate-headers:
     runs-on: ubuntu-latest
@@ -56,11 +60,37 @@ jobs:
         - runner: ubuntu-latest
           architecture: x86_64
           artifact_suffix: ""
+          runtime: puc
           lua_version: "5.1.5"
+          runtime_label: "lua5.1.5"
+          release_suffix: ""
+          lua_include: lua-5.1.5/src
+          lua_lib: lua-5.1.5/src/liblua.a
+        - runner: ubuntu-latest
+          architecture: x86_64
+          artifact_suffix: ""
+          runtime: luajit
+          runtime_label: "luajit2.1"
+          release_suffix: "-luajit"
+          lua_include: luajit/src
+          lua_lib: luajit/src/libluajit.a
         - runner: ubuntu-24.04-arm
           architecture: arm64
           artifact_suffix: "-arm64"
+          runtime: puc
           lua_version: "5.1.5"
+          runtime_label: "lua5.1.5"
+          release_suffix: ""
+          lua_include: lua-5.1.5/src
+          lua_lib: lua-5.1.5/src/liblua.a
+        - runner: ubuntu-24.04-arm
+          architecture: arm64
+          artifact_suffix: "-arm64"
+          runtime: luajit
+          runtime_label: "luajit2.1"
+          release_suffix: "-luajit"
+          lua_include: luajit/src
+          lua_lib: luajit/src/libluajit.a
 
     steps:
     - uses: actions/checkout@master
@@ -83,10 +113,19 @@ jobs:
       run: gcc -v
 
     - name: Setup Lua
+      if: matrix.runtime == 'puc'
       run: |
         curl -L -O https://www.lua.org/ftp/lua-${{ matrix.lua_version }}.tar.gz
         tar -xzf lua-${{ matrix.lua_version }}.tar.gz
         cd lua-${{ matrix.lua_version }}/src && make liblua.a MYCFLAGS=-DLUA_USE_POSIX
+
+    - name: Setup LuaJIT
+      if: matrix.runtime == 'luajit'
+      run: |
+        curl -L -o luajit.tar.gz https://github.com/LuaJIT/LuaJIT/archive/$LUAJIT_COMMIT.tar.gz
+        tar -xzf luajit.tar.gz
+        mv LuaJIT-* luajit
+        make -C luajit/src -j$(nproc) amalg BUILDMODE=static
 
     - name: Get LPeg
       run: |
@@ -102,7 +141,7 @@ jobs:
       run: |
         mkdir -p dist
         gcc -static -o dist/moon \
-          -Ilua-${{ matrix.lua_version }}/src/ \
+          -I${{ matrix.lua_include }} \
           -Ilpeg-1.0.2/ \
           -Ibin/binaries/ \
           bin/binaries/moon.c \
@@ -112,10 +151,10 @@ jobs:
           lpeg-1.0.2/lptree.c \
           lpeg-1.0.2/lpcode.c \
           lpeg-1.0.2/lpprint.c \
-          lua-${{ matrix.lua_version }}/src/liblua.a \
+          ${{ matrix.lua_lib }} \
           -lm -ldl
         gcc -static -o dist/moonc \
-          -Ilua-${{ matrix.lua_version }}/src/ \
+          -I${{ matrix.lua_include }} \
           -Ilpeg-1.0.2/ \
           -Ibin/binaries/ \
           bin/binaries/moonc.c \
@@ -126,7 +165,7 @@ jobs:
           lpeg-1.0.2/lpcode.c \
           lpeg-1.0.2/lpprint.c \
           luafilesystem-1_8_0/src/lfs.c \
-          lua-${{ matrix.lua_version }}/src/liblua.a \
+          ${{ matrix.lua_lib }} \
           -lm -ldl
 
     - name: Test run
@@ -135,23 +174,27 @@ jobs:
         dist/moon -e 'print "hello world"'
         dist/moonc -h
 
+    - name: Test JIT
+      if: matrix.runtime == 'luajit'
+      run: dist/moon -e 'print jit.version'
+
     - name: Upload artifact
       uses: actions/upload-artifact@v6
       with:
-        name: moonscript-${{ env.VERSION_SUFFIX }}-linux-lua${{ matrix.lua_version }}${{ matrix.artifact_suffix }}
+        name: moonscript-${{ env.VERSION_SUFFIX }}-linux-${{ matrix.runtime_label }}${{ matrix.artifact_suffix }}
         path: dist/
 
     - name: Package for release
       if: github.ref_type == 'tag'
       run: |
         cd dist
-        tar -czvf ../moonscript-${{ env.VERSION_SUFFIX }}-linux-${{ matrix.architecture }}.tar.gz *
+        tar -czvf ../moonscript-${{ env.VERSION_SUFFIX }}-linux-${{ matrix.architecture }}${{ matrix.release_suffix }}.tar.gz *
 
     - name: Upload to release
       if: github.ref_type == 'tag'
       uses: softprops/action-gh-release@v2
       with:
-        files: moonscript-${{ env.VERSION_SUFFIX }}-linux-${{ matrix.architecture }}.tar.gz
+        files: moonscript-${{ env.VERSION_SUFFIX }}-linux-${{ matrix.architecture }}${{ matrix.release_suffix }}.tar.gz
 
   windows:
     runs-on: windows-latest
@@ -159,7 +202,20 @@ jobs:
 
     strategy:
       matrix:
-        lua_version: ["5.1.5"]
+        include:
+        - runtime: puc
+          lua_version: "5.1.5"
+          runtime_label: "lua5.1.5"
+          release_suffix: ""
+          msys_install: gcc make curl zip
+          lua_include: lua-5.1.5/src
+          lua_lib: lua-5.1.5/src/liblua.a
+        - runtime: luajit
+          runtime_label: "luajit2.1"
+          release_suffix: "-luajit"
+          msys_install: make curl zip mingw-w64-x86_64-gcc
+          lua_include: luajit/src
+          lua_lib: luajit/src/libluajit.a
 
     defaults:
       run:
@@ -176,7 +232,7 @@ jobs:
 
     - uses: msys2/setup-msys2@v2
       with:
-        install: gcc make curl zip
+        install: ${{ matrix.msys_install }}
 
     - name: Set version suffix
       shell: bash
@@ -191,10 +247,19 @@ jobs:
       run: gcc -v
 
     - name: Setup Lua
+      if: matrix.runtime == 'puc'
       run: |
         curl -L -O https://www.lua.org/ftp/lua-${{ matrix.lua_version }}.tar.gz
         tar -xzf lua-${{ matrix.lua_version }}.tar.gz
         cd lua-${{ matrix.lua_version }}/src && make liblua.a
+
+    - name: Setup LuaJIT
+      if: matrix.runtime == 'luajit'
+      run: |
+        curl -L -o luajit.tar.gz https://github.com/LuaJIT/LuaJIT/archive/$LUAJIT_COMMIT.tar.gz
+        tar -xzf luajit.tar.gz
+        mv LuaJIT-* luajit
+        make -C luajit/src -j$(nproc) amalg BUILDMODE=static
 
     - name: Get LPeg
       run: |
@@ -210,7 +275,7 @@ jobs:
       run: |
         mkdir -p dist
         gcc -static -o dist/moon.exe \
-          -Ilua-${{ matrix.lua_version }}/src/ \
+          -I${{ matrix.lua_include }} \
           -Ilpeg-1.0.2/ \
           -Ibin/binaries/ \
           bin/binaries/moon.c \
@@ -220,10 +285,10 @@ jobs:
           lpeg-1.0.2/lptree.c \
           lpeg-1.0.2/lpcode.c \
           lpeg-1.0.2/lpprint.c \
-          lua-${{ matrix.lua_version }}/src/liblua.a \
+          ${{ matrix.lua_lib }} \
           -lm
         gcc -static -o dist/moonc.exe \
-          -Ilua-${{ matrix.lua_version }}/src/ \
+          -I${{ matrix.lua_include }} \
           -Ilpeg-1.0.2/ \
           -Ibin/binaries/ \
           bin/binaries/moonc.c \
@@ -234,7 +299,7 @@ jobs:
           lpeg-1.0.2/lpcode.c \
           lpeg-1.0.2/lpprint.c \
           luafilesystem-1_8_0/src/lfs.c \
-          lua-${{ matrix.lua_version }}/src/liblua.a \
+          ${{ matrix.lua_lib }} \
           -lm
 
     - name: Test run
@@ -243,20 +308,24 @@ jobs:
         dist/moon.exe -e 'print "hello world"'
         dist/moonc.exe -h
 
+    - name: Test JIT
+      if: matrix.runtime == 'luajit'
+      run: dist/moon.exe -e 'print jit.version'
+
     - name: Upload artifact
       uses: actions/upload-artifact@v6
       with:
-        name: moonscript-${{ env.VERSION_SUFFIX }}-windows-lua${{ matrix.lua_version }}
+        name: moonscript-${{ env.VERSION_SUFFIX }}-windows-${{ matrix.runtime_label }}
         path: dist/
 
     - name: Package for release
       if: github.ref_type == 'tag'
       run: |
         cd dist
-        zip ../moonscript-${{ env.VERSION_SUFFIX }}-windows-x86_64.zip *
+        zip ../moonscript-${{ env.VERSION_SUFFIX }}-windows-x86_64${{ matrix.release_suffix }}.zip *
 
     - name: Upload to release
       if: github.ref_type == 'tag'
       uses: softprops/action-gh-release@v2
       with:
-        files: moonscript-${{ env.VERSION_SUFFIX }}-windows-x86_64.zip
+        files: moonscript-${{ env.VERSION_SUFFIX }}-windows-x86_64${{ matrix.release_suffix }}.zip
