@@ -28,3 +28,9 @@ else
 
 
 
+
+-- multiple names with single complex value
+
+a, b = x\fn
+
+a, b, c = x\fn, 1

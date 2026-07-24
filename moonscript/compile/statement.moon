@@ -7,10 +7,6 @@ import unpack from require "moonscript.util"
 {
   raw: (node) => @add node[2]
 
-  lines: (node) =>
-    for line in *node[2]
-      @add line
-
   declare: (node) =>
     names = node[2]
     undeclared = @declare names

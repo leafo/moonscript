@@ -110,6 +110,8 @@ string_chars = {
       insert arg_names, 1, "self"
 
     with @block!
+      .header = "function("..concat(arg_names, ", ")..")"
+
       if #whitelist > 0
         \whitelist_names whitelist
 
@@ -128,13 +130,6 @@ string_chars = {
       \stm {"assign", self_args, self_arg_values} if #self_args > 0
 
       \stms block
-
-      -- inject more args if the block manipulated arguments
-      -- only varargs bubbling does this currently
-      if #args > #arg_names -- will only work for simple adjustments
-        arg_names = [arg[1] for arg in *args]
-
-      .header = "function("..concat(arg_names, ", ")..")"
 
   table: (node) =>
     items = unpack node, 2
@@ -216,8 +211,5 @@ string_chars = {
 
   -- catch all pure string values
   raw_value: (value) =>
-    if value == "..."
-      @send "varargs"
-
     tostring value
 }

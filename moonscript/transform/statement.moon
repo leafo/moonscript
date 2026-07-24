@@ -2,7 +2,7 @@ import Transformer from require "moonscript.transform.transformer"
 
 import NameProxy, LocalName, is_name_proxy from require "moonscript.transform.names"
 
-import Run, transform_last_stm, implicitly_return, last_stm
+import Run, transform_last_stm, implicitly_return, last_stm, find_continues
   from require "moonscript.transform.statements"
 
 types = require "moonscript.types"
@@ -17,38 +17,35 @@ import construct_comprehension from require "moonscript.transform.comprehension"
 
 import unpack from require "moonscript.util"
 
-with_continue_listener = (body) ->
-  continue_name = nil
+-- binds the continue statements in a loop body to a loop-local flag,
+-- wrapping the body in a repeat block that continue can break out of
+apply_continue = (body) ->
+  continues = find_continues body
+  return body unless continues[1]
+
+  continue_name = NameProxy "continue"
+
+  -- attach the name in place, the continue transformer expands the node when
+  -- the compiler reaches it so cascading transforms still see a continue
+  for node in *continues
+    node[2] = continue_name
+
+  last_type = ntype last_stm body
+
+  -- a trailing continue expands to a break, which must also be enclosed
+  repeat_body = if types.terminating[last_type] or last_type == "continue"
+    { {"do", body} }
+  else
+    body
+
+  insert repeat_body, {"assign", {continue_name}, {"true"}}
 
   {
-    Run =>
-      @listen "continue", ->
-        unless continue_name
-          continue_name = NameProxy"continue"
-          @put_name continue_name
-        continue_name
-
-    build.group body
-
-    Run =>
-      return unless continue_name
-      last = last_stm body
-      enclose_lines = types.terminating[last and ntype(last)]
-
-      @put_name continue_name, nil
-      @splice (lines) ->
-        lines = {"do", {lines}} if enclose_lines
-
-        {
-          {"assign", {continue_name}, {"false"}}
-          {"repeat", "true", {
-            lines
-            {"assign", {continue_name}, {"true"}}
-          }}
-          {"if", {"not", continue_name}, {
-            {"break"}
-          }}
-        }
+    {"assign", {continue_name}, {"false"}}
+    {"repeat", "true", repeat_body}
+    {"if", {"not", continue_name}, {
+      {"break"}
+    }}
   }
 
 
@@ -197,8 +194,10 @@ Transformer {
 
     node
 
+  -- apply_continue binds the loop's flag to the node, a continue without one
+  -- is outside of any loop
   continue: (node) =>
-    continue_name = @send "continue"
+    continue_name = node[2]
     error "continue must be inside of a loop" unless continue_name
     build.group {
       build.assign_one continue_name, "true"
@@ -460,15 +459,15 @@ Transformer {
         }
       }
 
-    node.body = with_continue_listener node.body
+    node.body = apply_continue node.body
 
   while: (node) =>
     smart_node node
-    node.body = with_continue_listener node.body
+    node.body = apply_continue node.body
 
   for: (node) =>
     smart_node node
-    node.body = with_continue_listener node.body
+    node.body = apply_continue node.body
 
   switch: (node, ret) =>
     exp, conds = unpack node, 2

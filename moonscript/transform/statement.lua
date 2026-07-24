@@ -5,10 +5,10 @@ do
   local _obj_0 = require("moonscript.transform.names")
   NameProxy, LocalName, is_name_proxy = _obj_0.NameProxy, _obj_0.LocalName, _obj_0.is_name_proxy
 end
-local Run, transform_last_stm, implicitly_return, last_stm
+local Run, transform_last_stm, implicitly_return, last_stm, find_continues
 do
   local _obj_0 = require("moonscript.transform.statements")
-  Run, transform_last_stm, implicitly_return, last_stm = _obj_0.Run, _obj_0.transform_last_stm, _obj_0.implicitly_return, _obj_0.last_stm
+  Run, transform_last_stm, implicitly_return, last_stm, find_continues = _obj_0.Run, _obj_0.transform_last_stm, _obj_0.implicitly_return, _obj_0.last_stm, _obj_0.find_continues
 end
 local types = require("moonscript.types")
 local build, ntype, is_value, smart_node, value_is_singular, is_slice, NOOP
@@ -20,77 +20,65 @@ local construct_comprehension
 construct_comprehension = require("moonscript.transform.comprehension").construct_comprehension
 local unpack
 unpack = require("moonscript.util").unpack
-local with_continue_listener
-with_continue_listener = function(body)
-  local continue_name = nil
+local apply_continue
+apply_continue = function(body)
+  local continues = find_continues(body)
+  if not (continues[1]) then
+    return body
+  end
+  local continue_name = NameProxy("continue")
+  for _index_0 = 1, #continues do
+    local node = continues[_index_0]
+    node[2] = continue_name
+  end
+  local last_type = ntype(last_stm(body))
+  local repeat_body
+  if types.terminating[last_type] or last_type == "continue" then
+    repeat_body = {
+      {
+        "do",
+        body
+      }
+    }
+  else
+    repeat_body = body
+  end
+  insert(repeat_body, {
+    "assign",
+    {
+      continue_name
+    },
+    {
+      "true"
+    }
+  })
   return {
-    Run(function(self)
-      return self:listen("continue", function()
-        if not (continue_name) then
-          continue_name = NameProxy("continue")
-          self:put_name(continue_name)
-        end
-        return continue_name
-      end)
-    end),
-    build.group(body),
-    Run(function(self)
-      if not (continue_name) then
-        return 
-      end
-      local last = last_stm(body)
-      local enclose_lines = types.terminating[last and ntype(last)]
-      self:put_name(continue_name, nil)
-      return self:splice(function(lines)
-        if enclose_lines then
-          lines = {
-            "do",
-            {
-              lines
-            }
-          }
-        end
-        return {
-          {
-            "assign",
-            {
-              continue_name
-            },
-            {
-              "false"
-            }
-          },
-          {
-            "repeat",
-            "true",
-            {
-              lines,
-              {
-                "assign",
-                {
-                  continue_name
-                },
-                {
-                  "true"
-                }
-              }
-            }
-          },
-          {
-            "if",
-            {
-              "not",
-              continue_name
-            },
-            {
-              {
-                "break"
-              }
-            }
-          }
+    {
+      "assign",
+      {
+        continue_name
+      },
+      {
+        "false"
+      }
+    },
+    {
+      "repeat",
+      "true",
+      repeat_body
+    },
+    {
+      "if",
+      {
+        "not",
+        continue_name
+      },
+      {
+        {
+          "break"
         }
-      end)
-    end)
+      }
+    }
   }
 end
 local extract_declarations
@@ -307,7 +295,7 @@ return Transformer({
     return node
   end,
   continue = function(self, node)
-    local continue_name = self:send("continue")
+    local continue_name = node[2]
     if not (continue_name) then
       error("continue must be inside of a loop")
     end
@@ -774,15 +762,15 @@ return Transformer({
         })
       })
     end
-    node.body = with_continue_listener(node.body)
+    node.body = apply_continue(node.body)
   end,
   ["while"] = function(self, node)
     smart_node(node)
-    node.body = with_continue_listener(node.body)
+    node.body = apply_continue(node.body)
   end,
   ["for"] = function(self, node)
     smart_node(node)
-    node.body = with_continue_listener(node.body)
+    node.body = apply_continue(node.body)
   end,
   switch = function(self, node, ret)
     local exp, conds = unpack(node, 2)

@@ -131,3 +131,27 @@ do
     print thing
 
 
+
+-- continue as last statement
+
+while true
+  print "hello"
+  continue
+
+-- continue at end of switch case in accumulating loop
+
+values = for x in *items
+  switch x
+    when "skip"
+      continue
+    else
+      x
+
+-- nested continues where outer continue comes after inner loop
+
+for a in *x
+  for b in *y
+    continue if b
+    print b
+  continue if a
+  print a

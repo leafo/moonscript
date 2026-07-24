@@ -14,10 +14,10 @@ do
 end
 local lua_keywords
 lua_keywords = require("moonscript.data").lua_keywords
-local Run, transform_last_stm, implicitly_return, chain_is_stub
+local transform_last_stm, implicitly_return, chain_is_stub, has_varargs
 do
   local _obj_0 = require("moonscript.transform.statements")
-  Run, transform_last_stm, implicitly_return, chain_is_stub = _obj_0.Run, _obj_0.transform_last_stm, _obj_0.implicitly_return, _obj_0.chain_is_stub
+  transform_last_stm, implicitly_return, chain_is_stub, has_varargs = _obj_0.transform_last_stm, _obj_0.implicitly_return, _obj_0.chain_is_stub, _obj_0.has_varargs
 end
 local construct_comprehension
 construct_comprehension = require("moonscript.transform.comprehension").construct_comprehension
@@ -135,12 +135,6 @@ return Transformer({
   fndef = function(self, node)
     smart_node(node)
     node.body = transform_last_stm(node.body, implicitly_return(self))
-    node.body = {
-      Run(function(self)
-        return self:listen("varargs", function() end)
-      end),
-      unpack(node.body)
-    }
     return node
   end,
   ["if"] = function(self, node)
@@ -235,22 +229,16 @@ return Transformer({
   end,
   block_exp = function(self, node)
     local body = unpack(node, 2)
-    local fn = nil
     local arg_list = { }
-    fn = smart_node(build.fndef({
-      body = {
-        Run(function(self)
-          return self:listen("varargs", function()
-            insert(arg_list, "...")
-            insert(fn.args, {
-              "..."
-            })
-            return self:unlisten("varargs")
-          end)
-        end),
-        unpack(body)
-      }
+    local fn = smart_node(build.fndef({
+      body = body
     }))
+    if has_varargs(body) then
+      insert(arg_list, "...")
+      insert(fn.args, {
+        "..."
+      })
+    end
     return build.chain({
       base = {
         "parens",

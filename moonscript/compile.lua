@@ -277,20 +277,6 @@ do
     get_current = function(self, name)
       return rawget(self._state, name)
     end,
-    listen = function(self, name, fn)
-      self._listeners[name] = fn
-    end,
-    unlisten = function(self, name)
-      self._listeners[name] = nil
-    end,
-    send = function(self, name, ...)
-      do
-        local fn = self._listeners[name]
-        if fn then
-          return fn(self, ...)
-        end
-      end
-    end,
     extract_assign_name = function(self, node)
       local is_local = false
       local real_name
@@ -565,14 +551,6 @@ do
       self.current_stms = current_stms
       self.current_stm_i = current_stm_i
       return nil
-    end,
-    splice = function(self, fn)
-      local lines = {
-        "lines",
-        self._lines
-      }
-      self._lines = Lines()
-      return self:stms(fn(lines))
     end
   }
   _base_0.__index = _base_0
@@ -582,7 +560,6 @@ do
       self._lines = Lines()
       self._names = { }
       self._state = { }
-      self._listeners = { }
       do
         self.transform = {
           value = transform.Value:bind(self),
@@ -592,11 +569,8 @@ do
       if self.parent then
         self.root = self.parent.root
         self.indent = self.parent.indent + 1
-        setmetatable(self._state, {
+        return setmetatable(self._state, {
           __index = self.parent._state
-        })
-        return setmetatable(self._listeners, {
-          __index = self.parent._listeners
         })
       else
         self.indent = 0

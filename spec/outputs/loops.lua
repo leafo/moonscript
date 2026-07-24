@@ -304,3 +304,72 @@ do
     print(thing)
   end
 end
+while true do
+  local _continue_0 = false
+  repeat
+    do
+      print("hello")
+      _continue_0 = true
+      break
+    end
+    _continue_0 = true
+  until true
+  if not _continue_0 then
+    break
+  end
+end
+local values
+do
+  local _accum_0 = { }
+  local _len_0 = 1
+  local _list_2 = items
+  for _index_0 = 1, #_list_2 do
+    local _continue_0 = false
+    repeat
+      local x = _list_2[_index_0]
+      local _exp_0 = x
+      if "skip" == _exp_0 then
+        _continue_0 = true
+        break
+      else
+        _accum_0[_len_0] = x
+      end
+      _len_0 = _len_0 + 1
+      _continue_0 = true
+    until true
+    if not _continue_0 then
+      break
+    end
+  end
+  values = _accum_0
+end
+for _index_0 = 1, #x do
+  local _continue_0 = false
+  repeat
+    local a = x[_index_0]
+    for _index_1 = 1, #y do
+      local _continue_1 = false
+      repeat
+        local b = y[_index_1]
+        if b then
+          _continue_1 = true
+          break
+        end
+        print(b)
+        _continue_1 = true
+      until true
+      if not _continue_1 then
+        break
+      end
+    end
+    if a then
+      _continue_0 = true
+      break
+    end
+    print(a)
+    _continue_0 = true
+  until true
+  if not _continue_0 then
+    break
+  end
+end

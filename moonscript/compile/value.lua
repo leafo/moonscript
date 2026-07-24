@@ -165,6 +165,7 @@ return {
     end
     do
       local _with_0 = self:block()
+      _with_0.header = "function(" .. concat(arg_names, ", ") .. ")"
       if #whitelist > 0 then
         _with_0:whitelist_names(whitelist)
       end
@@ -221,19 +222,6 @@ return {
         })
       end
       _with_0:stms(block)
-      if #args > #arg_names then
-        do
-          local _accum_0 = { }
-          local _len_0 = 1
-          for _index_0 = 1, #args do
-            local arg = args[_index_0]
-            _accum_0[_len_0] = arg[1]
-            _len_0 = _len_0 + 1
-          end
-          arg_names = _accum_0
-        end
-      end
-      _with_0.header = "function(" .. concat(arg_names, ", ") .. ")"
       return _with_0
     end
   end,
@@ -353,9 +341,6 @@ return {
     return tostring(value[2])
   end,
   raw_value = function(self, value)
-    if value == "..." then
-      self:send("varargs")
-    end
     return tostring(value)
   end
 }

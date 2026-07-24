@@ -11,13 +11,6 @@ return {
   raw = function(self, node)
     return self:add(node[2])
   end,
-  lines = function(self, node)
-    local _list_0 = node[2]
-    for _index_0 = 1, #_list_0 do
-      local line = _list_0[_index_0]
-      self:add(line)
-    end
-  end,
   declare = function(self, node)
     local names = node[2]
     local undeclared = self:declare(names)

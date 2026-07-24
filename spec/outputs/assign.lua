@@ -28,3 +28,18 @@ else
   print("the other")
   a, b = "nothing", "yeah"
 end
+a, b = (function()
+  local _base_0 = x
+  local _fn_0 = _base_0.fn
+  return function(...)
+    return _fn_0(_base_0, ...)
+  end
+end)()
+local c
+a, b, c = (function()
+  local _base_0 = x
+  local _fn_0 = _base_0.fn
+  return function(...)
+    return _fn_0(_base_0, ...)
+  end
+end)(), 1

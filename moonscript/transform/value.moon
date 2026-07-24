@@ -5,7 +5,7 @@ import NameProxy from require "moonscript.transform.names"
 import Accumulator, default_accumulator from require "moonscript.transform.accumulator"
 import lua_keywords from require "moonscript.data"
 
-import Run, transform_last_stm, implicitly_return, chain_is_stub from require "moonscript.transform.statements"
+import transform_last_stm, implicitly_return, chain_is_stub, has_varargs from require "moonscript.transform.statements"
 
 import construct_comprehension from require "moonscript.transform.comprehension"
 
@@ -83,11 +83,6 @@ Transformer {
   fndef: (node) =>
     smart_node node
     node.body = transform_last_stm node.body, implicitly_return self
-    node.body = {
-      Run => @listen "varargs", -> -- capture event
-      unpack node.body
-    }
-
     node
 
   if: (node) =>
@@ -146,18 +141,14 @@ Transformer {
   block_exp: (node) =>
     body = unpack node, 2
 
-    fn = nil
     arg_list = {}
+    fn = smart_node build.fndef body: body
 
-    fn = smart_node build.fndef body: {
-      Run =>
-        @listen "varargs", ->
-          insert arg_list, "..."
-          insert fn.args, {"..."}
-          @unlisten "varargs"
-
-      unpack body
-    }
+    -- if the body references varargs then the wrapper function must accept
+    -- and forward them so they remain visible
+    if has_varargs body
+      insert arg_list, "..."
+      insert fn.args, {"..."}
 
     build.chain { base: {"parens", fn}, {"call", arg_list} }
 }

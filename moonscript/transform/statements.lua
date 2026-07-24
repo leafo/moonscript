@@ -3,6 +3,8 @@ local ntype, mtype, is_value, NOOP
 ntype, mtype, is_value, NOOP = types.ntype, types.mtype, types.is_value, types.NOOP
 local comprehension_has_value
 comprehension_has_value = require("moonscript.transform.comprehension").comprehension_has_value
+local insert
+insert = table.insert
 local Run
 do
   local _class_0
@@ -74,6 +76,68 @@ chain_is_stub = function(chain)
   local stub = chain[#chain]
   return stub and ntype(stub) == "colon"
 end
+local continue_boundaries = {
+  fndef = true,
+  ["while"] = true,
+  ["for"] = true,
+  foreach = true,
+  comprehension = true,
+  tblcomprehension = true
+}
+local find_continues
+find_continues = function(tbl, out)
+  if out == nil then
+    out = { }
+  end
+  for _index_0 = 1, #tbl do
+    local item = tbl[_index_0]
+    if type(item) == "table" then
+      if item[1] == "continue" then
+        insert(out, item)
+      elseif not continue_boundaries[item[1]] then
+        find_continues(item, out)
+      end
+    end
+  end
+  return out
+end
+local has_varargs
+has_varargs = function(tbl)
+  for _index_0 = 1, #tbl do
+    local _continue_0 = false
+    repeat
+      local item = tbl[_index_0]
+      local _exp_0 = type(item)
+      if "string" == _exp_0 then
+        if item == "..." then
+          return true
+        end
+      elseif "table" == _exp_0 then
+        local _exp_1 = item[1]
+        if "fndef" == _exp_1 then
+          _continue_0 = true
+          break
+        elseif "string" == _exp_1 then
+          for i = 3, #item do
+            local part = item[i]
+            if type(part) == "table" and has_varargs(part) then
+              return true
+            end
+          end
+        else
+          if has_varargs(item) then
+            return true
+          end
+        end
+      end
+      _continue_0 = true
+    until true
+    if not _continue_0 then
+      break
+    end
+  end
+  return false
+end
 local implicitly_return
 implicitly_return = function(scope)
   local is_top = true
@@ -111,5 +175,7 @@ return {
   last_stm = last_stm,
   transform_last_stm = transform_last_stm,
   chain_is_stub = chain_is_stub,
-  implicitly_return = implicitly_return
+  implicitly_return = implicitly_return,
+  find_continues = find_continues,
+  has_varargs = has_varargs
 }

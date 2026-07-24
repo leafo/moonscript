@@ -174,7 +174,6 @@ class Block
 
     @_names = {}
     @_state = {}
-    @_listeners = {}
 
     with transform
       @transform = {
@@ -186,7 +185,6 @@ class Block
       @root = @parent.root
       @indent = @parent.indent + 1
       setmetatable @_state, { __index: @parent._state }
-      setmetatable @_listeners, { __index: @parent._listeners }
     else
       @indent = 0
 
@@ -198,16 +196,6 @@ class Block
 
   get_current: (name) =>
     rawget @_state, name
-
-  listen: (name, fn) =>
-    @_listeners[name] = fn
-
-  unlisten: (name) =>
-    @_listeners[name] = nil
-
-  send: (name, ...) =>
-    if fn = @_listeners[name]
-      fn self, ...
 
   extract_assign_name: (node) =>
     is_local = false
@@ -402,13 +390,6 @@ class Block
     @current_stm_i = current_stm_i
 
     nil
-
-  -- takes the existing set of lines and replaces them with the result of
-  -- calling fn on them
-  splice: (fn) =>
-    lines = {"lines", @_lines}
-    @_lines = Lines!
-    @stms fn lines
 
 class RootBlock extends Block
   new: (@options) =>
