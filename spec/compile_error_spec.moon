@@ -18,6 +18,16 @@ describe "compile errors", ->
 
   for {name, code_str, expected_msg, expected_line} in *{
     {
+      "short-colon stub outside of with"
+      unindent [[
+        print "hello"
+        x = \foo
+      ]]
+      "Short-colon syntax must be called within a with block"
+      2
+    }
+
+    {
       "short-dot outside of with"
       unindent [[
         print "hello"

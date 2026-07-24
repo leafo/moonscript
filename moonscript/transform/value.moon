@@ -4,6 +4,7 @@ import build, ntype, smart_node from require "moonscript.types"
 import NameProxy from require "moonscript.transform.names"
 import Accumulator, default_accumulator from require "moonscript.transform.accumulator"
 import lua_keywords from require "moonscript.data"
+import user_error from require "moonscript.errors"
 
 import transform_last_stm, implicitly_return, chain_is_stub, has_varargs from require "moonscript.transform.statements"
 
@@ -113,6 +114,13 @@ Transformer {
       base_name = NameProxy "base"
       fn_name = NameProxy "fn"
       colon = table.remove node
+
+      -- a stub with no base takes the scope from the enclosing with block
+      unless node[2]
+        scope_var = @get "scope_var"
+        unless scope_var
+          user_error "Short-colon syntax must be called within a with block", node[-1]
+        node[2] = scope_var
 
       is_super = ntype(node[2]) == "ref" and node[2][2] == "super"
       build.block_exp {

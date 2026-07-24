@@ -14,6 +14,8 @@ do
 end
 local lua_keywords
 lua_keywords = require("moonscript.data").lua_keywords
+local user_error
+user_error = require("moonscript.errors").user_error
 local transform_last_stm, implicitly_return, chain_is_stub, has_varargs
 do
   local _obj_0 = require("moonscript.transform.statements")
@@ -181,6 +183,13 @@ return Transformer({
       local base_name = NameProxy("base")
       local fn_name = NameProxy("fn")
       local colon = table.remove(node)
+      if not (node[2]) then
+        local scope_var = self:get("scope_var")
+        if not (scope_var) then
+          user_error("Short-colon syntax must be called within a with block", node[-1])
+        end
+        node[2] = scope_var
+      end
       local is_super = ntype(node[2]) == "ref" and node[2][2] == "super"
       return build.block_exp({
         build.assign({

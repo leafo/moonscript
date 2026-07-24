@@ -116,3 +116,9 @@ do
   with dad
     .if "yes"
     y = .end.of.function
+
+
+do
+  with obj
+    bound = \method
+    keyword_bound = \function

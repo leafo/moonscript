@@ -167,6 +167,27 @@ do
     local _with_0 = dad
     _with_0["if"]("yes")
     local y = _with_0["end"].of["function"]
+  end
+end
+do
+  do
+    local _with_0 = obj
+    local bound
+    do
+      local _base_0 = _with_0
+      local _fn_0 = _base_0.method
+      bound = function(...)
+        return _fn_0(_base_0, ...)
+      end
+    end
+    local keyword_bound
+    do
+      local _base_0 = _with_0
+      local _fn_0 = _base_0["function"]
+      keyword_bound = function(...)
+        return _fn_0(_base_0, ...)
+      end
+    end
     return _with_0
   end
 end
