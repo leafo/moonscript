@@ -410,6 +410,7 @@ class RootBlock extends Block
     table.concat buffer
 
 format_error = (msg, pos, file_str) ->
+  msg = tostring msg
   line_message = if pos
     line = pos_to_line file_str, pos
     line_str, line = get_closest_line file_str, line
@@ -444,8 +445,7 @@ tree = (tree, options={}) ->
         when "user-error", "compile-error"
           unpack err, 2
         else
-          -- unknown error, bubble it
-          error "Unknown error thrown", util.dump error_msg
+          concat {"Unknown error thrown: #{util.dump err}", debug.traceback runner}, "\n"
     else
       concat {err, debug.traceback runner}, "\n"
 

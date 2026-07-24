@@ -32,11 +32,14 @@ pcall ->
 
 gettime or= os.clock
 
+-- nil-safe capture of all return values
+pack = (...) -> {n: select("#", ...), ...}
+
 benchmark = (fn) ->
   if gettime
     start = gettime!
-    res = {fn!}
-    gettime! - start, unpack res
+    res = pack fn!
+    gettime! - start, unpack res, 1, res.n
   else
     nil, fn!
 

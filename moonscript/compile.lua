@@ -647,6 +647,7 @@ do
 end
 local format_error
 format_error = function(msg, pos, file_str)
+  msg = tostring(msg)
   local line_message
   if pos then
     local line = pos_to_line(file_str, pos)
@@ -688,7 +689,10 @@ tree = function(tree, options)
       if "user-error" == _exp_0 or "compile-error" == _exp_0 then
         error_msg, error_pos = unpack(err, 2)
       else
-        error_msg, error_pos = error("Unknown error thrown", util.dump(error_msg))
+        error_msg, error_pos = concat({
+          "Unknown error thrown: " .. tostring(util.dump(err)),
+          debug.traceback(runner)
+        }, "\n")
       end
     else
       error_msg, error_pos = concat({
