@@ -102,6 +102,8 @@ jobs:
         else
           echo "VERSION_SUFFIX=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
         fi
+        # commit time, not wall clock, so identical inputs build identical binaries
+        echo "BUILD_TIME=$(git show -s --format=%cI HEAD)" >> $GITHUB_ENV
 
     - name: Download headers
       uses: actions/download-artifact@v4
@@ -144,6 +146,8 @@ jobs:
           -I${{ matrix.lua_include }} \
           -Ilpeg-1.0.2/ \
           -Ibin/binaries/ \
+          -DMOON_BUILD_COMMIT="\"${{ env.VERSION_SUFFIX }}\"" \
+          -DMOON_BUILD_TIME="\"${{ env.BUILD_TIME }}\"" \
           bin/binaries/moon.c \
           bin/binaries/moonscript.c \
           lpeg-1.0.2/lpvm.c \
@@ -157,6 +161,8 @@ jobs:
           -I${{ matrix.lua_include }} \
           -Ilpeg-1.0.2/ \
           -Ibin/binaries/ \
+          -DMOON_BUILD_COMMIT="\"${{ env.VERSION_SUFFIX }}\"" \
+          -DMOON_BUILD_TIME="\"${{ env.BUILD_TIME }}\"" \
           bin/binaries/moonc.c \
           bin/binaries/moonscript.c \
           lpeg-1.0.2/lpvm.c \
@@ -242,6 +248,8 @@ jobs:
         else
           echo "VERSION_SUFFIX=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
         fi
+        # commit time, not wall clock, so identical inputs build identical binaries
+        echo "BUILD_TIME=$(git show -s --format=%cI HEAD)" >> $GITHUB_ENV
 
     - name: Show GCC
       run: gcc -v
@@ -278,6 +286,8 @@ jobs:
           -I${{ matrix.lua_include }} \
           -Ilpeg-1.0.2/ \
           -Ibin/binaries/ \
+          -DMOON_BUILD_COMMIT="\"${{ env.VERSION_SUFFIX }}\"" \
+          -DMOON_BUILD_TIME="\"${{ env.BUILD_TIME }}\"" \
           bin/binaries/moon.c \
           bin/binaries/moonscript.c \
           lpeg-1.0.2/lpvm.c \
@@ -291,6 +301,8 @@ jobs:
           -I${{ matrix.lua_include }} \
           -Ilpeg-1.0.2/ \
           -Ibin/binaries/ \
+          -DMOON_BUILD_COMMIT="\"${{ env.VERSION_SUFFIX }}\"" \
+          -DMOON_BUILD_TIME="\"${{ env.BUILD_TIME }}\"" \
           bin/binaries/moonc.c \
           bin/binaries/moonscript.c \
           lpeg-1.0.2/lpvm.c \

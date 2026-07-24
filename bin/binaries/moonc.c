@@ -30,6 +30,18 @@ int main(int argc, char **argv) {
     }
     lua_pop(l, nresults);
 
+#ifdef MOON_BUILD_COMMIT
+    // Build metadata passed in by CI; moonscript.version prints it with -v
+    lua_newtable(l);
+    lua_pushstring(l, LUA_RELEASE);
+    lua_setfield(l, -2, "lua");
+    lua_pushstring(l, MOON_BUILD_COMMIT);
+    lua_setfield(l, -2, "commit");
+    lua_pushstring(l, MOON_BUILD_TIME);
+    lua_setfield(l, -2, "time");
+    lua_setglobal(l, "MOON_BUILD_INFO");
+#endif
+
     // Set up arg table
     lua_newtable(l);
     lua_pushstring(l, "moonc");
