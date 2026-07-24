@@ -75,8 +75,14 @@ describe "moonscript.compile", ->
       }
 
       {
-        "exp (nested concat within concat stays flat)"
+        "exp (nested concat left of concat keeps grouping)"
         -> {"exp", {"exp", ref("a"), "..", ref("b")}, "..", ref("c")}
+        "(a .. b) .. c"
+      }
+
+      {
+        "exp (nested concat right of concat stays flat)"
+        -> {"exp", ref("a"), "..", {"exp", ref("b"), "..", ref("c")}}
         "a .. b .. c"
       }
 

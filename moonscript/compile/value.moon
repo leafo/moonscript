@@ -71,10 +71,9 @@ exp_precedence = (node) ->
         if right = binary_op_prec[node[i + 1]]
           return true if right > inner
           -- equal precedence on the right regroups under a right associative
-          -- operator: an exp holding x ^ y rendered flat as x ^ y ^ b
-          -- evaluates as x ^ (y ^ b). only concat is safe because string
-          -- concatenation is associative
-          return true if right == inner and right_assoc_op[node[i + 1]] and node[i + 1] != ".."
+          -- operator: an exp holding a .. b rendered flat as a .. b .. c
+          -- evaluates as a .. (b .. c), observable through __concat
+          return true if right == inner and right_assoc_op[node[i + 1]]
 
       false
 

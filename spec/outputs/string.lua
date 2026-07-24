@@ -40,3 +40,6 @@ local y = 1 + (tostring(n) .. "0") * 2
 local cmp = a == "v" .. tostring(b)
 local joined = "a" .. "b" .. tostring(c)
 local mixed = (tostring(a) .. "b") * 2 - ("c" .. tostring(d))
+local prefix = ("id: " .. tostring(id) .. ", ") .. rest
+local data_url = ("data:image/" .. tostring(kind) .. ";base64,") .. encode_base64(image_bytes)
+local line = line .. ((" " .. tostring(join) .. " ") .. el)

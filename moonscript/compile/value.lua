@@ -129,7 +129,7 @@ return {
             if right > inner then
               return true
             end
-            if right == inner and right_assoc_op[node[i + 1]] and node[i + 1] ~= ".." then
+            if right == inner and right_assoc_op[node[i + 1]] then
               return true
             end
           end

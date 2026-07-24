@@ -76,3 +76,11 @@ cmp = a == "v#{b}"
 joined = "a" .. "b#{c}"
 
 mixed = "#{a}b" * 2 - "c#{d}"
+
+-- interpolation on the left of concat keeps its grouping for __concat
+
+prefix = "id: #{id}, " .. rest
+
+data_url = "data:image/#{kind};base64," .. encode_base64(image_bytes)
+
+line ..= " #{join} " .. el
