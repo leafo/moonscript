@@ -68,6 +68,19 @@ extract_declarations = (body=@current_stms, start=@current_stm_i + 1, out={}) =>
         extract_declarations @, stm[2], 1, out
   out
 
+-- the names a declare statement must list for an assignment's names,
+-- destructuring literals are replaced by the names they extract so the
+-- declaration works when the assignment happens in a deeper scope
+extract_declare_names = (names) ->
+  out = {}
+  for name in *names
+    if ntype(name) == "table"
+      for tuple in *destructure.extract_assign_names name
+        insert out, tuple[1]
+    else
+      insert out, name
+  out
+
 expand_elseif_assign = (ifstm) ->
   for i = 4, #ifstm
     case = ifstm[i]
@@ -155,7 +168,7 @@ Transformer {
           block_body[idx] = build.assign_one first_name, block_body[idx]
 
           return build.group {
-            {"declare", {first_name}}
+            {"declare", extract_declare_names {first_name}}
             {"do", block_body}
           }
 
@@ -183,11 +196,13 @@ Transformer {
             stm
 
         build.group {
-          {"declare", names}
+          {"declare", extract_declare_names names}
           @transform.statement value, ret, node
         }
 
-    node = transformed or node
+    -- the assigns bubbled into the value's branches handle their own
+    -- destructuring when they are transformed
+    return transformed if transformed
 
     if destructure.has_destructure names
       return destructure.split_assign @, node
@@ -300,7 +315,7 @@ Transformer {
 
     if ntype(stm) == "assign"
       wrapped = build.group {
-        build.declare names: [name for name in *stm[2] when ntype(name) == "ref"]
+        build.declare names: [name for name in *extract_declare_names(stm[2]) when ntype(name) == "ref"]
         wrapped
       }
 

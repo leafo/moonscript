@@ -124,6 +124,23 @@ extract_declarations = function(self, body, start, out)
   end
   return out
 end
+local extract_declare_names
+extract_declare_names = function(names)
+  local out = { }
+  for _index_0 = 1, #names do
+    local name = names[_index_0]
+    if ntype(name) == "table" then
+      local _list_0 = destructure.extract_assign_names(name)
+      for _index_1 = 1, #_list_0 do
+        local tuple = _list_0[_index_1]
+        insert(out, tuple[1])
+      end
+    else
+      insert(out, name)
+    end
+  end
+  return out
+end
 local expand_elseif_assign
 expand_elseif_assign = function(ifstm)
   for i = 4, #ifstm do
@@ -240,9 +257,9 @@ return Transformer({
         return build.group({
           {
             "declare",
-            {
+            extract_declare_names({
               first_name
-            }
+            })
           },
           {
             "do",
@@ -282,13 +299,15 @@ return Transformer({
         transformed = build.group({
           {
             "declare",
-            names
+            extract_declare_names(names)
           },
           self.transform.statement(value, ret, node)
         })
       end
     end
-    node = transformed or node
+    if transformed then
+      return transformed
+    end
     if destructure.has_destructure(names) then
       return destructure.split_assign(self, node)
     end
@@ -522,7 +541,7 @@ return Transformer({
           names = (function()
             local _accum_0 = { }
             local _len_0 = 1
-            local _list_0 = stm[2]
+            local _list_0 = extract_declare_names(stm[2])
             for _index_0 = 1, #_list_0 do
               local name = _list_0[_index_0]
               if ntype(name) == "ref" then

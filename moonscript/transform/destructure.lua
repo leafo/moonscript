@@ -48,7 +48,14 @@ is_multi_return = function(node)
   if not (type(node) == "table") then
     return false
   end
-  return node[1] == "chain" and ntype(node[#node]) == "call"
+  local _exp_0 = node[1]
+  if "chain" == _exp_0 then
+    return ntype(node[#node]) == "call"
+  elseif "explist" == _exp_0 then
+    return true
+  else
+    return false
+  end
 end
 local extract_assign_names
 extract_assign_names = function(name, accum, prefix)
@@ -111,6 +118,29 @@ extract_assign_names = function(name, accum, prefix)
   end
   return accum
 end
+local keyword_refs = {
+  ["nil"] = true,
+  ["true"] = true,
+  ["false"] = true
+}
+local chainable_receiver
+chainable_receiver = function(node)
+  local _exp_0 = type(node)
+  if "string" == _exp_0 then
+    return node ~= "..." and not keyword_refs[node]
+  elseif "table" == _exp_0 then
+    local _exp_1 = node[1]
+    if "ref" == _exp_1 then
+      return not keyword_refs[node[2]]
+    elseif "chain" == _exp_1 or "self" == _exp_1 or "self_class" == _exp_1 or "temp_name" == _exp_1 or "parens" == _exp_1 or "exp" == _exp_1 or "table" == _exp_1 or "string" == _exp_1 then
+      return true
+    else
+      return false
+    end
+  else
+    return false
+  end
+end
 local build_assign
 build_assign = function(scope, destruct_literal, receiver)
   assert(receiver, "attempting to build destructure assign with no receiver")
@@ -123,7 +153,7 @@ build_assign = function(scope, destruct_literal, receiver)
     values
   }
   local obj
-  if scope:is_local(receiver) or #extracted_names == 1 then
+  if chainable_receiver(receiver) and (scope:is_local(receiver) or #extracted_names == 1) then
     obj = receiver
   else
     do

@@ -118,7 +118,8 @@ return {
       callee[1] = callee_type .. "_colon"
     end
     local callee_value = self:value(callee)
-    if ntype(callee) == "exp" then
+    local _exp_0 = ntype(callee)
+    if "exp" == _exp_0 or "table" == _exp_0 then
       callee_value = self:line("(", callee_value, ")")
     end
     local actions

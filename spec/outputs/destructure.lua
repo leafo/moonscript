@@ -161,8 +161,150 @@ _ = function(z)
 end
 do
   local z = "oo"
-  return function(k)
+  _ = function(k)
     local a, b, c
     a, b, c = z[1], z[2], z[3]
   end
+end
+local a, b
+do
+  local _accum_0 = { }
+  local _len_0 = 1
+  local _list_0 = {
+    2,
+    3
+  }
+  for _index_0 = 1, #_list_0 do
+    local i = _list_0[_index_0]
+    _accum_0[_len_0] = i * i
+    _len_0 = _len_0 + 1
+  end
+  a, b = _accum_0[1], _accum_0[2]
+end
+local c, d
+do
+  local _accum_0 = { }
+  local _len_0 = 1
+  local _list_0 = {
+    1,
+    2
+  }
+  for _index_0 = 1, #_list_0 do
+    local v = _list_0[_index_0]
+    _accum_0[_len_0] = v * 2
+    _len_0 = _len_0 + 1
+  end
+  c, d = _accum_0[1], _accum_0[2]
+end
+local left, right
+if cond then
+  do
+    local _obj_0 = {
+      left = 1,
+      right = 2
+    }
+    left, right = _obj_0.left, _obj_0.right
+  end
+else
+  do
+    local _obj_0 = {
+      left = 3
+    }
+    left, right = _obj_0.left, _obj_0.right
+  end
+end
+local p, q
+do
+  do
+    local _obj_0 = {
+      10,
+      20
+    }
+    p, q = _obj_0[1], _obj_0[2]
+  end
+end
+local val
+local _exp_0 = x
+if 2 == _exp_0 then
+  val = ({
+    val = "two"
+  }).val
+end
+local t
+do
+  local _with_0 = something()
+  _with_0.x = 5
+  t = _with_0[1]
+end
+local u, v
+if cond then
+  do
+    local _obj_0 = {
+      7,
+      8
+    }
+    u, v = _obj_0[1], _obj_0[2]
+  end
+end
+local n, m
+if cond then
+  local _destruct_0
+  n, _destruct_0 = 1, {
+    m = 2
+  }
+  m = _destruct_0.m
+end
+local k
+do
+  local _tbl_0 = { }
+  for w in thing:gmatch("%w") do
+    _tbl_0[w] = true
+  end
+  k = _tbl_0.k
+end
+local inner
+if cond then
+  inner = ({
+    a = {
+      "deep"
+    }
+  }).a[1]
+end
+local lit
+lit = ({
+  42
+})[1]
+local single
+if cond then
+  do
+    local _obj_0 = {
+      single = 1
+    }, {
+      single = 2
+    }
+    single = _obj_0.single
+  end
+end
+local grab
+grab = function(...)
+  local first_arg
+  do
+    local _obj_0 = ...
+    first_arg = _obj_0.first_arg
+  end
+end
+local nothing
+do
+  local _obj_0 = nil
+  nothing = _obj_0[1]
+end
+local negated
+do
+  local _obj_0 = not thing
+  negated = _obj_0.negated
+end
+local len
+do
+  local _obj_0 = #thing
+  len = _obj_0.len
 end

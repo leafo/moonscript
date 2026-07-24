@@ -98,3 +98,42 @@ do
   (k) ->
     {a,b,c} = z
 
+
+-- destructuring against expression blocks
+
+{a, b} = for i in *{2, 3} do i * i
+
+{c, d} = [v * 2 for v in *{1, 2}]
+
+{:left, :right} = if cond then {left: 1, right: 2} else {left: 3}
+
+{p, q} = do
+  {10, 20}
+
+{:val} = switch x
+  when 2 then {val: "two"}
+
+{t} = with something! do .x = 5
+
+{u, v} = {7, 8} if cond
+
+n, {:m} = if cond then 1, {m: 2}
+
+{:k} = {w, true for w in thing\gmatch "%w"}
+
+{a: {inner}} = if cond then {a: {"deep"}}
+
+{lit} = {42}
+
+{:single} = if cond then {single: 1}, {single: 2}
+
+-- receivers that can't be chained directly
+
+grab = (...) ->
+  {:first_arg} = ...
+
+{nothing} = nil
+
+{:negated} = not thing
+
+{:len} = #thing

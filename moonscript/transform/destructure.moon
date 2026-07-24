@@ -23,7 +23,13 @@ has_destructure = (names) ->
 is_multi_return = (node) ->
   return true if node == "..."
   return false unless type(node) == "table"
-  node[1] == "chain" and ntype(node[#node]) == "call"
+  switch node[1]
+    when "chain"
+      ntype(node[#node]) == "call"
+    when "explist"
+      true
+    else
+      false
 
 extract_assign_names = (name, accum={}, prefix={}) ->
 
@@ -59,6 +65,28 @@ extract_assign_names = (name, accum={}, prefix={}) ->
 
   accum
 
+-- can the receiver be referenced directly as the base of a chain? anything
+-- not recognized here is copied to a temporary name before destructuring.
+-- exp, table and string are chainable because the compiler wraps them in
+-- parentheses
+keyword_refs = {nil: true, true: true, false: true}
+
+chainable_receiver = (node) ->
+  switch type node
+    when "string"
+      -- legacy transformers use plain strings for names
+      node != "..." and not keyword_refs[node]
+    when "table"
+      switch node[1]
+        when "ref"
+          not keyword_refs[node[2]]
+        when "chain", "self", "self_class", "temp_name", "parens", "exp", "table", "string"
+          true
+        else
+          false
+    else
+      false
+
 build_assign = (scope, destruct_literal, receiver) ->
   assert receiver,  "attempting to build destructure assign with no receiver"
 
@@ -69,7 +97,7 @@ build_assign = (scope, destruct_literal, receiver) ->
 
   inner = {"assign", names, values}
 
-  obj = if scope\is_local(receiver) or #extracted_names == 1
+  obj = if chainable_receiver(receiver) and (scope\is_local(receiver) or #extracted_names == 1)
     receiver
   else
     with obj = NameProxy "obj"

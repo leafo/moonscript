@@ -83,7 +83,11 @@ string_chars = {
       callee[1] = callee_type.."_colon"
 
     callee_value = @value callee
-    callee_value = @line "(", callee_value, ")" if ntype(callee) == "exp"
+
+    -- expressions and table literals can't be subscripted directly in lua
+    switch ntype callee
+      when "exp", "table"
+        callee_value = @line "(", callee_value, ")"
 
     actions = with @line!
       \append chain_item action for action in *node[item_offset,]
