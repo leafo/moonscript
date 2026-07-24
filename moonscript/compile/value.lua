@@ -213,7 +213,6 @@ return {
         end
       end
     end
-    local chain_pos = node[-1]
     local chain_item
     chain_item = function(node)
       local t, arg = unpack(node)
@@ -225,8 +224,6 @@ return {
         return ".", tostring(arg)
       elseif t == "colon" then
         return ":", tostring(arg)
-      elseif t == "colon_stub" then
-        return user_error("Uncalled colon stub", chain_pos)
       else
         return error("Unknown chain action: " .. tostring(t))
       end

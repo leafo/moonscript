@@ -126,8 +126,6 @@ exp_precedence = (node) ->
       if sup = @get "super"
         return @value sup self, node
 
-    chain_pos = node[-1]
-
     chain_item = (node) ->
       t, arg = unpack node
       if t == "call"
@@ -139,8 +137,6 @@ exp_precedence = (node) ->
         ".", tostring arg
       elseif t == "colon"
         ":", tostring arg
-      elseif t == "colon_stub"
-        user_error "Uncalled colon stub", chain_pos
       else
         error "Unknown chain action: #{t}"
 
