@@ -309,3 +309,85 @@ do
   len = _obj_0.len
 end
 obj.a, obj["b"], self.prop, self.__class.cls_prop = t.x, t.y, t.z, t.w
+local basic
+basic = function(_arg_0)
+  local a, b
+  a, b = _arg_0.a, _arg_0.b
+  return a + b
+end
+local two
+two = function(_arg_0, _arg_1)
+  local x1, y1
+  x1, y1 = _arg_0.x, _arg_0.y
+  local x2, y2
+  x2, y2 = _arg_1.x, _arg_1.y
+  return x1 * x2 + y1 * y2
+end
+local with_default
+with_default = function(_arg_0)
+  if _arg_0 == nil then
+    _arg_0 = {
+      a = 1,
+      b = 2
+    }
+  end
+  local a, b
+  a, b = _arg_0.a, _arg_0.b
+  return a + b
+end
+local nested
+nested = function(_arg_0)
+  local x, y, first
+  x, y, first = _arg_0.pos.x, _arg_0.pos.y, _arg_0[1]
+  return x + y + first
+end
+local positional
+positional = function(_arg_0)
+  local first, second
+  first, second = _arg_0[1], _arg_0[2]
+  return first .. second
+end
+local mixed
+mixed = function(name, _arg_0, rest, ...)
+  if rest == nil then
+    rest = 1
+  end
+  local width, height
+  width, height = _arg_0.width, _arg_0.height
+  return print(name, width, height, rest, ...)
+end
+local bound
+bound = function(self, _arg_0)
+  local count
+  count = _arg_0.count
+  return self.total + count
+end
+local Point
+do
+  local _class_0
+  local _base_0 = { }
+  _base_0.__index = _base_0
+  _class_0 = setmetatable({
+    __init = function(self, _arg_0)
+      self.x, self.y = _arg_0.x, _arg_0.y
+    end,
+    __base = _base_0,
+    __name = "Point"
+  }, {
+    __index = _base_0,
+    __call = function(cls, ...)
+      local _self_0 = setmetatable({}, _base_0)
+      cls.__init(_self_0, ...)
+      return _self_0
+    end
+  })
+  _base_0.__class = _class_0
+  Point = _class_0
+end
+local shadowed = "outer"
+local shadow_fn
+shadow_fn = function(_arg_0)
+  local shadowed
+  shadowed = _arg_0.shadowed
+  return shadowed
+end

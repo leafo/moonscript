@@ -160,10 +160,17 @@ exp_precedence = (node) ->
 
     default_args = {}
     self_args = {}
+
+    fn_block = @block!
+
     arg_names = for arg in *args
       name, default_value = unpack arg
       name = if type(name) == "string"
         name
+      elseif name[1] == "temp_name"
+        -- a destructuring arg holds a proxy, resolve it in the function's
+        -- scope so the header and the unpacking assign agree on the name
+        name\get_name fn_block, false
       else
         if name[1] == "self" or name[1] == "self_class"
           insert self_args, name
@@ -174,7 +181,7 @@ exp_precedence = (node) ->
     if arrow == "fat"
       insert arg_names, 1, "self"
 
-    with @block!
+    with fn_block
       .header = "function("..concat(arg_names, ", ")..")"
 
       if #whitelist > 0
@@ -184,7 +191,11 @@ exp_precedence = (node) ->
 
       for default in *default_args
         name, value = unpack default
-        name = name[2] if type(name) == "table"
+        if type(name) == "table"
+          name = if name[1] == "temp_name"
+            name\get_name fn_block
+          else
+            name[2]
         \stm {
           'if', {'exp', {"ref", name}, '==', 'nil'}, {
             {'assign', {name}, {value}}

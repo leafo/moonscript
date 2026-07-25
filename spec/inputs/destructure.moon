@@ -141,3 +141,27 @@ grab = (...) ->
 -- assignable non-name targets
 
 {x: obj.a, y: obj["b"], z: @prop, w: @@cls_prop} = t
+
+-- destructuring function arguments
+
+basic = ({:a, :b}) -> a + b
+
+two = ({x: x1, y: y1}, {x: x2, y: y2}) -> x1 * x2 + y1 * y2
+
+with_default = ({:a, :b} = {a: 1, b: 2}) -> a + b
+
+nested = ({pos: {:x, :y}, [1]: first}) -> x + y + first
+
+positional = ({first, second}) -> first .. second
+
+mixed = (name, {:width, :height}, rest=1, ...) ->
+  print name, width, height, rest, ...
+
+bound = ({:count}) => @total + count
+
+class Point
+  new: ({x: @x, y: @y}) =>
+
+-- outer local is shadowed, not assigned
+shadowed = "outer"
+shadow_fn = ({:shadowed}) -> shadowed

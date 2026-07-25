@@ -9,6 +9,7 @@ import user_error from require "moonscript.errors"
 import transform_last_stm, implicitly_return, chain_is_stub, has_varargs from require "moonscript.transform.statements"
 
 import construct_comprehension from require "moonscript.transform.comprehension"
+destructure = require "moonscript.transform.destructure"
 
 import insert from table
 import unpack from require "moonscript.util"
@@ -84,6 +85,21 @@ Transformer {
   fndef: (node) =>
     smart_node node
     node.body = transform_last_stm node.body, implicitly_return self
+
+    -- destructuring args receive a temporary name that is unpacked at the
+    -- top of the body
+    local destructures
+    for arg in *node.args
+      if ntype(arg[1]) == "table"
+        proxy = NameProxy "arg"
+        destructures or= {}
+        insert destructures, destructure.build_assign @, arg[1], proxy, shadow: true
+        arg[1] = proxy
+
+    if destructures
+      insert destructures, build.group node.body
+      node.body = destructures
+
     node
 
   if: (node) =>

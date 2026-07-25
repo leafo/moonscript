@@ -297,7 +297,7 @@ build_grammar = wrap_env debug_grammar, (root) ->
       White * sym")" + Ct"" * Ct""
 
     FnArgDefList: FnArgDef * ((sym"," + Break) * White * FnArgDef)^0 * ((sym"," + Break) * White * Ct(VarArg))^0 + Ct(VarArg)
-    FnArgDef: Ct((Name + SelfName) * (sym"=" * Exp)^-1)
+    FnArgDef: Ct((Name + SelfName + TableLit) * (sym"=" * Exp)^-1)
 
     FunLit: FnArgsDef *
       (sym"->" * Cc"slim" + sym"=>" * Cc"fat") *

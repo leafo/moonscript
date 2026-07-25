@@ -64,6 +64,27 @@ describe "compile errors", ->
     }
 
     {
+      "destructuring function argument into call"
+      unindent [[
+        print "hello"
+        f = ({foo!}) -> foo
+      ]]
+      "Can't destructure into chain ending in call"
+      2
+    }
+
+    {
+      "destructuring function argument into invalid value"
+      unindent [[
+        print "hello"
+        print "world"
+        f = ({1}) -> nil
+      ]]
+      "Can't destructure value of type: number"
+      3
+    }
+
+    {
       "continue outside of loop"
       unindent [[
         print "hello"

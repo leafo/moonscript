@@ -251,6 +251,7 @@ return {
     local args, whitelist, arrow, block = unpack(node, 2)
     local default_args = { }
     local self_args = { }
+    local fn_block = self:block()
     local arg_names
     do
       local _accum_0 = { }
@@ -260,6 +261,8 @@ return {
         local name, default_value = unpack(arg)
         if type(name) == "string" then
           name = name
+        elseif name[1] == "temp_name" then
+          name = name:get_name(fn_block, false)
         else
           if name[1] == "self" or name[1] == "self_class" then
             insert(self_args, name)
@@ -279,7 +282,7 @@ return {
       insert(arg_names, 1, "self")
     end
     do
-      local _with_0 = self:block()
+      local _with_0 = fn_block
       _with_0.header = "function(" .. concat(arg_names, ", ") .. ")"
       if #whitelist > 0 then
         _with_0:whitelist_names(whitelist)
@@ -292,7 +295,11 @@ return {
         local default = default_args[_index_0]
         local name, value = unpack(default)
         if type(name) == "table" then
-          name = name[2]
+          if name[1] == "temp_name" then
+            name = name:get_name(fn_block)
+          else
+            name = name[2]
+          end
         end
         _with_0:stm({
           'if',

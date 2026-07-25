@@ -148,7 +148,7 @@ chainable_receiver = function(node)
   end
 end
 local build_assign
-build_assign = function(scope, destruct_literal, receiver)
+build_assign = function(scope, destruct_literal, receiver, opts)
   assert(receiver, "attempting to build destructure assign with no receiver")
   local extracted_names = extract_assign_names(destruct_literal)
   local names = { }
@@ -186,13 +186,35 @@ build_assign = function(scope, destruct_literal, receiver)
     end
     insert(values, chain)
   end
-  return build.group({
-    {
+  local group = { }
+  if opts and opts.shadow then
+    local shadow_names
+    do
+      local _accum_0 = { }
+      local _len_0 = 1
+      for _index_0 = 1, #names do
+        local name = names[_index_0]
+        if ntype(name) == "ref" or type(name) == "string" then
+          _accum_0[_len_0] = name
+          _len_0 = _len_0 + 1
+        end
+      end
+      shadow_names = _accum_0
+    end
+    if next(shadow_names) then
+      insert(group, {
+        "declare_with_shadows",
+        shadow_names
+      })
+    end
+  else
+    insert(group, {
       "declare",
       names
-    },
-    inner
-  })
+    })
+  end
+  insert(group, inner)
+  return build.group(group)
 end
 local split_assign
 split_assign = function(scope, assign)

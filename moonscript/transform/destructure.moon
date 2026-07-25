@@ -92,7 +92,7 @@ chainable_receiver = (node) ->
     else
       false
 
-build_assign = (scope, destruct_literal, receiver) ->
+build_assign = (scope, destruct_literal, receiver, opts) ->
   assert receiver,  "attempting to build destructure assign with no receiver"
 
   extracted_names = extract_assign_names destruct_literal
@@ -119,10 +119,19 @@ build_assign = (scope, destruct_literal, receiver) ->
       "nil"
     insert values, chain
 
-  build.group {
-    {"declare", names}
-    inner
-  }
+  group = {}
+
+  if opts and opts.shadow
+    -- force new locals so the targets never assign to an enclosing scope,
+    -- only plain names can be declared (chain and self targets can't)
+    shadow_names = [name for name in *names when ntype(name) == "ref" or type(name) == "string"]
+    if next shadow_names
+      insert group, {"declare_with_shadows", shadow_names}
+  else
+    insert group, {"declare", names}
+
+  insert group, inner
+  build.group group
 
 -- applies to destructuring to a assign node
 split_assign = (scope, assign) ->

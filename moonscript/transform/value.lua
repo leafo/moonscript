@@ -23,6 +23,7 @@ do
 end
 local construct_comprehension
 construct_comprehension = require("moonscript.transform.comprehension").construct_comprehension
+local destructure = require("moonscript.transform.destructure")
 local insert
 insert = table.insert
 local unpack
@@ -137,6 +138,23 @@ return Transformer({
   fndef = function(self, node)
     smart_node(node)
     node.body = transform_last_stm(node.body, implicitly_return(self))
+    local destructures
+    local _list_0 = node.args
+    for _index_0 = 1, #_list_0 do
+      local arg = _list_0[_index_0]
+      if ntype(arg[1]) == "table" then
+        local proxy = NameProxy("arg")
+        destructures = destructures or { }
+        insert(destructures, destructure.build_assign(self, arg[1], proxy, {
+          shadow = true
+        }))
+        arg[1] = proxy
+      end
+    end
+    if destructures then
+      insert(destructures, build.group(node.body))
+      node.body = destructures
+    end
     return node
   end,
   ["if"] = function(self, node)
