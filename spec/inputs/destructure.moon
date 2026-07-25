@@ -165,3 +165,7 @@ class Point
 -- outer local is shadowed, not assigned
 shadowed = "outer"
 shadow_fn = ({:shadowed}) -> shadowed
+
+-- later defaults see names bound by earlier destructuring args
+ordered = ({:a}, b = a, @c = b) =>
+  a + b + @c

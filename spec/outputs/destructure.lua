@@ -349,11 +349,11 @@ positional = function(_arg_0)
 end
 local mixed
 mixed = function(name, _arg_0, rest, ...)
+  local width, height
+  width, height = _arg_0.width, _arg_0.height
   if rest == nil then
     rest = 1
   end
-  local width, height
-  width, height = _arg_0.width, _arg_0.height
   return print(name, width, height, rest, ...)
 end
 local bound
@@ -390,4 +390,17 @@ shadow_fn = function(_arg_0)
   local shadowed
   shadowed = _arg_0.shadowed
   return shadowed
+end
+local ordered
+ordered = function(self, _arg_0, b, c)
+  local a
+  a = _arg_0.a
+  if b == nil then
+    b = a
+  end
+  if c == nil then
+    c = b
+  end
+  self.c = c
+  return a + b + self.c
 end

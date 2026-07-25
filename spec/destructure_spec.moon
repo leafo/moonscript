@@ -93,3 +93,27 @@ describe "function argument destructure", ->
       return f "a", {mid: "b"}, "x", "y"
     ]]
     assert.same {"a", "b", 2}, result
+
+  it "later defaults see earlier destructured names", ->
+    result = run unindent [[
+      a = "outer"
+      f = ({:a}, b = a) -> b
+      return f {a: 42}
+    ]]
+    assert.same 42, result
+
+  it "lowers self assigns after destructure in order", ->
+    result = run unindent [[
+      obj = {}
+      obj.set = ({:base}, @x = base * 2) => @x
+      first = obj\set {base: 3}
+      return {first, obj.x, obj\set({base: 3}, 99)}
+    ]]
+    assert.same {6, 6, 99}, result
+
+  it "chains destructure defaults left to right", ->
+    result = run unindent [[
+      f = ({:a} = {a: 1}, {:b} = {b: a + 10}) -> {a, b}
+      return f!
+    ]]
+    assert.same {1, 11}, result

@@ -86,19 +86,76 @@ Transformer {
     smart_node node
     node.body = transform_last_stm node.body, implicitly_return self
 
-    -- destructuring args receive a temporary name that is unpacked at the
-    -- top of the body
-    local destructures
-    for arg in *node.args
+    -- from the first destructuring arg onward, argument initialization
+    -- (default checks, self assigns, unpacking) moves into the body in left
+    -- to right order, so a later default can reference an earlier
+    -- destructured name:
+    --   f = ({:a}, b = a) -> b
+    -- earlier args stay on the compiler's default handling, keeping output
+    -- for functions without destructuring unchanged
+    local first_destructure
+    for i, arg in ipairs node.args
       if ntype(arg[1]) == "table"
-        proxy = NameProxy "arg"
-        destructures or= {}
-        insert destructures, destructure.build_assign @, arg[1], proxy, shadow: true
-        arg[1] = proxy
+        first_destructure = i
+        break
 
-    if destructures
-      insert destructures, build.group node.body
-      node.body = destructures
+    if first_destructure
+      -- a destructured name always shadows at the top of the body, so a
+      -- later parameter of the same name could never be seen. reject the
+      -- duplicate instead of silently breaking later-parameter-wins
+      bound_names = {}
+      -- fat arrow binds self as an implicit first parameter
+      bound_names.self = true if node.arrow == "fat"
+      for arg in *node.args
+        switch ntype arg[1]
+          when "self", "self_class"
+            bound_names[arg[1][2]] = true
+          when "table"
+            nil
+          else
+            bound_names[arg[1]] = true if type(arg[1]) == "string"
+
+      seen_targets = {}
+      for arg in *node.args
+        continue unless ntype(arg[1]) == "table"
+        targets = [t for {t} in *destructure.extract_assign_names arg[1] when ntype(t) == "ref"]
+
+        for target in *targets
+          name = target[2]
+          if bound_names[name] or seen_targets[name]
+            user_error "Can't destructure into '#{name}': name is bound by another parameter", target[-1]
+
+        for target in *targets
+          seen_targets[target[2]] = true
+
+      default_check = (name, value) ->
+        {"if", {"exp", name, "==", "nil"}, {{"assign", {name}, {value}}}}
+
+      prelude = {}
+      for i=first_destructure, #node.args
+        arg = node.args[i]
+        name, default_value = arg[1], arg[2]
+
+        switch ntype name
+          when "table"
+            proxy = NameProxy "arg"
+            if default_value
+              insert prelude, default_check proxy, default_value
+            insert prelude, destructure.build_assign @, name, proxy, shadow: true
+            node.args[i] = {proxy}
+          when "self", "self_class"
+            raw_name = name[2]
+            if default_value
+              insert prelude, default_check {"ref", raw_name}, default_value
+            insert prelude, build.assign_one name, {"ref", raw_name}
+            node.args[i] = {raw_name}
+          else
+            if default_value
+              insert prelude, default_check {"ref", name}, default_value
+              node.args[i] = {name}
+
+      insert prelude, build.group node.body
+      node.body = prelude
 
     node
 

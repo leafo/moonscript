@@ -85,6 +85,56 @@ describe "compile errors", ->
     }
 
     {
+      "destructured parameter followed by parameter of same name"
+      unindent [[
+        print "hello"
+        f = ({:a}, a) -> a
+      ]]
+      "Can't destructure into 'a': name is bound by another parameter"
+      2
+    }
+
+    {
+      "destructured parameter preceded by parameter of same name"
+      unindent [[
+        print "hello"
+        f = (a, {:a}) -> a
+      ]]
+      "Can't destructure into 'a': name is bound by another parameter"
+      2
+    }
+
+    {
+      "destructured parameter followed by self parameter of same name"
+      unindent [[
+        print "hello"
+        f = ({:a}, @a) => a
+      ]]
+      "Can't destructure into 'a': name is bound by another parameter"
+      2
+    }
+
+    {
+      "destructured self parameter in fat arrow"
+      unindent [[
+        print "hello"
+        f = ({:self}) => @x
+      ]]
+      "Can't destructure into 'self': name is bound by another parameter"
+      2
+    }
+
+    {
+      "two destructured parameters binding same name"
+      unindent [[
+        print "hello"
+        f = ({:a}, {a: a}) -> a
+      ]]
+      "Can't destructure into 'a': name is bound by another parameter"
+      2
+    }
+
+    {
       "continue outside of loop"
       unindent [[
         print "hello"

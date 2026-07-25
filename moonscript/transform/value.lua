@@ -138,22 +138,143 @@ return Transformer({
   fndef = function(self, node)
     smart_node(node)
     node.body = transform_last_stm(node.body, implicitly_return(self))
-    local destructures
-    local _list_0 = node.args
-    for _index_0 = 1, #_list_0 do
-      local arg = _list_0[_index_0]
+    local first_destructure
+    for i, arg in ipairs(node.args) do
       if ntype(arg[1]) == "table" then
-        local proxy = NameProxy("arg")
-        destructures = destructures or { }
-        insert(destructures, destructure.build_assign(self, arg[1], proxy, {
-          shadow = true
-        }))
-        arg[1] = proxy
+        first_destructure = i
+        break
       end
     end
-    if destructures then
-      insert(destructures, build.group(node.body))
-      node.body = destructures
+    if first_destructure then
+      local bound_names = { }
+      if node.arrow == "fat" then
+        bound_names.self = true
+      end
+      local _list_0 = node.args
+      for _index_0 = 1, #_list_0 do
+        local arg = _list_0[_index_0]
+        local _exp_0 = ntype(arg[1])
+        if "self" == _exp_0 or "self_class" == _exp_0 then
+          bound_names[arg[1][2]] = true
+        elseif "table" == _exp_0 then
+          local _ = nil
+        else
+          if type(arg[1]) == "string" then
+            bound_names[arg[1]] = true
+          end
+        end
+      end
+      local seen_targets = { }
+      local _list_1 = node.args
+      for _index_0 = 1, #_list_1 do
+        local _continue_0 = false
+        repeat
+          local arg = _list_1[_index_0]
+          if not (ntype(arg[1]) == "table") then
+            _continue_0 = true
+            break
+          end
+          local targets
+          do
+            local _accum_0 = { }
+            local _len_0 = 1
+            local _list_2 = destructure.extract_assign_names(arg[1])
+            for _index_1 = 1, #_list_2 do
+              local _des_0 = _list_2[_index_1]
+              local t
+              t = _des_0[1]
+              if ntype(t) == "ref" then
+                _accum_0[_len_0] = t
+                _len_0 = _len_0 + 1
+              end
+            end
+            targets = _accum_0
+          end
+          for _index_1 = 1, #targets do
+            local target = targets[_index_1]
+            local name = target[2]
+            if bound_names[name] or seen_targets[name] then
+              user_error("Can't destructure into '" .. tostring(name) .. "': name is bound by another parameter", target[-1])
+            end
+          end
+          for _index_1 = 1, #targets do
+            local target = targets[_index_1]
+            seen_targets[target[2]] = true
+          end
+          _continue_0 = true
+        until true
+        if not _continue_0 then
+          break
+        end
+      end
+      local default_check
+      default_check = function(name, value)
+        return {
+          "if",
+          {
+            "exp",
+            name,
+            "==",
+            "nil"
+          },
+          {
+            {
+              "assign",
+              {
+                name
+              },
+              {
+                value
+              }
+            }
+          }
+        }
+      end
+      local prelude = { }
+      for i = first_destructure, #node.args do
+        local arg = node.args[i]
+        local name, default_value = arg[1], arg[2]
+        local _exp_0 = ntype(name)
+        if "table" == _exp_0 then
+          local proxy = NameProxy("arg")
+          if default_value then
+            insert(prelude, default_check(proxy, default_value))
+          end
+          insert(prelude, destructure.build_assign(self, name, proxy, {
+            shadow = true
+          }))
+          node.args[i] = {
+            proxy
+          }
+        elseif "self" == _exp_0 or "self_class" == _exp_0 then
+          local raw_name = name[2]
+          if default_value then
+            insert(prelude, default_check({
+              "ref",
+              raw_name
+            }, default_value))
+          end
+          insert(prelude, build.assign_one(name, {
+            "ref",
+            raw_name
+          }))
+          node.args[i] = {
+            raw_name
+          }
+        else
+          if default_value then
+            insert(prelude, default_check({
+              "ref",
+              name
+            }, default_value))
+            node.args[i] = {
+              name
+            }
+          end
+        end
+      end
+      insert(prelude, build.group(node.body))
+      node.body = prelude
     end
     return node
   end,

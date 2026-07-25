@@ -168,8 +168,8 @@ exp_precedence = (node) ->
       name = if type(name) == "string"
         name
       elseif name[1] == "temp_name"
-        -- a destructuring arg holds a proxy, resolve it in the function's
-        -- scope so the header and the unpacking assign agree on the name
+        -- a destructuring arg holds a proxy. put the resolved name into
+        -- scope immediately or a second proxy would pick the same free name
         name\get_name fn_block, false
       else
         if name[1] == "self" or name[1] == "self_class"
