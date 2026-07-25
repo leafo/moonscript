@@ -179,7 +179,7 @@ describe "linter", ->
       missing_global 10
     ]]
 
-    result = lint.lint_code code, nil, nil, {"constant_assign"}
+    result = lint.lint_code code, nil, nil, stages: {"constant_assign"}
     assert.same unindent([[
       string input
 
@@ -188,10 +188,42 @@ describe "linter", ->
       > insert = 5
     ]]), result
 
-    result = lint.lint_code code, nil, nil, {"global_access", "unused"}
+    result = lint.lint_code code, nil, nil, stages: {"global_access", "unused"}
     assert.truthy result\match "accessing global"
     assert.truthy result\match "assigned but unused"
     assert.is_nil result\match "assigning to constant"
 
-    assert.is_nil (lint.lint_code code, nil, nil, {"import_overwrite"})
-    assert.is_nil (lint.lint_code code, nil, nil, {})
+    assert.is_nil (lint.lint_code code, nil, nil, stages: {"import_overwrite"})
+    assert.is_nil (lint.lint_code code, nil, nil, stages: {})
+
+  it "formats output with the compact format", ->
+    code = unindent [[
+      import insert from table
+      insert = 5
+      do
+        unused_var = 1
+      f = -> missing_global 10
+      f!
+    ]]
+
+    assert.same unindent([[
+      test.moon:2:1: assigning to constant `insert` [constant_assign]
+      test.moon:4:3: assigned but unused `unused_var` [unused]
+      test.moon:5:7: accessing global `missing_global` [global_access]
+    ]]), lint.lint_code code, "test.moon", nil, format: "compact"
+
+  it "combines compact format with stage filter", ->
+    code = unindent [[
+      import insert from table
+      insert = 5
+      missing_global 10
+    ]]
+
+    result = lint.lint_code code, "test.moon", nil, {
+      format: "compact"
+      stages: {"global_access"}
+    }
+    assert.same "test.moon:3:1: accessing global `missing_global` [global_access]", result
+
+  it "compact format returns nothing for clean code", ->
+    assert.is_nil (lint.lint_code "x = 5\nprint x", "test.moon", nil, format: "compact")

@@ -27,11 +27,21 @@ mtype = (value) -> -- the moonscript object class
       return cls
   base_type
 
--- convet position in text to line number
-pos_to_line = (str, pos) ->
+-- convert position in text to line and column numbers
+pos_to_line_col = (str, pos) ->
   line = 1
-  for _ in str\sub(1, pos)\gmatch("\n")
+  line_start = 1
+  while true
+    nl = str\find "\n", line_start, true
+    break unless nl and nl < pos
     line += 1
+    line_start = nl + 1
+
+  line, pos - line_start + 1
+
+-- convert position in text to line number
+pos_to_line = (str, pos) ->
+  line = pos_to_line_col str, pos
   line
 
 trim = (str) ->
@@ -136,7 +146,6 @@ safe_module = (name, tbl) ->
   }
 
 {
-  :moon, :mtype, :pos_to_line, :get_closest_line, :get_line, :trim, :split, :dump,
+  :moon, :mtype, :pos_to_line_col, :pos_to_line, :get_closest_line, :get_line, :trim, :split, :dump,
   :debug_posmap, :getfenv, :setfenv, :get_options, :unpack, :safe_module
 }
-

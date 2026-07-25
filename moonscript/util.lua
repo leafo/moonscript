@@ -29,12 +29,23 @@ mtype = function(value)
   end
   return base_type
 end
+local pos_to_line_col
+pos_to_line_col = function(str, pos)
+  local line = 1
+  local line_start = 1
+  while true do
+    local nl = str:find("\n", line_start, true)
+    if not (nl and nl < pos) then
+      break
+    end
+    line = line + 1
+    line_start = nl + 1
+  end
+  return line, pos - line_start + 1
+end
 local pos_to_line
 pos_to_line = function(str, pos)
-  local line = 1
-  for _ in str:sub(1, pos):gmatch("\n") do
-    line = line + 1
-  end
+  local line = pos_to_line_col(str, pos)
   return line
 end
 local trim
@@ -202,6 +213,7 @@ end
 return {
   moon = moon,
   mtype = mtype,
+  pos_to_line_col = pos_to_line_col,
   pos_to_line = pos_to_line,
   get_closest_line = get_closest_line,
   get_line = get_line,

@@ -52,7 +52,7 @@ local default_whitelist = Set({
   "true",
   "false"
 })
-local lint_stages = {
+local LINT_STAGES = {
   "global_access",
   "unused",
   "constant_assign",
@@ -70,7 +70,8 @@ do
       end
       return insert(root.lint_errors, {
         msg,
-        pos
+        pos,
+        stage
       })
     end,
     lint_mark_used = function(self, name)
@@ -284,6 +285,37 @@ do
   end
   LinterBlock = _class_0
 end
+local format_lint_compact
+format_lint_compact = function(errors, code, header)
+  if not (next(errors)) then
+    return nil
+  end
+  local pos_to_line_col
+  pos_to_line_col = require("moonscript.util").pos_to_line_col
+  local formatted
+  do
+    local _accum_0 = { }
+    local _len_0 = 1
+    for _index_0 = 1, #errors do
+      local _des_0 = errors[_index_0]
+      local msg, pos, stage
+      msg, pos, stage = _des_0[1], _des_0[2], _des_0[3]
+      local location
+      if pos then
+        local line, col = pos_to_line_col(code, pos)
+        location = tostring(header) .. ":" .. tostring(line) .. ":" .. tostring(col)
+      else
+        location = header
+      end
+      local stage_suffix = stage and " [" .. tostring(stage) .. "]" or ""
+      local _value_0 = tostring(location) .. ": " .. tostring(msg) .. tostring(stage_suffix)
+      _accum_0[_len_0] = _value_0
+      _len_0 = _len_0 + 1
+    end
+    formatted = _accum_0
+  end
+  return table.concat(formatted, "\n")
+end
 local format_lint
 format_lint = function(errors, code, header)
   if not (next(errors)) then
@@ -351,8 +383,16 @@ do
     })
   end
 end
+local LINT_FORMATS = {
+  "default",
+  "compact"
+}
+local formatters = {
+  default = format_lint,
+  compact = format_lint_compact
+}
 local lint_code
-lint_code = function(code, name, whitelist_globals, stages)
+lint_code = function(code, name, whitelist_globals, opts)
   if name == nil then
     name = "string input"
   end
@@ -361,21 +401,26 @@ lint_code = function(code, name, whitelist_globals, stages)
   if not (tree) then
     return nil, err
   end
-  local scope = LinterBlock(whitelist_globals, stages)
+  local scope = LinterBlock(whitelist_globals, opts and opts.stages)
   scope:stms(tree)
   scope:lint_check_unused()
-  return format_lint(scope.lint_errors, code, name)
+  local formatter = formatters[opts and opts.format or "default"]
+  if not (formatter) then
+    error("unknown lint format: " .. tostring(opts.format))
+  end
+  return formatter(scope.lint_errors, code, name)
 end
 local lint_file
-lint_file = function(fname, stages)
+lint_file = function(fname, opts)
   local f, err = io.open(fname)
   if not (f) then
     return nil, err
   end
-  return lint_code(f:read("*a"), fname, whitelist_for_file(fname), stages)
+  return lint_code(f:read("*a"), fname, whitelist_for_file(fname), opts)
 end
 return {
   lint_code = lint_code,
   lint_file = lint_file,
-  lint_stages = lint_stages
+  LINT_STAGES = LINT_STAGES,
+  LINT_FORMATS = LINT_FORMATS
 }

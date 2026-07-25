@@ -54,7 +54,7 @@ default_whitelist = Set {
 }
 
 -- the named checks that can be enabled or disabled when linting
-lint_stages = {
+LINT_STAGES = {
   "global_access"
   "unused"
   "constant_assign"
@@ -147,7 +147,7 @@ class LinterBlock extends Block
   lint_report: (stage, msg, pos) =>
     root = @root
     return if root.lint_stages and not root.lint_stages[stage]
-    insert root.lint_errors, {msg, pos}
+    insert root.lint_errors, {msg, pos, stage}
 
   lint_mark_used: (name) =>
     if @lint_unused_names and @lint_unused_names[name]
@@ -188,6 +188,23 @@ class LinterBlock extends Block
       .statement_compilers = @statement_compilers
       .lint_wrap_transform = @lint_wrap_transform
       @lint_wrap_transform child
+
+-- one `file:line:col: message [stage]` line per error
+format_lint_compact = (errors, code, header) ->
+  return nil unless next errors
+
+  import pos_to_line_col from require "moonscript.util"
+  formatted = for {msg, pos, stage} in *errors
+    location = if pos
+      line, col = pos_to_line_col code, pos
+      "#{header}:#{line}:#{col}"
+    else
+      header
+
+    stage_suffix = stage and " [#{stage}]" or ""
+    "#{location}: #{msg}#{stage_suffix}"
+
+  table.concat formatted, "\n"
 
 format_lint = (errors, code, header) ->
   return unless next errors
@@ -236,21 +253,32 @@ whitelist_for_file = do
 
     setmetatable Set(final_list), __index: default_whitelist
 
-lint_code = (code, name="string input", whitelist_globals, stages) ->
+-- the named output formats for lint results
+LINT_FORMATS = {"default", "compact"}
+
+formatters = {
+  default: format_lint
+  compact: format_lint_compact
+}
+
+-- opts: {stages: {stage_name}, format: format_name}
+lint_code = (code, name="string input", whitelist_globals, opts) ->
   parse = require "moonscript.parse"
   tree, err = parse.string code
   return nil, err unless tree
 
-  scope = LinterBlock whitelist_globals, stages
+  scope = LinterBlock whitelist_globals, opts and opts.stages
   scope\stms tree
   scope\lint_check_unused!
 
-  format_lint scope.lint_errors, code, name
+  formatter = formatters[opts and opts.format or "default"]
+  error "unknown lint format: #{opts.format}" unless formatter
+  formatter scope.lint_errors, code, name
 
-lint_file = (fname, stages) ->
+lint_file = (fname, opts) ->
   f, err = io.open fname
   return nil, err unless f
-  lint_code f\read("*a"), fname, whitelist_for_file(fname), stages
+  lint_code f\read("*a"), fname, whitelist_for_file(fname), opts
 
 
-{ :lint_code, :lint_file, :lint_stages }
+{ :lint_code, :lint_file, :LINT_STAGES, :LINT_FORMATS }

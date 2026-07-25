@@ -179,6 +179,15 @@ moonc -l --lint-stage global_access --lint-stage unused .
 moonc -l --exclude-lint-stage import_overwrite .
 ```
 
+The `--lint-format` option changes how results are printed. The `compact`
+format writes one `file:line:column: message [stage]` line per issue,
+suitable for tools and editors that parse compiler style output:
+
+```bash
+$ moonc -l --lint-format compact lint_example.moon
+lint_example.moon:7:5: accessing global `my_nmuber` [global_access]
+```
+
 Like when compiling, you can also pass a directory as a command line argument
 to recursively process all the `.moon` files.
 

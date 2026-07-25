@@ -8,16 +8,23 @@ local parser = argparse()
 parser:flag("-l --lint", "Perform a lint on the file instead of compiling")
 
 -- may be nil when an older moonscript.cmd.lint is loaded from the module path
-local all_lint_stages = require("moonscript.cmd.lint").lint_stages
+local all_lint_stages = require("moonscript.cmd.lint").LINT_STAGES
+local all_lint_formats = require("moonscript.cmd.lint").LINT_FORMATS
 
 local lint_stage_opt = parser:option("--lint-stage",
   "Limit lint to the given stage name (repeatable)"):count("*")
 local exclude_lint_stage_opt = parser:option("--exclude-lint-stage",
   "Lint with all stages except the given stage name (repeatable)"):count("*")
+local lint_format_opt = parser:option("--lint-format",
+  "Set the output format of lint results")
 
 if all_lint_stages then
   lint_stage_opt:choices(all_lint_stages)
   exclude_lint_stage_opt:choices(all_lint_stages)
+end
+
+if all_lint_formats then
+  lint_format_opt:choices(all_lint_formats)
 end
 
 parser:mutex(lint_stage_opt, exclude_lint_stage_opt)
@@ -54,9 +61,10 @@ end
 
 local opts = read_stdin and {} or parser:parse()
 
--- the list of lint stages to run, nil runs all of them
-local lint_stages
+-- options passed to lint_file, stages: nil runs all of them
+local lint_opts
 do
+  local lint_stages
   local included, excluded = opts.lint_stage, opts.exclude_lint_stage
   if included and #included > 0 then
     lint_stages = included
@@ -73,6 +81,11 @@ do
       end
     end
   end
+
+  lint_opts = {
+    stages = lint_stages,
+    format = opts.lint_format,
+  }
 end
 
 function log_msg(...)
@@ -188,7 +201,7 @@ if opts.watch then
   if opts.lint then
     local lint = require "moonscript.cmd.lint"
     handle_file = function(fname)
-      return lint.lint_file(fname, lint_stages)
+      return lint.lint_file(fname, lint_opts)
     end
   else
     handle_file = compile_and_write
@@ -237,10 +250,12 @@ elseif opts.lint then
   local lint = require "moonscript.cmd.lint"
   for _, tuple in pairs(files) do
     local fname = tuple[1]
-    local res, err = lint.lint_file(fname, lint_stages)
+    local res, err = lint.lint_file(fname, lint_opts)
     if res then
       has_linted_with_error = true
-      io.stderr:write(res .. "\n\n")
+      -- compact format lines identify their file, no separator needed
+      local sep = opts.lint_format == "compact" and "\n" or "\n\n"
+      io.stderr:write(res .. sep)
     elseif err then
       has_linted_with_error = true
       io.stderr:write(fname .. "\n" .. err.. "\n\n")
