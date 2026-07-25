@@ -81,8 +81,78 @@ describe "linter", ->
 
     assert.is_nil (lint.lint_code code)
 
-  -- a repeated import overwrites the existing binding instead of shadowing
-  -- it, so it counts as a constant write like any other assignment
+  -- importing a name bound in an enclosing scope writes that binding
+  -- instead of creating a local
+  it "flags import overwriting an enclosing binding", ->
+    code = unindent [[
+      insert = "hello"
+      f = ->
+        import insert from table
+        insert
+      f!
+    ]]
+
+    assert.same unindent([[
+      string input
+
+      line 3: import overwrites existing binding `insert`
+      ===================================================
+      >   import insert from table
+    ]]), lint.lint_code code
+
+  it "flags import overwriting a binding in the same scope", ->
+    code = unindent [[
+      insert = "hello"
+      import insert from table
+      insert {}, 1
+    ]]
+
+    assert.same unindent([[
+      string input
+
+      line 2: import overwrites existing binding `insert`
+      ===================================================
+      > import insert from table
+    ]]), lint.lint_code code
+
+  it "flags a final import overwriting an enclosing binding", ->
+    code = unindent [[
+      insert = "hello"
+      f = ->
+        print insert
+        import insert from table
+      f!
+    ]]
+
+    assert.same unindent([[
+      string input
+
+      line 4: import overwrites existing binding `insert`
+      ===================================================
+      >   import insert from table
+    ]]), lint.lint_code code
+
+  it "flags import inside nested function overwriting a declared local", ->
+    code = unindent [[
+      f = ->
+        local check_app_version
+        reload = ->
+          import check_app_version from require "helpers.api"
+          print "reloaded"
+        reload!
+        check_app_version!
+      f!
+    ]]
+
+    assert.same unindent([[
+      string input
+
+      line 4: import overwrites existing binding `check_app_version`
+      ==============================================================
+      >     import check_app_version from require "helpers.api"
+    ]]), lint.lint_code code
+
+  -- a repeated import writes the existing constant binding
   it "flags a repeated import", ->
     code = unindent [[
       import insert from table

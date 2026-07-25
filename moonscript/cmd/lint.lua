@@ -4,6 +4,8 @@ local Set
 Set = require("moonscript.data").Set
 local Block
 Block = require("moonscript.compile").Block
+local ntype
+ntype = require("moonscript.types").ntype
 local mtype
 mtype = require("moonscript.util").mtype
 local default_whitelist = Set({
@@ -126,14 +128,16 @@ do
     end,
     block = function(self, ...)
       do
-        local _with_0 = _class_0.__parent.__base.block(self, ...)
-        _with_0.block = self.block
-        _with_0.render = self.render
-        _with_0.lint_check_unused = self.lint_check_unused
-        _with_0.lint_mark_used = self.lint_mark_used
-        _with_0.value_compilers = self.value_compilers
-        _with_0.statement_compilers = self.statement_compilers
-        return _with_0
+        local child = _class_0.__parent.__base.block(self, ...)
+        child.block = self.block
+        child.render = self.render
+        child.lint_check_unused = self.lint_check_unused
+        child.lint_mark_used = self.lint_mark_used
+        child.value_compilers = self.value_compilers
+        child.statement_compilers = self.statement_compilers
+        child.lint_wrap_transform = self.lint_wrap_transform
+        self:lint_wrap_transform(child)
+        return child
       end
     end
   }
@@ -146,6 +150,40 @@ do
       end
       _class_0.__parent.__init(self, ...)
       self.lint_errors = { }
+      self.lint_wrap_transform = function(self, block)
+        local inner = block.transform.statement
+        local checked_imports = setmetatable({ }, {
+          __mode = "k"
+        })
+        block.transform.statement = function(node, ...)
+          local import_node = node
+          while ntype(import_node) == "transform" do
+            import_node = import_node[2]
+          end
+          if ntype(import_node) == "import" and not checked_imports[import_node] then
+            checked_imports[import_node] = true
+            local _list_0 = import_node[2]
+            for _index_0 = 1, #_list_0 do
+              local name = _list_0[_index_0]
+              if ntype(name) == "colon" then
+                name = name[2]
+              end
+              local binding = block:binding_value(name)
+              if not (type(binding) == "table" and binding.const) then
+                if binding then
+                  insert(block.root.lint_errors, {
+                    "import overwrites existing binding `" .. tostring(name) .. "`",
+                    import_node[-1]
+                  })
+                end
+              end
+            end
+          end
+          return inner(node, ...)
+        end
+        return block
+      end
+      self:lint_wrap_transform(self)
       local vc = self.value_compilers
       self.value_compilers = setmetatable({
         ref = function(block, val)
