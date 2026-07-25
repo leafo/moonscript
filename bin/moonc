@@ -7,6 +7,21 @@ local parser = argparse()
 
 parser:flag("-l --lint", "Perform a lint on the file instead of compiling")
 
+-- may be nil when an older moonscript.cmd.lint is loaded from the module path
+local all_lint_stages = require("moonscript.cmd.lint").lint_stages
+
+local lint_stage_opt = parser:option("--lint-stage",
+  "Limit lint to the given stage name (repeatable)"):count("*")
+local exclude_lint_stage_opt = parser:option("--exclude-lint-stage",
+  "Lint with all stages except the given stage name (repeatable)"):count("*")
+
+if all_lint_stages then
+  lint_stage_opt:choices(all_lint_stages)
+  exclude_lint_stage_opt:choices(all_lint_stages)
+end
+
+parser:mutex(lint_stage_opt, exclude_lint_stage_opt)
+
 parser:flag("-v --version", "Print version"):action(function()
   require("moonscript.version").print_version()
   os.exit(0)
@@ -38,6 +53,27 @@ else
 end
 
 local opts = read_stdin and {} or parser:parse()
+
+-- the list of lint stages to run, nil runs all of them
+local lint_stages
+do
+  local included, excluded = opts.lint_stage, opts.exclude_lint_stage
+  if included and #included > 0 then
+    lint_stages = included
+  elseif excluded and #excluded > 0 then
+    local skip = {}
+    for _, name in ipairs(excluded) do
+      skip[name] = true
+    end
+
+    lint_stages = {}
+    for _, name in ipairs(all_lint_stages or {}) do
+      if not skip[name] then
+        table.insert(lint_stages, name)
+      end
+    end
+  end
+end
 
 function log_msg(...)
   if not opts.p then
@@ -151,7 +187,9 @@ if opts.watch then
   local handle_file
   if opts.lint then
     local lint = require "moonscript.cmd.lint"
-    handle_file = lint.lint_file
+    handle_file = function(fname)
+      return lint.lint_file(fname, lint_stages)
+    end
   else
     handle_file = compile_and_write
   end
@@ -199,7 +237,7 @@ elseif opts.lint then
   local lint = require "moonscript.cmd.lint"
   for _, tuple in pairs(files) do
     local fname = tuple[1]
-    local res, err = lint.lint_file(fname)
+    local res, err = lint.lint_file(fname, lint_stages)
     if res then
       has_linted_with_error = true
       io.stderr:write(res .. "\n\n")

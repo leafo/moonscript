@@ -169,3 +169,29 @@ describe "linter", ->
       =======================================
       >   import insert from require "custom"
     ]]), lint.lint_code code
+
+  it "limits reporting to the given stages", ->
+    code = unindent [[
+      import insert from table
+      insert = 5
+      do
+        unused_var = 1
+      missing_global 10
+    ]]
+
+    result = lint.lint_code code, nil, nil, {"constant_assign"}
+    assert.same unindent([[
+      string input
+
+      line 2: assigning to constant `insert`
+      ======================================
+      > insert = 5
+    ]]), result
+
+    result = lint.lint_code code, nil, nil, {"global_access", "unused"}
+    assert.truthy result\match "accessing global"
+    assert.truthy result\match "assigned but unused"
+    assert.is_nil result\match "assigning to constant"
+
+    assert.is_nil (lint.lint_code code, nil, nil, {"import_overwrite"})
+    assert.is_nil (lint.lint_code code, nil, nil, {})

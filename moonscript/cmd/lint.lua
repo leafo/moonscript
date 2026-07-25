@@ -52,11 +52,27 @@ local default_whitelist = Set({
   "true",
   "false"
 })
+local lint_stages = {
+  "global_access",
+  "unused",
+  "constant_assign",
+  "import_overwrite"
+}
 local LinterBlock
 do
   local _class_0
   local _parent_0 = Block
   local _base_0 = {
+    lint_report = function(self, stage, msg, pos)
+      local root = self.root
+      if root.lint_stages and not root.lint_stages[stage] then
+        return 
+      end
+      return insert(root.lint_errors, {
+        msg,
+        pos
+      })
+    end,
     lint_mark_used = function(self, name)
       if self.lint_unused_names and self.lint_unused_names[name] then
         self.lint_unused_names[name] = false
@@ -107,19 +123,16 @@ do
         local _des_0 = tuples[_index_0]
         local pos, names
         pos, names = _des_0[1], _des_0[2]
-        insert(self.root.lint_errors, {
-          "assigned but unused " .. tostring(table.concat((function()
-            local _accum_0 = { }
-            local _len_0 = 1
-            for _index_1 = 1, #names do
-              local n = names[_index_1]
-              _accum_0[_len_0] = "`" .. tostring(n) .. "`"
-              _len_0 = _len_0 + 1
-            end
-            return _accum_0
-          end)(), ", ")),
-          pos
-        })
+        self.root:lint_report("unused", "assigned but unused " .. tostring(table.concat((function()
+          local _accum_0 = { }
+          local _len_0 = 1
+          for _index_1 = 1, #names do
+            local n = names[_index_1]
+            _accum_0[_len_0] = "`" .. tostring(n) .. "`"
+            _len_0 = _len_0 + 1
+          end
+          return _accum_0
+        end)(), ", ")), pos)
       end
     end,
     render = function(self, ...)
@@ -144,12 +157,15 @@ do
   _base_0.__index = _base_0
   setmetatable(_base_0, _parent_0.__base)
   _class_0 = setmetatable({
-    __init = function(self, whitelist_globals, ...)
+    __init = function(self, whitelist_globals, stages, ...)
       if whitelist_globals == nil then
         whitelist_globals = default_whitelist
       end
       _class_0.__parent.__init(self, ...)
       self.lint_errors = { }
+      if stages then
+        self.lint_stages = Set(stages)
+      end
       self.lint_wrap_transform = function(self, block)
         local inner = block.transform.statement
         local checked_imports = setmetatable({ }, {
@@ -171,10 +187,7 @@ do
               local binding = block:binding_value(name)
               if not (type(binding) == "table" and binding.const) then
                 if binding then
-                  insert(block.root.lint_errors, {
-                    "import overwrites existing binding `" .. tostring(name) .. "`",
-                    import_node[-1]
-                  })
+                  block.root:lint_report("import_overwrite", "import overwrites existing binding `" .. tostring(name) .. "`", import_node[-1])
                 end
               end
             end
@@ -189,10 +202,7 @@ do
         ref = function(block, val)
           local name = val[2]
           if not (block:has_name(name) or whitelist_globals[name] or name:match("%.")) then
-            insert(self.lint_errors, {
-              "accessing global `" .. tostring(name) .. "`",
-              val[-1]
-            })
+            self:lint_report("global_access", "accessing global `" .. tostring(name) .. "`", val[-1])
           end
           block:lint_mark_used(name)
           return vc.ref(block, val)
@@ -221,10 +231,7 @@ do
               if const_name then
                 local binding = block:binding_value(const_name)
                 if type(binding) == "table" and binding.const then
-                  insert(self.lint_errors, {
-                    "assigning to constant `" .. tostring(const_name) .. "`",
-                    type(name) == "table" and name[-1] or node[-1] or block.root.last_pos
-                  })
+                  self:lint_report("constant_assign", "assigning to constant `" .. tostring(const_name) .. "`", type(name) == "table" and name[-1] or node[-1] or block.root.last_pos)
                 end
               end
               local real_name, is_local = block:extract_assign_name(name)
@@ -345,7 +352,7 @@ do
   end
 end
 local lint_code
-lint_code = function(code, name, whitelist_globals)
+lint_code = function(code, name, whitelist_globals, stages)
   if name == nil then
     name = "string input"
   end
@@ -354,20 +361,21 @@ lint_code = function(code, name, whitelist_globals)
   if not (tree) then
     return nil, err
   end
-  local scope = LinterBlock(whitelist_globals)
+  local scope = LinterBlock(whitelist_globals, stages)
   scope:stms(tree)
   scope:lint_check_unused()
   return format_lint(scope.lint_errors, code, name)
 end
 local lint_file
-lint_file = function(fname)
+lint_file = function(fname, stages)
   local f, err = io.open(fname)
   if not (f) then
     return nil, err
   end
-  return lint_code(f:read("*a"), fname, whitelist_for_file(fname))
+  return lint_code(f:read("*a"), fname, whitelist_for_file(fname), stages)
 end
 return {
   lint_code = lint_code,
-  lint_file = lint_file
+  lint_file = lint_file,
+  lint_stages = lint_stages
 }

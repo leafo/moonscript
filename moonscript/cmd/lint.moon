@@ -53,10 +53,21 @@ default_whitelist = Set {
   "false"
 }
 
+-- the named checks that can be enabled or disabled when linting
+lint_stages = {
+  "global_access"
+  "unused"
+  "constant_assign"
+  "import_overwrite"
+}
+
 class LinterBlock extends Block
-  new: (whitelist_globals=default_whitelist, ...) =>
+  new: (whitelist_globals=default_whitelist, stages, ...) =>
     super ...
     @lint_errors = {}
+
+    if stages
+      @lint_stages = Set stages
 
     @lint_wrap_transform = (block) =>
       inner = block.transform.statement
@@ -78,10 +89,8 @@ class LinterBlock extends Block
             -- check after the import is lowered
             unless type(binding) == "table" and binding.const
               if binding
-                insert block.root.lint_errors, {
-                  "import overwrites existing binding `#{name}`"
-                  import_node[-1]
-                }
+                block.root\lint_report "import_overwrite",
+                  "import overwrites existing binding `#{name}`", import_node[-1]
 
         inner node, ...
       block
@@ -93,10 +102,7 @@ class LinterBlock extends Block
       ref: (block, val) ->
         name = val[2]
         unless block\has_name(name) or whitelist_globals[name] or name\match "%."
-          insert @lint_errors, {
-            "accessing global `#{name}`"
-            val[-1]
-          }
+          @lint_report "global_access", "accessing global `#{name}`", val[-1]
 
         block\lint_mark_used name
         vc.ref block, val
@@ -121,10 +127,8 @@ class LinterBlock extends Block
           if const_name
             binding = block\binding_value const_name
             if type(binding) == "table" and binding.const
-              insert @lint_errors, {
-                "assigning to constant `#{const_name}`"
+              @lint_report "constant_assign", "assigning to constant `#{const_name}`",
                 type(name) == "table" and name[-1] or node[-1] or block.root.last_pos
-              }
 
           real_name, is_local = block\extract_assign_name name
           -- already defined in some other scope
@@ -138,6 +142,12 @@ class LinterBlock extends Block
 
         sc.assign block, node
     }, __index: sc
+
+  -- records an error if the stage is enabled
+  lint_report: (stage, msg, pos) =>
+    root = @root
+    return if root.lint_stages and not root.lint_stages[stage]
+    insert root.lint_errors, {msg, pos}
 
   lint_mark_used: (name) =>
     if @lint_unused_names and @lint_unused_names[name]
@@ -160,10 +170,8 @@ class LinterBlock extends Block
     table.sort tuples, (a,b) -> a[1] < b[1]
 
     for {pos, names} in *tuples
-      insert @root.lint_errors, {
-        "assigned but unused #{table.concat ["`#{n}`" for n in *names], ", "}"
-        pos
-      }
+      @root\lint_report "unused",
+        "assigned but unused #{table.concat ["`#{n}`" for n in *names], ", "}", pos
 
   render: (...) =>
     @lint_check_unused!
@@ -228,21 +236,21 @@ whitelist_for_file = do
 
     setmetatable Set(final_list), __index: default_whitelist
 
-lint_code = (code, name="string input", whitelist_globals) ->
+lint_code = (code, name="string input", whitelist_globals, stages) ->
   parse = require "moonscript.parse"
   tree, err = parse.string code
   return nil, err unless tree
 
-  scope = LinterBlock whitelist_globals
+  scope = LinterBlock whitelist_globals, stages
   scope\stms tree
   scope\lint_check_unused!
 
   format_lint scope.lint_errors, code, name
 
-lint_file = (fname) ->
+lint_file = (fname, stages) ->
   f, err = io.open fname
   return nil, err unless f
-  lint_code f\read("*a"), fname, whitelist_for_file fname
+  lint_code f\read("*a"), fname, whitelist_for_file(fname), stages
 
 
-{ :lint_code, :lint_file }
+{ :lint_code, :lint_file, :lint_stages }

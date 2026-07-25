@@ -163,6 +163,22 @@ The linter is compatible with the watch mode (see above) for automatic linting.
 moonc -l file1.moon file2.moon
 ```
 
+The linter's checks are organized into named stages: `global_access`,
+`unused`, `constant_assign`, `import_overwrite`. By default every stage is
+reported. The `--lint-stage` option limits reporting to the given stage, and
+`--exclude-lint-stage` reports every stage except the given one. Both can be
+repeated to name multiple stages, and they can not be combined:
+
+- `global_access` reports references to undeclared global variables.
+- `unused` reports local assignments that are never used.
+- `constant_assign` reports assignments to constant bindings, such as imports.
+- `import_overwrite` reports imports that overwrite existing bindings.
+
+```bash
+moonc -l --lint-stage global_access --lint-stage unused .
+moonc -l --exclude-lint-stage import_overwrite .
+```
+
 Like when compiling, you can also pass a directory as a command line argument
 to recursively process all the `.moon` files.
 
