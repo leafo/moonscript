@@ -46,3 +46,16 @@ do
     c
     from z
 
+
+
+-- import name is hoisted by local *
+do
+  local *
+  use = -> insert "hello"
+  import insert from table
+
+-- import inside class body is hoisted for methods
+class Pipeline
+  import insert from table
+
+  add: (...) => insert @, ...

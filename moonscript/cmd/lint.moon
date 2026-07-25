@@ -81,6 +81,19 @@ class LinterBlock extends Block
           if type(name) == "table" and name[1] == "temp_name"
             continue
 
+          const_name = if type(name) == "string"
+            name
+          elseif name[1] == "ref"
+            name[2]
+
+          if const_name
+            binding = block\binding_value const_name
+            if type(binding) == "table" and binding.const
+              insert @lint_errors, {
+                "assigning to constant `#{const_name}`"
+                type(name) == "table" and name[-1] or node[-1] or block.root.last_pos
+              }
+
           real_name, is_local = block\extract_assign_name name
           -- already defined in some other scope
           unless is_local or real_name and not block\has_name real_name, true

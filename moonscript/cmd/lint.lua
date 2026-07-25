@@ -174,6 +174,21 @@ do
                 _continue_0 = true
                 break
               end
+              local const_name
+              if type(name) == "string" then
+                const_name = name
+              elseif name[1] == "ref" then
+                const_name = name[2]
+              end
+              if const_name then
+                local binding = block:binding_value(const_name)
+                if type(binding) == "table" and binding.const then
+                  insert(self.lint_errors, {
+                    "assigning to constant `" .. tostring(const_name) .. "`",
+                    type(name) == "table" and name[-1] or node[-1] or block.root.last_pos
+                  })
+                end
+              end
               local real_name, is_local = block:extract_assign_name(name)
               if not (is_local or real_name and not block:has_name(real_name, true)) then
                 _continue_0 = true

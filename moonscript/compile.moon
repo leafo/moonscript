@@ -240,6 +240,22 @@ class Block
     name = name\get_name self if NameProxy == mtype name
     @_names[name] = value
 
+  -- record names the current construct always binds fresh (loop variables,
+  -- local statements), so they shadow any binding in an enclosing scope
+  put_fresh_names: (names) =>
+    for name in *names
+      real_name = @extract_assign_name name
+      @put_name real_name if real_name
+
+  -- the value stored for a binding by put_name, following the same scope
+  -- visibility as has_name. constant bindings store a descriptor table
+  binding_value: (name) =>
+    val = @_names[name]
+    if val == nil and @parent
+      if not @_name_whitelist or @_name_whitelist[name]
+        return @parent\binding_value name
+    val
+
   -- Check if a name is defined in the current or any enclosing scope
   -- skip_exports: ignore names that have been exported using `export`
   has_name: (name, skip_exports) =>

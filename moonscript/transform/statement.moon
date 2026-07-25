@@ -58,7 +58,7 @@ extract_declarations = (body=@current_stms, start=@current_stm_i + 1, out={}) =>
     stm = @transform.statement stm
     body[i] = stm
     switch stm[1]
-      when "assign", "declare"
+      when "assign", "declare", "declare_constants"
         for name in *stm[2]
           if ntype(name) == "ref"
             insert out, name
@@ -278,16 +278,22 @@ Transformer {
 
   import: (node) =>
     names, source = unpack node, 2
+
+    dest_names = {}
     table_values = for name in *names
       dest_name = if ntype(name) == "colon"
         name[2]
       else
         name
 
+      insert dest_names, dest_name
       {{"key_literal", name}, dest_name}
 
     dest = { "table", table_values }
-    { "assign", {dest}, {source}, [-1]: node[-1] }
+    build.group {
+      { "assign", {dest}, {source}, [-1]: node[-1] }
+      { "declare_constants", dest_names, [-1]: node[-1] }
+    }
 
   comprehension: (node, action) =>
     exp, clauses = unpack node, 2

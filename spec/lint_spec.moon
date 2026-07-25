@@ -19,3 +19,83 @@ describe "linter", ->
       ====================================
       >   unused = 1
     ]]), lint.lint_code code
+
+  it "reports assigning to constant import", ->
+    code = unindent [[
+      import insert from table
+      insert = 5
+    ]]
+
+    assert.same unindent([[
+      string input
+
+      line 2: assigning to constant `insert`
+      ======================================
+      > insert = 5
+    ]]), lint.lint_code code
+
+  it "reports update op on constant import", ->
+    code = unindent [[
+      import count from require "thing"
+      count += 1
+    ]]
+
+    assert.same unindent([[
+      string input
+
+      line 2: assigning to constant `count`
+      =====================================
+      > count += 1
+    ]]), lint.lint_code code
+
+  it "allows shadowing a constant import", ->
+    code = unindent [[
+      import insert from table
+      insert {}, 1
+      f = (insert) -> insert
+      g = ->
+        local insert
+        insert = 5
+        insert
+      f g!
+    ]]
+
+    assert.is_nil (lint.lint_code code)
+
+  -- loop variables are fresh locals in every loop form, writing them never
+  -- touches the enclosing binding
+  it "allows loop variables shadowing a constant import", ->
+    code = unindent [[
+      import x from table
+      f = -> x
+      for x = 1, 2
+        x = 3
+        f!
+      for x in ipairs {}
+        x = 4
+        f!
+      for x in *{1, 2}
+        x = 5
+        f!
+    ]]
+
+    assert.is_nil (lint.lint_code code)
+
+  -- a repeated import overwrites the existing binding instead of shadowing
+  -- it, so it counts as a constant write like any other assignment
+  it "flags a repeated import", ->
+    code = unindent [[
+      import insert from table
+      insert {}, 1
+      do
+        import insert from require "custom"
+        insert 2
+    ]]
+
+    assert.same unindent([[
+      string input
+
+      line 4: assigning to constant `insert`
+      =======================================
+      >   import insert from require "custom"
+    ]]), lint.lint_code code

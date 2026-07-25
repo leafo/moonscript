@@ -75,3 +75,38 @@ do
     a, b, c = _obj_0.a, _obj_0.b, _obj_0.c
   end
 end
+do
+  local use, insert
+  use = function()
+    return insert("hello")
+  end
+  insert = table.insert
+end
+local Pipeline
+do
+  local _class_0
+  local insert
+  local _base_0 = {
+    add = function(self, ...)
+      return insert(self, ...)
+    end
+  }
+  _base_0.__index = _base_0
+  _class_0 = setmetatable({
+    __init = function() end,
+    __base = _base_0,
+    __name = "Pipeline"
+  }, {
+    __index = _base_0,
+    __call = function(cls, ...)
+      local _self_0 = setmetatable({}, _base_0)
+      cls.__init(_self_0, ...)
+      return _self_0
+    end
+  })
+  _base_0.__class = _class_0
+  local self = _class_0
+  insert = table.insert
+  Pipeline = _class_0
+  return _class_0
+end

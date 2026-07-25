@@ -105,7 +105,7 @@ extract_declarations = function(self, body, start, out)
       stm = self.transform.statement(stm)
       body[i] = stm
       local _exp_0 = stm[1]
-      if "assign" == _exp_0 or "declare" == _exp_0 then
+      if "assign" == _exp_0 or "declare" == _exp_0 or "declare_constants" == _exp_0 then
         local _list_0 = stm[2]
         for _index_0 = 1, #_list_0 do
           local name = _list_0[_index_0]
@@ -444,6 +444,7 @@ return Transformer({
   end,
   import = function(self, node)
     local names, source = unpack(node, 2)
+    local dest_names = { }
     local table_values
     do
       local _accum_0 = { }
@@ -456,6 +457,7 @@ return Transformer({
         else
           dest_name = name
         end
+        insert(dest_names, dest_name)
         local _value_0 = {
           {
             "key_literal",
@@ -472,16 +474,23 @@ return Transformer({
       "table",
       table_values
     }
-    return {
-      "assign",
+    return build.group({
       {
-        dest
+        "assign",
+        {
+          dest
+        },
+        {
+          source
+        },
+        [-1] = node[-1]
       },
       {
-        source
-      },
-      [-1] = node[-1]
-    }
+        "declare_constants",
+        dest_names,
+        [-1] = node[-1]
+      }
+    })
   end,
   comprehension = function(self, node, action)
     local exp, clauses = unpack(node, 2)

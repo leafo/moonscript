@@ -346,6 +346,24 @@ do
       end
       self._names[name] = value
     end,
+    put_fresh_names = function(self, names)
+      for _index_0 = 1, #names do
+        local name = names[_index_0]
+        local real_name = self:extract_assign_name(name)
+        if real_name then
+          self:put_name(real_name)
+        end
+      end
+    end,
+    binding_value = function(self, name)
+      local val = self._names[name]
+      if val == nil and self.parent then
+        if not self._name_whitelist or self._name_whitelist[name] then
+          return self.parent:binding_value(name)
+        end
+      end
+      return val
+    end,
     has_name = function(self, name, skip_exports)
       if not skip_exports and self:name_exported(name) then
         return true

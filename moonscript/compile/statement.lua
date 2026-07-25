@@ -11,6 +11,20 @@ return {
   raw = function(self, node)
     return self:add(node[2])
   end,
+  declare_constants = function(self, node)
+    local _list_0 = node[2]
+    for _index_0 = 1, #_list_0 do
+      local name = _list_0[_index_0]
+      if ntype(name) == "ref" then
+        name = name[2]
+      end
+      self:put_name(name, {
+        const = true,
+        pos = node[-1]
+      })
+    end
+    return nil
+  end,
   declare = function(self, node)
     local names = node[2]
     local undeclared = self:declare(names)
@@ -34,6 +48,7 @@ return {
   declare_with_shadows = function(self, node)
     local names = node[2]
     self:declare(names)
+    self:put_fresh_names(names)
     do
       local _with_0 = self:line("local ")
       _with_0:append_list((function()
@@ -158,7 +173,7 @@ return {
     }), " do")
     do
       local _with_0 = self:block(loop)
-      _with_0:declare({
+      _with_0:put_fresh_names({
         name
       })
       _with_0:stms(block)
@@ -197,7 +212,7 @@ return {
         return _accum_0
       end)(), ",")
       loop:append(" do")
-      _with_0:declare(names)
+      _with_0:put_fresh_names(names)
       _with_0:stms(block)
       return _with_0
     end
