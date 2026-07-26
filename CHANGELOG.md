@@ -1,3 +1,354 @@
+# MoonScript v0.7.0 (2026-07-26)
+
+This update includes a bunch of syntax bug fixes and cleanups, with a few new
+features and an enhanced linter. This will be the last release using LPeg,
+future versions will use [the new
+parser](https://github.com/leafo/moonscript-parser).
+
+## Destructuring updates
+
+### Function arguments can be destructured
+
+A function argument can now be written as a table literal to destructure the
+value passed in. The destructuring patterns are the same ones supported by
+assignment, including nested patterns, numeric keys, and `@field` targets:
+
+```moonscript
+dist = ({x: x1, y: y1}, {x: x2, y: y2}) ->
+  math.sqrt (x2 - x1)^2 + (y2 - y1)^2
+
+class Point
+  new: ({x: @x, y: @y}) =>
+
+render = (name, {:width, :height}, scale=1, ...) ->
+  print name, width, height, scale, ...
+```
+
+The argument becomes an internal name and the fields are unpacked at the top of
+the function body:
+
+```lua
+render = function(name, _arg_0, scale, ...)
+  local width, height
+  width, height = _arg_0.width, _arg_0.height
+  if scale == nil then
+    scale = 1
+  end
+  return print(name, width, height, scale, ...)
+end
+```
+
+Destructured arguments always declare fresh locals, so a name in the pattern
+shadows an enclosing local of the same name instead of assigning to it.
+
+Argument initialization now happens in the order the arguments are written, so a
+default value can reference a name that an earlier argument destructured:
+
+```moonscript
+scaled = ({:base}, amount = base * 2) -> base + amount
+```
+
+Because the destructured names are bound at the top of the body, a name in a
+pattern can not collide with another argument. `({:a}, a) ->` and `({:self}) =>`
+are now compile errors.
+
+### Destructuring in multiple assignment
+
+Destructuring can now be used mixed in with other names in multiple assignment (#367, #304):
+
+```moonscript
+num, {:message} = two_values!
+head, {:content}, tail = mix!
+{value: built}, {:status} = builder\build!
+```
+
+Previously the assignment  was split into separate statements, which broke
+destructuring output.
+
+### Better validation of destructuring targets
+
+The names extracted by a destructuring pattern are now checked with the same
+rule the parser uses for assignment targets. `@@class_field`, index expressions,
+and slices are now allowed:
+
+```moonscript
+{x: obj.a, y: obj["b"], z: @prop, w: @@cls_prop} = t
+```
+
+Destructuring into something that can never be assigned to is now a compile
+error instead of generating broken code:
+
+* `{foo!} = thing` reports `Can't destructure into chain ending in call`
+* `{...} = thing` reports `Can't destructure into '...'`
+
+## Linter updates
+
+### Lint stages
+
+The linter's checks are now organized into named stages: `global_access`,
+`unused`, `constant_assign`, and `import_overwrite`. Every stage runs by
+default. `moonc --lint-stage` limits reporting to the named stage, and
+`--exclude-lint-stage` reports everything but the named stage. Both options can
+be repeated, and they can not be combined.
+
+```bash
+moonc -l --lint-stage global_access --lint-stage unused .
+moonc -l --exclude-lint-stage import_overwrite .
+```
+
+### New checks
+
+`import_overwrite` reports an `import` that clobbers a name that is already
+bound in scope:
+
+```moonscript
+insert = "hello"
+f = ->
+  import insert from table -- import overwrites existing binding `insert`
+```
+
+`constant_assign` reports writing to a name that is tagged as constant. In this
+version, only the names created by `import` are tagged as constant. For this
+release, constant names are only checked in the linter. In the future we will
+make constant violation a compiler error.
+
+```moonscript
+import insert from table
+insert = 5 -- assigning to constant `insert`
+```
+
+### Compact lint output
+
+`moonc --lint-format compact` writes one line per issue in the familiar
+`file:line:column: message` shape, with the stage name appended, for editors
+and tools that parse compiler output (#465):
+
+```bash
+$ moonc -l --lint-format compact lint_example.moon
+lint_example.moon:7:5: accessing global `my_nmuber` [global_access]
+```
+
+## Standard library updates
+
+### New class introspection functions
+
+The `moon` module has four new functions, documented in the [standard
+library reference](http://moonscript.org/reference/standard_lib.html):
+
+* `is_class(value)` tests if a value is a MoonScript class table
+* `is_instance(value)` tests if a value is an instance of a MoonScript class
+* `is_instance_of(value, cls)` tests if a value is an instance of `cls` or any of
+  its parents. It throws an error if `value` is not an instance
+* `is_subclass_of(cls, parent)` tests if `cls` inherits from `parent`. A class is
+  not a subclass of itself. It throws an error if `cls` is not a class
+
+Unlike the old `is_object`, these can tell classes, instances, and `__base`
+tables apart.
+
+`is_object` is now deprecated. It returns truthy for instances, classes, and
+`__base` tables, so it can not be used to distinguish them.
+
+### BREAKING: `moon.type` no longer returns the class object for a class
+
+`moon.type` now returns the string `"class"` when given a class, and it only
+returns the class object for actual instances. Previously a class returned
+itself, and a `__base` table returned the class it belonged to, which made it
+impossible to tell an instance from the class it came from.
+
+```moonscript
+class MyClass
+
+type MyClass!       -- MyClass (unchanged)
+type MyClass        -- "class" (was MyClass)
+type MyClass.__base -- "table" (was MyClass)
+```
+
+### BREAKING: changes to `moonscript.util`
+
+These are internal helpers that were never documented, but they were reachable:
+
+* `util.moon.type` is now `util.mtype`, to avoid the confusion with the `type`
+  function in the `moon` module
+* `util.moon.is_object` removed, replaced by `util.moon.is_class` and
+  `util.moon.is_instance`
+* `util.moon.is_a` removed, replaced by `is_instance_of` in the `moon` module
+
+## Code Generation
+
+### Interpolated strings and nested expressions are parenthesized correctly
+
+The compiler now knows Lua's operator precedence when writing out an
+expression, and it adds parentheses when a nested expression would otherwise be
+regrouped by the surrounding operators. String interpolation is the most common
+way to get a nested expression, and it was silently generating the wrong math
+(#320):
+
+```moonscript
+x = 10 / "#{b}.5"
+```
+
+**Before:**
+
+```lua
+local x = 10 / tostring(b) .. ".5"
+```
+
+**After:**
+
+```lua
+local x = 10 / (tostring(b) .. ".5")
+```
+
+Because `..` is right associative in Lua, an interpolated string on the left
+hand side of a `..` is grouped as well. This is observable through the
+`__concat` metamethod:
+
+```moonscript
+prefix = "id: #{id}, " .. rest
+```
+
+**Before:**
+
+```lua
+local prefix = "id: " .. tostring(id) .. ", " .. rest
+```
+
+**After:**
+
+```lua
+local prefix = ("id: " .. tostring(id) .. ", ") .. rest
+```
+
+### Prefix operators are grouped in update assignments and switches
+
+The check for whether a value needs to be wrapped in parentheses did not
+account for the prefix operators `#`, `-`, `not`, and `~`, which parse greedily.
+An update assignment or a `switch` case with one of them on the left would
+compile to the wrong grouping (#457):
+
+```moonscript
+count -= #datum + 1
+total *= -x + 1
+flag and= not a or b
+```
+
+**Before:**
+
+```lua
+local count = count - #datum + 1
+local total = total * -x + 1
+local flag = flag and not a or b
+```
+
+**After:**
+
+```lua
+local count = count - (#datum + 1)
+local total = total * (-x + 1)
+local flag = flag and (not a or b)
+```
+
+### Expression lines no longer use `_`
+
+When an expression appears where a statement is expected, the compiler assigns
+it to a throwaway variable. It used to use the name `_`, which would clobber a
+variable of that name in the user's code (#309). It now uses an autogenerated
+`_scrap_N` name.
+
+```moonscript
+_ = 5
+tbl.field
+print _
+```
+
+**Before:**
+
+```lua
+local _ = 5
+_ = tbl.field
+return print(_)
+```
+
+**After:**
+
+```lua
+local _ = 5
+local _scrap_0 = tbl.field
+return print(_)
+```
+
+### `local` in a class body is hoisted
+
+A `local` declaration inside a class body was written out near the bottom of the
+generated `do` block, after the methods had already been compiled. Methods
+referencing the name would close over the outer or global name instead of the
+class local (#459). The declaration is now hoisted to the top of the class body,
+placed after the reference to the parent class so a body local can shadow the
+parent's name.
+
+```moonscript
+class Counter
+  local count
+  count = 0
+
+  inc: => count += 1
+```
+
+## Bug Fixes
+
+* Updated all compiler thrown errors to ensure they include positional
+  information so the error messages are more informative
+* Trailing `continue` in a loop body generated invalid Lua (`break` was
+  followed by more statements)
+* `a, b = x\some_method` and other assignments of a single complex value to
+  multiple names silently dropped every name after the first
+* A `\stub` without a base crashed the compiler with an internal error. Inside a
+  `with` block it now uses the `with` value, and outside of one it reports
+  `Short-colon syntax must be called within a with block` (#428)
+* `continue` outside of a loop is now a compile error with a line number instead
+  of an internal error with a traceback
+* Destructuring against the result of an `if`, `switch`, `for`, `while`, `do`,
+  `with`, or comprehension declared the names in the wrong scope (#449, #411,
+  #391, #451)
+* Destructuring against a receiver that can not be indexed directly, like `...`,
+  `nil`, `not thing`, `#thing`, or a table literal, generated invalid Lua
+* An expression inside a string interpolation that can't be parsed now throws a
+  parse error instead of putting the malformed code as raw characters in the
+  string
+* Fixed broken `moonc --version` which reported missing argument instead of
+  printing version (#471)
+* Errors raised without a position now report the position of the statement
+  being compiled, instead of no position at all
+* An internal compiler error no longer throws a second error while trying to
+  report the first one
+
+## Binaries
+
+* The static binaries now report build information with `--version`:
+
+  ```
+  $ moon --version
+  MoonScript version 0.7.0 (static build)
+  Runtime: LuaJIT 2.1.1748459687
+  Commit: v0.7.0
+  Built: 2026-07-24T09:07:45-07:00
+  ```
+
+* LuaJIT builds are now included alongside the Lua 5.1 builds
+* Linux arm64 builds are now included
+
+## New Parser in Testing
+
+The next version of MoonScript will likely include the [new C
+parser](https://github.com/leafo/moonscript-parser) generated by
+[pgen](https://github.com/leafo/pgen), replacing LPeg. Early testing shows the
+new parser is be about 5x faster.
+ 
+Setting the `MOONSCRIPT_PARSER=pgen` environment variable will make the
+compiler parse with the `moonscript_parser` module instead of building the LPeg
+grammar at runtime. This is opt in and experimental, the LPeg grammar is still
+the default
+
 # MoonScript v0.6.0 (2026-01-10)
 
 ## New Features
