@@ -212,6 +212,49 @@ some_args = (x=100, y=x+1000) ->
   print x + y
 ```
 
+### Argument Destructuring
+
+An argument can be written as a table literal to
+[destructure](#destructuring_assignment) the value that is passed in. The names
+in the table literal become local variables in the body of the function.
+
+```moon
+send_message = ({:sender, :recipient, :body}) ->
+  print "#{sender} -> #{recipient}: #{body}"
+
+send_message {
+  sender: "leaf"
+  recipient: "world"
+  body: "hello"
+}
+```
+
+Any pattern that can be used in a destructuring assignment can be used here,
+including positional names and nested tables:
+
+```moon
+draw = ({label, pos: {x, y}}) ->
+  print label, x, y
+
+draw { "origin", pos: {0, 0} }
+```
+
+Destructured arguments can be mixed with regular arguments, argument defaults,
+and `...`:
+
+```moon
+render = (name, {:width, :height} = {width: 100, height: 50}, ...) ->
+  print name, width, height, ...
+```
+
+Using a fat arrow, the pattern can assign directly to properties of the object.
+This is convenient for a constructor:
+
+```moon
+class Point
+  new: ({x: @x, y: @y}) =>
+```
+
 ### Considerations
 
 Because of the expressive parentheses-less way of calling functions, some
@@ -1420,6 +1463,13 @@ extract by mixing the syntax:
 {:mix, :max, random: rand } = math
 ```
 
+The extracted values don't have to be assigned to plain names. Anything that can
+go on the left hand side of an assignment works, like properties and indexes:
+
+```moon
+{x: @x, y: obj.y, z: obj["z"]} = point
+```
+
 ### Destructuring In Other Places
 
 Destructuring can also show up in places where an assignment implicitly takes
@@ -1438,6 +1488,17 @@ for {left, right} in *tuples
 
 We know each element in the array table is a two item tuple, so we can unpack
 it directly in the names clause of the for statement using a destructure.
+
+Destructuring can also be mixed with regular names when assigning multiple
+values at once:
+
+```moon
+num, {:message} = get_result!
+print num, message
+```
+
+Function arguments can be destructured as well, see [Argument
+Destructuring](#argument_destructuring).
 
 
 ## Function Stubs
