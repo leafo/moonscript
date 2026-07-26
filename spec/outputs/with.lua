@@ -53,7 +53,7 @@ end
 do
   do
     local _with_0 = foo
-    local _ = _with_0:prop("something").hello
+    local _scrap_0 = _with_0:prop("something").hello
     _with_0.prop:send(one)
     _with_0.prop:send(one)
   end
@@ -154,8 +154,8 @@ do
   end
 end
 do
-  local _
-  _ = function()
+  local _scrap_0
+  _scrap_0 = function()
     do
       local _with_0 = hi
       return _with_0.a, _with_0.b

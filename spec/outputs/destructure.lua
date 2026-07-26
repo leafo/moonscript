@@ -27,7 +27,7 @@ do
     a, b, c, d = _obj_0.a, _obj_0.b, _obj_0.c, _obj_0.d
   end
   a = one[1]
-  local _ = two
+  local _scrap_0 = two
   b = one[1]
   c = nil
   d = one[1]
@@ -154,14 +154,15 @@ do
     a, b, c = _obj_0[1], _obj_0[2], _obj_0[3]
   end
 end
-local _
-_ = function(z)
+local _scrap_0
+_scrap_0 = function(z)
   local a, b, c
   a, b, c = z[1], z[2], z[3]
 end
 do
   local z = "oo"
-  _ = function(k)
+  local _scrap_1
+  _scrap_1 = function(k)
     local a, b, c
     a, b, c = z[1], z[2], z[3]
   end

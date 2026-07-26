@@ -423,6 +423,10 @@ do
       })
       return name
     end,
+    discard_name = function(self)
+      self._discard_name = self._discard_name or NameProxy("scrap")
+      return self._discard_name
+    end,
     add = function(self, item, pos)
       do
         local _with_0 = self._lines
@@ -541,7 +545,7 @@ do
             result = self:stm({
               "assign",
               {
-                "_"
+                self:discard_name()
               },
               {
                 node

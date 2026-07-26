@@ -338,14 +338,14 @@ do
     hi = function(self)
       _class_0.__parent.__base.hi(self, 1, 2, 3, 4)(1, 2, 3, 4)
       _class_0.__parent.something(1, 2, 3, 4)
-      local _ = _class_0.__parent.something(1, 2, 3, 4).world
+      local _scrap_0 = _class_0.__parent.something(1, 2, 3, 4).world
       _class_0.__parent.yeah(self, "world").okay(hi, hi, hi)
-      _ = something.super
-      _ = _class_0.__parent.super.super.super
+      _scrap_0 = something.super
+      _scrap_0 = _class_0.__parent.super.super.super
       do
         local _base_1 = _class_0.__parent
         local _fn_0 = _base_1.hello
-        _ = function(...)
+        _scrap_0 = function(...)
           return _fn_0(self, ...)
         end
       end
@@ -412,7 +412,7 @@ self.__class(something)
 local self = self + self / self
 self = 343
 self.hello(2, 3, 4)
-local _ = hello[self].world
+local _scrap_0 = hello[self].world
 local Whacko
 do
   local _class_0
@@ -433,7 +433,7 @@ do
   })
   _base_0.__class = _class_0
   local self = _class_0
-  _ = self.hello
+  local _scrap_1 = self.hello
   if something then
     print("hello world")
   end
@@ -466,7 +466,7 @@ yyy = function()
     })
     _base_0.__class = _class_0
     local self = _class_0
-    _ = nil
+    local _scrap_1 = nil
     Cool = _class_0
     return _class_0
   end
@@ -489,7 +489,7 @@ do
   })
   _base_0.__class = _class_0
   local self = _class_0
-  _ = nil
+  local _scrap_1 = nil
   a.b.c.D = _class_0
 end
 do
@@ -510,7 +510,7 @@ do
   })
   _base_0.__class = _class_0
   local self = _class_0
-  _ = nil
+  local _scrap_1 = nil
   a.b["hello"] = _class_0
 end
 do
@@ -546,7 +546,7 @@ do
   })
   _base_0.__class = _class_0
   local self = _class_0
-  _ = nil
+  local _scrap_1 = nil
   if _parent_0.__inherited then
     _parent_0.__inherited(_parent_0, _class_0)
   end
@@ -714,7 +714,7 @@ do
   })
   _base_0.__class = _class_0
   local self = _class_0
-  _ = nil
+  local _scrap_1 = nil
   Something = _class_0
 end
 do
@@ -956,7 +956,7 @@ do
   local self = _class_0
   self.butt = function()
     _class_0.__parent.butt(self)
-    _ = _class_0.__parent.hello
+    local _scrap_1 = _class_0.__parent.hello
     _class_0.__parent.hello(self)
     local _base_1 = _class_0.__parent
     local _fn_0 = _base_1.hello
@@ -967,7 +967,7 @@ do
   self.zone = cool({
     function()
       _class_0.__parent.zone(self)
-      _ = _class_0.__parent.hello
+      local _scrap_1 = _class_0.__parent.hello
       _class_0.__parent.hello(self)
       local _base_1 = _class_0.__parent
       local _fn_0 = _base_1.hello

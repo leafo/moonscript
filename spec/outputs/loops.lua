@@ -38,7 +38,7 @@ end
 local x
 x = function()
   for x in y do
-    local _ = y
+    local _scrap_0 = y
   end
 end
 local hello = {
@@ -63,7 +63,7 @@ end
 x = function()
   for _index_0 = 1, #hello do
     local x = hello[_index_0]
-    local _ = y
+    local _scrap_0 = y
   end
 end
 local t
@@ -89,13 +89,13 @@ do
   end
   y = _accum_0
 end
-local _
-_ = function()
+local _scrap_0
+_scrap_0 = function()
   for k = 10, 40 do
-    _ = "okay"
+    local _scrap_1 = "okay"
   end
 end
-_ = function()
+_scrap_0 = function()
   return (function()
     local _accum_0 = { }
     local _len_0 = 1
@@ -115,7 +115,7 @@ while 5 + 5 do
 end
 while also do
   i(work(too))
-  _ = "okay"
+  local _scrap_1 = "okay"
 end
 local i = 0
 do

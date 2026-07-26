@@ -1,14 +1,14 @@
 local hello = "hello"
 local world = "world"
-local _
-_ = function()
+local _scrap_0
+_scrap_0 = function()
   local hello = 3223
 end
-_ = function(a)
+_scrap_0 = function(a)
   local hello = 3223
   a = 323
 end
-_ = function(a, b, c)
+_scrap_0 = function(a, b, c)
   a, b, c = 1, 2, 3
   local world = 12321
 end

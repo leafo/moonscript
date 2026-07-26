@@ -1,5 +1,5 @@
-local _
-_ = function()
+local _scrap_0
+_scrap_0 = function()
   local joop = 2302
   return function(hi)
     local d = 100

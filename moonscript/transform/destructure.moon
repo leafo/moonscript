@@ -195,7 +195,7 @@ split_assign = (scope, assign) ->
       insert g, build_assign scope, literal, proxy
   elseif total_names >= start or total_values >= start
     name_slice = if total_names < start
-      {"_"}
+      {scope\discard_name!}
     else
       for i=start,total_names do names[i]
 

@@ -1,12 +1,12 @@
-local _
-_ = function()
+local _scrap_0
+_scrap_0 = function()
   local _list_0 = things
   for _index_0 = 1, #_list_0 do
     local x = _list_0[_index_0]
-    _ = x
+    local _scrap_1 = x
   end
 end
-_ = function()
+_scrap_0 = function()
   local _accum_0 = { }
   local _len_0 = 1
   local _list_0 = things
@@ -44,7 +44,7 @@ do
   end
   return _tbl_0
 end
-_ = function()
+_scrap_0 = function()
   if a then
     if a then
       return a
@@ -86,7 +86,7 @@ do
     end
   end
 end
-_ = function()
+_scrap_0 = function()
   local _base_0 = a
   local _fn_0 = _base_0.b
   return function(...)

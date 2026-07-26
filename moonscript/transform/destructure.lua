@@ -319,7 +319,7 @@ split_assign = function(scope, assign)
     local name_slice
     if total_names < start then
       name_slice = {
-        "_"
+        scope:discard_name()
       }
     else
       do

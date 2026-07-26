@@ -23,7 +23,7 @@ local items = {
 }
 for z in ipairs(items) do
   if z > 4 then
-    local _ = z
+    local _scrap_0 = z
   end
 end
 local rad
@@ -50,7 +50,7 @@ end
 for z in items do
   for j in list do
     if z > 4 then
-      local _ = z
+      local _scrap_0 = z
     end
   end
 end
@@ -129,7 +129,7 @@ for x in items do
   print("hello", x)
 end
 for x in x do
-  local _ = x
+  local _scrap_0 = x
 end
 local x
 do

@@ -1,25 +1,25 @@
 local you_cool = false
 if cool then
   if you_cool then
-    local _ = one
+    local _scrap_0 = one
   else
     if eatdic then
-      local _ = yeah
+      local _scrap_0 = yeah
     else
-      local _ = two
-      _ = three
+      local _scrap_0 = two
+      _scrap_0 = three
     end
   end
 else
-  local _ = no
+  local _scrap_0 = no
 end
 if cool then
-  local _ = no
+  local _scrap_0 = no
 end
 if cool then
-  local _ = no
+  local _scrap_0 = no
 else
-  local _ = yes
+  local _scrap_0 = yes
 end
 if cool then
   wow(cool)
@@ -29,12 +29,12 @@ end
 if working then
   if cool then
     if cool then
-      local _ = okay
+      local _scrap_0 = okay
     else
-      local _ = what
+      local _scrap_0 = what
     end
   else
-    local _ = nah
+    local _scrap_0 = nah
   end
 end
 if yeah then
@@ -112,19 +112,19 @@ hello = 5 + (function()
 end)()
 local z = false
 if false then
-  local _ = one
+  local _scrap_0 = one
 else
   do
     local x = true
     if x then
-      local _ = two
+      local _scrap_0 = two
     else
       do
         z = true
         if z then
-          local _ = three
+          local _scrap_0 = three
         else
-          local _ = four
+          local _scrap_0 = four
         end
       end
     end

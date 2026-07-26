@@ -168,7 +168,7 @@ thing({
   what = "great",
   no = "more"
 })
-local _ = {
+local _scrap_0 = {
   okay = 123
 }
 local k = {

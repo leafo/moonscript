@@ -2,9 +2,9 @@ local x
 x = function()
   return print(what)
 end
-local _
-_ = function() end
-_ = function()
+local _scrap_0
+_scrap_0 = function() end
+_scrap_0 = function()
   return function()
     return function() end
   end
@@ -31,19 +31,19 @@ eat(function() end, world);
 x = function(...) end
 hello()
 hello.world()
-_ = hello().something
-_ = what()["ofefe"]
+_scrap_0 = hello().something
+_scrap_0 = what()["ofefe"]
 what()(the()(heck()))
-_ = function(a, b, c, d, e) end
-_ = function(a, a, a, a, a)
+_scrap_0 = function(a, b, c, d, e) end
+_scrap_0 = function(a, a, a, a, a)
   return print(a)
 end
-_ = function(x)
+_scrap_0 = function(x)
   if x == nil then
     x = 23023
   end
 end
-_ = function(x)
+_scrap_0 = function(x)
   if x == nil then
     x = function(y)
       if y == nil then
@@ -52,7 +52,7 @@ _ = function(x)
     end
   end
 end
-_ = function(x)
+_scrap_0 = function(x)
   if x == nil then
     if something then
       x = yeah
@@ -76,16 +76,16 @@ something = function(hello, world)
   end
   return print(hello)
 end
-_ = function(self, x, y) end
-_ = function(self, x, y)
+_scrap_0 = function(self, x, y) end
+_scrap_0 = function(self, x, y)
   self.x, self.y = x, y
 end
-_ = function(self, x)
+_scrap_0 = function(self, x)
   if x == nil then
     x = 1
   end
 end
-_ = function(self, x, y, z)
+_scrap_0 = function(self, x, y, z)
   if x == nil then
     x = 1
   end
@@ -108,7 +108,7 @@ k(function()
     return 
   end
 end)
-_ = function()
+_scrap_0 = function()
   if something then
     return real_name
   end

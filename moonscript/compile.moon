@@ -297,6 +297,11 @@ class Block
     @stm {"assign", {name}, {value}}
     name
 
+  -- expressions that need to be coerced into statements are assigned to this name
+  discard_name: =>
+    @_discard_name or= NameProxy "scrap"
+    @_discard_name
+
   -- add something to the line buffer
   add: (item, pos) =>
     with @_lines
@@ -390,7 +395,7 @@ class Block
         @value node
       else
         -- coerce value into statement
-        @stm {"assign", {"_"}, {node}}
+        @stm {"assign", {@discard_name!}, {node}}
 
     if result
       if type(node) == "table" and type(result) == "table" and node[-1]

@@ -28,14 +28,14 @@ do
   end
   copy = _tbl_0
 end
-local _
+local _scrap_0
 do
   local _tbl_0 = { }
   for x in yes do
     local _key_0, _val_0 = unpack(x)
     _tbl_0[_key_0] = _val_0
   end
-  _ = _tbl_0
+  _scrap_0 = _tbl_0
 end
 do
   local _tbl_0 = { }
@@ -45,7 +45,7 @@ do
     local _key_0, _val_0 = unpack(x)
     _tbl_0[_key_0] = _val_0
   end
-  _ = _tbl_0
+  _scrap_0 = _tbl_0
 end
 do
   local _tbl_0 = { }
@@ -53,7 +53,7 @@ do
     local _key_0, _val_0 = xxxx
     _tbl_0[_key_0] = _val_0
   end
-  _ = _tbl_0
+  _scrap_0 = _tbl_0
 end
 do
   local _tbl_0 = { }
@@ -80,7 +80,7 @@ do
     end)())
     _tbl_0[_key_0] = _val_0
   end
-  _ = _tbl_0
+  _scrap_0 = _tbl_0
 end
 local n1
 do
@@ -166,7 +166,7 @@ do
   for i = 1, 10 do
     _tbl_0["hello"] = "world"
   end
-  _ = _tbl_0
+  _scrap_0 = _tbl_0
 end
 local j
 do
@@ -250,11 +250,11 @@ end
 local _max_0 = 3 + 4
 for _index_0 = 1 + 2, _max_0 < 0 and #items + _max_0 or _max_0 do
   local item = items[_index_0]
-  _ = item
+  local _scrap_1 = item
 end
 local _max_1 = 2 - thing[4]
 for _index_0 = hello() * 4, _max_1 < 0 and #items + _max_1 or _max_1 do
   local item = items[_index_0]
-  _ = item
+  local _scrap_1 = item
 end
 return nil

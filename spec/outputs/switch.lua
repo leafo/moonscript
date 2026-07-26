@@ -12,7 +12,7 @@ local _exp_2 = value
 if "cool" == _exp_2 then
   print("hello world")
 elseif "yeah" == _exp_2 then
-  local _ = [[FFFF]] + [[MMMM]]
+  local _scrap_0 = [[FFFF]] + [[MMMM]]
 elseif (2323 + 32434) == _exp_2 then
   print("okay")
 else
@@ -37,9 +37,9 @@ do
   local _with_0 = something
   local _exp_5 = _with_0:value()
   if _with_0.okay == _exp_5 then
-    local _ = "world"
+    local _scrap_0 = "world"
   else
-    local _ = "yesh"
+    local _scrap_0 = "yesh"
   end
 end
 fix(this)
@@ -53,13 +53,13 @@ call_func((function()
 end)())
 local _exp_5 = hi
 if (hello or world) == _exp_5 then
-  local _ = greene
+  local _scrap_0 = greene
 end
 local _exp_6 = hi
 if "one" == _exp_6 or "two" == _exp_6 then
   print("cool")
 elseif "dad" == _exp_6 then
-  local _ = no
+  local _scrap_0 = no
 end
 local _exp_7 = hi
 if (3 + 1) == _exp_7 or hello() == _exp_7 or (function()

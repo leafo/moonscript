@@ -18,26 +18,26 @@ fun(a)(b, bad(hello))
 hello(world(what(are(you(doing(here))))))
 what(the)[3243](world, yeck(heck))
 hairy[hands][are](gross)(okay(okay[world]))
-local _ = (get[something] + 5)[years]
+local _scrap_0 = (get[something] + 5)[years]
 local i, x = 200, 300
 local yeah = (1 + 5) * 3
 yeah = ((1 + 5) * 3) / 2
 yeah = ((1 + 5) * 3) / 2 + i % 100
 local whoa = (1 + 2) * (3 + 4) * (4 + 5)
-_ = function()
+_scrap_0 = function()
   if something then
     return 1, 2, 4
   end
   return print("hello")
 end
-_ = function()
+_scrap_0 = function()
   if hello then
     return "heloo", "world"
   else
     return no, way
   end
 end
-_ = function()
+_scrap_0 = function()
   return 1, 2, 34
 end
 return 5 + function()
@@ -47,21 +47,21 @@ return 5 + (function()
   return 4
 end) + 2
 print(5 + function()
-  _ = 34
+  local _scrap_1 = 34
   return good(nads)
 end)
 something('else', "ya")
 something('else')
 something("else")
-_ = something([[hey]]) * 2
-_ = something([======[hey]======]) * 2
-_ = something('else'), 2
-_ = something("else"), 2
-_ = something([[else]]), 2
+_scrap_0 = something([[hey]]) * 2
+_scrap_0 = something([======[hey]======]) * 2
+_scrap_0 = something('else'), 2
+_scrap_0 = something("else"), 2
+_scrap_0 = something([[else]]), 2
 something('else', 2)
 something("else", 2)
 something([[else]], 2)
-_ = here(we)("go")[12123]
+_scrap_0 = here(we)("go")[12123]
 local something = {
   test = 12323,
   what = function()
@@ -120,12 +120,12 @@ for i = 1, 10 do
 end
 print("nutjob")
 if hello then
-  _ = 343
+  local _scrap_1 = 343
 end
 if cool then
   print("what")
 else
-  _ = whack
+  local _scrap_1 = whack
 end
 local arg = {
   ...
@@ -148,7 +148,7 @@ x = #{
     2
   }
 }
-_ = hello, world
+_scrap_0 = hello, world
 something:hello(what)(a, b)
 something:hello(what)
 something.hello:world(a, b)
@@ -178,7 +178,7 @@ x = 0
 local _list_0 = values
 for _index_0 = 1, #_list_0 do
   local v = _list_0[_index_0]
-  _ = ((function()
+  local _scrap_1 = ((function()
     if ntype(v) == "fndef" then
       x = x + 1
     end
@@ -194,9 +194,9 @@ hello = {
 div({
   class = "cool"
 })
-_ = 5 + what(wack)
+_scrap_0 = 5 + what(wack)
 what(whack + 5)
-_ = 5 - what(wack)
+_scrap_0 = 5 - what(wack)
 what(whack - 5)
 x = hello - world - something;
 (function(something)
@@ -210,16 +210,16 @@ x = hello - world - something;
   return print(something)
 end)()
 if something then
-  _ = 03589
+  local _scrap_1 = 03589
 else
-  _ = 3434
+  local _scrap_1 = 3434
 end
 if something then
-  _ = yeah
+  local _scrap_1 = yeah
 elseif "ymmm" then
   print("cool")
 else
-  _ = okay
+  local _scrap_1 = okay
 end
 x = notsomething
 y = ifsomething
