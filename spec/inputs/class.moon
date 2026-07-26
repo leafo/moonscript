@@ -194,6 +194,21 @@ class Whack extends Thing
 
 ---
 
+class LocalHoist
+  local one_thing, another_thing
+
+  one_thing = "hello"
+
+  get_thing: => one_thing
+  set_thing: (v) => another_thing = v
+
+class LocalHoistExtends extends LocalHoist
+  local LocalHoist
+
+  get_class: => LocalHoist
+
+---
+
 class Wowha extends Thing
   @butt: ->
     super!

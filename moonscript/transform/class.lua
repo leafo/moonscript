@@ -124,11 +124,17 @@ return function(self, node, ret, parent_assign)
   end
   local statements = { }
   local properties = { }
+  local hoisted_locals = { }
   for _index_0 = 1, #body do
     local item = body[_index_0]
     local _exp_0 = item[1]
     if "stm" == _exp_0 then
-      insert(statements, item[2])
+      local stm = item[2]
+      if ntype(stm) == "declare_with_shadows" then
+        insert(hoisted_locals, stm)
+      else
+        insert(statements, stm)
+      end
     elseif "props" == _exp_0 then
       for _index_1 = 2, #item do
         local tuple = item[_index_1]
@@ -403,11 +409,16 @@ return function(self, node, ret, parent_assign)
           cls_name
         }
       },
+      parent_val and build.assign_one(parent_cls_name, parent_val) or NOOP,
+      build.group((function()
+        if #hoisted_locals > 0 then
+          return hoisted_locals
+        end
+      end)()),
       {
         "declare_glob",
         "*"
       },
-      parent_val and build.assign_one(parent_cls_name, parent_val) or NOOP,
       build.assign_one(base_name, {
         "table",
         properties

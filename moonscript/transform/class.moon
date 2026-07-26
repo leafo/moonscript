@@ -93,10 +93,19 @@ super_scope = (value, t, key) ->
   -- split apart properties and statements
   statements = {}
   properties = {}
+
+  -- local declarations are hoisted to the top of the class scope so methods
+  -- can close over the names
+  hoisted_locals = {}
+
   for item in *body
     switch item[1]
       when "stm"
-        insert statements, item[2]
+        stm = item[2]
+        if ntype(stm) == "declare_with_shadows"
+          insert hoisted_locals, stm
+        else
+          insert statements, stm
       when "props"
         for tuple in *item[2,]
           if ntype(tuple[1]) == "self"
@@ -233,9 +242,14 @@ super_scope = (value, t, key) ->
         @put_name name if name
 
       {"declare", { cls_name }}
-      {"declare_glob", "*"}
 
+      -- the parent expression is evaluated before the local shadows are
+      -- installed so it can reference a name a class body local overrides
       parent_val and .assign_one(parent_cls_name, parent_val) or NOOP
+
+      .group if #hoisted_locals > 0 then hoisted_locals
+
+      {"declare_glob", "*"}
 
       .assign_one base_name, {"table", properties}
       .assign_one base_name\chain"__index", base_name
