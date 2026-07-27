@@ -568,7 +568,7 @@ static void __const_init(lua_State *L) {
   __const_refs[50] = luaL_ref(L, LUA_REGISTRYINDEX);
   lua_pushlstring(L, "with", 4);
   __const_refs[51] = luaL_ref(L, LUA_REGISTRYINDEX);
-  lua_pushnumber(L, 1);
+  lua_pushinteger(L, 1);
   __const_refs[52] = luaL_ref(L, LUA_REGISTRYINDEX);
   for (int i = 0; __cg_names[i] != NULL; i++) {
     lua_pushstring(L, __cg_names[i]);
