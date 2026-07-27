@@ -83,7 +83,7 @@ luafilesystem-$(LFS_VERSION)/src/lfs.c:
 	tar -xzf luafilesystem.tar.gz
 
 bin/binaries/moonscript.h: moonscript/*.lua moon/*.lua
-	bin/splat.moon -l moonscript -x moonscript.parse.slow -x moonscript.parse.grammar moonscript moon > moonscript.lua
+	bin/splat.moon -x moonscript.parse.slow -x moonscript.parse.grammar moonscript moon > moonscript.lua
 	xxd -i moonscript.lua > $@
 	rm moonscript.lua
 

@@ -29,17 +29,25 @@ LUALIB_API int luaopen_moonscript(lua_State *l) {
 	luaopen_lpeg(l);
 	setloaded(l, "lpeg");
 
-	luaopen_moonscript_parse_native(l);
-	setloaded(l, "moonscript.parse.native");
-
 	// Load argparse (splat output sets up package.preload)
 	if (luaL_loadbuffer(l, (const char *)argparse_lua, argparse_lua_len, "argparse.lua") == 0) {
 		lua_call(l, 0, 0);
 	}
 
-	if (luaL_loadbuffer(l, (const char *)moonscript_lua, moonscript_lua_len, "moonscript.lua") == 0) {
-		lua_call(l, 0, 1);
-		return 1;
+	// Register the moonscript modules into package.preload
+	if (luaL_loadbuffer(l, (const char *)moonscript_lua, moonscript_lua_len, "moonscript.lua") != 0) {
+		return 0;
 	}
-	return 0;
+	lua_call(l, 0, 0);
+
+	// The native parser runs its callback chunks at load, and those require
+	// moonscript.parse.tree: package.preload must be populated first or the
+	// require escapes to the filesystem
+	luaopen_moonscript_parse_native(l);
+	setloaded(l, "moonscript.parse.native");
+
+	lua_getglobal(l, "require");
+	lua_pushstring(l, "moonscript");
+	lua_call(l, 1, 1);
+	return 1;
 }
