@@ -29,3 +29,4 @@ jobs:
     - name: test
       run: |
         busted -o utfTerminal
+        busted -o utfTerminal --helper=spec/use_slow_parser.moon

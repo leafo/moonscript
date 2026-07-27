@@ -92,10 +92,10 @@ return {
   scoped = function(self, node)
     local _, before, value, after
     _, before, value, after = node[1], node[2], node[3], node[4]
-    _ = before and before:call(self)
+    local _scrap_0 = before and before:call(self)
     do
       local _with_0 = self:value(value)
-      _ = after and after:call(self)
+      local _scrap_1 = after and after:call(self)
       return _with_0
     end
   end,

@@ -1,0 +1,5 @@
+*.so
+*.o
+dist/
+bin/binaries/*.h
+bin/binaries/argparse.lua

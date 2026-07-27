@@ -157,7 +157,7 @@ return Transformer({
         if "self" == _exp_0 or "self_class" == _exp_0 then
           bound_names[arg[1][2]] = true
         elseif "table" == _exp_0 then
-          local _ = nil
+          local _scrap_0 = nil
         else
           if type(arg[1]) == "string" then
             bound_names[arg[1]] = true

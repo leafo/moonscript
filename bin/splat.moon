@@ -9,6 +9,7 @@ normalize = (path) ->
 
 parser = argparse "splat.moon", "Concatenate a collection of Lua modules into a single file"
 parser\option("--load -l", "Module names that will be load on require")\count "*"
+parser\option("--exclude -x", "Module names to leave out of the output")\count "*"
 parser\flag("--strip-prefix -s", "Strip directory prefix from module names")
 
 parser\argument("directories", "Directories to scan for Lua modules")\args "+"
@@ -54,12 +55,15 @@ write_module = (name, text) ->
     print "  "..line
   print "end"
 
+exclude = {name, true for name in *args.exclude}
+
 modules = {}
 for dir in *dirs
   files = scan_directory dir, "%.lua$"
   prefix = strip_prefix and normalize(dir) or nil
   chunks = for path in *files
     module_name = path_to_module_name path, prefix
+    continue if exclude[module_name]
     content = io.open(path)\read"*a"
     modules[module_name] = true
     {module_name, content}

@@ -130,3 +130,7 @@ unless lua_code
 -- our code is ready
 print lua_code
 ```
+
+On a parse failure `parse.string` returns `nil` and a multi-line error string
+of the form `<message> at line <n>, column <m>:` followed by the offending
+source line and a `^` position marker.

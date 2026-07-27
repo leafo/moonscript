@@ -36,6 +36,16 @@ something and you need to re-build the MoonScript with a working version of
 MoonScript. You can check out the repo in another directory, or install it
 using LuaRocks to have a separate working version.
 
+### The parser
+
+The parser is defined as a [pgen](https://github.com/leafo/pgen) grammar in
+`moonscript/parse/grammar.moon`, which is compiled to a native C module
+(`moonscript/parse/native.c`) and a pure Lua equivalent
+(`moonscript/parse/slow.lua`, unused at runtime, kept for a future Lua-only
+distribution). Both generated files are checked in. After changing the
+grammar, run `make generate` to rebuild them (requires the pgen and
+clang-format).
+
 ## Running Tests
 
 Tests are written in MoonScript and use [Busted](https://olivinelabs.com/busted/).

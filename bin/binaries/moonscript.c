@@ -23,10 +23,14 @@ void setloaded(lua_State* l, const char* name) {
 }
 
 extern int luaopen_lpeg(lua_State *l);
+extern int luaopen_moonscript_parse_native(lua_State *l);
 
 LUALIB_API int luaopen_moonscript(lua_State *l) {
 	luaopen_lpeg(l);
 	setloaded(l, "lpeg");
+
+	luaopen_moonscript_parse_native(l);
+	setloaded(l, "moonscript.parse.native");
 
 	// Load argparse (splat output sets up package.preload)
 	if (luaL_loadbuffer(l, (const char *)argparse_lua, argparse_lua_len, "argparse.lua") == 0) {

@@ -8,7 +8,22 @@ LUA_SRC_VERSION ?= 5.1.5
 LPEG_VERSION ?= 1.0.2
 LFS_VERSION ?= 1_8_0
 
-.PHONY: test local build watch lint count show test_binary
+.PHONY: test local build watch lint count show test_binary generate clean
+
+clean:
+	rm -f moonscript/parse/native.so moonscript/parse/native.o
+	rm -rf dist
+
+# regenerate the parser from the pgen grammar (requires the pgen to be installed)
+generate: build
+	pgen moonscript/parse/grammar.lua -n moonscript_parse_native \
+		-o moonscript/parse/native.c --vendor-errors moonscript/parse/errors.lua
+	clang-format -style="{ColumnLimit: 0}" -i moonscript/parse/native.c
+	pgen moonscript/parse/grammar.lua -n moonscript_parse_slow \
+		-o moonscript/parse/slow.lua
+
+moonscript/parse/native.so: moonscript/parse/native.c
+	gcc -shared -o $@ -O3 -fPIC $< `pkg-config --cflags --libs lua5.1`
 
 build:
 	LUA_PATH='$(LUA_PATH_MAKE)' LUA_CPATH='$(LUA_CPATH_MAKE)' $(LUA) bin/moonc moon/ moonscript/
@@ -31,8 +46,9 @@ show:
 	# LUA_PATH_MAKE $(LUA_PATH_MAKE)
 	# LUA_CPATH_MAKE $(LUA_CPATH_MAKE)
 
-test: build
-	busted
+test: build moonscript/parse/native.so
+	LUA_PATH='$(LUA_PATH_MAKE)' LUA_CPATH='./?.so;$(LUA_CPATH_MAKE)' busted
+	LUA_PATH='$(LUA_PATH_MAKE)' LUA_CPATH='$(LUA_CPATH_MAKE)' busted --helper=spec/use_slow_parser.moon
 
 build_test_outputs: build
 	BUILD=1 busted spec/lang_spec.moon
@@ -67,7 +83,7 @@ luafilesystem-$(LFS_VERSION)/src/lfs.c:
 	tar -xzf luafilesystem.tar.gz
 
 bin/binaries/moonscript.h: moonscript/*.lua moon/*.lua
-	bin/splat.moon -l moonscript moonscript moon > moonscript.lua
+	bin/splat.moon -l moonscript -x moonscript.parse.slow -x moonscript.parse.grammar moonscript moon > moonscript.lua
 	xxd -i moonscript.lua > $@
 	rm moonscript.lua
 
@@ -93,6 +109,7 @@ dist/moon: lua-$(LUA_SRC_VERSION)/src/liblua.a lpeg-$(LPEG_VERSION)/lptree.c bin
 		-Ibin/binaries/ \
 		bin/binaries/moon.c \
 		bin/binaries/moonscript.c \
+		moonscript/parse/native.c \
 		lpeg-$(LPEG_VERSION)/lpvm.c \
 		lpeg-$(LPEG_VERSION)/lpcap.c \
 		lpeg-$(LPEG_VERSION)/lptree.c \
@@ -109,6 +126,7 @@ dist/moonc: lua-$(LUA_SRC_VERSION)/src/liblua.a lpeg-$(LPEG_VERSION)/lptree.c lu
 		-Ibin/binaries/ \
 		bin/binaries/moonc.c \
 		bin/binaries/moonscript.c \
+		moonscript/parse/native.c \
 		lpeg-$(LPEG_VERSION)/lpvm.c \
 		lpeg-$(LPEG_VERSION)/lpcap.c \
 		lpeg-$(LPEG_VERSION)/lptree.c \

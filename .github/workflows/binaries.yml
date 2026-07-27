@@ -25,7 +25,7 @@ jobs:
 
     - name: Generate moonscript.h
       run: |
-        bin/splat.moon -l moonscript moonscript moon > moonscript.lua
+        bin/splat.moon -l moonscript -x moonscript.parse.slow -x moonscript.parse.grammar moonscript moon > moonscript.lua
         xxd -i moonscript.lua > bin/binaries/moonscript.h
 
     - name: Generate moon.h
@@ -150,6 +150,7 @@ jobs:
           -DMOON_BUILD_TIME="\"${{ env.BUILD_TIME }}\"" \
           bin/binaries/moon.c \
           bin/binaries/moonscript.c \
+          moonscript/parse/native.c \
           lpeg-1.0.2/lpvm.c \
           lpeg-1.0.2/lpcap.c \
           lpeg-1.0.2/lptree.c \
@@ -165,6 +166,7 @@ jobs:
           -DMOON_BUILD_TIME="\"${{ env.BUILD_TIME }}\"" \
           bin/binaries/moonc.c \
           bin/binaries/moonscript.c \
+          moonscript/parse/native.c \
           lpeg-1.0.2/lpvm.c \
           lpeg-1.0.2/lpcap.c \
           lpeg-1.0.2/lptree.c \
@@ -290,6 +292,7 @@ jobs:
           -DMOON_BUILD_TIME="\"${{ env.BUILD_TIME }}\"" \
           bin/binaries/moon.c \
           bin/binaries/moonscript.c \
+          moonscript/parse/native.c \
           lpeg-1.0.2/lpvm.c \
           lpeg-1.0.2/lpcap.c \
           lpeg-1.0.2/lptree.c \
@@ -305,6 +308,7 @@ jobs:
           -DMOON_BUILD_TIME="\"${{ env.BUILD_TIME }}\"" \
           bin/binaries/moonc.c \
           bin/binaries/moonscript.c \
+          moonscript/parse/native.c \
           lpeg-1.0.2/lpvm.c \
           lpeg-1.0.2/lpcap.c \
           lpeg-1.0.2/lptree.c \

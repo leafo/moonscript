@@ -5,3 +5,4 @@ for file in $(find moonscript moon | grep 'lua$'); do
 	echo "[\"$MODULE\"] = \"$file\","
 done
 
+echo '["moonscript.parse.native"] = { sources = {"moonscript/parse/native.c"} },'
