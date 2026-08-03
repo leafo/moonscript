@@ -324,10 +324,10 @@ parent's name.
 
 ```moonscript
 class Counter
-  local count
-  count = 0
+  local cache
 
-  inc: => count += 1
+  -- previously `cache` local would not be lexically available in the method
+  update: => cache or= "something..."
 ```
 
 ## Bug Fixes
