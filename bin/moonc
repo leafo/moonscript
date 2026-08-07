@@ -51,7 +51,7 @@ parser:flag("-",
 local read_stdin = arg[1] == "-" -- luacheck: ignore 113
 
 if not read_stdin then
-  parser:argument("file/directory"):args("+")
+  parser:argument("file/directory"):args("*")
 else
   if arg[2] ~= nil then
     io.stderr:write("- must be the only argument\n")
@@ -86,6 +86,11 @@ do
     stages = lint_stages,
     format = opts.lint_format,
   }
+end
+
+if not read_stdin and #opts["file/directory"] == 0 then
+  io.stderr:write(parser:get_help())
+  os.exit()
 end
 
 function log_msg(...)
