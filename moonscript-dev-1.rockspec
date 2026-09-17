@@ -20,6 +20,10 @@ dependencies = {
 	"luafilesystem >= 1.5"
 }
 
+test_dependencies = {
+	"loadkit"
+}
+
 build = {
 	type = "builtin",
 	modules = {
@@ -62,4 +66,3 @@ build = {
 		bin = { "bin/moon", "bin/moonc" }
 	}
 }
-
