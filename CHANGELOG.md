@@ -169,7 +169,7 @@ lint_example.moon:7:5: accessing global `my_nmuber` [global_access]
 ### New class introspection functions
 
 The `moon` module has four new functions, documented in the [standard
-library reference](http://moonscript.org/reference/standard_lib.html):
+library reference](https://moonscript.org/reference/standard_lib.html):
 
 * `is_class(value)` tests if a value is a MoonScript class table
 * `is_instance(value)` tests if a value is an instance of a MoonScript class
@@ -609,7 +609,7 @@ of the method it should call on the parent.
 
 ## New Features
 
-* New [unused assignment linter](http://moonscript.org/reference/command_line.html#unused_variable_assigns) finds assignments that are never referenced after being defined.
+* New [unused assignment linter](https://moonscript.org/reference/command_line.html#command-line-tools/moonc/linter/unused-variable-assigns) finds assignments that are never referenced after being defined.
 
 ## Parsing Updates
 
@@ -685,8 +685,8 @@ x = {
 
 ## New Things
 
-* New [code coverage tool](http://moonscript.org/reference/#code_coverage) built into `moonc`
-* New [linting tool](http://moonscript.org/reference/#linter) built into `moonc`, identifies global variable references that don't pass whitelist
+* New [code coverage tool](https://moonscript.org/reference/command_line.html#command-line-tools/moon/code-coverage) built into `moonc`
+* New [linting tool](https://moonscript.org/reference/command_line.html#command-line-tools/moonc/linter) built into `moonc`, identifies global variable references that don't pass whitelist
 * Numbers can have `LL` and `ULL` suffixes for LuaJIT
 
 ## Bug Fixes
@@ -810,7 +810,7 @@ end
 
 ## Changes
 
-* The way the subtraction operator works has changed. There was always a little confusion as to the rules regarding whitespace around it and it was recommended to always add whitespace around the operator when doing subtraction. Not anymore. Hopefully it now [works how you would expect](http://moonscript.org/reference/#considerations). (`a-b` compiles to `a - b` and not `a(-b)` anymore).
+* The way the subtraction operator works has changed. There was always a little confusion as to the rules regarding whitespace around it and it was recommended to always add whitespace around the operator when doing subtraction. Not anymore. Hopefully it now [works how you would expect](https://moonscript.org/reference/#the-language/function-literals/considerations). (`a-b` compiles to `a - b` and not `a(-b)` anymore).
 * The `moon` library is no longer sets a global variable and instead returns the module. Your code should now be:
 
 ```moonscript
@@ -866,9 +866,9 @@ moonscript = require "moonscript"
 ## New Things
 
 * Lua 5.2 Support. The compiler can now run in either Lua 5.2 and 5.1
-* A switch `when` clause [can take multiple values](http://moonscript.org/reference/#switch), comma separated.
-* Added [destructuring assignment](http://moonscript.org/reference/#destructuring_assignment).
-* Added `local *` (and `local ^`) for [hoisting variable declarations](http://moonscript.org/reference/#local_statement) in the current scope
+* A switch `when` clause [can take multiple values](https://moonscript.org/reference/#the-language/switch), comma separated.
+* Added [destructuring assignment](https://moonscript.org/reference/#the-language/destructuring-assignment).
+* Added `local *` (and `local ^`) for [hoisting variable declarations](https://moonscript.org/reference/#the-language/local-statement) in the current scope
 * List comprehensions and line decorators now support numeric loop syntax
 
 ## Bug Fixes
@@ -886,43 +886,43 @@ MoonScript has [made its way into GitHub](https://github.com/github/linguist/pul
 
 ## Changes
 
-* Compiled [files will now implicitly return](http://moonscript.org/reference/#implicit_returns_on_files) their last statement. Be careful, this might change what `require` returns.
+* Compiled [files will now implicitly return](https://moonscript.org/reference/#the-language/misc/implicit-returns-on-files) their last statement. Be careful, this might change what `require` returns.
 
 ## New Things
 
 ### The Language
 
-* Added [`continue` keyword](http://moonscript.org/reference/#continue) for skipping the current iteration in a loop.
-* Added [string interpolation](http://moonscript.org/reference/#string_interpolation).
-* Added [`do` expression and block](http://moonscript.org/reference/#do).
+* Added [`continue` keyword](https://moonscript.org/reference/#the-language/continue) for skipping the current iteration in a loop.
+* Added [string interpolation](https://moonscript.org/reference/#the-language/string-interpolation).
+* Added [`do` expression and block](https://moonscript.org/reference/#the-language/do).
 * Added `unless` as a block and line decorator. Is the inverse of `if`.
-* Assignment can be used in an [`if` statement's expression](http://moonscript.org/reference/#with_assignment).
+* Assignment can be used in an [`if` statement's expression](https://moonscript.org/reference/#the-language/conditionals/with-assignment).
 * Added `or=` and `and=` operators.
 * `@@` can be prefixed in front of a name to access that name within `self.__class`
-* `@` and `@@` can be [used as values](http://moonscript.org/reference/#_and__values) to reference `self` and `self.__class`.
-* In class declarations it's possible to [assign to the class object](http://moonscript.org/reference/#class_variables) instead of the instance metatable by prefixing the key with `@`.
-* Class methods can access [locals defined within the body](http://moonscript.org/reference/#class_declaration_statements) of the class declaration.
-* Super classes are [notified when they are extended](http://moonscript.org/reference/#inheritance) from with an `__inherited` callback.
-* Classes can now [implicitly return and be expressions](http://moonscript.org/reference/#anonymous_classes).
+* `@` and `@@` can be [used as values](https://moonscript.org/reference/#the-language/object-oriented-programming/-and-values) to reference `self` and `self.__class`.
+* In class declarations it's possible to [assign to the class object](https://moonscript.org/reference/#the-language/object-oriented-programming/class-variables) instead of the instance metatable by prefixing the key with `@`.
+* Class methods can access [locals defined within the body](https://moonscript.org/reference/#the-language/object-oriented-programming/class-declaration-statements) of the class declaration.
+* Super classes are [notified when they are extended](https://moonscript.org/reference/#the-language/object-oriented-programming/inheritance) from with an `__inherited` callback.
+* Classes can now [implicitly return and be expressions](https://moonscript.org/reference/#the-language/object-oriented-programming/anonymous-classes).
 * `local` keyword returns, can be used for forward declaration or shadowing a variable.
-* String literals can be used as keys in [table literals](http://moonscript.org/reference/#table_literals).
+* String literals can be used as keys in [table literals](https://moonscript.org/reference/#the-language/table-literals).
 * Call methods on string literals without wrapping in parentheses: `"hello"\upper!`
 * Table comprehensions can return a single value that is unpacked into the key and value.
-* The expression in a [`with` statement can now be an assignment](http://moonscript.org/reference/#with_statement), to give a name to the expression that is being operated on.
+* The expression in a [`with` statement can now be an assignment](https://moonscript.org/reference/#the-language/with-statement), to give a name to the expression that is being operated on.
 
 
 ### The API
 
-* The `load` functions can take an [optional last argument of options](http://moonscript.org/reference/#load_functions).
+* The `load` functions can take an [optional last argument of options](https://moonscript.org/reference/api.html#moonscript-compiler-api/moonscriptbase-module).
 
 ### The Tools
 
-* The [online compiler](http://moonscript.org/compiler/) now runs through a web service instead of emscripten, should work reliably on any computer now.
-* [Windows binaries](http://moonscript.org/bin/) have been updated.
+* The [online compiler](https://moonscript.org/compiler/) now runs through a web service instead of emscripten, should work reliably on any computer now.
+* [Windows binaries](https://moonscript.org/#installation/precompiled-binaries) have been updated.
 
 ## Bug Fixes
 
-* Significantly improved the [line number rewriter](http://moonscript.org/reference/#error_rewriting). It should now accurately report all line numbers.
+* Significantly improved the [line number rewriter](https://moonscript.org/reference/command_line.html#command-line-tools/moon/error-rewriting). It should now accurately report all line numbers.
 * Generic `for` loops correctly parse for multiple values as defined in Lua.
 * Update expressions don't fail with certain combinations of precedence.
 * All statements/expressions are allowed in a class body, not just some.
@@ -968,7 +968,7 @@ MoonScript has [made its way into GitHub](https://github.com/github/linguist/pul
 * Created [prebuilt MoonScript Windows executables][2].
 * Wrote a [Textmate/Sublime Text bundle][9].
 * Wrote a [SciTE syntax highlighter with scintillua][10].
-* Created a [SciTE package for Windows][11] that has everything configured.
+* Created a SciTE package for Windows that has everything configured.
 * Created an [online compiler and snippet site][12] using [emscripten][13].
 * Watch mode works on all platforms now. Uses polling if `inotify` is not
   available.
@@ -1002,19 +1002,18 @@ Since the first release, I've written one other project in MoonScript (other tha
 Initial release
 
 
-  [1]: http://moonscript.org
-  [2]: http://moonscript.org/bin/
-  [3]: http://moonscript.org/reference/standard_lib.html
-  [4]: http://moonscript.org/reference/#table_comprehensions
+  [1]: https://moonscript.org
+  [2]: https://moonscript.org/#installation/precompiled-binaries
+  [3]: https://moonscript.org/reference/standard_lib.html
+  [4]: https://moonscript.org/reference/#the-language/comprehensions/table-comprehensions
   [5]: https://github.com/leafo/moonscript/commits/master
-  [6]: http://moonscript.org/reference/#function_stubs
-  [7]: http://moonscript.org/reference/#switch
-  [8]: http://moonscript.org/reference/#super
+  [6]: https://moonscript.org/reference/#the-language/function-stubs
+  [7]: https://moonscript.org/reference/#the-language/switch
+  [8]: https://moonscript.org/reference/#the-language/object-oriented-programming/super
   [9]: https://github.com/leafo/moonscript-tmbundle
-  [10]: https://github.com/leafo/moonscript/tree/master/extra/scintillua
-  [11]: http://moonscript.org/scite/
-  [12]: http://moonscript.org/compiler/
-  [13]: http://emscripten.org
-  [14]: http://twitter.com/moonscript
-  [15]: http://leafo.net/sitegen/
+  [10]: https://github.com/leafo/moonscript/tree/fc77603156f75682cb059e3e244d58ab3c550175/extra/scintillua
+  [12]: https://moonscript.org/compiler/
+  [13]: https://emscripten.org
+  [14]: https://x.com/moonscript
+  [15]: https://leafo.net/sitegen/
 
