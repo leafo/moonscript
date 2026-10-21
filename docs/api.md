@@ -29,7 +29,7 @@ will be loaded over a matching `.lua` file that has the same base name.
 
 For more information on Lua's `package.loaders` see [Lua Reference Manual
 &mdash;
-package.loaders](http://www.lua.org/manual/5.1/manual.html#pdf-package.loaders)
+package.loaders](https://www.lua.org/manual/5.1/manual.html#pdf-package.loaders)
 
 The `moonloader`, when finding a valid path to a `.moon` file, will parse and
 compile the file in memory. The code is then turned into a function using the

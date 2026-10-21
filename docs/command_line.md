@@ -244,7 +244,7 @@ variables that are allowed to be used. A default whitelist is provided that
 contains all of Lua's built in functions and modules.
 
 You can create your own entires in the whitelist as well. For example, the
-testing framework [Busted](http://olivinelabs.com/busted) uses a collection of
+testing framework [Busted](https://lunarmodules.github.io/busted/) uses a collection of
 global functions (like `describe`, `before_each`, `setup`) to make writing
 tests easy.
 
@@ -329,5 +329,5 @@ _, name, _, count = unpack item
 print name, count
 ```
 
-  [1]: http://en.wikipedia.org/wiki/Lint_(software)
+  [1]: https://en.wikipedia.org/wiki/Lint_(software)
 

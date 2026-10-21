@@ -8,7 +8,7 @@ source = {
 description = {
 	summary = "A programmer friendly language that compiles to Lua",
 	detailed = "A programmer friendly language that compiles to Lua",
-	homepage = "http://moonscript.org",
+	homepage = "https://moonscript.org",
 	maintainer = "Leaf Corcoran <leafot@gmail.com>",
 	license = "MIT"
 }

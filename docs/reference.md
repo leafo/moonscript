@@ -6,16 +6,16 @@
 }
 
 MoonScript is a programming language that compiles to
-[Lua](http://www.lua.org). This guide expects the reader to have basic
+[Lua](https://www.lua.org). This guide expects the reader to have basic
 familiarity with Lua. For each code snippet below, the MoonScript is on the
 left and the compiled Lua is on right right.
 
 This is the official language reference manual, installation directions and the
-homepage are located at <http://moonscript.org>.
+homepage are located at <https://moonscript.org>.
 
 <div class="github-buttons">
-<iframe src="http://ghbtns.com/github-btn.html?user=leafo&repo=moonscript&type=watch&count=true" allowtransparency="true" frameborder="0" scrolling="0" width="110px" height="20px"></iframe>
-<iframe src="http://ghbtns.com/github-btn.html?user=leafo&repo=moonscript&type=fork&count=true" allowtransparency="true" frameborder="0" scrolling="0" width="95px" height="20px"></iframe>
+<iframe src="https://ghbtns.com/github-btn.html?user=leafo&repo=moonscript&type=watch&count=true" allowtransparency="true" frameborder="0" scrolling="0" width="110px" height="20px"></iframe>
+<iframe src="https://ghbtns.com/github-btn.html?user=leafo&repo=moonscript&type=fork&count=true" allowtransparency="true" frameborder="0" scrolling="0" width="95px" height="20px"></iframe>
 </div>
 
 # The Language
