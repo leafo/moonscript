@@ -1,4 +1,4 @@
-# MoonScript dev
+# MoonScript v0.8.0 (2026-10-22)
 
 ## New parser
 
@@ -33,6 +33,37 @@ changes:
 * The `MOONSCRIPT_PARSER` environment variable is no longer used.
 * LPeg is still a dependency: `moonscript.errors` and `bin/moon-tags` use it
   for parsing unrelated to MoonScript source.
+
+## New Features
+
+* `moonc --correlate` writes output where the line numbers of the generated
+  Lua match the line numbers of the source, as closely as possible, so errors
+  and stack traces point at the right line without a rewriter. The option is
+  also available as `correlate: true` in the compile options to
+  `moonscript.base` functions like `to_lua` and `loadstring`. (#312)
+* `moonc -` (read from stdin) can now be combined with other flags, such as
+  `--lint`, `-o`, `-T`, `-X`, `--transform` and `--correlate`. It can't be
+  used with `--watch` or `--output-to`.
+
+## Changes
+
+* Compile errors use the same format as the new parse errors:
+  `failed to compile: <message> at line <n>, column <m>:` followed by the
+  offending line and a `^` marker, replacing `Compile error: <message>` and
+  `[<n>] >> <line>`.
+* The `moonscript.cmd.args` module has been removed.
+
+## Bug Fixes
+
+* Anonymous classes store `false` instead of `nil` in the name slot of the
+  syntax tree, which fixes `unpack` dropping the trailing class fields on Lua
+  5.5.
+* The native parser's callback modules are loaded before the parser module.
+
+## Binaries
+
+* The static binaries embed precompiled bytecode for MoonScript's modules,
+  which speeds up startup.
 
 # MoonScript v0.7.0 (2026-07-26)
 

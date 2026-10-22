@@ -25,7 +25,7 @@ generate: build
 moonscript/parse/native.so: moonscript/parse/native.c
 	gcc -shared -o $@ -O3 -fPIC $< `pkg-config --cflags --libs lua5.1`
 
-build:
+build: moonscript/parse/native.so
 	LUA_PATH='$(LUA_PATH_MAKE)' LUA_CPATH='$(LUA_CPATH_MAKE)' $(LUA) bin/moonc moon/ moonscript/
 	echo "#!/usr/bin/env lua" > bin/moon
 	$(LUA) bin/moonc -p bin/moon.moon >> bin/moon
@@ -46,7 +46,7 @@ show:
 	# LUA_PATH_MAKE $(LUA_PATH_MAKE)
 	# LUA_CPATH_MAKE $(LUA_CPATH_MAKE)
 
-test: build moonscript/parse/native.so
+test: build
 	LUA_PATH='$(LUA_PATH_MAKE)' LUA_CPATH='./?.so;$(LUA_CPATH_MAKE)' busted
 	LUA_PATH='$(LUA_PATH_MAKE)' LUA_CPATH='$(LUA_CPATH_MAKE)' busted --helper=spec/use_slow_parser.moon
 
