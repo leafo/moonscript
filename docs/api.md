@@ -60,9 +60,13 @@ fn = moonscript.loadstring 'print "hi!"'
 fn!
 ```
 
-All of these functions can take an optional last argument, a table of options.
-The only option right now is `implicitly_return_root`. Setting this to `false`
-makes it so the file does not implicitly return its last statement.
+All of these functions can take an optional last argument, a table of options:
+
+* `implicitly_return_root` -- Setting this to `false` makes it so the file
+  does not implicitly return its last statement.
+* `correlate` -- Setting this to `true` generates Lua code where the line
+  numbers match the line numbers of the MoonScript source as closely as
+  possible, the same as the `--correlate` flag of `moonc`.
 
 
 ```moononly

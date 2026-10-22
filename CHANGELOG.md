@@ -6,8 +6,7 @@ The LPeg parser has been replaced. The grammar is defined in
 `moonscript/parse/grammar.moon` and compiled by
 [pgen](https://github.com/leafo/pgen) into a native C module,
 `moonscript.parse.native`. A pure Lua version of the same grammar is included
-as `moonscript.parse.slow`, a drop-in replacement for the native module; it
-is not selected automatically.
+as `moonscript.parse.slow`, a drop-in replacement for the native module.
 
 Parsing is around 5x faster:
 
@@ -25,14 +24,12 @@ changes:
   <m>:` followed by the offending line and a `^` marker, replacing
   `Failed to parse: [<n>] >> <line>`. Anything matching on the old error text
   will need updating.
-* Installing the rock now compiles a C module, so a C compiler is required at
-  install time.
 * `moonscript.parse` no longer exports `build_grammar` and `extract_line`,
   and the `moonscript.parse.util`, `moonscript.parse.literals` and
   `moonscript.parse.env` modules have been removed.
 * The `MOONSCRIPT_PARSER` environment variable is no longer used.
-* LPeg is still a dependency: `moonscript.errors` and `bin/moon-tags` use it
-  for parsing unrelated to MoonScript source.
+* Note: LPeg is still a dependency: `moonscript.errors` and `bin/moon-tags`
+  use it for parsing unrelated to MoonScript source.
 
 ## New Features
 

@@ -128,6 +128,11 @@ The `-w` flag can be used to enable watch mode. `moonc` will stay running, and
 watch for changes to the input files. If any of them change then they will be
 compiled automatically.
 
+The `--correlate` flag makes the line numbers of the generated Lua match the
+line numbers of the MoonScript source as closely as possible. Error messages
+and stack traces from the compiled code will then point at the right line in
+the original file without needing any error rewriting.
+
 A full list of flags can be seen by passing the `-h` or `--help` flag.
 
 ### Syntax Transformer
