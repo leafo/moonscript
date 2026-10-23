@@ -435,14 +435,14 @@ do
       end
       return val
     end,
-    has_name = function(self, name, skip_exports)
+    has_name = function(self, name, skip_exports, ignore_whitelist)
       if not skip_exports and self:name_exported(name) then
         return true
       end
       local yes = self._names[name]
       if yes == nil and self.parent then
-        if not self._name_whitelist or self._name_whitelist[name] then
-          return self.parent:has_name(name, true)
+        if ignore_whitelist or not self._name_whitelist or self._name_whitelist[name] then
+          return self.parent:has_name(name, true, ignore_whitelist)
         end
       else
         return yes

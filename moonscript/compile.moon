@@ -326,13 +326,14 @@ class Block
 
   -- Check if a name is defined in the current or any enclosing scope
   -- skip_exports: ignore names that have been exported using `export`
-  has_name: (name, skip_exports) =>
+  -- ignore_whitelist: see through `using`, which only restricts assignment
+  has_name: (name, skip_exports, ignore_whitelist) =>
     return true if not skip_exports and @name_exported name
 
     yes = @_names[name]
     if yes == nil and @parent
-      if not @_name_whitelist or @_name_whitelist[name]
-        @parent\has_name name, true
+      if ignore_whitelist or not @_name_whitelist or @_name_whitelist[name]
+        @parent\has_name name, true, ignore_whitelist
     else
       yes
 

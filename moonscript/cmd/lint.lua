@@ -202,7 +202,7 @@ do
       self.value_compilers = setmetatable({
         ref = function(block, val)
           local name = val[2]
-          if not (block:has_name(name) or whitelist_globals[name] or name:match("%.")) then
+          if not (block:has_name(name, false, true) or whitelist_globals[name] or name:match("%.")) then
             self:lint_report("global_access", "accessing global `" .. tostring(name) .. "`", val[-1])
           end
           block:lint_mark_used(name)

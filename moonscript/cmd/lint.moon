@@ -101,7 +101,8 @@ class LinterBlock extends Block
     @value_compilers = setmetatable {
       ref: (block, val) ->
         name = val[2]
-        unless block\has_name(name) or whitelist_globals[name] or name\match "%."
+        -- outer names hidden by `using` can still be read
+        unless block\has_name(name, false, true) or whitelist_globals[name] or name\match "%."
           @lint_report "global_access", "accessing global `#{name}`", val[-1]
 
         block\lint_mark_used name

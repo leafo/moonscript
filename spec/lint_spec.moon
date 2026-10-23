@@ -170,6 +170,34 @@ describe "linter", ->
       >   import insert from require "custom"
     ]]), lint.lint_code code
 
+  it "allows reading outer names in a function with using", ->
+    code = unindent [[
+      items = {}
+      x = 1
+      f = (using nil) ->
+        items[1] = "x"
+        print x
+      g = (n using items) ->
+        print n, x, items
+        missing_global
+      f!
+      g!
+    ]]
+
+    assert.same "test.moon:8:3: accessing global `missing_global` [global_access]",
+      lint.lint_code code, "test.moon", nil, format: "compact"
+
+  it "doesn't report constant assign shadowed by using", ->
+    code = unindent [[
+      import insert from table
+      f = (using nil) ->
+        insert = 2
+        insert
+      f!
+    ]]
+
+    assert.is_nil (lint.lint_code code)
+
   it "limits reporting to the given stages", ->
     code = unindent [[
       import insert from table
